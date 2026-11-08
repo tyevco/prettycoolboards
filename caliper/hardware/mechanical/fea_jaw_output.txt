@@ -1,0 +1,12 @@
+FEA of the printed moving outside jaw under the 5 N measuring force.
+
+mesh 142268 tets / 27452 nodes, global 1.0 mm, fine 0.4 mm at the root and the tip
+load 5.0 N in +u on the measuring face, y -38..-32; jaw 7.8 thick, root 20.0 wide, tip 3.5
+layer normal = assembly z (body printed back face down): bending is in the layer plane
+
+PETG             deflection at the load    15.7 um, at the tip    20.2 um; von Mises 0.36 MPa (SF in-layer 124.4), interlayer 0.14/0.07 MPa; reaction [-0.0, 5.0, 0.0] N (fixed facets 2785, load facets 692, 47.0 mm2)
+PA-CF (PAHT-CF)  deflection at the load     6.3 um, at the tip     8.2 um; von Mises 0.36 MPa (SF in-layer 124.1), interlayer 0.13/0.07 MPa; reaction [0.0, 5.0, 0.0] N (fixed facets 2785, load facets 692, 47.0 mm2)
+6061-T6          deflection at the load     0.4 um, at the tip     0.5 um; von Mises 0.36 MPa (SF in-layer 123.9), interlayer 0.11/0.07 MPa; reaction [0.0, 5.0, -0.0] N (fixed facets 2785, load facets 692, 47.0 mm2)
+
+Strength numbers are the skill's PETG book values (45 in-layer, 20 interlayer);
+for 6061 the SF is meaningless (yield 275 MPa).  Linear tets run ~5 % stiff.

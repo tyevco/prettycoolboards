@@ -1,0 +1,61 @@
+{
+  "board": {
+    "design_settings": {
+      "defaults": {},
+      "diff_pair_dimensions": [],
+      "drc_exclusions": [],
+      "rules": {},
+      "track_widths": [],
+      "via_dimensions": []
+    }
+  },
+  "boards": [],
+  "libraries": {
+    "pinned_footprint_libs": [],
+    "pinned_symbol_libs": []
+  },
+  "meta": {
+    "filename": "prettycool-caliper-slider.kicad_pro",
+    "version": 1
+  },
+  "net_settings": {
+    "classes": [],
+    "meta": {
+      "version": 0
+    }
+  },
+  "pcbnew": {
+    "page_layout_descr_file": ""
+  },
+  "sheets": [
+    [
+      "b08a52c2-37a7-52c8-9c3d-6723ce8ef562",
+      "Root"
+    ],
+    [
+      "8b8d7e2d-ec91-5520-bcb3-8e934148e707",
+      "Power: USB-C, charger, 3V3, rails"
+    ],
+    [
+      "8d5a83de-97b2-5444-b563-2b828a684645",
+      "ESP32-S3 module"
+    ],
+    [
+      "e4404b34-3f55-50db-8321-51b9507445ac",
+      "AS5311 magnetic encoder"
+    ],
+    [
+      "c63678c9-e694-5432-a20c-1bdbb8c26df3",
+      "Capacitive front-end (experimental)"
+    ],
+    [
+      "44e3b392-2117-5e58-96d0-5b272847d240",
+      "Display, buttons, LED, piezo"
+    ],
+    [
+      "8b669b1b-99f1-54bd-8e1f-df2e8a8ba4f1",
+      "Accelerometer"
+    ]
+  ],
+  "text_variables": {}
+}

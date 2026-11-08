@@ -1,0 +1,11 @@
+# Managed dependencies of the whole project. The components that use them declare them again
+# in their own idf_component.yml (ui: lvgl + esp_lvgl_port, caliper_usb: esp_tinyusb,
+# store: esp_littlefs, power: led_strip) so their headers are visible there.
+dependencies:
+  idf: ">=5.4.0"
+  lvgl/lvgl: "~9.2.2"
+  espressif/esp_lvgl_port: "^2.4.0"
+  espressif/esp_tinyusb: "^1.5.0"
+  joltwatt/esp_littlefs: "^1.14.0"
+  espressif/led_strip: "^2.5.3"
+  # NimBLE, esp_http_server, esp_http_client, esp-mqtt and esp_lcd (ST7789) are part of ESP-IDF 5.4.

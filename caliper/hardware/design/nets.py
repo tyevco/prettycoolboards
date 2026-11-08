@@ -4,14 +4,15 @@ REV = "A"
 DATE = "2026-11-07"
 
 # Nets drawn with power symbols (global by nature).
-POWER_NETS = ["GND", "VBUS", "VBAT", "VSYS", "+3V3", "+3V3_SNS"]
+# +3V3_UI (LCD VDD + RGB LED) is switched by a second TPS22917 on SNS_PWR_EN (SPEC §3).
+POWER_NETS = ["GND", "VBUS", "VBAT", "VSYS", "+3V3", "+3V3_SNS", "+3V3_UI"]
 
 # Signals that cross sheet boundaries on the slider board (global labels).
 SLIDER_INTERSHEET = [
     "USB_DP", "USB_DM",
     "I2C_SCL", "I2C_SDA", "CHG_INT_N", "FG_ALRT_N",
     "IMU_INT1", "IMU_INT2",
-    "SNS_PWR_EN",
+    "SNS_PWR_EN",          # enables BOTH +3V3_SNS and +3V3_UI
     "MAG_A", "MAG_B", "MAG_IDX", "MAG_CLK", "MAG_DO", "MAG_CSN", "MAG_INC_N", "MAG_DEC_N",
     "CAP_RX", *[f"CAP_TX{i}" for i in range(8)],
     "LCD_SCK", "LCD_MOSI", "LCD_CS_N", "LCD_DC", "LCD_RST_N", "LCD_BL",
@@ -29,7 +30,7 @@ MCU_PINS = {
     "IO4": "MAG_A", "IO5": "MAG_B", "IO6": "MAG_IDX",
     "IO7": "MAG_CLK", "IO8": "MAG_DO", "IO9": "MAG_CSN",
     "IO10": "MAG_INC_N", "IO11": "MAG_DEC_N",
-    "IO12": "SNS_PWR_EN",
+    "IO12": "SNS_PWR_EN",    # +3V3_SNS and +3V3_UI load switches
     "IO13": "I2C_SDA", "IO14": "I2C_SCL",
     "IO15": "IMU_INT1", "IO16": "IMU_INT2",
     "IO17": "BTN_ZERO_N", "IO18": "BTN_HOLD_N", "IO21": "BTN_MODE_N",
@@ -47,7 +48,8 @@ MCU_PINS = {
 GPIO = {net: (43 if pin == "TXD0" else 44 if pin == "RXD0" else int(pin[2:]))
         for pin, net in MCU_PINS.items() if net and pin.startswith(("IO", "TXD", "RXD"))}
 
-I2C_ADDR = {"BQ25180": 0x6A, "MAX17048": 0x36, "LIS2DW12": 0x18}
+# LIS2DW12 SA0 is tied HIGH (0x19): its SA0 pull-up cannot be disconnected, so a grounded SA0 burns 60-170 uA.
+I2C_ADDR = {"BQ25180": 0x6A, "MAX17048": 0x36, "LIS2DW12": 0x19}
 
 INTERSHEET = SLIDER_INTERSHEET
 

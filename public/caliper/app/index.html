@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Caliper Companion</title>
+<meta name="description" content="Web Bluetooth companion page for the PrettyCool Caliper: live reading, log download, tolerance profiles, settings. Includes a demo mode.">
+<meta name="color-scheme" content="light dark">
+<style>
+:root {
+  --bg: #f4f5f7; --surface: #ffffff; --surface-2: #eef0f3; --border: #d5d9e0;
+  --text: #15181d; --muted: #555d6b; --accent: #0b5cad; --accent-text: #ffffff;
+  --cap: #8a4b00; --pass: #116b2e; --pass-bg: #e3f4e8; --fail: #b3141b; --fail-bg: #fde7e7;
+  --warn: #8a5a00; --warn-bg: #fff3d6; --band: rgba(17, 107, 46, 0.14); --grid: rgba(0, 0, 0, 0.08);
+  --lcd-bg: #e9efe6; --lcd-text: #10170f; --focus: #0b5cad;
+  --radius: 10px; --mono: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0e1116; --surface: #161a21; --surface-2: #1d222b; --border: #2c333f;
+    --text: #e8ebf0; --muted: #a2abb9; --accent: #5aa7f5; --accent-text: #08111c;
+    --cap: #f0a24a; --pass: #5fd38a; --pass-bg: #12301d; --fail: #ff7b7b; --fail-bg: #3a1517;
+    --warn: #f2c25b; --warn-bg: #33280f; --band: rgba(95, 211, 138, 0.16); --grid: rgba(255, 255, 255, 0.08);
+    --lcd-bg: #0b120c; --lcd-text: #c9f5cf; --focus: #5aa7f5;
+  }
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.45 var(--sans); }
+a { color: var(--accent); }
+header.top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 12px 16px;
+  background: var(--surface); border-bottom: 1px solid var(--border); }
+header.top h1 { font-size: 17px; margin: 0; font-weight: 650; }
+header.top .sub { color: var(--muted); font-size: 13px; }
+header.top .spacer { flex: 1 1 auto; }
+main { max-width: 1160px; margin: 0 auto; padding: 16px; display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 920px) {
+  main { grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr); }
+  .span-2 { grid-column: 1 / -1; }
+}
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; min-width: 0; }
+.card h2 { font-size: 15px; margin: 0 0 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.card h2 .note { font-weight: 400; color: var(--muted); font-size: 13px; }
+.stack { display: grid; gap: 16px; min-width: 0; align-content: start; }
+button, .btn { font: inherit; font-weight: 600; border-radius: 8px; border: 1px solid var(--border); background: var(--surface-2);
+  color: var(--text); padding: 8px 14px; cursor: pointer; min-height: 40px; }
+button.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+button.danger { color: var(--fail); }
+button[aria-pressed="true"] { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+input, select { font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+  padding: 7px 9px; width: 100%; min-width: 0; }
+label.field { display: grid; gap: 3px; font-size: 13px; color: var(--muted); min-width: 0; }
+label.field > span { font-weight: 600; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+.status { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: var(--muted); flex: none; }
+.dot.on { background: var(--pass); } .dot.demo { background: var(--warn); } .dot.busy { background: var(--accent); }
+.banner { border-radius: var(--radius); padding: 12px 14px; border: 1px solid var(--border); background: var(--warn-bg); color: var(--text); }
+.banner strong { color: var(--warn); }
+.banner[hidden] { display: none; }
+
+/* Reading display */
+.lcd { background: var(--lcd-bg); color: var(--lcd-text); border-radius: 8px; padding: 10px 14px 12px; border: 3px solid transparent;
+  transition: border-color 0.15s, background 0.15s; }
+.lcd.pass { border-color: var(--pass); }
+.lcd.fail { border-color: var(--fail); }
+.lcd .top-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; min-height: 26px; }
+.reading { font-family: var(--mono); font-variant-numeric: tabular-nums; font-weight: 700; letter-spacing: -0.02em;
+  font-size: clamp(34px, 11.5vw, 112px); line-height: 1.02; text-align: right; white-space: nowrap; overflow: hidden; }
+.reading .u { font-size: 0.32em; font-weight: 600; margin-left: 0.25em; letter-spacing: 0; }
+.reading.stale { opacity: 0.45; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip { font: 700 12px/1 var(--sans); letter-spacing: 0.04em; padding: 5px 8px; border-radius: 999px; border: 1px solid currentColor; opacity: 0.25; }
+.chip.on { opacity: 1; }
+.chip.pass.on { color: var(--pass); background: var(--pass-bg); }
+.chip.fail.on { color: var(--fail); background: var(--fail-bg); }
+.chip.err.on { color: var(--fail); background: var(--fail-bg); }
+.chip.warn.on { color: var(--warn); background: var(--warn-bg); }
+.subreadings { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin-top: 10px; }
+.sub { background: var(--surface-2); border-radius: 8px; padding: 8px 10px; min-width: 0; }
+.sub .k { font-size: 12px; color: var(--muted); font-weight: 600; }
+.sub .v { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 22px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sub.cap .v { color: var(--cap); }
+.controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); gap: 8px; margin-top: 12px; }
+.controls button { min-height: 48px; }
+kbd { font: 11px var(--mono); border: 1px solid var(--border); border-radius: 4px; padding: 0 4px; color: var(--muted); }
+
+/* Chart */
+.chart-wrap { position: relative; width: 100%; height: 240px; }
+canvas { display: block; width: 100%; height: 100%; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-top: 6px; }
+.swatch { display: inline-block; width: 14px; height: 4px; border-radius: 2px; vertical-align: middle; margin-right: 5px; }
+
+/* Stats */
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 8px; }
+.stat { background: var(--surface-2); border-radius: 8px; padding: 8px 10px; min-width: 0; }
+.stat .k { font-size: 12px; color: var(--muted); font-weight: 600; }
+.stat .v { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 17px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+dl.kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 12px; margin: 0; font-size: 14px; }
+dl.kv dt { color: var(--muted); } dl.kv dd { margin: 0; overflow-wrap: anywhere; }
+
+/* Tables */
+.table-wrap { overflow: auto; max-height: 360px; border: 1px solid var(--border); border-radius: 8px; margin-top: 10px; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { padding: 6px 10px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+th { position: sticky; top: 0; background: var(--surface-2); font-weight: 650; }
+td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; }
+td .tag { font-weight: 700; font-size: 11px; }
+.tag.pass { color: var(--pass); } .tag.fail { color: var(--fail); }
+
+/* Profiles */
+.profile { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); align-items: end;
+  padding: 10px; border: 1px solid var(--border); border-radius: 8px; margin-top: 8px; }
+.profile.active { border-color: var(--accent); box-shadow: inset 4px 0 0 var(--accent); }
+.profile .acts { display: flex; gap: 6px; }
+.profile .acts button { flex: 1; padding: 8px; }
+.settings-grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.bytes.over { color: var(--fail); font-weight: 700; }
+pre.console { background: var(--lcd-bg); color: var(--lcd-text); border-radius: 8px; padding: 10px; height: 220px; overflow: auto;
+  font: 12px/1.4 var(--mono); margin: 10px 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.toast { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); max-width: calc(100% - 32px);
+  background: var(--text); color: var(--bg); padding: 10px 14px; border-radius: 8px; font-size: 14px; z-index: 10;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.25); }
+.toast[hidden] { display: none; }
+footer { max-width: 1160px; margin: 0 auto; padding: 4px 16px 32px; color: var(--muted); font-size: 13px; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>
+</head>
+<body>
+<header class="top">
+  <div>
+    <h1>PrettyCool Caliper</h1>
+    <div class="sub">Companion app &middot; rev A &middot; <a href="../docs/app">docs</a></div>
+  </div>
+  <span class="spacer"></span>
+  <span class="status" id="status" role="status" aria-live="polite"><span class="dot" id="statusDot"></span><span id="statusText">Not connected</span></span>
+  <div class="row">
+    <button class="primary" id="btnConnect" type="button">Connect</button>
+    <button id="btnDemo" type="button">Demo mode</button>
+    <button id="btnDisconnect" type="button" hidden>Disconnect</button>
+  </div>
+</header>
+
+<main>
+  <div class="banner span-2" id="noBle" hidden>
+    <strong>Web Bluetooth is not available here.</strong>
+    <span id="noBleWhy"></span>
+    Use Chrome or Edge on Windows, macOS, ChromeOS or Android (Linux may need a flag) to connect to a caliper. Everything else on this page
+    works in <button type="button" id="btnDemo2">Demo mode</button>, which simulates a caliper in the browser.
+  </div>
+
+  <div class="stack">
+    <section class="card" aria-labelledby="hReading">
+      <h2 id="hReading">Reading <span class="note" id="profileNote"></span></h2>
+      <div class="lcd" id="lcd">
+        <div class="top-row">
+          <div class="chips" aria-label="Status flags">
+            <span class="chip" id="fHold">HOLD</span>
+            <span class="chip pass" id="fPass">PASS</span>
+            <span class="chip fail" id="fFail">FAIL</span>
+            <span class="chip" id="fCap">CAP</span>
+            <span class="chip warn" id="fChg">CHG</span>
+            <span class="chip err" id="fErr">SENSOR ERR</span>
+          </div>
+          <span class="small" id="battery" aria-label="Battery"></span>
+        </div>
+        <div class="reading stale" id="reading" aria-live="off"><span id="readingVal">--.--</span><span class="u" id="readingUnit">mm</span></div>
+      </div>
+      <div class="subreadings">
+        <div class="sub"><div class="k">Magnetic (AS5311)</div><div class="v" id="vMag">--</div></div>
+        <div class="sub cap"><div class="k">Capacitive (experimental)</div><div class="v" id="vCap">--</div></div>
+        <div class="sub"><div class="k">Cap &minus; mag</div><div class="v" id="vDiff">--</div></div>
+      </div>
+      <div class="controls">
+        <button type="button" id="cZero" disabled>Zero <kbd>Z</kbd></button>
+        <button type="button" id="cHold" aria-pressed="false" disabled>Hold <kbd>H</kbd></button>
+        <button type="button" id="cRecord" disabled>Record <kbd>R</kbd></button>
+        <button type="button" id="cUnit" disabled>mm / in <kbd>U</kbd></button>
+        <button type="button" id="cTime" disabled>Set time</button>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="hChart">
+      <h2 id="hChart">Live chart <span class="note">last <span id="chartSpan">30</span> s</span></h2>
+      <div class="chart-wrap"><canvas id="chart" role="img" aria-label="Chart of recent readings"></canvas></div>
+      <div class="legend">
+        <span><span class="swatch" style="background:var(--accent)"></span>Magnetic</span>
+        <span><span class="swatch" style="background:var(--cap)"></span>Capacitive</span>
+        <span><span class="swatch" style="background:var(--band);height:10px"></span>Tolerance band (active profile)</span>
+      </div>
+    </section>
+  </div>
+
+  <div class="stack">
+    <section class="card" aria-labelledby="hStats">
+      <h2 id="hStats">Session stats <span class="note">readings you record in this page</span></h2>
+      <div class="stats">
+        <div class="stat"><div class="k">Count</div><div class="v" id="sCount">0</div></div>
+        <div class="stat"><div class="k">Min</div><div class="v" id="sMin">--</div></div>
+        <div class="stat"><div class="k">Max</div><div class="v" id="sMax">--</div></div>
+        <div class="stat"><div class="k">Mean</div><div class="v" id="sMean">--</div></div>
+        <div class="stat"><div class="k">&sigma; (n&minus;1)</div><div class="v" id="sSd">--</div></div>
+        <div class="stat"><div class="k">Range</div><div class="v" id="sRange">--</div></div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button type="button" id="sAdd" disabled>Add current</button>
+        <button type="button" id="sReset">Reset</button>
+        <span class="small muted" id="sLast"></span>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="hDev">
+      <h2 id="hDev">Device</h2>
+      <dl class="kv" id="devInfo"><dt>State</dt><dd>Not connected</dd></dl>
+    </section>
+
+    <section class="card" aria-labelledby="hSerial">
+      <h2 id="hSerial">USB console <span class="note">Web Serial, optional</span></h2>
+      <p class="small muted" id="serialNote" style="margin:0 0 8px">Talks to the firmware's USB CDC console (115200 baud) when the caliper is plugged in by USB-C.</p>
+      <div class="row">
+        <button type="button" id="serConnect">Open port</button>
+        <button type="button" id="serClose" hidden>Close</button>
+      </div>
+      <pre class="console" id="serOut" aria-live="off" hidden></pre>
+      <form class="row" id="serForm" hidden>
+        <label class="visually-hidden" for="serIn">Console input</label>
+        <input id="serIn" autocomplete="off" placeholder="command, Enter to send" style="flex:1 1 160px">
+        <button type="submit">Send</button>
+      </form>
+    </section>
+  </div>
+
+  <section class="card span-2" aria-labelledby="hLog">
+    <h2 id="hLog">Reading log <span class="note" id="logNote">stored on the caliper</span></h2>
+    <div class="row">
+      <label class="field" style="width:120px"><span>From seq</span><input type="number" id="logFrom" min="0" value="0" inputmode="numeric"></label>
+      <button type="button" class="primary" id="logRead" disabled style="align-self:end">Download log</button>
+      <button type="button" id="logCsv" disabled style="align-self:end">Export CSV</button>
+      <button type="button" class="danger" id="logClear" disabled style="align-self:end">Clear log on caliper</button>
+      <span class="small muted" id="logStatus" style="align-self:end" role="status"></span>
+    </div>
+    <div class="table-wrap" id="logWrap" hidden>
+      <table>
+        <thead><tr><th scope="col">Seq</th><th scope="col">Time</th><th scope="col" style="text-align:right">Value</th><th scope="col">Unit</th><th scope="col">Flags</th><th scope="col">Profile</th></tr></thead>
+        <tbody id="logBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card span-2" aria-labelledby="hProf">
+    <h2 id="hProf">Tolerance profiles <span class="note">values in <span id="profUnit">mm</span>; band = nominal &minus; tol&minus; &hellip; nominal + tol+</span></h2>
+    <div class="row">
+      <button type="button" id="profRead" disabled>Read from caliper</button>
+      <button type="button" id="profAdd">Add profile</button>
+      <button type="button" class="primary" id="profWrite" disabled>Write to caliper</button>
+      <button type="button" id="profNone" disabled>No profile</button>
+      <span class="small muted" id="profStatus" role="status"></span>
+    </div>
+    <div id="profList"></div>
+  </section>
+
+  <section class="card span-2" aria-labelledby="hSet">
+    <h2 id="hSet">Settings <span class="note">JSON, at most 240 bytes</span></h2>
+    <form id="setForm" autocomplete="off">
+      <div class="settings-grid">
+        <label class="field"><span>Name</span><input name="name" maxlength="20"></label>
+        <label class="field"><span>Auto-off (s)</span><input name="auto_off_s" type="number" min="0" max="3600" step="1" inputmode="numeric" title="0 = never, otherwise 30 to 3600"></label>
+        <label class="field"><span>Decimals (mm)</span><input name="decimals" type="number" min="1" max="3" step="1" inputmode="numeric" title="1 to 3; inch shows two more"></label>
+        <label class="field"><span>HID suffix (after SEND)</span>
+          <select name="hid_suffix"><option value="enter">Enter</option><option value="tab">Tab</option><option value="none">None</option></select></label>
+        <label class="field"><span>Wi-Fi SSID</span><input name="wifi_ssid" maxlength="32"></label>
+        <label class="field"><span>Wi-Fi password</span><input name="wifi_pass" type="password" placeholder="unchanged (write-only)" maxlength="64" autocomplete="new-password"></label>
+        <label class="field"><span>MQTT URL</span><input name="mqtt_url" maxlength="64" placeholder="mqtt://broker.local:1883/caliper"></label>
+        <label class="field"><span>HTTP POST URL</span><input name="http_post_url" maxlength="64" placeholder="https://example.com/readings"></label>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button type="button" id="setRead" disabled>Read from caliper</button>
+        <button type="submit" class="primary" id="setWrite" disabled>Write to caliper</button>
+        <span class="small bytes" id="setBytes"></span>
+        <span class="small muted" id="setStatus" role="status"></span>
+      </div>
+      <p class="small muted" style="margin:8px 0 0">The Wi-Fi password is never read back from the caliper. Leave it blank to keep the stored one.</p>
+    </form>
+  </section>
+</main>
+<footer>
+  Rev A is designed, not built or tested: this page follows the GATT contract in the
+  <a href="../docs/app">companion app docs</a> and has only been exercised against its own demo simulator.
+  Shortcuts: <kbd>Z</kbd> zero, <kbd>H</kbd> hold, <kbd>R</kbd> record, <kbd>U</kbd> unit.
+</footer>
+<div class="toast" id="toast" role="alert" hidden></div>
+<script type="module" src="./app.js"></script>
+<noscript><p style="padding:16px">This page needs JavaScript.</p></noscript>
+</body>
+</html>

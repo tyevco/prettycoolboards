@@ -12,10 +12,10 @@ live in [nets.py](nets.py). If anything here changes, update `nets.py` and this 
 | Resolution shown | 0.01 mm / 0.0005 in (the internal resolution is the AS5311's 0.488 µm) |
 | Target accuracy | ±0.03 mm (rev A has a printed body; the electronics aren't the limit) |
 | Sensors | **Primary:** AS5311 magnetic linear encoder over 2.0 mm-pole magnetic tape. **Experimental:** capacitive 8-phase transmitter / reflector scale |
-| MCU / radio | ESP32-S3-MINI-1 (N4R2 or N8R2; the schematic picks the LCSC-stocked one), PCB antenna. BLE 5 (HID keyboard + GATT) and 2.4 GHz Wi-Fi |
+| MCU / radio | ESP32-S3-MINI-1-**N4R2** (4 MB quad flash + 2 MB quad PSRAM; LCSC C3013941. The N8R2 is not stocked at LCSC), PCB antenna. BLE 5 (HID keyboard + GATT) and 2.4 GHz Wi-Fi |
 | Display | 1.14 in 240×135 ST7789 IPS, 13-pin 0.5 mm FPC, white LED backlight |
 | UI | 3 buttons: ZERO, HOLD/SEND, MODE. RGB status LED, piezo |
-| IMU | LIS2DW12 (wake on pickup, auto-off, orientation) |
+| IMU | LIS2DW12 (wake on pickup, auto-off, orientation), I2C 0x19 (SA0 high) |
 | Power | 1S LiPo 402535 (~500 mAh) on JST-SH 2-pin. USB-C (USB 2.0 device) charging at 250 mA |
 | Storage | Readings in LittleFS on the module flash; exported as CSV over USB MSC, Wi-Fi or BLE |
 
@@ -60,15 +60,28 @@ live in [nets.py](nets.py). If anything here changes, update `nets.py` and this 
 USB-C VBUS ─ ESD/TVS ─ BQ25180 (VIN) ─┬─ SYS → VSYS ─┬─ TPS63802 buck-boost → +3V3 (ESP32, LCD, IMU, FG, LED)
                                      │               └─ (VSYS sense via MAX17048, which is on BAT)
                                      └─ BAT ─ LiPo (JST-SH), MAX17048 CELL
-+3V3 ─ TPS22917 load switch (SNS_PWR_EN) → +3V3_SNS (AS5311, capacitive front-end op-amp + VREF)
-+3V3 ─ low-side N-MOSFET (LCD_BL, PWM) ─ backlight LED (current-set resistor)
++3V3 ─ TPS22917 load switch U5 (SNS_PWR_EN) → +3V3_SNS (AS5311, capacitive front-end op-amp + VREF)
++3V3 ─ TPS22917 load switch U6 (SNS_PWR_EN) → +3V3_UI  (ST7789 VDD, WS2812B-2020-V6 RGB LED)
++3V3 ─ 15 Ω ─ backlight LED (LEDA/LEDK) ─ low-side AO3400A (LCD_BL, PWM)   (≈ 20 mA at the panel's VF 3.0 V / 20 mA rating)
 ```
-- Use a **buck-boost**, not an LDO: Wi-Fi TX peaks near 500 mA, and an LDO drops out below a ~3.6 V cell.
-  TPS63802 (2 A, 11 µA Iq) or another LCSC-stocked buck-boost with ≥1 A out and ≤15 µA Iq.
+- **+3V3_UI** (added during capture): the ST7789 still draws 15 + 5 µA typ in sleep-in mode (DM-TFT114-397 §5.3)
+  and a WS2812 draws standby current, so both are switched off in deep sleep. There is no free GPIO, so U6 shares
+  SNS_PWR_EN with U5: both rails are on whenever the caliper is awake. Both switches tie QOD to VOUT (fast discharge)
+  and use a 1 nF CT for a slow ramp. Before switching off, the firmware drives every signal into those rails low
+  (MAG_CSN/MAG_CLK, LCD_*, RGB_DIN) so nothing back-powers through ESD diodes.
+- Use a **buck-boost**, not an LDO: Wi-Fi TX peaks at 355 mA at 3.3 V (module datasheet Table 6-4; ≈ 0.5 A from a
+  3.0 V cell with the rest of the load), and an LDO drops out below a ~3.6 V cell.
+  TPS63802DLAR (2 A, 11 µA Iq; LCSC C2845237), L = 0.47 µH DFE201612E, feedback 511 k / 91 k (TI Table 10-5;
+  R2 ≤ 100 k, so the divider costs 5.5 µA permanently).
 - BQ25180: ILIM set by I2C. Ship mode is used in storage. The register init table follows
-  dial-me-spinner `docs/firmware.md §13.1`. /INT goes to CHG_INT_N.
-- Sleep budget target: ≤ 25 µA total (buck-boost Iq + BQ25180 + MAX17048 hibernate + LIS2DW12 wake
-  mode + ESP32-S3 deep sleep).
+  dial-me-spinner `docs/firmware.md §13.1`. /INT goes to CHG_INT_N. Keep `IBAT_OCP` at its 1 A reset value or
+  higher (SLUSE99C Table 8-15): the 500 mA setting would trip on the ≈ 0.5 A Wi-Fi peaks from a low cell.
+- Sleep budget: the original ≤ 25 µA target is **not reachable** with this buck-boost: its Iq (11 µA) plus its
+  feedback divider (5.5 µA) plus the ESP32-S3 deep sleep (~8 µA) already reach 24.5 µA. Revised target **≤ 35 µA**
+  (≈ 33 µA estimated: ESP32-S3 8 + TPS63802 11 + divider 5.5 + BQ25180 3 + MAX17048 hibernate 3 + LIS2DW12 ~1 +
+  2 × TPS22917 off 0.02 + ≈ 2 conversion loss on the 3.3 V-side loads; the LCD and RGB LED are unpowered). The 3 µA
+  figures need firmware settings: BQ25180 watchdog and push-button off (else 4 µA, SLUSE99C IQ_BAT), MAX17048
+  `VRESET.Dis` = 1 (else 4 µA, 19-6171 IDD0). See docs/architecture.md for the budget and life estimate.
 
 ## 4. Sensors
 
@@ -82,12 +95,16 @@ USB-C VBUS ─ ESD/TVS ─ BQ25180 (VIN) ─┬─ SYS → VSYS ─┬─ TPS638
 - Air gap 0.3 mm ±0.1 between the IC's top surface and the tape. The mechanics hold it with gibs.
 
 ### 4.2 Capacitive front-end (experimental, isolatable)
-- **TX:** 8 GPIO outputs (CAP_TX0…CAP_TX7). Each goes through a 0402 0 Ω jumper (`R_CAPTXn`, DNP-able) and a
-  100 Ω series resistor to its electrode phase. Phase n connects to every 8th finger.
-- **RX:** receive electrode → 0 Ω jumper (DNP-able) → a charge amplifier (a rail-to-rail CMOS op-amp with
-  ≥10 MHz GBW, e.g. OPA376/OPA365 class, LCSC-stocked; feedback 10 pF ‖ 10 MΩ) biased at VREF = +3V3_SNS/2
-  (divider + 1 µF, buffered by the 2nd half of a dual op-amp, or a separate one) → a 2nd-order RC/active
-  low-pass at ~400 kHz → **CAP_RX** (ESP32 ADC1_CH0, GPIO1).
+- **TX:** 8 GPIO outputs (CAP_TX0…CAP_TX7). Each goes through a 0402 0 Ω jumper (**R60…R67**, DNP-able) and a
+  100 Ω series resistor (**R70…R77**) to its electrode phase (net CAP_EL_TXn). Phase n connects to every 8th finger.
+- **Electrodes in the schematic:** symbol/footprint **E40** (`caliper:CAP_ELECTRODES`, not in the BOM or the CPL)
+  carries one seed pad per electrode net: pads 1–8 = TX0…TX7, eight 0.30 × 5.00 mm fingers at 0.635 mm pitch (one
+  5.08 mm repeat), pad 9 = RX, a 5.08 × 1.20 mm strip whose centre is 3.8 mm below the comb centre. Layout places E40
+  on the bottom at the start of the comb and draws the rest of the comb and the 40 mm RX strip as copper on the same nets.
+- **RX:** receive electrode (CAP_EL_RX) → 0 Ω jumper **R80** (DNP-able) → charge amplifier U40A
+  (**TLV9062IDGKR**, 10 MHz GBW RRIO CMOS, LCSC C398356; feedback 10 pF C0G ‖ 10 MΩ) biased at
+  CAP_VREF = +3V3_SNS/2 (100 k/100 k + 1 µF, buffered by U40B) → 2nd-order RC low-pass 390 Ω/1 nF + 3.9 kΩ/100 pF
+  (both poles ≈ 408 kHz) → **CAP_RX** (ESP32 ADC1_CH0, GPIO1).
 - The firmware drives the 8 phases (a dedicated-GPIO bundle) as a rotating square pattern at 25–100 kHz.
   The ADC samples are synchronously demodulated into I/Q, and atan2 gives the position within the 5.08 mm pitch.
 - A guard ground pour surrounds the RX trace on all layers. No digital traces cross the front-end.
@@ -109,8 +126,8 @@ The authoritative copy is `nets.py: MCU_PINS`. The constraints behind it:
 
 | Bus | Devices | Notes |
 |---|---|---|
-| I2C (GPIO13 SDA / GPIO14 SCL, 4.7 k to +3V3, 400 kHz) | BQ25180 (0x6A), MAX17048 (0x36), LIS2DW12 (0x18, SA0 low) | |
-| SPI2 (GPIO33 SCK / GPIO34 MOSI / GPIO35 CS / GPIO36 DC / GPIO37 RST) | ST7789 LCD | 40 MHz, write-only |
+| I2C (GPIO13 SDA / GPIO14 SCL, 4.7 k to +3V3, 400 kHz) | BQ25180 (0x6A), MAX17048 (0x36), LIS2DW12 (**0x19, SA0 high**) | SA0 has an internal pull-up that cannot be disconnected: a grounded SA0 (0x18) burns 60–170 µA |
+| SPI2 (GPIO33 SCK / GPIO34 MOSI / GPIO35 CS / GPIO36 DC / GPIO37 RST) | ST7789 LCD | 40 MHz, write-only. Panel pin order per DM-TFT114-397 §3.1; connector 0.5K-AX-13PWB (13 P, 0.5 mm, bottom contact) |
 | AS5311 SSI (GPIO7 CLK / GPIO8 DO / GPIO9 CSn) | AS5311 | bit-banged or SPI3, ≤1 MHz |
 
 ## 7. Mechanical envelope (detail in `hardware/mechanical/`)
@@ -127,3 +144,17 @@ The authoritative copy is `nets.py: MCU_PINS`. The constraints behind it:
 - The BLE GATT service UUIDs and the characteristic layout are defined once in
   `firmware/main/proto/caliper_gatt.h` and mirrored in `app/`.
 - Log record: `{u32 seq, u32 unix_s, i32 value_nm, u8 unit, u8 flags (hold/tol pass/fail), u16 profile_id}` = 16 bytes.
+
+## 9. Capture changes log (rev A schematic, 2026-11-07)
+Changes made while capturing the schematic (the reasons are in the sections above and in docs/electronics.md):
+1. ESP32-S3-MINI-1-**N4R2** fixed (N8R2 not stocked at LCSC).
+2. LIS2DW12 SA0 **high → 0x19** (was SA0 low / 0x18): `nets.I2C_ADDR` updated.
+3. New switched rail **+3V3_UI** (U6, TPS22917, also on SNS_PWR_EN) for the LCD VDD and the RGB LED; added to
+   `nets.POWER_NETS`.
+4. Sleep budget target revised from ≤ 25 µA to ≤ 35 µA (buck-boost Iq + its divider).
+5. Capacitive front-end reference designators and values fixed (R60–R67, R70–R77, R80–R85, U40, E40).
+6. RGB LED is a WS2812B-2020-V6 (3.3–5.3 V per LCSC), on +3V3_UI with no level shifter.
+7. Schematic review (2026-11-07): backlight series resistor R50 10 Ω → **15 Ω** (C22810), because 10 Ω drove the
+   panel LED at 31–41 mA against its 20 mA rating; sleep-budget line items corrected (TPS22917 off current, the
+   firmware conditions behind the 3 µA BQ25180 / MAX17048 figures, conversion loss); BQ25180 `IBAT_OCP` ≥ 1 A noted.
+   No net, pin or address changed.

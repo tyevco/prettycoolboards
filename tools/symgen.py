@@ -90,8 +90,8 @@ def box_symbol(name, pins, ref="U", footprint="", datasheet="", description="", 
     return sym
 
 
-def write_library(path, symbols):
-    lib = ["kicad_symbol_lib", ["version", "20241209"], ["generator", Q("dial_me_spinner_symgen")],
+def write_library(path, symbols, generator="dial_me_spinner_symgen"):
+    lib = ["kicad_symbol_lib", ["version", "20241209"], ["generator", Q(generator)],
            ["generator_version", Q("9.0")]] + symbols
     with open(path, "w", encoding="utf-8") as f:
         f.write(dumps(lib) + "\n")

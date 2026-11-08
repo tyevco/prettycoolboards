@@ -1,0 +1,11 @@
+# PrettyCool Caliper, ESP32-S3-MINI-1-N4R2 (4 MB flash)
+# Name,    Type, SubType,  Offset,   Size
+nvs,       data, nvs,      0x9000,   0x6000
+otadata,   data, ota,      0xF000,   0x2000
+phy_init,  data, phy,      0x11000,  0x1000
+ota_0,     app,  ota_0,    0x20000,  0x1B0000
+ota_1,     app,  ota_1,    0x1D0000, 0x1B0000
+# LittleFS: the reading log (ring of 16-byte records) and the tolerance profiles
+storage,   data, spiffs,   0x380000, 0x50000
+# FAT (wear-levelled) exposed over USB MSC; holds the exported LOG.CSV only
+msc,       data, fat,      0x3D0000, 0x30000

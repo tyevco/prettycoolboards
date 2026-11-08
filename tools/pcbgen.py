@@ -336,6 +336,11 @@ class BoardBuilder:
             refill(path)
 
 
+# Namespace prefix for the uuid5s that unique_uuids() assigns; projects set their own (the default keeps
+# dial-me-spinner's boards byte-identical).
+UUID_NAMESPACE = "dial-me-spinner"
+
+
 def unique_uuids(path):
     """Give every repeated UUID in a saved board a fresh one. Footprints copied from a library keep the library's
     pad and graphic UUIDs, so every 0402 shares its pad UUIDs with every other; KiCad's DRC report then resolves a
@@ -350,7 +355,7 @@ def unique_uuids(path):
         elif st.startswith('(uuid "'):
             u = st.split('"')[1]
             if u in seen:
-                nu = str(_uuid.uuid5(_uuid.NAMESPACE_URL, f"dial-me-spinner/{os.path.basename(path)}/{ref}/{i}"))
+                nu = str(_uuid.uuid5(_uuid.NAMESPACE_URL, f"{UUID_NAMESPACE}/{os.path.basename(path)}/{ref}/{i}"))
                 lines[i] = ln.replace(u, nu)
                 u = nu
                 changed += 1

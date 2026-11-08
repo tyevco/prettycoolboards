@@ -31,9 +31,19 @@ POWER_SYMBOLS = {
 }
 GENERIC_POWER = "power:VCC"
 
+# Namespace prefix for the deterministic uuid5s of every schematic item. Each project sets its own
+# (set_uuid_namespace) so two projects' sheets never share UUIDs; the default keeps dial-me-spinner's
+# existing UUIDs unchanged.
+UUID_NAMESPACE = "dial-me-spinner"
+
+
+def set_uuid_namespace(ns: str) -> None:
+    global UUID_NAMESPACE
+    UUID_NAMESPACE = ns
+
 
 def _uid(*parts) -> str:
-    return str(_uuid.uuid5(_uuid.NAMESPACE_URL, "dial-me-spinner/" + "/".join(map(str, parts))))
+    return str(_uuid.uuid5(_uuid.NAMESPACE_URL, UUID_NAMESPACE + "/" + "/".join(map(str, parts))))
 
 
 def snap(v: float, g: float = GRID) -> float:

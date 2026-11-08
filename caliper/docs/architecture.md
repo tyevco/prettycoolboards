@@ -1,3 +1,175 @@
 # Architecture
 
-_Written as rev A is designed; see [SPEC](../hardware/design/SPEC.md)._
+> **Status: rev A in design.** The schematics are captured and ERC clean; nothing has been laid out, built or
+> measured. Every current below is a datasheet typical or an *estimate*, never a measurement.
+
+This page explains how the caliper is put together and why: the system blocks, the choices that were made (and
+the alternatives that lost), and the power budget. The architecture of record is
+[SPEC](../hardware/design/SPEC.md); where this page and SPEC disagree, SPEC wins. The circuit details and part
+numbers are in [Schematics and boards](electronics.md).
+
+## 1. Overview
+
+A 150 mm caliper whose slider carries one 62 × 34 mm, 4-layer board. The slider reads its position from an
+**AS5311 magnetic linear encoder** over 2 mm-pole magnetic tape glued into the beam, and, as an experiment that can
+be cut out with jumpers, from an **8-phase capacitive scale** (a passive 200 × 7 mm PCB bonded into the beam). An
+**ESP32-S3-MINI-1** runs everything: the reading on a **1.14 in colour IPS** display, three buttons, an RGB LED and a
+piezo, a reading log in flash, **BLE** (HID keyboard + GATT) and **Wi-Fi**. A **LIS2DW12** accelerometer wakes it on
+pickup. Power is a 1S 500 mAh LiPo charged from **USB-C** by a BQ25180, regulated by a **TPS63802 buck-boost**, and
+measured by a **MAX17048** fuel gauge.
+
+## 2. Block diagram
+
+```mermaid
+flowchart LR
+  USB["USB-C (J1)<br/>ESD: USBLC6 + SMF5.0A"] -->|VBUS| CHG["BQ25180<br/>charger + power path<br/>I2C 0x6A"]
+  USB -->|D+ / D−| MCU
+  BAT["LiPo 402535<br/>~500 mAh (J2)"] <-->|VBAT| CHG
+  BAT --> FG["MAX17048<br/>fuel gauge 0x36"]
+  CHG -->|VSYS| BB["TPS63802<br/>buck-boost"]
+  BB -->|+3V3| MCU["ESP32-S3-MINI-1-N4R2<br/>BLE 5 + Wi-Fi, PCB antenna"]
+  BB -->|+3V3| IMU["LIS2DW12<br/>0x19, wake on pickup"]
+  BB -->|+3V3| SW1["TPS22917 U5"] -->|+3V3_SNS| MAG["AS5311<br/>A/B/Index + SSI"]
+  SW1 -->|+3V3_SNS| AFE["Charge amp + VREF<br/>TLV9062"]
+  BB -->|+3V3| SW2["TPS22917 U6"] -->|+3V3_UI| LCD["ST7789 1.14in IPS<br/>SPI2 40 MHz"]
+  SW2 -->|+3V3_UI| LED["WS2812B-2020 RGB"]
+  MCU -->|8 × CAP_TX| TXE["TX comb<br/>(bottom copper)"]
+  TXE -. capacitive .-> SCALE["Scale PCB<br/>reflectors in the beam"]
+  SCALE -. capacitive .-> RXE["RX strip"] --> AFE -->|CAP_RX, ADC1_CH0| MCU
+  TAPE["Magnetic tape<br/>2 mm poles"] -. field .-> MAG -->|PCNT + SSI| MCU
+  MCU -->|I2C 400 kHz| CHG
+  MCU -->|I2C| FG
+  MCU -->|I2C| IMU
+  MCU --> UI["ZERO / HOLD / MODE<br/>piezo, backlight FET"]
+```
+
+## 3. Decisions and the alternatives that lost
+
+### 3.1 MCU and radio: ESP32-S3 vs nRF52840 + nRF7002
+
+| | ESP32-S3-MINI-1-N4R2 (chosen) | nRF52840 module + nRF7002 Wi-Fi companion |
+|---|---|---|
+| Radios | BLE 5 + 2.4 GHz Wi-Fi in one module, PCB antenna, certified | BLE from the nRF52840, Wi-Fi 6 from a second chip with its own antenna, RF layout and certification |
+| Parts / area | One 15.4 × 20.5 mm module | Two modules (or a module + a QFN with RF matching) on a 62 × 34 mm board that already carries a display, a sensor and a comb |
+| USB | Native USB 2.0 FS (CDC + MSC + HID in TinyUSB) | Native USB on the nRF52840 |
+| Deep sleep | 7–8 µA (module datasheet v1.7 Table 6-7) | ~1.5–3 µA System ON idle (nRF) |
+| Active current | 13–33 mA CPU (modem sleep, 40–80 MHz), 189 mA peak BLE TX at 0 dBm, 355 mA Wi-Fi TX peak | Much lower: nRF BLE TX ~5 mA |
+| Cost (LCSC, qty 1) | $5.00 | ~$10 + ~$5 + RF parts |
+
+The caliper needs Wi-Fi for the web page and MQTT/HTTP push (SPEC §1), which the nRF52840 cannot do alone.
+Adding an nRF7002 doubles the RF work on a board whose antenna already has to hang clear of a steel beam. The
+ESP32-S3 costs more energy while awake, but a caliper is awake for minutes a day and spends the rest in deep
+sleep, where the difference (~6 µA) is small next to the buck-boost's 11 µA. The S3 also has the PCNT peripheral
+for the AS5311 quadrature and a dedicated-GPIO bundle for the 8-phase drive. **N4R2, not N8R2:** the N8R2 is not
+stocked at LCSC; 4 MB of flash holds the firmware plus a LittleFS log of thousands of 16-byte records.
+
+### 3.2 Position sensing: AS5311 vs capacitive vs optical
+
+| | AS5311 magnetic (primary) | Capacitive 8-phase (experimental) | Optical (incremental strip + quadrature sensor) |
+|---|---|---|---|
+| Resolution | 0.488 µm/count (4× quadrature), 12-bit absolute within each 2 mm pole pair | Set by the ADC/demodulation: ~1/500 of 5.08 mm ≈ 10 µm expected | 10–25 µm with hobby-grade strips (e.g. 150–180 LPI) |
+| Robustness | Insensitive to coolant, dust, oil, light; 0.3 ± 0.1 mm gap | Sensitive to moisture and contamination in the 0.15 mm gap, and to the slider's tilt | Needs a clean, sealed path; dust and scratches drop counts |
+| Absolute? | Within 2 mm (SSI) plus counting; zero on ZERO | Within 5.08 mm | No |
+| Parts | One IC + magnetic tape ($12.63 IC, tape extra) | One op-amp + copper (cheap) but a second PCB in the beam and much firmware | Emitter/detector + a strip + optics alignment |
+| Risk | Supply: 80 pcs at LCSC; 16 mA while on | Unproven here: it is what commercial calipers use, but their ASICs do the hard part | Mechanical alignment in a printed housing |
+
+The AS5311 is the low-risk route to "electronics are not the limit" (SPEC §1): its resolution is ~20× finer than
+the 0.01 mm display and it is insensitive to the shop environment. The capacitive scale is built alongside it as an
+experiment because it is the low-power route (the commercial calipers run for years on a coin cell), and it costs
+only an op-amp, 18 jumpers/resistors and copper. With R60–R67 and R80 left off it is electrically absent. Optical
+lost on contamination and alignment in a printed slider.
+
+The AS5311 draws 16 mA (21 mA max), so it is powered only while the caliper is awake (+3V3_SNS). The position is
+re-established after every wake: the SSI gives the absolute position within the current 2 mm pole, and the firmware
+keeps the pole count in RTC memory; a slider moved by more than ±1 mm while asleep (wake-on-motion from the IMU
+starts the sensor) needs re-zeroing. *To verify on prototype.*
+
+### 3.3 3V3 regulation: buck-boost vs LDO
+
+A 1S LiPo runs from 4.2 V down to ~3.0 V. An LDO (e.g. a 2 µA-Iq RT9080) works while VBAT > 3.3 V + dropout, so it
+loses regulation for the bottom ~25–35 % of the cell's capacity, exactly when the ESP32-S3's Wi-Fi TX peaks (355 mA,
+datasheet Table 6-4) pull the cell lower still; the S3 needs 3.0–3.6 V. The **TPS63802** buck-boost keeps +3V3
+regulated from 1.3 V to 5.5 V in, with 2 A out. The price is quiescent current: 11 µA Iq plus 5.5 µA in its
+feedback divider (the datasheet limits the lower resistor to 100 kΩ), against ~2 µA for an LDO. That is the largest
+single line in the sleep budget below, and the reason SPEC's sleep target moved from 25 µA to 35 µA.
+
+### 3.4 Smaller decisions made during capture
+
+* **LIS2DW12 at 0x19 (SA0 high), not 0x18:** SA0's internal pull-up cannot be disconnected; grounding it costs
+  60–170 µA ([Schematics §3.6](electronics.md#_3-6-imu-lis2dw12)).
+* **+3V3_UI switched rail:** the ST7789 still draws 15 + 5 µA typ in sleep-in (DM-TFT114-397 §5.3) and a WS2812
+  idles at hundreds of µA in older revisions, so both lose power in deep sleep. No GPIO is free, so the switch
+  shares SNS_PWR_EN with the sensor rail.
+* **WS2812B-2020-V6 (3.3–5.3 V)** on 3.3 V: no level shifter and no 5 V rail.
+* **Buttons with 100 k pull-ups + 100 nF:** no static current, hardware debounce, and they work as ext1 wake sources
+  without keeping the RTC pull-ups powered.
+
+## 4. Power tree
+
+```
+USB-C VBUS ─ SMF5.0A/USBLC6 ─ BQ25180 IN ─┬─ SYS → VSYS ─ TPS63802 → +3V3 ─┬─ ESP32-S3, LIS2DW12, I2C pull-ups, piezo, backlight (FET)
+                                          │                                ├─ TPS22917 U5 → +3V3_SNS: AS5311, TLV9062, VREF
+                                          │                                └─ TPS22917 U6 → +3V3_UI : ST7789 VDD, WS2812
+                                          └─ BAT ─ LiPo (J2) ─ MAX17048 (VDD = CELL)
+```
+
+Charging is 250 mA (≈ 0.5 C for the 500 mAh cell), set over I2C; the BQ25180 power path runs the system from USB
+while it charges.
+
+## 5. Power budget and battery life
+
+Assumptions: cell 500 mAh nominal, **450 mAh usable** (*estimate*). Battery-side currents at VBAT ≈ 3.7 V; the
+buck-boost is taken as ~90 % efficient at tens of mA (*estimate*; TPS63802 efficiency curves), so a 3.3 V load
+of *I* draws ≈ *I* × 3.3 / (3.7 × 0.9) ≈ 1.0 × *I* from the cell. In deep sleep the converter's Iq dominates its
+efficiency, so the sleep column lists the quiescent currents directly, plus one line for the conversion loss on
+the 3.3 V-side sleep loads (ESP32, LIS2DW12, divider: ≈ 14.5 µA at an assumed ~80 % light-load efficiency).
+
+| Block | Deep sleep (µA) | Idle, awake (mA) | Measuring (mA) | Basis |
+|---|---|---|---|---|
+| ESP32-S3-MINI-1 | 8 | 25 | 35 | Deep sleep, RTC peripherals on: 8 µA (Table 6-7). Awake: modem sleep at 80 MHz, 22–36 mA WAITI (Table 6-6) with light-sleep between frames (*estimate*); BLE connection events add ~1–3 mA average (*estimate*) |
+| TPS63802 Iq + FB divider | 16.5 | – | – | 11 µA (SLVSEU9D) + 0.5 V / 91 kΩ |
+| BQ25180 (battery only) | 3 | – | – | IQ_BAT 3 µA typ with the watchdog and push-button disabled; 4 µA with the push-button on (SLUSE99C Electrical Characteristics, IQ_BAT). Firmware must set it |
+| MAX17048 | 3 | 0.023 | 0.023 | 3 µA hibernate with `VRESET.Dis` = 1, else 4 µA; 23 µA active (19-6171 Electrical Characteristics, IDD0). Plus ≤ 2 × 0.4 µA SCL/SDA pull-downs (IPD) against the pull-ups |
+| LIS2DW12 | 1 | 0.05 | 0.05 | Low-power wake mode ~1 µA (*estimate*, ST DS11811) |
+| TPS22917 ×2 (off) | 0.02 | – | – | ISD,VIN 10 nA typ each (SLVSDW8B; the 0.5 µA figure is the *on*-state IQ) |
+| Buck-boost conversion loss on the 3.3 V sleep loads | ≈ 1.7 | – | – | 14.5 µA × 3.3 / (3.7 × ~0.8) − 14.5 (*estimate*) |
+| AS5311 | 0 | 16 | 16 | 16 mA typ, 21 mA max (rev 1.13, electrical characteristics); off in sleep |
+| Capacitive AFE | 0 | 1.1 | 1.2 | TLV9062 2 × 538 µA + 16.5 µA divider; TX drive negligible |
+| ST7789 logic | 0 | 8 | 8 | DM-TFT114-397 §5.3; off in sleep (+3V3_UI) |
+| Backlight | 0 | 5 | 10 | ≈ 20 mA at 100 % (15 Ω, VF 3.0 V); 25 % / 50 % PWM (*estimate*) |
+| WS2812B-2020-V6 | 0 | ~1 | ~1 | Idle current per LCSC listing (*to verify*); off in sleep |
+| **Total** | **≈ 33 µA** (≈ 35 µA if the firmware leaves the 4 µA defaults) | **≈ 56 mA** | **≈ 71 mA** | |
+
+Battery life (450 mAh usable, *estimates*):
+
+| Scenario | Average | Runtime |
+|---|---|---|
+| Deep sleep only (storage, not ship mode) | 33 µA | ≈ 13 600 h ≈ **1.5 years** (the cell's self-discharge matters more) |
+| Ship mode (BQ25180 BATFET off) | ~3 µA + pack PCM | years; wake by plugging in USB |
+| Continuous measuring, display on | 71 mA | **≈ 6 h** |
+| Wi-Fi sync burst (TX ~300 mA peaks, ~100 mA average for a few s) | – | a few mAh per sync |
+| Typical shop day: 30 min awake measuring, 23.5 h asleep | ≈ 36 mAh/day | **≈ 12 days** |
+| Light use: 10 min/day | ≈ 13 mAh/day | ≈ 5 weeks |
+
+What dominates: awake, the ESP32-S3 (~50 %) and the AS5311 (~22 %); asleep, the buck-boost Iq and its divider
+(50 %) and the ESP32-S3 (24 %). The cheapest rev-B improvement is the auto-off delay (the IMU sees the caliper put
+down), then a lower-Iq buck-boost (e.g. TPS63900 class, 75 nA Iq, if it can supply the Wi-Fi peaks).
+
+Peak current: Wi-Fi TX 355 mA (802.11b, 20.5 dBm) + AS5311 21 mA + LCD/backlight ~30 mA ≈ 405 mA at 3.3 V, so
+≈ 405 × 3.3 / (3.0 × 0.9) ≈ 500 mA from a 3.0 V cell (≈ 350 mA from a full 4.2 V one). That is inside the TPS63802's 2 A
+rating, but it is about 1 C for a 500 mAh cell (for bursts only) and half of the BQ25180's default 1 A battery
+discharge limit (`IBAT_OCP`; the firmware must not lower it to 500 mA). The bulk 22 µF (C6) plus 22 µF at the module
+ride through the TX bursts.
+
+## 6. References
+
+* [SPEC](../hardware/design/SPEC.md), [Schematics and boards](electronics.md)
+* Espressif, *ESP32-S3-MINI-1 & MINI-1U Datasheet* v1.7 (pin definitions, Fig. 9-1 peripheral schematic,
+  Tables 6-4…6-7 currents): <https://www.espressif.com/sites/default/files/documentation/esp32-s3-mini-1_mini-1u_datasheet_en.pdf>
+* ams, *AS5311 High Resolution Magnetic Linear Encoder*, Revision 1.13 (pins, §7.7 supply, Isupp)
+* TI, *TPS63802* SLVSEU9D (Fig. 10-1, Tables 10-2, 10-5, DLA0010A land pattern): <https://www.ti.com/lit/ds/symlink/tps63802.pdf>
+* TI, *BQ25180* SLUSE99C: <https://www.ti.com/lit/ds/symlink/bq25180.pdf>; *TPS22917* SLVSDW8B: <https://www.ti.com/lit/ds/symlink/tps22917.pdf>;
+  *TLV9062* SBOS799: <https://www.ti.com/lit/ds/symlink/tlv9062.pdf>
+* Maxim/ADI, *MAX17048/MAX17049* 19-6171 (pin table, Fig. 14, Table 3)
+* DisplayModule, *DM-TFT114-397* (1.14 in ST7789 panel pinout, DC characteristics): <https://cdn.shopify.com/s/files/1/0264/7629/files/DM-TFT114-397_Datasheet.pdf>
+* ST, LIS2DW12 DS11811 and AN5038 (SA0 pull-up); dial-me-spinner `docs/bringup.md` (0x18 fault signature)

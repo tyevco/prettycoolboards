@@ -1,0 +1,50 @@
+menu "PrettyCool Caliper"
+
+    config CALIPER_LOG_CAPACITY
+        int "Reading-log capacity (records of 16 bytes)"
+        range 256 65536
+        default 4096
+        help
+            Size of the LittleFS ring log. 4096 records = 64 KiB file; the CSV export of a
+            full log is about 130 KiB and must fit the "msc" FAT partition.
+
+    config CALIPER_MAG_DIR_INVERT
+        bool "Invert the AS5311 counting direction"
+        default n
+        help
+            Flip if the reading decreases when the jaws open (depends on the tape orientation).
+
+    config CALIPER_CAP_SENSOR
+        bool "Enable the EXPERIMENTAL capacitive scale"
+        default y
+        help
+            Drives CAP_TX0..7 and samples CAP_RX. Isolated from the magnetic path: if it fails
+            to start, LIVE.cap_nm reads INT32_MIN and nothing else changes.
+
+    config CALIPER_USB_TINYUSB
+        bool "Use TinyUSB (CDC console + MSC) instead of USB-Serial-JTAG"
+        default y
+        help
+            With TinyUSB the native USB PHY belongs to TinyUSB, so esptool's automatic reset
+            into the bootloader over USB-Serial-JTAG stops working: use the CLI command
+            "bootloader" or hold BOOT while resetting. Disable for firmware development.
+
+    config CALIPER_USB_MSC
+        bool "Expose LOG.CSV as a USB mass-storage drive"
+        depends on CALIPER_USB_TINYUSB
+        default y
+
+    config CALIPER_CHG_TS_ENABLE
+        bool "BQ25180 TS (thermistor) monitoring"
+        default y
+        help
+            Rev A has a 10 k NTC (RT1) on TS/MR next to the battery connector (docs/electronics.md).
+            Disable only on a board without it (TS then needs a plain 10 k to GND). The firmware
+            also guards charging with the ESP32-S3 die temperature in both cases.
+
+    config CALIPER_CHARGE_MA
+        int "Charge current (mA)"
+        range 40 500
+        default 250
+
+endmenu

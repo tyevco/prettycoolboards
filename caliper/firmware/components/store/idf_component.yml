@@ -1,0 +1,2 @@
+dependencies:
+  joltwatt/esp_littlefs: "^1.14.0"

@@ -1,0 +1,26 @@
+ERC report (2026-11-07T17:23:22-0800, Encoding UTF8)
+Report includes: Errors, Warnings, Exclusions
+
+***** Sheet /
+
+***** Sheet /Power: USB-C, charger, 3V3, rails/
+[pin_to_pin]: Pins of type Open collector and Power output are connected
+    ; error
+    @(342.90 mm, 134.62 mm): Symbol U5 Pin 5 [QOD, Open collector, Line]
+    @(342.90 mm, 132.08 mm): Symbol U5 Pin 6 [VOUT, Power output, Line]
+[pin_to_pin]: Pins of type Open collector and Power output are connected
+    ; error
+    @(474.98 mm, 134.62 mm): Symbol U6 Pin 5 [QOD, Open collector, Line]
+    @(474.98 mm, 132.08 mm): Symbol U6 Pin 6 [VOUT, Power output, Line]
+
+***** Sheet /ESP32-S3 module/
+
+***** Sheet /AS5311 magnetic encoder/
+
+***** Sheet /Capacitive front-end (experimental)/
+
+***** Sheet /Display, buttons, LED, piezo/
+
+***** Sheet /Accelerometer/
+
+ ** ERC messages: 2  Errors 2  Warnings 0
