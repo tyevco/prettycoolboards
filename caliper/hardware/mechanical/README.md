@@ -9,7 +9,7 @@ the FEA runs on the Windows Python with the `print-stress` skill:
 
 ```
 bash caliper/hardware/mechanical/run_all.sh        # extract board, tests, models, STL/STEP, drawings, clash, calcs, renders (~3 min)
-py fea_jaw.py; py fea_slider.py                     # Windows: FEA (~10 min each), then rerun calcs.py
+py fea_jaw.py; py fea_inside_jaw.py; py fea_slider.py   # Windows: FEA (inside jaw ~1 min, the others ~10 min), then rerun calcs.py
 ```
 
 | Path | What |
@@ -20,9 +20,10 @@ py fea_jaw.py; py fea_slider.py                     # Windows: FEA (~10 min each
 | `drawgen.py` | Rev B: `step/{slider_body_b,beam_pockets}.step` and `drawings/*.{svg,dxf,pdf}` (A3, tolerances and process notes) |
 | `extract_board_parts.py` | Reads `../kicad/slider/*.kicad_pcb` (KiCad 9 `pcbnew`) and writes `board_parts.json`: the Edge.Cuts outline (body + tabs), the holes, one box per part (Fab outline x datasheet height) plus the SMT standoffs, the H1 screw head and the mated JST plug |
 | `board_envelope.py` | The slider-board envelope from `board_parts.json` (SPEC 2.1 placeholder without it) and the board rules the housing depends on (height zones, bottom window, antenna keep-out, holes) |
-| `clash_check.py` | Exact B-rep intersections: board vs housing, slider vs beam / fixed jaw / tape / scale / stop at R = 0, 75, 151, slider-internal pairs; the sensor gaps; the webs between the body's cut features; metal vs antenna (RF) -> `clash_report.txt` |
+| `clash_check.py` | Exact B-rep intersections: board vs housing, slider vs beam / fixed jaw / tape / scale / stop at R = 0, 75, 151, slider-internal pairs; the sensor gaps; the webs between the body's cut features; metal and carbon-filled (PA-CF jaws) vs antenna (RF; FAIL / RISK) -> `clash_report.txt` |
 | `calcs.py` | Jaw deflection, gib preloads, sliding force, back web, thermal error, gap stack-ups, AS5311 gap budget, board under a button press -> `calcs_output.txt` |
-| `fea_jaw.py` | FEA of the moving jaw (print-stress solver, Windows Python) -> `fea_jaw_output.txt`, `renders/fea_jaw.png` |
+| `fea_jaw.py` | FEA of the moving outside jaw (print-stress solver, Windows Python) -> `fea_jaw_output.txt`, `renders/fea_jaw.png` |
+| `fea_inside_jaw.py` | FEA of the moving inside jaw, phase-3 outline vs the RF-relieved one (Windows Python) -> `fea_inside_jaw_output.txt` |
 | `fea_slider.py` | FEA of the whole body under both gib preloads, and of the board under a button press (with and without the button-band ledge) -> `fea_slider_output.txt`, `renders/fea_body.png` |
 | `render.py` | `renders/*.png` (matplotlib, flat-shaded B-rep tessellation; exact sections) |
 | `tests/test_mechanical.py` | Invariants: gaps, SPEC/nets contract, envelope, valid solids, walls, clamp stack, RF, print poses, sliding force, no slider/beam interference |

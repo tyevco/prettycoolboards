@@ -1,0 +1,68 @@
+{
+ "entries": [
+  {
+   "correction": {
+    "dx": 0.0,
+    "dy": 0.0,
+    "mirror": false,
+    "rot": 270.0
+   },
+   "ee": {
+    "key": "ee-sha1:3263de7df4a17090",
+    "title": "TSSOP-20_L6.5-W4.4-P0.65-LS6.4-BL"
+   },
+   "fit": {
+    "alternatives": [
+     {
+      "conflicts": 20,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": false,
+      "names": 0,
+      "rot": 90.0
+     },
+     {
+      "conflicts": 20,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": true,
+      "names": 0,
+      "rot": 90.0
+     },
+     {
+      "conflicts": 20,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": true,
+      "names": 0,
+      "rot": 270.0
+     }
+    ],
+    "matched": 20,
+    "method": "number",
+    "rms": 0.0085,
+    "score": 84
+   },
+   "fitted": "2026-11-08",
+   "kicad": {
+    "fpid": "Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm",
+    "pad_hash": "sha1:e5f1a01cd93566f8"
+   },
+   "reasons": [
+    "fits by pad numbers: 20/20 matched, rms 0.008 mm",
+    "rot 90 also lands every pad, on other nets; ruled out by pad numbers"
+   ],
+   "status": "auto",
+   "tool": "jlcplace 0.2.1",
+   "verdict": "green",
+   "verifications": []
+  }
+ ],
+ "lcsc": "C22459687"
+}

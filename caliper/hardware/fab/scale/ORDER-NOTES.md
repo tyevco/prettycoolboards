@@ -8,6 +8,10 @@ Rev A is **designed, not built**: nothing here has been fabricated, assembled or
 * Do not place (DNP): none
 * Not assembled, not in BOM/CPL (copper / mechanical only): FID1, FID2, H1, H2
 * Bottom-side placements (0): none
+* **jlcplace 0.2.1 placement gate** (JLC's EasyEDA footprints put down at every CPL row, over gerbers.zip): 0 results: 0 red, 0 yellow, 0 green, 0 verified
+  * no parts, no CPL: checked with an empty CPL (not shipped), so nothing on the board needs placing and gerbers.zip is this board's, plotted from the CPL origin
+  * origin: the Gerbers' (0, 0) is this CPL's origin, board (100, 100) (the aux (drill/place file) origin): the rows were checked from it, as JLC reads them
+* JLC placement preview checklist (jlcplace-checklist.md): nothing to check
 * **PCB:** 2 layers, **0.8 mm**, ENIG, 200 x 7 mm. **No solder mask on the front (F) side at all**: the whole front is one mask opening over the reflector pattern (bare ENIG copper is the electrode face). Back: solid copper under green mask, white silk on the back only.
 * **No assembly.** No BOM, no CPL. Two Ø1.0 non-plated alignment holes (pin jig for bonding), two fiducials.
 * **Front copper is 38 isolated islands (no net) by design**: tell JLC's DFM review the floating copper is intended (it is a passive capacitive reflector scale).

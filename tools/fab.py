@@ -1,4 +1,4 @@
-"""Fabrication outputs: gerbers, drill, JLCPCB BOM, PDFs, renders (the CPL is jlc_cpl.py)."""
+"""Fabrication outputs: gerbers, drill, JLCPCB BOM, PDFs, renders (the CPL is written and checked by jlcplace: jlcplace_gate.py)."""
 
 from __future__ import annotations
 

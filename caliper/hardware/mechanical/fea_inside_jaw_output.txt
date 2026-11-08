@@ -1,0 +1,22 @@
+FEA of the printed moving inside jaw under the 5 N measuring force: phase-3 outline vs the RF-relieved one.
+
+load 5 N in -u on the measuring face u 0, y 31..37; jaw 2.4 thick (z -8.6..-6.2), tip 3 wide; global mesh 0.22 mm
+layer normal = assembly z (body printed back face down): bending is in the layer plane
+
+phase 3 (straight flank, root from u 1.5): 56338 tets / 11846 nodes
+  PETG             deflection at the face 128.00 um, at the tip 192.26 um; von Mises 7.55 MPa (SF in-layer 6.0), interlayer 1.78/0.91 MPa; reaction [0.0, -5.0, -0.0] N (fixed facets 820, load facets 738, 14.4 mm2)
+  PA-CF (PAHT-CF)  deflection at the face  51.95 um, at the tip  78.03 um; von Mises 7.58 MPa (SF in-layer 5.9), interlayer 1.57/0.87 MPa; reaction [0.0, -5.0, 0.0] N (fixed facets 820, load facets 738, 14.4 mm2)
+
+arc only (R 5.15 arc, root from u 1.5): 55096 tets / 11587 nodes
+  PETG             deflection at the face 141.57 um, at the tip 210.04 um; von Mises 8.14 MPa (SF in-layer 5.5), interlayer 1.73/0.93 MPa; reaction [-0.0, -5.0, 0.0] N (fixed facets 820, load facets 738, 14.4 mm2)
+  PA-CF (PAHT-CF)  deflection at the face  57.48 um, at the tip  85.27 um; von Mises 8.17 MPa (SF in-layer 5.5), interlayer 1.51/0.87 MPa; reaction [-0.0, -5.0, 0.0] N (fixed facets 820, load facets 738, 14.4 mm2)
+
+RF relief as built (R 5.15 arc, root from u 0.5): 58546 tets / 12279 nodes
+  PETG             deflection at the face  98.35 um, at the tip 148.88 um; von Mises 6.59 MPa (SF in-layer 6.8), interlayer 1.4/0.72 MPa; reaction [0.0, -5.0, -0.0] N (fixed facets 920, load facets 738, 14.4 mm2)
+  PA-CF (PAHT-CF)  deflection at the face  39.92 um, at the tip  60.42 um; von Mises 6.61 MPa (SF in-layer 6.8), interlayer 1.23/0.69 MPa; reaction [0.0, -5.0, -0.0] N (fixed facets 920, load facets 738, 14.4 mm2)
+
+RESULT PETG face deflection: phase 3 128.00 um, arc only 141.57 um (+10.6 %), as built 98.35 um (-23.2 %); 19.7 um/N
+RESULT PA-CF face deflection: phase 3 51.95 um, arc only 57.48 um (+10.6 %), as built 39.92 um (-23.2 %); 8.0 um/N
+
+Strength numbers are the skill's PETG book values (45 in-layer, 20 interlayer).
+Linear tets run ~5 % stiff; both variants are meshed the same way, so the comparison holds.

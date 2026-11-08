@@ -21,6 +21,7 @@ Coordinate frame (assembly, millimetres)
 The slider housing is built in its own frame u = x - R (u = 0 is the moving
 jaw's measuring face), so every slider number below is a u.  Board x = u - 8.
 """
+import math
 from types import SimpleNamespace
 
 # ---------------------------------------------------------------------------
@@ -91,6 +92,16 @@ SCALE_POCKET_DEPTH = SCALE_T + SCALE_ADH  # 0.85: PCB face flush with the beam f
 # Fixed-jaw joint in the beam: 2 x M3 bolts + 2 x 3 mm dowels (h6 pins, H7 reamed holes)
 FJ_BOLTS = [(-12.0, 5.0), (-12.0, 15.0)]
 FJ_DOWELS = [(-5.0, 4.0), (-5.0, 16.0)]
+# Bolts: M3 x 10 (ISO 4762 socket head, or ISO 7380 button head) from the front face into an
+# ISO 4032 hex nut (5.5 AF, m 2.15-2.40) in a hex trap on the back.  The block is 11.1 thick, so a
+# 2.5 deep trap left the screw ~1.4 mm into the nut; the trap is now 3.6 deep, so the screw end
+# reaches 0.1 past the nut's far face and stays 1.1 below the back face (an M3 x 12 would stand
+# 0.9 proud).  0.95 of PA-CF is left between the trap floor and the beam slot; it is loaded in
+# compression against the beam's back face only.
+FJ_SCREW_L = 10.0
+NUT_M3_AF, NUT_M3_M = 5.5, 2.4
+FJ_NUT_TRAP_AF = 5.6
+FJ_NUT_TRAP_DEPTH = 3.6
 DOWEL_D = 3.0
 # End stop (review fix e): an M2 x 6 socket-head cap screw (ISO 4762) in an M2 tapped hole
 # through the beam; its head (3.8 x 2.0) stands proud of the front face on the upper land and
@@ -285,6 +296,16 @@ IJ_TIP_W = 3.0
 # support.  The slider prints back face down (z -7.4 on the bed), the fixed jaw front face down
 # (z +2.5 on the bed); the tips cross 0.2 apart in z.
 IJ_MOVING_Z = (Z_BACK, Z_BACK + 2.4)
+# RF relief (2026-11-08).  The module moved 0.45 mm toward the jaw in layout, which put the moving
+# inside jaw's root flank 4.70 mm (plan) from the antenna corner (SPEC D4: >= 5 for carbon fill).
+# The flank now steps round that corner on an arc of RF_CLEAR + IJ_RF_MARGIN (a scallop <= 0.45 deep,
+# ~4 mm long, on the root flank; the tip and its measuring face u 0, y 31..37 are untouched), and the
+# root's left end moves from u 1.5 to the housing end face, u 0.5, which gives the root section back.
+# fea_inside_jaw.py compares the old and new outlines.
+IJ_RF_MARGIN = 0.15
+IJ_ROOT_U0 = H_U0
+IJ_ROOT_U0_OLD = 1.5
+IJ_FLANK = ((0.0, IJ_TIP_Y0), (STEP_U1, 24.6))   # root flank, from the tip's measuring edge to the step
 IJ_FIXED_Z = (Z_BACK + 2.6, 2.5)
 
 # Fixed jaw block
@@ -314,6 +335,45 @@ ROLLER_RIM_U = ROLLER_U + ROLLER_D / 2
 def bu(bx):
     """Board x -> slider u."""
     return BOARD_U0 + bx
+
+
+def _rf_arc(p0, p1, n=10):
+    """Vertices replacing the part of segment p0-p1 closer than RF_CLEAR + IJ_RF_MARGIN to the antenna's
+    corner nearest the jaw (u = bu(ANTENNA[0]), y = ANTENNA[1]).  The vertices sit on a circle of radius
+    r / cos(dt / 2) (dt = the angle per chord), so every chord stays >= r from the corner.
+    [] when the segment already clears."""
+    cx, cy = bu(ANTENNA[0]), ANTENNA[1]
+    r = RF_CLEAR + IJ_RF_MARGIN
+    L = math.hypot(p1[0] - p0[0], p1[1] - p0[1])
+    ex, ey = (p1[0] - p0[0]) / L, (p1[1] - p0[1]) / L
+    t_f = (cx - p0[0]) * ex + (cy - p0[1]) * ey
+    fx, fy = p0[0] + t_f * ex, p0[1] + t_f * ey
+    d = math.hypot(fx - cx, fy - cy)
+    if d >= r:
+        return []
+    rv = r
+    for _ in range(20):
+        h = math.sqrt(rv * rv - d * d)
+        a0 = math.atan2(fy - h * ey - cy, fx - h * ex - cx)   # end toward p0
+        a1 = math.atan2(fy + h * ey - cy, fx + h * ex - cx)   # end toward p1
+        span = (a1 - a0 + math.pi) % (2 * math.pi) - math.pi  # the short way, through the foot direction
+        rv = r / math.cos(abs(span) / n / 2)
+    if not (0.0 < t_f - h and t_f + h < L):
+        raise ValueError("RF relief arc runs off the root flank: widen the flank or move the jaw")
+    return [(cx + rv * math.cos(a0 + span * i / n), cy + rv * math.sin(a0 + span * i / n)) for i in range(n + 1)]
+
+
+def moving_inside_jaw_outline(rf_relief=True, root_u0=None):
+    """Plan outline (u, y) of the moving inside jaw.  rf_relief=False gives the phase-3 outline
+    (straight root flank, root from u 1.5) for comparison (fea_inside_jaw.py); root_u0 overrides
+    the root's left end."""
+    t1, w = IJ_TIP_Y1, IJ_TIP_W
+    yb = STEP_Y1 - 0.1
+    (u0, y0), (u1, y1) = IJ_FLANK
+    arc = _rf_arc(IJ_FLANK[0], IJ_FLANK[1]) if rf_relief else []
+    if root_u0 is None:
+        root_u0 = IJ_ROOT_U0 if rf_relief else IJ_ROOT_U0_OLD
+    return [(-w, t1), (0, t1), (u0, y0)] + arc + [(u1, y1), (STEP_U1, yb), (root_u0, yb), (-w, IJ_TIP_Y0)]
 
 
 def as_namespace():

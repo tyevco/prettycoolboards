@@ -5,7 +5,7 @@
 #include "board_pins.h"
 #include "pin_plan.h"
 
-const char PIN_PLAN_HASH[] = "274725a2baff6685";
+const char PIN_PLAN_HASH[] = "a69a03f48b11ea8a";
 
 const pin_plan_t PIN_PLAN[] = {
     {.gpio = PIN_BOOT_N, .net = "BOOT_N", .owner = "",
@@ -127,7 +127,7 @@ const pin_plan_t PIN_PLAN[] = {
      }},
     {.gpio = PIN_I2C_SDA, .net = "I2C_SDA", .owner = "power: I2C0 master (open drain, internal pull-up off)",
      .init = PP_INIT_DRIVER, .untouched = false,
-     .ext = {PP_EXT_PULL_UP, PP_RAIL_3V3, 4700u, "R6 4.7k pull-up; U2, U4, U60"},
+     .ext = {PP_EXT_PULL_UP, PP_RAIL_3V3, 2200u, "R6 2.2k pull-up; U2, U4, U60"},
      .st = {
          [PP_MODE_RESET] = {PP_DIR_IN, PP_LEVEL_NONE, PP_PULL_NONE, false, false},
          [PP_MODE_RUN] = {PP_DIR_PERIPH, 1, PP_PULL_NONE, false, false},
@@ -136,7 +136,7 @@ const pin_plan_t PIN_PLAN[] = {
      }},
     {.gpio = PIN_I2C_SCL, .net = "I2C_SCL", .owner = "power: I2C0 master (open drain, internal pull-up off)",
      .init = PP_INIT_DRIVER, .untouched = false,
-     .ext = {PP_EXT_PULL_UP, PP_RAIL_3V3, 4700u, "R7 4.7k pull-up; U2, U4, U60"},
+     .ext = {PP_EXT_PULL_UP, PP_RAIL_3V3, 2200u, "R7 2.2k pull-up; U2, U4, U60"},
      .st = {
          [PP_MODE_RESET] = {PP_DIR_IN, PP_LEVEL_NONE, PP_PULL_NONE, false, false},
          [PP_MODE_RUN] = {PP_DIR_PERIPH, 1, PP_PULL_NONE, false, false},

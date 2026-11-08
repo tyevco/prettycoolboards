@@ -1,0 +1,88 @@
+{
+ "entries": [
+  {
+   "correction": {
+    "dx": 0.0208,
+    "dy": 0.0,
+    "mirror": false,
+    "rot": 180.0
+   },
+   "ee": {
+    "key": "ee-sha1:d1c7589686aed0e5",
+    "title": "SOT-23-3_L2.9-W1.3-P1.90-LS2.4-BR"
+   },
+   "fit": {
+    "alternatives": [
+     {
+      "conflicts": 2,
+      "dx": -0.4808,
+      "dy": -0.2878,
+      "equivalent": false,
+      "matched": 1,
+      "mirror": true,
+      "names": 0,
+      "rot": 120.3157
+     },
+     {
+      "conflicts": 2,
+      "dx": -0.4808,
+      "dy": 0.2878,
+      "equivalent": false,
+      "matched": 1,
+      "mirror": true,
+      "names": 0,
+      "rot": 239.6843
+     },
+     {
+      "conflicts": 2,
+      "dx": 0.0208,
+      "dy": 0.0,
+      "equivalent": false,
+      "matched": 1,
+      "mirror": true,
+      "names": 0,
+      "rot": 0.0
+     },
+     {
+      "conflicts": 3,
+      "dx": -0.4808,
+      "dy": -0.2878,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": false,
+      "names": 0,
+      "rot": 300.3157
+     },
+     {
+      "conflicts": 3,
+      "dx": -0.4808,
+      "dy": 0.2878,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": false,
+      "names": 0,
+      "rot": 59.6843
+     }
+    ],
+    "matched": 3,
+    "method": "number",
+    "rms": 0.0589,
+    "score": 68
+   },
+   "fitted": "2026-11-08",
+   "kicad": {
+    "fpid": "Package_TO_SOT_SMD:SOT-23",
+    "pad_hash": "sha1:1e861832ef1a535f"
+   },
+   "reasons": [
+    "fits by pad numbers: 3/3 matched, rms 0.059 mm",
+    "rot 59.6843, 300.316 also land every pad, on other nets; ruled out by pad numbers"
+   ],
+   "status": "auto",
+   "tool": "jlcplace 0.2.1",
+   "verdict": "green",
+   "verifications": []
+  }
+ ],
+ "lcsc": "C20917"
+}

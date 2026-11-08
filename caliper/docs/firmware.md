@@ -673,7 +673,7 @@ back wrong (a BQ reset), checked at 1 Hz.
   hibernate), except **VRESET.Dis = 1** (bit 0 of the 0x18 MSB, read-modify-write of the 16-bit register) so
   the reset comparator is off in hibernate: SPEC §3 counts 3 µA for the gauge, which needs it.
 * **MAX17048 before ship mode** (`power_ship_mode`, SPEC §3): ship mode switches VSYS off, so +3V3 and the
-  4.7 k I2C pull-ups die while the gauge stays on VBAT with SDA/SCL floating. Before SHIP_RST is written:
+  2.2 k I2C pull-ups die while the gauge stays on VBAT with SDA/SCL floating. Before SHIP_RST is written:
   HIBRT 0x0A = **0xFFFF** (always hibernate, 3 µA: the fallback), MODE 0x06 = **0x2000** (EnSleep, bit 13) and,
   without VBUS, CONFIG 0x0C |= **0x0080** (SLEEP, bit 7; read-modify-write keeps RCOMP / ATHD): forced sleep,
   0.5 µA typ / 2 µA max, which only CONFIG.SLEEP = 0 or a POR ends (Maxim 19-6171 Rev 7: Table 2 p. 10, Fig. 8
@@ -790,8 +790,8 @@ board circuit on the net (`ext`: pull-up / pull-down / driven / load, its rail a
 | 10 | MAG_INC_N | R30 10k to +3V3_SNS; U30 MagINCn open drain | in | in (sensor_mag) | hi-Z, hold |
 | 11 | MAG_DEC_N | R31 10k to +3V3_SNS; U30 MagDECn open drain | in | in (sensor_mag) | hi-Z, hold |
 | 12 | SNS_PWR_EN | R5 100k pull-down; U5 / U6 TPS22917 ON | in | out 1 (sensor_mag) | out 0, hold |
-| 13 | I2C_SDA | R6 4.7k pull-up; U2, U4, U60 | in | periph 1 (power: I2C0 master) | hi-Z, hold |
-| 14 | I2C_SCL | R7 4.7k pull-up; U2, U4, U60 | in | periph 1 (power: I2C0 master) | hi-Z, hold |
+| 13 | I2C_SDA | R6 2.2k pull-up; U2, U4, U60 | in | periph 1 (power: I2C0 master) | hi-Z, hold |
+| 14 | I2C_SCL | R7 2.2k pull-up; U2, U4, U60 | in | periph 1 (power: I2C0 master) | hi-Z, hold |
 | 15 | IMU_INT1 | U60 LIS2DW12 INT1, push-pull active low (CTRL3 0x18) | hi-Z | in (board) | in, **wake** |
 | 16 | IMU_INT2 | U60 LIS2DW12 INT2, push-pull (no source routed) | hi-Z | in (board) | hi-Z, hold |
 | 17 | BTN_ZERO_N | R52 100k pull-up + C52 100n; SW50 to GND | in | in (buttons) | in, **wake** |
@@ -869,7 +869,7 @@ nets; `rails.yaml` RUN / SLEEP / SHIP; `SOURCE_DATE_EPOCH=1794000000`):
 Checked and fine as they were: SNS_PWR_EN, MAG_CLK, MAG_CSN, LCD_BL and BUZZ held low with no pull (R5, R51,
 R56 pull down too, the AS5311 CSn pull-up is on the off rail); the buttons and CHG_INT_N (100 k / 10 k pull-ups
 to the always-on +3V3) and IMU_INT1 (push-pull) with every RTC pull off; the I2C driver with its internal
-pull-ups off (4.7 k on +3V3); GPIO0 / GPIO45 / GPIO46 strap levels (R21 up, R56 / R55 down, matching the reset
+pull-ups off (2.2 k on +3V3); GPIO0 / GPIO45 / GPIO46 strap levels (R21 up, R56 / R55 down, matching the reset
 pulls); GPIO3 (CHG_INT_N, R8 up) is ignored as a strap while EFUSE_STRAP_JTAG_SEL = 0.
 
 ```sh

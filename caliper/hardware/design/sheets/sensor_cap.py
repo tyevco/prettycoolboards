@@ -6,7 +6,8 @@ RX: receive electrode -> R80 0R jumper (DNP-able) -> charge amplifier U40A (TLV9
 -> 2nd-order RC low-pass (390R/1n + 3.9k/100p, both poles ~408 kHz) -> CAP_RX (GPIO1, ADC1_CH0).
 
 The electrodes are copper on the bottom layer, not parts. They are drawn as one symbol, E40 ("CAP_ELECTRODES",
-pins TX0..TX7 + RX), whose footprint holds one seed pad per net: eight 0.30 x 5.00 mm fingers at 0.635 mm pitch
+pins PHASE0..PHASE7 + RCV: passive, and not named TX/RX, which tools read as a UART), whose footprint holds one seed
+pad per net: eight 0.30 x 5.00 mm fingers at 0.635 mm pitch
 (one 5.08 mm repeat of the transmitter comb) and a 5.08 x 1.20 mm receive strip 3.8 mm below the comb centre
 (SPEC §2.1: TX strip y = 12.5...17.5, RX strip y = 10.6...11.8). Layout (layout.py) places E40 on the bottom
 at the start of the comb and draws the remaining fingers and the full 40 mm RX strip as copper on the seed
@@ -36,7 +37,9 @@ SYMBOLS = [
         description="Capacitive scale electrodes (bottom copper): 8 transmitter phases + receive strip. "
                     "Seed pads only; layout draws the full comb on these nets. Not a BOM part.",
         keywords="electrode capacitive scale caliper",
-        pins=[(i + 1, f"TX{i}", "passive", "L") for i in range(8)] + [(9, "RX", "passive", "R")],
+        # passive, and named PHASEn / RCV rather than TXn / RX: they are electrodes, not a UART. hwtools boardcheck
+        # reads a pin named TX6 as a UART transmitter and flagged it against U10 TXD0 through R66/R76 (output to output)
+        pins=[(i + 1, f"PHASE{i}", "passive", "L") for i in range(8)] + [(9, "RCV", "passive", "R")],
     ),
 ]
 
@@ -79,7 +82,7 @@ def build(d):
             "Comb x = 11...51, y = 12.5...17.5; RX strip y = 10.6...11.8 (SPEC §2.1). Bottom mask open over both.\n"
             "Guard GND around the RX strip and the CAP_EL_RX trace on all layers; nothing else on the bottom in y = 9...19.")
     d.add("E40", "caliper:" + EL_SYM, "CAP_ELECTRODES", EL_FP,
-          pins={**{f"TX{i}": f"CAP_EL_TX{i}" for i in range(8)}, "RX": "CAP_EL_RX"}, in_bom=False)
+          pins={**{f"PHASE{i}": f"CAP_EL_TX{i}" for i in range(8)}, "RCV": "CAP_EL_RX"}, in_bom=False)
 
     d.group("RX jumper + charge amplifier (U40A)",
             "Q = C*V: Cf 10p C0G || Rf 10M (HPF corner 1.6 kHz, far below the 25-100 kHz drive). Output centred on VREF.\n"

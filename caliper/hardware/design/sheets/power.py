@@ -18,6 +18,9 @@ Pinouts were checked against the primary datasheets:
     the I2C pull-ups must stay on the always-on +3V3.
   * TPS22917DBVR (TI SLVSDW8B Table 6-1): 1 VIN, 2 GND, 3 ON, 4 CT (cap to VIN), 5 QOD, 6 VOUT.
   * HRO TYPE-C-31-M-12 / USBLC6-2SC6 / SMF5.0A: as dial-me-spinner base.py (same parts, same LCSC codes).
+  * AO3401A (Alpha & Omega, Rev 3.1 Dec 2023, LCSC C15127, JLC Basic): SOT-23 1 G, 2 S, 3 D (KiCad
+    Transistor_FET:AO3401A). VDS -30 V, VGS +-12 V; RDS(on) <= 60 mOhm at VGS -4.5 V (47 typ), <= 85 mOhm at -2.5 V
+    (60 typ); VGS(th) -0.5...-1.3 V; RthJA 125 C/W max steady state. Battery reverse-polarity FET (SPEC §3).
 """
 
 from sheets.parts import C0402, C0603, R0402, cap, res, testpoints
@@ -185,13 +188,21 @@ def build(d):
           datasheet="https://www.murata.com/en-us/products/productdetail?partno=NCP15XH103F03RC",
           fields={"MPN": "NCP15XH103F03RC", "Manufacturer": "Murata", "LCSC": "C77131"})
 
-    d.group("LiPo connector J2 (402535, ~500 mAh, JST-SH 2-pin)",
-            "Pin 1 = BAT+, pin 2 = GND. Pack leads are not standardised: check every pack's polarity before plugging in.\n"
-            "The cell sits in the housing pocket behind the board (SPEC §2.1).")
+    d.group("LiPo connector J2 (402535, ~500 mAh, JST-SH 2-pin) + reverse-polarity P-FET Q1",
+            "Pin 1 = BAT+, pin 2 = GND. Pack leads are not standardised: check every pack's polarity anyway.\n"
+            "Q1 AO3401A in the BAT+ lead: drain to J2, source to VBAT, gate to GND via R10. The body diode conducts for a\n"
+            "correct cell, then VGS = -VBAT turns the channel on (both directions, so charging works). A reversed cell\n"
+            "leaves VGS = 0: off. VGS max +-12 V vs 4.4 V: no zener. 0.5 A: <= 43 mV / 21 mW (85 mOhm max at VGS -2.5 V).\n"
+            "The cell sits in the housing pocket behind the board (SPEC §2.1).", anchor="J2")
     d.add("J2", "Connector_Generic_MountingPin:Conn_01x02_MountingPin", "BATT",
           "Connector_JST:JST_SH_SM02B-SRSS-TB_1x02-1MP_P1.00mm_Horizontal",
-          pins={"1": "VBAT", "2": "GND", "MP": "GND"},
+          pins={"1": "VBAT_RAW", "2": "GND", "MP": "GND"},
           fields={"MPN": "SM02B-SRSS-TB(LF)(SN)", "Manufacturer": "JST", "LCSC": "C160402"})
+    d.add("Q1", "Transistor_FET:AO3401A", "AO3401A", "Package_TO_SOT_SMD:SOT-23",
+          pins={"D": "VBAT_RAW", "S": "VBAT", "G": "BATFET_G"},
+          datasheet="https://www.aosmd.com/res/datasheets/AO3401A.pdf",
+          fields={"MPN": "AO3401A", "Manufacturer": "Alpha & Omega Semiconductor", "LCSC": "C15127"})
+    res(d, "R10", "10k", "BATFET_G", "GND")
 
     d.group("3V3 buck-boost: TPS63802 (VSYS 2.5-4.6 V -> +3V3, 2 A)",
             "Buck-boost, not an LDO: Wi-Fi TX peaks ~355 mA (module datasheet) and the cell falls below 3.4 V (SPEC §3).\n"
@@ -247,17 +258,18 @@ def build(d):
     cap(d, "C12", "1u", "+3V3_UI", "GND")
 
     d.group("I2C + open-drain pull-ups (always-on +3V3)",
-            "SDA/SCL 4.7k: BQ25180 0x6A, MAX17048 0x36, LIS2DW12 0x19 at 400 kHz (SPEC §6).\n"
+            "SDA/SCL 2.2k: BQ25180 0x6A, MAX17048 0x36, LIS2DW12 0x19 at 400 kHz (SPEC §6): ~205 ns rise (30-70 %)\n"
+            "with ~110 pF (4.7k gave 438 ns > 300 ns); 1.3 mA sink at VOL 0.4 V (fast mode allows 3 mA).\n"
             "Must stay on the always-on rail: the MAX17048 reads a low bus as 'disconnected' and sleeps.")
-    res(d, "R6", "4.7k", "+3V3", "I2C_SDA")
-    res(d, "R7", "4.7k", "+3V3", "I2C_SCL")
+    res(d, "R6", "2.2k", "+3V3", "I2C_SDA")
+    res(d, "R7", "2.2k", "+3V3", "I2C_SCL")
     res(d, "R8", "10k", "+3V3", "CHG_INT_N")
     res(d, "R9", "10k", "+3V3", "FG_ALRT_N")
 
     d.group("Mounting holes and fiducials",
-            "H1 (18.75, 24) support hole; H2-H4 tab clamp holes (-3.5, 5.5) (-3.5, 14) (65.5, 5.5), plated, to GND (SPEC §2.1).\n"
-            "H5 (65.5, 14) is on the board only, not yet in this schematic. 3 top fiducials.")
-    for i in range(1, 5):
+            "H1 (18.75, 24) support hole; H2-H5 tab clamp holes (-3.5, 5.5) (-3.5, 14) (65.5, 5.5) (65.5, 14), plated, to\n"
+            "GND (SPEC §2.1). H2-H5 carry an SMT M2 standoff, fitted by hand (no LCSC part fits the 6 mm tab). 3 fiducials.")
+    for i in range(1, 6):
         d.add(f"H{i}", "Mechanical:MountingHole_Pad", "M2", "MountingHole:MountingHole_2.2mm_M2_Pad_Via",
               pins={"1": "GND"}, in_bom=False)
     for i in range(1, 4):

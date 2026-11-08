@@ -1,0 +1,108 @@
+{
+ "entries": [
+  {
+   "correction": {
+    "dx": 0.0,
+    "dy": 2.5501,
+    "mirror": false,
+    "rot": 0.0
+   },
+   "ee": {
+    "key": "ee-sha1:f2d63b890d67b89b",
+    "title": "BULETM-SMD_ESP32-S3-MINI-1-N8"
+   },
+   "fit": {
+    "alternatives": [
+     {
+      "conflicts": 44,
+      "dx": 0.0,
+      "dy": 2.5501,
+      "equivalent": false,
+      "matched": 2,
+      "mirror": true,
+      "names": 0,
+      "rot": 0.0
+     },
+     {
+      "conflicts": 56,
+      "dx": 0.0001,
+      "dy": 2.55,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": false,
+      "names": 0,
+      "rot": 90.0
+     },
+     {
+      "conflicts": 56,
+      "dx": 0.0001,
+      "dy": 2.55,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": true,
+      "names": 0,
+      "rot": 90.0
+     },
+     {
+      "conflicts": 56,
+      "dx": -0.0001,
+      "dy": 2.55,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": false,
+      "names": 0,
+      "rot": 270.0
+     },
+     {
+      "conflicts": 56,
+      "dx": -0.0001,
+      "dy": 2.55,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": true,
+      "names": 0,
+      "rot": 270.0
+     },
+     {
+      "conflicts": 58,
+      "dx": 0.0,
+      "dy": 2.5499,
+      "equivalent": false,
+      "matched": 2,
+      "mirror": true,
+      "names": 0,
+      "rot": 180.0
+     },
+     {
+      "conflicts": 60,
+      "dx": 0.0,
+      "dy": 2.5499,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": false,
+      "names": 0,
+      "rot": 180.0
+     }
+    ],
+    "matched": 60,
+    "method": "number",
+    "rms": 0.025,
+    "score": 60
+   },
+   "fitted": "2026-11-08",
+   "kicad": {
+    "fpid": "RF_Module:ESP32-S2-MINI-1",
+    "pad_hash": "sha1:6c6e38ff0232848f"
+   },
+   "reasons": [
+    "fits by pad numbers: 60/60 matched (13 more with numbers KiCad does not have), rms 0.025 mm",
+    "rot 90, 180, 270 also land every pad, on other nets; ruled out by pad numbers"
+   ],
+   "status": "auto",
+   "tool": "jlcplace 0.2.1",
+   "verdict": "green",
+   "verifications": []
+  }
+ ],
+ "lcsc": "C3013941"
+}

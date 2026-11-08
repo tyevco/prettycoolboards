@@ -1,0 +1,68 @@
+{
+ "entries": [
+  {
+   "correction": {
+    "dx": 0.0,
+    "dy": 0.0,
+    "mirror": false,
+    "rot": 180.0
+   },
+   "ee": {
+    "key": "ee-sha1:1f1f56c450245cb8",
+    "title": "SOT-23-6_L2.9-W1.6-P0.95-LS2.8-BR"
+   },
+   "fit": {
+    "alternatives": [
+     {
+      "conflicts": 4,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": false,
+      "matched": 2,
+      "mirror": true,
+      "names": 0,
+      "rot": 0.0
+     },
+     {
+      "conflicts": 6,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": false,
+      "names": 0,
+      "rot": 0.0
+     },
+     {
+      "conflicts": 6,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": true,
+      "names": 0,
+      "rot": 180.0
+     }
+    ],
+    "matched": 6,
+    "method": "number",
+    "rms": 0.2125,
+    "score": 49
+   },
+   "fitted": "2026-11-08",
+   "kicad": {
+    "fpid": "Package_TO_SOT_SMD:SOT-23-6",
+    "pad_hash": "sha1:9578321e9ecef718"
+   },
+   "reasons": [
+    "rot 0 also lands every pad, on other nets; ruled out by pad numbers",
+    "rms 0.213 mm: the land patterns differ (every pad lands)"
+   ],
+   "status": "auto",
+   "tool": "jlcplace 0.2.1",
+   "verdict": "yellow",
+   "verifications": []
+  }
+ ],
+ "lcsc": "C2681320"
+}

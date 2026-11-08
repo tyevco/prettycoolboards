@@ -14,8 +14,8 @@ change the Python and rebuild.
 | `schplace.py` | The placer and router behind `schgen`: clusters, anchor ICs, satellite parts placed next to the pin they serve, and an orthogonal grid maze router that draws every wire |
 | `netlist_diff.py` | Proves two KiCad netlists are electrically identical (same nets, same `(ref, pin)` members, same component fields). It is the gate for any generator change |
 | `pcbgen.py` | Builds a `.kicad_pcb` from the KiCad netlist through the `pcbnew` API: footprints linked to symbols, outline, zones, keepouts, fills, and Specctra DSN/SES I/O for Freerouting |
-| `fab.py` | Gerbers, drill files, and the JLCPCB BOM |
-| `jlc_cpl.py` | JLCPCB CPL: per-LCSC-part rotation/origin corrections fitted to the EasyEDA footprints, and a simulation of JLC's placement of every row that stops the release if a pad lands off copper |
+| `fab.py` | Gerbers, drill files, and the JLCPCB BOM (the CPL comes from jlcplace) |
+| `jlcplace_gate.py` | The release gate around [jlcplace](https://github.com/tyevco/jlcplace): `jlcplace cpl` writes the JLCPCB CPL, `jlcplace check` simulates JLC's placement of every row with JLC's own EasyEDA footprints over the Gerbers, and the release refuses on any red row. Also turns the yellow rows and the preview checklist into ORDER-NOTES lines. Replaces the former `jlc_cpl.py` (see below) |
 
 ## Wiring rule
 
@@ -70,6 +70,7 @@ schematic.
 * poppler-utils (`pdftoppm`) for `--render`
 * Java 21 + [Freerouting](https://github.com/freerouting/freerouting) 2.1.x (optional, for autorouting)
 * Python 3.10+ (pytest for the tests)
+* [jlcplace](https://github.com/tyevco/jlcplace) >= 0.2.1 in the same venv (the release gate; `pip install -e ~/jlcplace`)
 
 ## Flow
 
@@ -81,7 +82,43 @@ design/sheets/*.py ──schgen + schplace──▶ kicad/*.kicad_sch ──kica
                         layout.py ──pcbgen──▶ kicad/*.kicad_pcb ──DSN──▶ Freerouting ──SES──▶ routed board
                                                                                                 │
                                                      release.py: DRC + schematic parity ◀───────┘──▶ fab outputs
+                                                                 │
+                                         gerbers.zip + BOM ──jlcplace cpl──▶ CPL ──jlcplace check──▶ gate
 ```
 
 ERC and DRC run through `kicad-cli` on every build, and their reports are
 written next to the outputs.
+
+## JLC placement gate (jlcplace)
+
+**Required for every board's release.** A fab package does not count as done until
+[jlcplace](https://github.com/tyevco/jlcplace) (>= 0.2.1, [docs](https://tyevco.github.io/jlcplace/)) has checked its
+CPL: red rows block. `release.py` runs it through `jlcplace_gate.py`, after the DRC/parity gate and after writing
+`gerbers.zip` and the BOM:
+
+```sh
+jlcplace cpl   BOARD --db DB --bom BOM --gerbers gerbers.zip -o CPL          # rows from the Gerbers' (0, 0); refuses on red
+jlcplace check BOARD CPL --db DB --bom BOM --gerbers gerbers.zip     --report fab/<board>/jlcplace-report.html --checklist fab/<board>/jlcplace-checklist.md
+```
+
+* Any red row, or a red run finding (an origin mismatch between the CPL and the Gerbers, Gerbers that are not this
+  board's), refuses the package; `--force` writes a REVIEW-ONLY one. A board without parts is checked with an empty
+  CPL (nothing on it may need placing, and its Gerbers must match the board).
+* A second `jlcplace check` without `--db` cross-checks the stored corrections against the EasyEDA records: a row the
+  records call red is red for the gate unless a human decision in the DB (manual, preview- or board-verified) accepts
+  it. jlcplace 0.2.1 alone lets a stored *auto* correction vouch for a row whose pins land on other nets.
+* The yellow rows and the preview checklist go into `ORDER-NOTES.md`; `jlcplace-checklist.md` is the list to work
+  through in JLC's placement preview.
+* `DB` is the project's committed correction database (caliper: `caliper/hardware/design/jlcplace-db/`): derived
+  numbers only (rot, dx, dy, verdicts, verifications). `release.py --refit-jlc` runs `jlcplace fetch` (network,
+  rate-limited) and `jlcplace fit --db` after a part is added or changed. Record preview and datasheet decisions with
+  `jlcplace confirm ... --db DB` and commit them.
+* `jlcplace check` and `cpl` read the EasyEDA record cache (`~/.cache/jlcplace`) and download nothing.
+* `jlcplace-report.html` (and `--overlay` images) draw EasyEDA pad outlines from the JLCEDA/EasyEDA Official Library:
+  for local review only. They are git-ignored; never commit or publish them.
+* Install: `pip install -e ~/jlcplace` into the venv that runs `release.py` (WSL: `~/.venvs/dial-me-spinner`).
+  `jlcplace_gate.py` finds the executable next to that Python, else on `PATH`, or takes `$JLCPLACE`.
+
+The former `jlc_cpl.py` (a pad-number fit and an "every pad on copper" simulation, with its EasyEDA-derived table
+`jlc_offsets.json`) is retired: jlcplace wrote the same rows (to 0.5 µm, the same angles) on the caliper slider and
+also checks nets, pin names, polarity, the Gerbers' origin, the BOM and the bottom-side reading.

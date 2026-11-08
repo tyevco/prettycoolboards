@@ -3,6 +3,7 @@
 #   bash caliper/hardware/mechanical/run_all.sh
 # The FEA runs on the Windows Python with the print-stress skill, after this script (it reads step/):
 #   py fea_jaw.py          # moving jaw          -> fea_jaw_output.txt, renders/fea_jaw.png
+#   py fea_inside_jaw.py   # moving inside jaw   -> fea_inside_jaw_output.txt (old vs RF-relieved outline)
 #   py fea_slider.py       # body + board        -> fea_slider_output.txt, renders/fea_body.png
 # then run `$PY calcs.py` again so calcs_output.txt quotes the new FEA numbers.
 set -eu

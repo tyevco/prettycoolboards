@@ -1,0 +1,47 @@
+{
+ "entries": [
+  {
+   "correction": {
+    "dx": 0.0708,
+    "dy": 0.0,
+    "mirror": false,
+    "rot": 180.0
+   },
+   "ee": {
+    "key": "ee-sha1:0bd81b10a8a6782e",
+    "title": "SOT-23_L2.9-W1.3-P1.90-LS2.4-BR"
+   },
+   "fit": {
+    "alternatives": [
+     {
+      "conflicts": 2,
+      "dx": 0.0708,
+      "dy": 0.0,
+      "equivalent": false,
+      "matched": 1,
+      "mirror": true,
+      "names": 0,
+      "rot": 0.0
+     }
+    ],
+    "matched": 3,
+    "method": "number",
+    "rms": 0.2003,
+    "score": 57
+   },
+   "fitted": "2026-11-08",
+   "kicad": {
+    "fpid": "Package_TO_SOT_SMD:SOT-23",
+    "pad_hash": "sha1:1e861832ef1a535f"
+   },
+   "reasons": [
+    "rms 0.200 mm: the land patterns differ (every pad lands)"
+   ],
+   "status": "auto",
+   "tool": "jlcplace 0.2.1",
+   "verdict": "yellow",
+   "verifications": []
+  }
+ ],
+ "lcsc": "C15127"
+}

@@ -1,0 +1,68 @@
+{
+ "entries": [
+  {
+   "correction": {
+    "dx": 0.0,
+    "dy": 0.0,
+    "mirror": false,
+    "rot": 0.0
+   },
+   "ee": {
+    "key": "ee-sha1:9342ce3922c5b1dc",
+    "title": "SW-SMD_L3.9-W3.0-P4.45"
+   },
+   "fit": {
+    "alternatives": [
+     {
+      "conflicts": 0,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": true,
+      "matched": 2,
+      "mirror": true,
+      "names": 0,
+      "rot": 180.0
+     },
+     {
+      "conflicts": 2,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": true,
+      "matched": 0,
+      "mirror": true,
+      "names": 0,
+      "rot": 0.0
+     },
+     {
+      "conflicts": 2,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": true,
+      "matched": 0,
+      "mirror": false,
+      "names": 0,
+      "rot": 180.0
+     }
+    ],
+    "matched": 2,
+    "method": "number",
+    "polar": false,
+    "rms": 0.0401,
+    "score": 87
+   },
+   "fitted": "2026-11-08",
+   "kicad": {
+    "fpid": "Button_Switch_SMD:SW_SPST_TS-1088-xR020",
+    "pad_hash": "sha1:94ea0934d6806d60"
+   },
+   "reasons": [
+    "fits by pad numbers: 2/2 matched, rms 0.040 mm"
+   ],
+   "status": "auto",
+   "tool": "jlcplace 0.2.1",
+   "verdict": "green",
+   "verifications": []
+  }
+ ],
+ "lcsc": "C720477"
+}

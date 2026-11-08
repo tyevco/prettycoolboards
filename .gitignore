@@ -26,3 +26,7 @@ node_modules/
 **/firmware/sdkconfig
 **/firmware/sdkconfig.old
 **/firmware/test/host/build/
+# jlcplace HTML report / overlays: they draw EasyEDA pad outlines (JLCEDA/EasyEDA Official Library);
+# for local review only, never published (jlcplace README, "Data and licensing")
+**/hardware/fab/*/jlcplace-report.html
+**/hardware/fab/*/jlcplace-overlay/

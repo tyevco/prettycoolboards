@@ -124,9 +124,8 @@ def outside_jaw_pts(sign):
 
 
 def moving_inside_jaw_pts():
-    t0, t1, w = P.IJ_TIP_Y0, P.IJ_TIP_Y1, P.IJ_TIP_W
-    yb = P.STEP_Y1 - 0.1
-    return [(-w, t1), (0, t1), (0, t0), (P.STEP_U1, 24.6), (P.STEP_U1, yb), (1.5, yb), (-w, t0)]
+    """Root flank relieved round the antenna corner (RF_CLEAR + IJ_RF_MARGIN), see params.py."""
+    return P.moving_inside_jaw_outline()
 
 
 def fixed_inside_jaw_pts():
@@ -146,8 +145,9 @@ def fixed_jaw(rev="A"):
     s -= box(P.BEAM_X0 - fit, 1.0, -fit, P.BEAM_W + fit, -P.BEAM_T - fit, fit)
     for x, y in P.FJ_BOLTS:
         s -= zcyl(x, y, P.M3_CLR, P.FJ_Z0 - 1, P.FJ_Z1 + 1)
-        # hex nut trap on the back (M3 nut 5.5 AF, 2.4 thick): faces up in the print pose
-        s -= hex_prism(x, y, 5.6, P.FJ_Z0 - 0.01, P.FJ_Z0 + 2.5)
+        # hex nut trap on the back (M3 nut 5.5 AF, 2.4 thick, seated 3.6 deep so the M3 x 10 passes
+        # through it): faces up in the print pose
+        s -= hex_prism(x, y, P.FJ_NUT_TRAP_AF, P.FJ_Z0 - 0.01, P.FJ_Z0 + P.FJ_NUT_TRAP_DEPTH)
     for x, y in P.FJ_DOWELS:
         s -= zcyl(x, y, P.DOWEL_D - (0.05 if rev == "A" else 0.0), P.FJ_Z0 - 1, P.FJ_Z1 + 1)
     return s
@@ -292,7 +292,8 @@ def slider_body_b():
 
 def rf_modifier():
     """Slicer modifier volume: body material within RF_CLEAR (plan) of the antenna area, to be printed in
-    unfilled PA (PAHT) instead of PA-CF (SPEC D4).  The moving inside jaw (u < 6.4) stays PA-CF."""
+    unfilled PA (PAHT) instead of PA-CF (SPEC D4).  The moving inside jaw (u < 6.4) stays PA-CF: its root
+    flank is relieved round the antenna corner instead (params.IJ_RF_MARGIN), so it clears RF_CLEAR."""
     a = P.ANTENNA
     u0, u1 = max(bu(a[0]) - P.RF_CLEAR, P.STEP_U1), bu(a[2]) + P.RF_CLEAR
     return box(u0, u1, a[1] - P.RF_CLEAR, a[3] + P.RF_CLEAR, P.Z_BACK, P.Z_LID_IN) & slider_body()

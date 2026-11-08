@@ -1,0 +1,70 @@
+{
+ "entries": [
+  {
+   "correction": {
+    "dx": -0.0001,
+    "dy": -0.0001,
+    "mirror": false,
+    "rot": 0.0
+   },
+   "ee": {
+    "key": "ee-sha1:6d0e30fa0fc30d81",
+    "title": "BUZ-SMD_L9.0-W9.0_PKMCS0909E4000-R1"
+   },
+   "fit": {
+    "alternatives": [
+     {
+      "conflicts": 0,
+      "dx": -0.0001,
+      "dy": 0.0001,
+      "equivalent": true,
+      "matched": 2,
+      "mirror": true,
+      "names": 0,
+      "rot": 180.0
+     },
+     {
+      "conflicts": 2,
+      "dx": 0.0001,
+      "dy": -0.0001,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": true,
+      "names": 0,
+      "rot": 0.0
+     },
+     {
+      "conflicts": 2,
+      "dx": 0.0001,
+      "dy": 0.0001,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": false,
+      "names": 0,
+      "rot": 180.0
+     }
+    ],
+    "doubt": "polarity",
+    "matched": 2,
+    "method": "number",
+    "polar": true,
+    "rms": 0.35,
+    "score": 26
+   },
+   "fitted": "2026-11-08",
+   "kicad": {
+    "fpid": "Buzzer_Beeper:Buzzer_Murata_PKMCS0909E",
+    "pad_hash": "sha1:57e1e0869d64f04b"
+   },
+   "reasons": [
+    "polarity decided by pad numbers only (rot 180 also lands both pads, and no pin names or drawn + confirm it): check the polarity mark in JLC's preview",
+    "rms 0.350 mm: the land patterns differ (every pad lands)"
+   ],
+   "status": "auto",
+   "tool": "jlcplace 0.2.1",
+   "verdict": "yellow",
+   "verifications": []
+  }
+ ],
+ "lcsc": "C910763"
+}

@@ -1,0 +1,68 @@
+{
+ "entries": [
+  {
+   "correction": {
+    "dx": 0.0,
+    "dy": 0.0,
+    "mirror": false,
+    "rot": 0.0
+   },
+   "ee": {
+    "key": "ee-sha1:82d652af25bf0c85",
+    "title": "LED-SMD_4P-L2.2-W2.0-P1.00_WS2815C-2020-4P"
+   },
+   "fit": {
+    "alternatives": [
+     {
+      "conflicts": 4,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": true,
+      "names": 0,
+      "rot": 0.0
+     },
+     {
+      "conflicts": 4,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": false,
+      "names": 0,
+      "rot": 180.0
+     },
+     {
+      "conflicts": 4,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": true,
+      "names": 0,
+      "rot": 180.0
+     }
+    ],
+    "matched": 4,
+    "method": "number",
+    "rms": 0.05,
+    "score": 77
+   },
+   "fitted": "2026-11-08",
+   "kicad": {
+    "fpid": "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm",
+    "pad_hash": "sha1:679bd6d4129ecc3e"
+   },
+   "reasons": [
+    "fits by pad numbers: 4/4 matched, rms 0.050 mm",
+    "rot 180 also lands every pad, on other nets; ruled out by pad numbers"
+   ],
+   "status": "auto",
+   "tool": "jlcplace 0.2.1",
+   "verdict": "green",
+   "verifications": []
+  }
+ ],
+ "lcsc": "C52917434"
+}

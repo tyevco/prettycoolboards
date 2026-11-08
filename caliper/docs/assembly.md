@@ -2,12 +2,13 @@
 
 > **Status: rev A is designed, not built.** The order settings below come from the generated fab package
 > (`caliper/hardware/fab/<board>/ORDER-NOTES.md`, written by `release.py`). Nothing has been ordered, assembled or
-> measured; prices and stock are catalogue figures from 2026-11-07. See [SPEC](../hardware/design/SPEC.md) for the
+> measured; prices and stock are catalogue figures from 2026-11-07/08. See [SPEC](../hardware/design/SPEC.md) for the
 > architecture of record and [Schematics and boards §7](electronics.md#_7-layout) for the layout and its DRC status.
 >
-> **Do not order the slider yet.** Its package is **review-only**: the JLC placement check found that the J50 part
-> (C2911931, 0.5K-AX-13PWB) does not fit the Hirose FH12 footprint on the board (its fitting nails would land 1.3 mm
-> off their pads). The scale package is released.
+> Both packages pass `release.py` (2026-11-08): the DRC/parity gate and the **jlcplace placement gate** (§6; slider
+> 101 CPL rows: 0 red, 1 yellow, 100 green; scale: no parts, 0 red). The slider was review-only until J50 got the
+> C2911931 vendor land (SPEC §12). Still designed, not built: buy the display panel and check it (§1), give the
+> machine routing a hand review (§5) and work through the preview checklist (§6) before ordering.
 
 Rev A is two PCBs, a bought display panel, a LiPo cell, a magnetic tape and the printed/brass mechanics
 ([Mechanical design](mechanical.md)).
@@ -19,12 +20,12 @@ Rev A is two PCBs, a bought display panel, a LiPo cell, a magnetic tape and the 
 | Slider PCB + assembly | JLCPCB, `caliper/hardware/fab/slider/` (`gerbers.zip`, `*-BOM-JLCPCB.csv`, `*-CPL-JLCPCB.csv`) | §2 |
 | Scale PCB (no assembly) | JLCPCB, `caliper/hardware/fab/scale/gerbers.zip` | §3 |
 | AS5311-ATST encoder (U30) | in the JLC BOM (LCSC C22459687) | **only 80 pcs at LCSC on 2026-11-07.** If they are gone, order the board with U30 DNP and buy AS5311-ATST (or -ATSU, reel) from Mouser/DigiKey; hand-solder it (TSSOP-20, 0.65 mm) |
-| LCD panel | 1.14 in 240 × 135 ST7789 IPS, 13-pin 0.5 mm FPC, pin order as DisplayModule DM-TFT114-397 §3.1 | **buy it first** and check its drawing: the board needs a 0.5 mm-pitch, 0.3 mm-thick plug-in tail long enough to fold from the glass's −x end back under it into J50 (SPEC §2.1). A different pin order needs `PANEL_PINS` changed in `sheets/ui.py` |
-| LiPo cell | 402535, ~500 mAh, 1S, with a JST-SH 2-pin (SHR-02V-S) plug | lead polarity is not standardised: J2 pin 1 = BAT+ (marked on the bottom silk). Check every pack with a meter before plugging it in. The leads leave the cell's −x end and come over the board's top edge (mechanics: lead channel and plug relief) |
+| LCD panel | 1.14 in 240 × 135 ST7789 IPS, 13-pin 0.5 mm FPC, pin order as DisplayModule DM-TFT114-397 §3.1 | **buy it first** and check its drawing: the board needs a 0.5 mm-pitch, 0.3 mm-thick plug-in tail long enough to fold from the glass's −x end back under it into J50 (SPEC §2.1). J50 is **bottom contact** and the fold turns the tail over, so with the panel lying flat, face up, tail toward −x, the tail's contacts must be on the **face (viewer) side** and its pin 1 on the **+y side** (toward the buttons): J50 pin 1 is at board y 10.5, pin 13 at y 4.5. A different pin order needs `PANEL_PINS` changed in `sheets/ui.py` |
+| LiPo cell | 402535, ~500 mAh, 1S, with a JST-SH 2-pin (SHR-02V-S) plug | lead polarity is not standardised: J2 pin 1 = BAT+ (marked on the bottom silk). Check every pack with a meter before plugging it in: Q1 (a P-FET in the BAT+ lead, SPEC §3) keeps a reversed pack from powering the board, but a reversed pack still does not work. The leads leave the cell's −x end and come over the board's top edge (mechanics: lead channel and plug relief) |
 | Magnetic tape | ams **AS5000-MS10-H075-100** (2.0 mm pole pair) or a generic 2 mm pole-pair encoder tape | slit to **8.0 mm** wide, ≤ 0.60 mm thick with backing (SPEC §7, D2); 172 mm long |
 | Adhesive | 3M 467MP transfer tape (0.05 mm) | tape and scale bonding |
 | Kapton shim | 0.025 mm sheet | 0–0.35 mm per unit under the tape ([Mechanical §7](mechanical.md#_7-setting-the-gaps-assembly-procedure)) |
-| SMT M2 standoffs | 4 × PEM SMTSO-M2-2ET class (2.0 mm tall, OD ≤ 4.0) | for the tab clamp holes H2–H5 (SPEC D3). **Not in the JLC BOM yet** (no LCSC part chosen by the schematic track): fit by hand |
+| SMT M2 standoffs | 4 × PEM SMTSO-M2-2ET class (2.0 mm tall, OD ≤ 4.0; Mouser/DigiKey) | for the tab clamp holes H2–H5 (SPEC D3). **Fitted by hand**, not in the JLC BOM: the only LCSC M2 SMT nuts (SMTSO20x0CTJ, e.g. C2915626 M2 × 2) have a Ø5.6 base, which overhangs the 6 mm tab (the hole is 2.5 mm from its outer edge) |
 | Board clamp hardware | 4 × M2 × 4 low-head screws (tower into the standoffs), 4 × shim washers 2.2 × 4.0 × 0.3 bedded in slow structural epoxy, 4 strips of 0.150 mm steel shim foil (a reusable tool), 1 × **nylon** M2 × 5 for H1 | H1 sits 5 mm from the antenna: no metal screw there. Full mechanical BOM: [Mechanical §11](mechanical.md#_11-hardware-bom) |
 
 ## 2. JLCPCB settings: slider board
@@ -41,8 +42,8 @@ Rev A is two PCBs, a bought display panel, a LiPo cell, a magnetic tape and the 
 | Min via | 0.40 / 0.20 mm (signal), 0.45–0.50 / 0.20–0.25 mm (power/GND) |
 | Mask / silk | green / white, both sides |
 | Remark (paste into the order) | "Flatness: bow/twist ≤ 0.03 mm over the lower 20 mm band (y 0–20, incl. the end tabs), 100 % inspected, reject above. Copper is poured on all four layers there, wherever the routing leaves room, on purpose. Bottom electrode area: mask opened per finger, bare ENIG, no paste." IPC-6012 class 2 allows 0.75 % (0.55 mm here), so this needs JLC to agree (and may need a quote) |
-| Assembly | PCBA, **both sides**: top = everything placed; bottom = U30, C30, C31 only. Alternatively order top-only and hand-solder the three bottom parts |
-| BOM / CPL | `prettycool-caliper-slider-BOM-JLCPCB.csv`, `prettycool-caliper-slider-CPL-JLCPCB.csv`. The CPL angles carry the JLC library corrections from `jlc_offsets.json` (42 parts); every row except J50 passes the placement simulation. Still check every IC and connector in JLC's placement preview |
+| Assembly | PCBA, **both sides**: top = everything placed; bottom = U30, C30, C31 (beam band) and C21, C23 (0402, under the module). Alternatively order top-only and hand-solder the five bottom parts |
+| BOM / CPL | `prettycool-caliper-slider-BOM-JLCPCB.csv`, `prettycool-caliper-slider-CPL-JLCPCB.csv`. The CPL is written by `jlcplace cpl` from the Gerbers' (0, 0) with JLC's EasyEDA rotation/origin corrections (`caliper/hardware/design/jlcplace-db/`) and passes the jlcplace check: 0 red, 1 yellow (BZ50 polarity), 100 green (§6). In JLC's placement preview, work through `jlcplace-checklist.md` (BZ50's polarity, U30's bottom-side reading) and still glance at every IC and connector |
 | Not placed | E40 (the electrode comb is copper, not a part), the 19 test pads, H1–H5, the fiducials. DNP list: see `ORDER-NOTES.md` |
 
 ## 3. JLCPCB settings: scale board
@@ -71,7 +72,8 @@ question.
 2. **Standoffs.** Solder the four SMT M2 standoffs on the H2–H5 top pads (paste + hot air, or iron), square to the
    board. Re-check flatness afterwards.
 3. **Electrical bring-up on the bench**, before any mechanics: USB-C power, rails (TP1–TP7 on the bottom), flash
-   over USB, display on J50 with the panel lying flat, battery on J2 (polarity checked). See [Bring-up](bringup.md).
+   over USB, display on J50 with the panel lying flat, battery on J2 (polarity checked; Q1 blocks a reversed pack,
+   SPEC §3). See [Bring-up](bringup.md).
 4. **Bond the scale and the tape** into the beam with 467MP (scale with the pin jig in its Ø1.0 holes), then shim
    the tape per [Mechanical §7](mechanical.md#_7-setting-the-gaps-assembly-procedure) step 2.
 5. **Fold the display tail** from the glass's −x end back under the glass into J50; bond the glass to the lid ribs.
@@ -84,10 +86,81 @@ question.
 
 ## 5. Open items before an order
 
-* **J50**: change the footprint to the C2911931 land, or the part to one that fits the FH12 land, then re-run
-  `release.py` (the slider package is review-only until its CPL check passes).
+* **J50**: the land is now drawn from the C2911931 vendor drawing (SPEC §12). The vendor drawing and EasyEDA place
+  the fitting nails 0.37 mm apart; the land covers both. Check the panel's tail orientation against J50 (§1).
 * The DRC/parity status and the open layout risks are in [Schematics and boards §7](electronics.md#_7-layout).
   The routing is machine-made and dense: give it a hand review in KiCad before ordering.
-* The SMT standoff, H5 and the new E40 / scale-hole footprints are not in the schematic yet (the board carries them
-  as layout-side edits; SPEC D3/D5).
+* The new E40 / scale-hole footprints are not in the schematic yet (the board carries them as layout-side edits;
+  SPEC D5). H5 is in the schematic; the SMT standoffs are hand-fitted (§1).
 * AS5311 stock (above). The panel's tail length and pin order (buy it first).
+
+## 6. jlcplace placement gate
+
+JLC places every part with its own EasyEDA footprint, at the point and angle the CPL row gives, laid over the Gerbers
+from their own (0, 0). A row that is right for KiCad's footprint can put JLC's part turned, shifted, on the wrong pins
+or reversed. [jlcplace](https://github.com/tyevco/jlcplace) ([docs](https://tyevco.github.io/jlcplace/)) simulates
+exactly that: it puts the EasyEDA pads down at every row over `gerbers.zip` and reports the KiCad pad and net each
+one lands on. It also checks the LCSC part's pin names against the symbol's pin functions, polarity, the BOM against
+the board and the CPL, the Gerbers' origin, and how the bottom-side rotation could be read.
+
+**It is a release gate.** `release.py` runs it on every board after writing the Gerbers and the BOM; a package does
+not count as done until it passes:
+
+1. `jlcplace cpl` writes the slider CPL from the Gerbers' (0, 0), with the corrections stored in
+   `caliper/hardware/design/jlcplace-db/` (one JSON file per LCSC code: derived numbers only, no EasyEDA geometry).
+2. `jlcplace check` checks that CPL with the BOM over `gerbers.zip` and writes `jlcplace-checklist.md` and
+   `jlcplace-report.html` into `fab/<board>/`.
+3. **Any red row, or a red finding about the whole run (an origin mismatch, Gerbers that are not this board's), refuses
+   the package.** `--force` writes a REVIEW-ONLY package instead. The yellow rows and the preview checklist are copied
+   into `ORDER-NOTES.md`.
+4. A second `jlcplace check` without the database cross-checks the stored corrections against the EasyEDA records. In
+   a test with one stored correction turned 180° (U1, the USB ESD array), jlcplace 0.2.1 wrote that row and called it
+   green with `--db` ("numbering accepted by the correction (auto)") although it put VBUS on GND; the records alone call
+   it red. So a row the records call red is red for the gate unless a human decision in the database (manual, preview-
+   or board-verified) accepts it.
+
+The scale has no parts. It is checked with an empty CPL, which is not shipped: nothing on it may need placing, and
+`gerbers.zip` must be this board's, plotted from the aux origin.
+
+`jlcplace-report.html` draws the EasyEDA pad outlines (JLCEDA/EasyEDA Official Library). It is for your own review,
+so it is git-ignored and never published. Open it locally after a release.
+
+**Result 2026-11-08** (jlcplace 0.2.1, KiCad 9.0.9 board):
+
+| Board | Rows | Red | Yellow | Green | Preview checklist |
+|---|---|---|---|---|---|
+| slider | 101 | 0 | 1 | 100 | BZ50 polarity; U30 bottom-side reading |
+| scale | 0 (no parts) | 0 | 0 | 0 | nothing (origin: the Gerbers' (0, 0) is the aux origin) |
+
+* **BZ50** (C910763, piezo): every pad lands as the correction puts it, but EasyEDA's footprint draws no "+" and names
+  no pins, so only the pad numbers decide which way round it goes. Check its polarity mark in JLC's preview.
+* **U30** (AS5311, bottom): green under the bottom-side reading every open tool uses (`jlc-2022`). JLC does not
+  document how it reads a bottom-side angle; under either "+180" reading pin 1 would sit on pad 11. It is the only
+  bottom part that depends on the reading: the other four (C21, C23, C30, C31) are non-polar two-pad capacitors.
+
+No part needed a manual decision (`jlcplace confirm --source manual`): nothing was red. After checking the preview,
+record what it showed in the database, with the CPL that was uploaded, and commit it:
+
+```sh
+jlcplace confirm caliper/hardware/kicad/slider/prettycool-caliper-slider.kicad_pcb --ref BZ50 --ref U30     --db caliper/hardware/design/jlcplace-db --by <name> --source preview     --cpl caliper/hardware/fab/slider/prettycool-caliper-slider-CPL-JLCPCB.csv     --gerbers caliper/hardware/fab/slider/gerbers.zip
+```
+
+(add `--space/--right/--up N` with the keys pressed if a part had to be moved, or `--failed` if it was wrong).
+
+**How to run it** (WSL, the `dial-me-spinner` venv, where jlcplace is installed editable from `~/jlcplace`):
+
+```sh
+cd /mnt/c/source/tyevco/prettycoolboards
+PY=$HOME/.venvs/dial-me-spinner/bin/python
+$PY caliper/hardware/design/release.py                   # both boards: DRC/parity gate, then the jlcplace gate
+$PY caliper/hardware/design/release.py --refit-jlc       # after adding or changing an LCSC part (network):
+                                                         #   jlcplace fetch + jlcplace fit --db jlcplace-db
+
+# the same check by hand (it reads the record cache ~/.cache/jlcplace and downloads nothing)
+cd caliper/hardware
+jlcplace fetch kicad/slider/prettycool-caliper-slider.kicad_pcb --bom fab/slider/prettycool-caliper-slider-BOM-JLCPCB.csv
+jlcplace check kicad/slider/prettycool-caliper-slider.kicad_pcb fab/slider/prettycool-caliper-slider-CPL-JLCPCB.csv     --bom fab/slider/prettycool-caliper-slider-BOM-JLCPCB.csv --gerbers fab/slider/gerbers.zip     --db design/jlcplace-db --report fab/slider/jlcplace-report.html --checklist fab/slider/jlcplace-checklist.md
+```
+
+Exit codes: 0 clean (yellow allowed), 2 red, 3 bad input, 4 a jlcplace bug. `release.py` refuses on 2, and on 3 or 4
+too (the gate did not run).

@@ -39,9 +39,13 @@ def build(d):
     d.add("U10", MCU_SYM, "ESP32-S3-MINI-1-N4R2", MCU_FP, pins=mcu_pins(),
           fields={"MPN": "ESP32-S3-MINI-1-N4R2", "Manufacturer": "Espressif Systems", "LCSC": "C3013941"})
 
-    d.group("3V3 decoupling at the module", "22u + 100n at pad 3 (datasheet Fig. 9-1), < 2 mm, own GND vias")
+    d.group("3V3 decoupling at the module",
+            "Datasheet Fig. 9-1: 22u + 100n at pad 3. C21 100n + C23 10u (0402, 0.5 mm tall) on the BOTTOM, under pad 3,\n"
+            "fed from its escape via, own GND vias (the housing floor is 0.75 mm below there, SPEC §2.1).\n"
+            "C20 22u (0603, 0.8 mm) is the bulk on top below the module, fed through the In2 +3V3 pour.")
     cap(d, "C20", "22u", "+3V3", "GND", rot=270)
     cap(d, "C21", "100n", "+3V3", "GND", rot=0)
+    cap(d, "C23", "10u/6.3V", "+3V3", "GND", rot=0)
 
     d.group("EN reset delay", "R 10k / C 1u (datasheet §9). EN pad on a test point for a manual reset.")
     res(d, "R20", "10k", "+3V3", "MCU_EN")

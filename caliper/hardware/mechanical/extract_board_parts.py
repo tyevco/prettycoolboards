@@ -40,7 +40,7 @@ HEIGHTS = [
     (r"ESP32-S[23]-MINI|ESP32S3.*MINI", 2.55, "Espressif MINI-1: 2.40 +/-0.10 + solder"),
     (r"TSSOP-20|AS5311", 1.20, "JEDEC MO-153 A max"),
     (r"USB_C|TYPE-C|USB-C", 3.30, "HRO TYPE-C-31-M-12: 3.26"),
-    (r"FH12|FPC|FFC", 2.00, "Hirose FH12 0.5 mm FPC: 2.0"),
+    (r"FH12|FPC|FFC|0\.5K-AX", 2.00, "0.5 mm FPC (HDGC 0.5K-AX-13PWB / Hirose FH12): 2.0"),
     (r"JST_SH|SM02B-SRSS", 2.95, "JST SH side entry"),
     (r"TS-1088.*R020", 2.00, "XKB TS-1088-xR020: 2.0"),
     (r"SW_.*3x4|TS-1088|SKRP|SW_SPST", 2.50, "tact, verify"),

@@ -1,0 +1,47 @@
+{
+ "entries": [
+  {
+   "correction": {
+    "dx": 0.0001,
+    "dy": -0.8733,
+    "mirror": false,
+    "rot": 0.0
+   },
+   "ee": {
+    "key": "ee-sha1:a1d83ffc9560a470",
+    "title": "FPC-SMD_13P-P0.50_0.5K-AX-13PWB"
+   },
+   "fit": {
+    "alternatives": [
+     {
+      "conflicts": 12,
+      "dx": -0.0001,
+      "dy": -0.8237,
+      "equivalent": false,
+      "matched": 1,
+      "mirror": true,
+      "names": 0,
+      "rot": 0.0
+     }
+    ],
+    "matched": 13,
+    "method": "number",
+    "rms": 0.0001,
+    "score": 89
+   },
+   "fitted": "2026-11-08",
+   "kicad": {
+    "fpid": "caliper:HDGC_0.5K-AX-13PWB_1x13-1MP_P0.50mm_Horizontal",
+    "pad_hash": "sha1:0e3eb6b0bc2186c0"
+   },
+   "reasons": [
+    "fits by pad numbers: 13/13 matched (2 more with numbers KiCad does not have), rms 0.000 mm"
+   ],
+   "status": "auto",
+   "tool": "jlcplace 0.2.1",
+   "verdict": "green",
+   "verifications": []
+  }
+ ],
+ "lcsc": "C2911931"
+}

@@ -1,0 +1,68 @@
+{
+ "entries": [
+  {
+   "correction": {
+    "dx": 0.0,
+    "dy": 0.0,
+    "mirror": false,
+    "rot": 0.0
+   },
+   "ee": {
+    "key": "ee-sha1:e45b3f8fd119b91b",
+    "title": "R0402"
+   },
+   "fit": {
+    "alternatives": [
+     {
+      "conflicts": 0,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": true,
+      "matched": 2,
+      "mirror": true,
+      "names": 0,
+      "rot": 180.0
+     },
+     {
+      "conflicts": 2,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": true,
+      "matched": 0,
+      "mirror": true,
+      "names": 0,
+      "rot": 0.0
+     },
+     {
+      "conflicts": 2,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": true,
+      "matched": 0,
+      "mirror": false,
+      "names": 0,
+      "rot": 180.0
+     }
+    ],
+    "matched": 2,
+    "method": "number",
+    "polar": false,
+    "rms": 0.0772,
+    "score": 80
+   },
+   "fitted": "2026-11-08",
+   "kicad": {
+    "fpid": "Resistor_SMD:R_0402_1005Metric",
+    "pad_hash": "sha1:24211eb4e460e19a"
+   },
+   "reasons": [
+    "fits by pad numbers: 2/2 matched, rms 0.077 mm"
+   ],
+   "status": "auto",
+   "tool": "jlcplace 0.2.1",
+   "verdict": "green",
+   "verifications": []
+  }
+ ],
+ "lcsc": "C25879"
+}

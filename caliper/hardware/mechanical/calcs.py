@@ -123,6 +123,22 @@ for mat in ("PETG", "PA-CF", "6061-T6"):
 say("Fixed jaw (printed PA-CF in rev A) has the same outline: add the same again for the closed loop.")
 say("Mitigation in rev A: PA-CF body; measure near the jaw root; a constant-force (slip-clutch) roller is a rev B item.")
 
+ij_path = os.path.join(HERE, "fea_inside_jaw_output.txt")
+say()
+say(f"Moving inside jaw (FEA only, fea_inside_jaw.py): {P.IJ_MOVING_Z[1] - P.IJ_MOVING_Z[0]:.1f} thick, tip "
+    f"{P.IJ_TIP_W:g} wide over y {P.IJ_TIP_Y0:g}..{P.IJ_TIP_Y1:g}, {F:g} N in -u on the measuring face; root fixed:")
+if os.path.exists(ij_path):
+    ij = re.findall(r"^RESULT (\S+) face deflection: phase 3 ([\d.]+) um, arc only ([\d.]+) um \(([-+\d.]+) %\), "
+                    r"as built ([\d.]+) um \(([-+\d.]+) %\); ([\d.]+) um/N", open(ij_path).read(), re.M)
+    for mat, d0, d1, p1, d2, p2, k in ij:
+        say(f"  {mat:<6} phase 3 {float(d0):5.1f} um; RF arc alone {float(d1):5.1f} um ({p1} %); as built (arc + root from "
+            f"u {P.IJ_ROOT_U0:g}) {float(d2):5.1f} um ({p2} %) = {float(k):4.1f} um/N -> {float(k) * 6:4.0f} um over a 6 N spread")
+    say("  (datasheet E, no FDM knock-down.)  The RF relief costs no stiffness: the wider root more than pays for the")
+    say("  scallop.  But the inside jaw is several times as compliant as the outside one: inside readings need a light,")
+    say("  steady touch, and the inside-jaw error is NOT inside a 10 um share of the budget (TVP, docs section 13).")
+else:
+    say("  (fea_inside_jaw_output.txt missing: run `py fea_inside_jaw.py`)")
+
 
 
 def fea_slider():
@@ -390,6 +406,24 @@ if FS:
         " board never reaches the cell.")
 else:
     say("  (fea_slider_output.txt missing: run `py fea_slider.py`)")
+
+# 9. Fixed-jaw bolts -----------------------------------------------------------
+head(9, "Fixed-jaw bolts (M3 into a hex nut trap)")
+end = P.FJ_Z1 - P.FJ_SCREW_L
+seat = P.FJ_Z0 + P.FJ_NUT_TRAP_DEPTH
+web = (-P.BEAM_T - 0.05) - seat
+say(f"Block z {P.FJ_Z0:g}..{P.FJ_Z1:g} ({P.FJ_Z1 - P.FJ_Z0:.1f} thick); M3 x {P.FJ_SCREW_L:g}, head on the front face, "
+    f"end at z {end:+.2f}.")
+say(f"Nut trap {P.FJ_NUT_TRAP_AF} AF x {P.FJ_NUT_TRAP_DEPTH} deep from the back (was 2.5): nut seat z {seat:+.2f}, "
+    f"nut ({P.NUT_M3_M} thick) to z {seat - P.NUT_M3_M:+.2f}.")
+for m, L in ((P.NUT_M3_M, P.FJ_SCREW_L), (2.15, P.FJ_SCREW_L - 0.29), (P.NUT_M3_M, P.FJ_SCREW_L - 0.29)):
+    e = P.FJ_Z1 - L
+    say(f"  nut m {m:.2f}, screw {L:.2f} long: engaged {min(m, seat - e):.2f} of {m:.2f} mm "
+        f"({min(m, seat - e) / 0.5:.1f} threads), screw end {e - P.FJ_Z0:.2f} under the back face")
+say(f"  (ISO 4032 m 2.15-2.40; M3 x 10 length js15 +/-0.29.)  The old 2.5 deep trap engaged "
+    f"{min(P.NUT_M3_M, P.FJ_Z0 + 2.5 - end):.2f} mm; an M3 x 12 would stand {P.FJ_Z0 - (P.FJ_Z1 - 12.0):.1f} proud of the back.")
+say(f"Web between the trap floor and the beam slot (z {-P.BEAM_T - 0.05:+.2f}): {web:.2f} mm, in compression against the")
+say("beam's back face (the nut clamps block-beam-block; nothing bends it).  It prints over the beam-slot bridge (section 8 of the docs).")
 
 with open(os.path.join(HERE, "calcs_output.txt"), "w", newline="\n") as f:
     f.write("\n".join(OUT).lstrip() + "\n")

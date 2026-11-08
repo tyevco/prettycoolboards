@@ -27,6 +27,13 @@ What matters for accuracy is the force *variation*: a thumb gives 2-8 N, so the 
 Fixed jaw (printed PA-CF in rev A) has the same outline: add the same again for the closed loop.
 Mitigation in rev A: PA-CF body; measure near the jaw root; a constant-force (slip-clutch) roller is a rev B item.
 
+Moving inside jaw (FEA only, fea_inside_jaw.py): 2.4 thick, tip 3 wide over y 31..37, 5 N in -u on the measuring face; root fixed:
+  PETG   phase 3 128.0 um; RF arc alone 141.6 um (+10.6 %); as built (arc + root from u 0.5)  98.3 um (-23.2 %) = 19.7 um/N ->  118 um over a 6 N spread
+  PA-CF  phase 3  52.0 um; RF arc alone  57.5 um (+10.6 %); as built (arc + root from u 0.5)  39.9 um (-23.2 %) =  8.0 um/N ->   48 um over a 6 N spread
+  (datasheet E, no FDM knock-down.)  The RF relief costs no stiffness: the wider root more than pays for the
+  scallop.  But the inside jaw is several times as compliant as the outside one: inside readings need a light,
+  steady touch, and the inside-jaw error is NOT inside a 10 um share of the budget (TVP, docs section 13).
+
 2. Slider yaw under the measuring force -> Y-gib preload
 ---------------------------------------------------------
 The workpiece pushes the moving jaw with F = 5.0 N (+x) at y -37.  The equal and opposite drive
@@ -73,7 +80,7 @@ tunnel behind the beam and joins the lower rail to the upper body (the first mod
 screwed only at y 44: a 34 mm cantilever that bent 0.6-1.1 mm in PA-CF and lost the preload).
   PETG   web 3.2 thick, span 22.2 (rail to upper body), load 2.5 N at 6.0 from the rail, 20 mm strip:   0.89 um under the plunger
   PA-CF  web 3.2 thick, span 22.2 (rail to upper body), load 2.5 N at 6.0 from the rail, 20 mm strip:   0.36 um under the plunger
-  FEA (fea_slider.py, whole body from step/slider_body.step, PA-CF, both preloads): plunger seat moves 1.74 um relative to the pads; reaction check 9.43 N
+  FEA (fea_slider.py, whole body from step/slider_body.step, PA-CF, both preloads): plunger seat moves 1.75 um relative to the pads; reaction check 9.43 N
   -> the plunger travel (about 1 mm) is no longer used up by the housing: the preload is held as set.
 
 4. Thermal error (zeroed at T0, read at T0 + dT)
@@ -203,3 +210,14 @@ x1.75 for bending (cantilever calibration in the same run):
   -> without the ledge the worst press (MODE) moved the electrode band 41.5 um toward the scale (28 % of the 0.15 gap) and the button
      129 um; with it, about 1.0 um + the ledge's own 5.7 um.  The ledge is kept.
   battery: cell top z -1.40, 0.80 below the ledge underside; the board never reaches the cell.
+
+9. Fixed-jaw bolts (M3 into a hex nut trap)
+--------------------------------------------
+Block z -8.6..2.5 (11.1 thick); M3 x 10, head on the front face, end at z -7.50.
+Nut trap 5.6 AF x 3.6 deep from the back (was 2.5): nut seat z -5.00, nut (2.4 thick) to z -7.40.
+  nut m 2.40, screw 10.00 long: engaged 2.40 of 2.40 mm (4.8 threads), screw end 1.10 under the back face
+  nut m 2.15, screw 9.71 long: engaged 2.15 of 2.15 mm (4.3 threads), screw end 1.39 under the back face
+  nut m 2.40, screw 9.71 long: engaged 2.21 of 2.40 mm (4.4 threads), screw end 1.39 under the back face
+  (ISO 4032 m 2.15-2.40; M3 x 10 length js15 +/-0.29.)  The old 2.5 deep trap engaged 1.40 mm; an M3 x 12 would stand 0.9 proud of the back.
+Web between the trap floor and the beam slot (z -4.05): 0.95 mm, in compression against the
+beam's back face (the nut clamps block-beam-block; nothing bends it).  It prints over the beam-slot bridge (section 8 of the docs).

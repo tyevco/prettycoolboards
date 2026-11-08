@@ -1,0 +1,68 @@
+{
+ "entries": [
+  {
+   "correction": {
+    "dx": 0.0,
+    "dy": 0.0,
+    "mirror": false,
+    "rot": 270.0
+   },
+   "ee": {
+    "key": "ee-sha1:afe9eacd87cf7ff7",
+    "title": "SOT-23-6_L2.9-W1.6-P0.95-LS2.8-BL"
+   },
+   "fit": {
+    "alternatives": [
+     {
+      "conflicts": 2,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": true,
+      "names": 0,
+      "rot": 90.0
+     },
+     {
+      "conflicts": 4,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": false,
+      "matched": 2,
+      "mirror": true,
+      "names": 0,
+      "rot": 270.0
+     },
+     {
+      "conflicts": 6,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": false,
+      "names": 0,
+      "rot": 90.0
+     }
+    ],
+    "matched": 6,
+    "method": "number",
+    "rms": 0.0116,
+    "score": 84
+   },
+   "fitted": "2026-11-08",
+   "kicad": {
+    "fpid": "Package_TO_SOT_SMD:SOT-23-6",
+    "pad_hash": "sha1:9578321e9ecef718"
+   },
+   "reasons": [
+    "fits by pad numbers: 6/6 matched, rms 0.012 mm",
+    "rot 90 also lands every pad, on other nets; ruled out by pad numbers"
+   ],
+   "status": "auto",
+   "tool": "jlcplace 0.2.1",
+   "verdict": "green",
+   "verifications": []
+  }
+ ],
+ "lcsc": "C7519"
+}

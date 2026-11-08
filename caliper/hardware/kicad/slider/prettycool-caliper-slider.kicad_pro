@@ -360,6 +360,10 @@
       },
       {
         "netclass": "Power",
+        "pattern": "/Power: USB-C, charger, 3V3, rails/VBAT_RAW"
+      },
+      {
+        "netclass": "Power",
         "pattern": "VBAT"
       },
       {

@@ -1,0 +1,68 @@
+{
+ "entries": [
+  {
+   "correction": {
+    "dx": -0.0749,
+    "dy": -0.0001,
+    "mirror": false,
+    "rot": 0.0
+   },
+   "ee": {
+    "key": "ee-sha1:31361c023d2e8c1c",
+    "title": "VSON-10_L3.0-W2.0-P0.50-TL"
+   },
+   "fit": {
+    "alternatives": [
+     {
+      "conflicts": 6,
+      "dx": -0.1151,
+      "dy": -0.0001,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": true,
+      "names": 0,
+      "rot": 0.0
+     },
+     {
+      "conflicts": 8,
+      "dx": -0.0749,
+      "dy": 0.0001,
+      "equivalent": false,
+      "matched": 2,
+      "mirror": true,
+      "names": 0,
+      "rot": 180.0
+     },
+     {
+      "conflicts": 8,
+      "dx": -0.1151,
+      "dy": 0.0001,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": false,
+      "names": 0,
+      "rot": 180.0
+     }
+    ],
+    "matched": 10,
+    "method": "number",
+    "rms": 0.0001,
+    "score": 85
+   },
+   "fitted": "2026-11-08",
+   "kicad": {
+    "fpid": "caliper:Texas_DLA0010A_VSON-HR-10_2x3mm_P0.5mm",
+    "pad_hash": "sha1:11bbc3cd9b737cd0"
+   },
+   "reasons": [
+    "fits by pad numbers: 10/10 matched, rms 0.000 mm",
+    "rot 180 also lands every pad, on other nets; ruled out by pad numbers"
+   ],
+   "status": "auto",
+   "tool": "jlcplace 0.2.1",
+   "verdict": "green",
+   "verifications": []
+  }
+ ],
+ "lcsc": "C2845237"
+}

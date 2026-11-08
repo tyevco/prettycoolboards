@@ -1,0 +1,68 @@
+{
+ "entries": [
+  {
+   "correction": {
+    "dx": 0.0,
+    "dy": -0.0001,
+    "mirror": false,
+    "rot": 270.0
+   },
+   "ee": {
+    "key": "ee-sha1:040ae350d6fcd799",
+    "title": "VSSOP-8_L3.0-W3.0-P0.65-LS4.9-BL"
+   },
+   "fit": {
+    "alternatives": [
+     {
+      "conflicts": 6,
+      "dx": 0.0,
+      "dy": 0.0001,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": false,
+      "names": 0,
+      "rot": 90.0
+     },
+     {
+      "conflicts": 6,
+      "dx": 0.0,
+      "dy": -0.0001,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": true,
+      "names": 0,
+      "rot": 90.0
+     },
+     {
+      "conflicts": 6,
+      "dx": 0.0,
+      "dy": 0.0001,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": true,
+      "names": 0,
+      "rot": 270.0
+     }
+    ],
+    "matched": 8,
+    "method": "number",
+    "rms": 0.0874,
+    "score": 71
+   },
+   "fitted": "2026-11-08",
+   "kicad": {
+    "fpid": "Package_SO:VSSOP-8_3x3mm_P0.65mm",
+    "pad_hash": "sha1:089a602236a065df"
+   },
+   "reasons": [
+    "fits by pad numbers: 8/8 matched, rms 0.087 mm",
+    "rot 90 also lands every pad, on other nets; ruled out by pad numbers"
+   ],
+   "status": "auto",
+   "tool": "jlcplace 0.2.1",
+   "verdict": "green",
+   "verifications": []
+  }
+ ],
+ "lcsc": "C398356"
+}

@@ -41,7 +41,8 @@ two decoupling capacitors, inside y 2.4…9.6 and x 20…41, ≤ 1.30 mm tall** 
 y 1.9…10.1; x 20…41 is where the channel, beam x 28…200, stays under the board over the whole 0–151 mm travel),
 and **the electrodes** (§2.2 table) with their guard copper. Everything else on the bottom over y 0…20 is
 copper under solder mask, nothing proud of it. Bottom in y 22…34: flat test pads only (no parts; the battery is
-1.55 mm below).
+1.55 mm below), **except under the module** (x 1.8…4.4, y 24.8…27.0, left of the battery pocket): the module's
+100 nF + 10 µF decoupling C21 / C23, 0402, ≤ 0.55 mm tall against the 0.75 mm housing-floor gap there (§12).
 
 **Placement table (D4).** Centre coordinates in board mm; rotation in degrees as seen from the top, 0 = the
 footprint's own orientation; the layout script may move a part ≤ 1 mm without a SPEC change if every rule here
@@ -53,7 +54,7 @@ is given in the notes.
 |---|---|---|---|---|---|---|
 | U10 | ESP32-S3-MINI-1-N4R2 | top | 7.85 | 24.25 | 0: antenna end toward +y | footprint origin (draft 8.3); outline x 0.15…15.55, y 14.0…34.0 (antenna area y 29.5…34.0 flush with the top edge, the top-left corner); h 2.55. Not under the glass |
 | — | Antenna keep-out | all 4 layers | | | | **x 0…21.0, y 29.0…34.0: no copper (pads, tracks, vias, zones), no parts, either side.** The footprint has none: layout draws it as a rule area. As routed, the rule area starts at y 29.2: a pour edge in y 29.0…29.2 and the module's own pads are the only copper in x 0…21, y 29.0…34 (§11). See "Antenna" below |
-| J50 | 13p 0.5 mm FPC, 2.0 tall | top | 21.5 | 7.5 | contact row along y, opening toward −x | under the glass's −x end: the panel tail leaves the glass at x 17.5 and folds back under it into J50 (TVP: tail length of the bought panel) |
+| J50 | 13p 0.5 mm FPC, 2.0 tall, HDGC 0.5K-AX-13PWB (C2911931), bottom contact | top | 21.5 | 7.5 | contact row along y at x 23.35, opening toward −x; **pin 1 at y 10.5 (the +y end), pin 13 at y 4.5** | under the glass's −x end: the panel tail leaves the glass at x 17.5 and folds back under it into J50 (TVP: tail length of the bought panel). Land drawn from the vendor drawing (§12). **Tail orientation:** the fold turns the tail over, so the tail's contacts must face the viewer (the display side) when the panel lies flat, face up, tail toward −x; the fold keeps y, so the tail's pin 1 must be on its +y side (toward the buttons) |
 | — | Display glass (on the lid, not the board) | — | 33.0 | 10.0 | landscape, FPC at the −x end | glass 31.0 × 17.6 × 1.6: x 17.5…48.5, y 1.2…18.8; active area 24.91 × 14.86, centre (34.45, 10.0) (shifted 1.45 away from the FPC end, TVP); lid end ribs x 16.15…17.5 and 48.5…49.85 |
 | J1 | USB-C HRO TYPE-C-31-M-12, top-mount | top | 59.3 | 26.5 | opening toward +x | shell x 55.65…63.0 (1.0 mm past the edge), y 22.03…30.97, h 3.26 (mechanics DEV-4: y 26.5) |
 | U1, D1 | USBLC6-2SC6, SMF5.0A | top | 50.2 / 51.3 | 26.3 / 22.0 | | within 5 mm of J1's pads (draft: both at (53.0, 24.0) in x 50.5…55.0, y 21.0…27.0). U1 sits on the USB pair, which runs on B.Cu along y 19.2…19.6 over an In2 GND strip |
@@ -62,13 +63,15 @@ is given in the notes.
 | SW52 | MODE | top | 46.0 | 31.0 | 0 | u 54; courtyard x ≤ 49, clear of J1 (x ≥ 53.7) and the antenna |
 | D50 | WS2812B-2020 RGB LED | top | 51.5 | 32.0 | 0 | light pipe in the lid at u 59.5 |
 | J2 | JST-SH SM02B-SRSS-TB, 2.95 tall | top | 24.5 | 30.6 | mating face toward +y (the top edge) | courtyard x 21.6…27.4: 0.6 clear of the antenna keep-out. The cell's leads come up past the top edge from the cell's −x end (the mechanics add a lead channel and a plug relief beyond y 34) |
-| RT1 | 10 k NTC (TS) | top | 24.5 | 26.5 | | next to J2, over the cell |
+| RT1 | 10 k NTC (TS) | top | 22.3 | 26.75 | | next to J2, over the cell (draft 24.5, 26.5: moved for Q1) |
+| Q1, R10 | AO3401A battery reverse-polarity P-FET, 10 k gate resistor | top | 25.1 / 22.5 | 25.1 / 23.5 | Q1 90: drain pad up, under J2 pin 1 | §3. Q1's drain pad is 2.5 mm below J2 pin 1 (25.0, 28.6) |
 | BZ50 | PKMCS0909E piezo, 1.9 tall | top | 40.0 | 24.3 | 0 | courtyard x 34.75…45.25, y 19.55…29.05; sound port in the lid at u 48 |
 | U60 | LIS2DW12 | top | 30.0 | 23.5 | | ≥ 15 mm from L1 |
 | U2, U3, L1, U5, U6, C1–C6, C8–C12, R3–R5 | charger / buck-boost / rail-switch cluster | top | 56.0 | 11.0 | | inside x 50.5…61.5, y 2.5…20.5 (not under the glass; ≤ 4.2), except C8 (51.3, 1.55) and C10 (49.75, 5.5), held ≤ 2 mm from U5 and up to 0.95 outside the box. L1 and the U3 switch nodes ≥ 10 mm from U40 and the RX feed |
-| U4, C7 | MAX17048 fuel gauge + its VBAT cap | top | 29.6 / 27.0 | 27.2 / 25.9 | | beside J2 (draft: in the cluster above) |
-| R6–R9 | I2C pull-ups (R6, R7) and the CHG_INT_N / FG_ALRT_N pull-ups (R8, R9) | top | 5.1…9.0 | 3.7…5.8 | | below the module, left of the glass (draft: in the cluster) |
-| C20, C21 | module 22 µF / 100 nF | top | 2.75 / 3.28 | 5.5 / 3.7 | | about 20 mm from the module's 3V3 pad, fed through the In2 +3V3 pour: an open item (§11) |
+| U4, C7 | MAX17048 fuel gauge + its VBAT cap | top | 29.6 / 27.37 | 27.2 / 26.3 | C7 90 | beside J2 (draft: in the cluster above); C7 left of U4's VBAT pins 2/3 |
+| R6–R9 | I2C pull-ups (R6, R7, **2.2 k**) and the CHG_INT_N / FG_ALRT_N pull-ups (R8, R9) | top | 5.1…9.0 | 3.7…5.8 | | below the module, left of the glass (draft: in the cluster) |
+| C21, C23 | module 100 nF / 10 µF, 0402 (0.5 mm) | **bottom** | 3.1 | 26.5 / 25.3 | 0; +3V3 pad toward x 2.6 | under the module, either side of pad 3's escape via (2.0, 25.95): their +3V3 pads are 1.9 mm from pad 3 (0.85, 25.95). Pad 3 is 0.45 mm from the left edge and the antenna keep-out is above it, so the top has no closer spot (§12) |
+| C20 | module 22 µF bulk, 0603 | top | ≈ 2.75 | ≈ 5.5 | | below the module, about 20 mm from pad 3, fed through the In2 +3V3 pour (the bulk; the 100 n / 10 µ above do the local decoupling) |
 | U30 | AS5311 TSSOP-20 | **bottom** | 31.0 | 6.0 | long axis along X | body x 27.75…34.25, leads y 2.8…9.2, A ≤ 1.20 |
 | C30, C31 (AS5311 100 nF, 1 µF) | 0402 | **bottom** | 35.45 / 36.5 | 8.6 / 6.0 | (C30 draft: 25.5, 6.0, 8.1 mm from the VDD pins) | inside the channel window above; the MagINC/MagDEC pull-ups and TP30–32 go on top |
 | E40 + comb | electrodes | **bottom copper** | 31.0 | 14.2 | | §2.2 table: x 10.68…51.32, y 10.35…18.05 incl. guard |
@@ -80,7 +83,7 @@ is given in the notes.
 | TP1–7, TP20–23, TP30–32, TP40–42, TP50–51 | 19 × Ø1.0 test pads | **bottom** | 22.5…47.9 | 22.6 / 25.14 | 2.54 grid, two rows | bench bring-up with the board out of the housing; nothing in the antenna keep-out or on the H1 pad. TP22 / TP23 (USB) at x 42.82 / 47.9 in the y 22.6 row |
 | H1 | M2 plated hole, Ø4.4 pad | both | 18.75 | 24.0 | | **nylon** M2 × 4 screw (5 mm from the antenna corner) into a body boss (u 26.75). Support only, see "Board support" |
 | H2, H3 | tab clamp holes | tab | −3.5 | 5.5 / 14.0 | | Ø2.2 plated (GND), top pad Ø4.4 for an SMT M2 standoff; bottom: no exposed copper (0.15 above the beam) |
-| H4, H5 | tab clamp holes | tab | 65.5 | 5.5 / 14.0 | | as H2/H3. **H5 is on the board only**: the schematic has H1–H4 (§11) |
+| H4, H5 | tab clamp holes | tab | 65.5 | 5.5 / 14.0 | | as H2/H3 (H5 is in the schematic since §12) |
 | FID1–3 | fiducials, Ø1 / mask Ø2 | top | (2.0, 1.5), (60.5, 1.2), (33.0, 27.6) | | | outside the antenna keep-out and every courtyard (FID3 draft (60.5, 32.8) was inside J1's courtyard) |
 
 **Antenna (D4).** The ESP32-S3-MINI-1's PCB antenna is the module's top 4.5 mm (the footprint's Fab "Keepout
@@ -95,8 +98,8 @@ the antenna area: the LiPo (the battery pocket moves to board x ≥ 21.5, D4/§7
 H1 screw (nylon), the SMT standoffs. The beam's upper edge is 9.5 mm below the antenna.
 
 **Board support (D3).** The **Z datum is the four tab clamps H2–H5**: each carries an SMT M2 threaded standoff
-(2.0 mm tall, OD ≤ 4.0 mm, reflow-soldered on the top pad; PEM SMTSO-M2-2ET class, the LCSC/JLC part to be chosen
-by the schematics track), and an M2 screw from the tower's top face pulls the standoff's top face up against a
+(2.0 mm tall, OD ≤ 4.0 mm, soldered on the top pad; PEM SMTSO-M2-2ET class, **fitted by hand**: no LCSC/JLC part
+fits, §12), and an M2 screw from the tower's top face pulls the standoff's top face up against a
 clamp face in the tower (the left tower spans u 0.5…7.6, the right u 70.4…77.4 (the roller rim reaches u 78.0); the tabs sit at u 2…8 and
 70…76, y 2.5…16.5, which keeps them 0.65 mm clear of the front-pad pockets and the pad set-screw inserts).
 These four points sit at the ends of the sensor band, 3.5 mm and 12 mm from the AS5311 and electrode rows.
@@ -147,7 +150,7 @@ against coupler 11.0…12.8, TX 12.5…17.5 against reflector 14.0…17.0).
 ```
 USB-C VBUS ─ ESD/TVS ─ BQ25180 (VIN) ─┬─ SYS → VSYS ─┬─ TPS63802 buck-boost → +3V3 (ESP32, LCD, IMU, FG, LED)
                                      │               └─ (VSYS sense via MAX17048, which is on BAT)
-                                     └─ BAT ─ LiPo (JST-SH), MAX17048 CELL
+                                     └─ BAT → VBAT (MAX17048 CELL/VDD) ─ Q1 P-FET (reverse polarity) ─ VBAT_RAW ─ LiPo (JST-SH J2)
 +3V3 ─ TPS22917 load switch U5 (SNS_PWR_EN) → +3V3_SNS (AS5311, capacitive front-end op-amp + VREF)
 +3V3 ─ TPS22917 load switch U6 (SNS_PWR_EN) → +3V3_UI  (ST7789 VDD, WS2812B-2020-V6 RGB LED)
 +3V3 ─ 15 Ω ─ backlight LED (LEDA/LEDK) ─ low-side AO3400A (LCD_BL, PWM)   (≈ 20 mA at the panel's VF 3.0 V / 20 mA rating)
@@ -157,6 +160,28 @@ USB-C VBUS ─ ESD/TVS ─ BQ25180 (VIN) ─┬─ SYS → VSYS ─┬─ TPS638
   SNS_PWR_EN with U5: both rails are on whenever the caliper is awake. Both switches tie QOD to VOUT (fast discharge)
   and use a 1 nF CT for a slow ramp. Before switching off, the firmware drives every signal into those rails low
   (MAG_CSN/MAG_CLK, LCD_*, RGB_DIN) so nothing back-powers through ESD diodes.
+- **Battery reverse-polarity protection (Q1, added 2026-11-08, §12):** a P-MOSFET "ideal diode" in the cell's
+  BAT+ lead: **AO3401A** (Alpha & Omega, LCSC C15127, JLC **Basic**, SOT-23), drain to J2 pin 1 (net VBAT_RAW), source
+  to VBAT, gate to GND through R10 10 k. With a correct cell the body diode conducts first, then VGS = −VBAT turns the
+  channel on; it conducts both ways, so the BQ25180 charges through it. A reversed cell leaves VGS = 0 (off, VDS −4.2 V
+  against −30 V, IDSS ≤ 1 µA). VGS max is ±12 V and the gate never sees more than the cell (≤ 4.4 V), so there is **no
+  zener**. The BQ25180 BAT pin, C3 and the MAX17048 CELL/VDD stay on the protected VBAT side.
+  Datasheet (AO3401A Rev 3.1, Dec 2023): RDS(on) ≤ 60 mΩ at VGS −4.5 V (47 typ), ≤ 85 mΩ at −2.5 V (60 typ), ×1.5 at
+  TJ 125 °C; VGS(th) −0.5…−1.3 V; RθJA ≤ 125 °C/W.
+  **At 0.5 A** (the Wi-Fi peak from a low cell) and a 3.0 V cell (VGS ≈ −3.0 V; the −2.5 V maximum is used as the
+  bound): drop **≤ 43 mV** (≈ 28 mV typical), dissipation **≤ 21 mW** (≈ 14 mW typical), ≈ 3 °C rise; ≤ 64 mV /
+  32 mW at TJ 125 °C. At a full cell (VGS −4.2 V) ≤ 30 mV / 15 mW. Charging at 250 mA: ≤ 21 mV / 5 mW; the charger
+  regulates VBAT at its own pin, so in CC the cell sits up to 21 mV lower and in CV the drop fades with the current.
+  The fuel gauge reads the cell through Q1, so under load it reads up to the same drop low (TVP).
+  **Board copper on top of Q1 (as routed 2026-11-08, estimate):** VBAT runs from Q1's source to U2 BAT / C3 as a
+  0.30 mm track, ≈ 1.7 mm F.Cu, 18.9 mm B.Cu, 10.3 mm In2 (0.5 oz) and ≈ 9 mm F.Cu, with three layer changes on one
+  0.25 mm via each: ≈ 0.09 Ω, so ≈ 45 mV more between the cell and the charger's BAT/SYS path at 0.5 A (hwtools
+  boardcheck + hand trace). The whole system current takes this path when USB is absent. A later layout pass should
+  pre-route VBAT like VBUS (0.5–0.8 mm on the outer layers, ≥ 2 vias per layer change, no 0.5 oz In2 leg); open (§11).
+  **Reversed cell with USB present:** the charger tries to charge; VBAT cannot rise above |VGS(th)| (≈ 0.5–1.3 V)
+  before Q1 turns on into the reversed cell, which keeps VBAT below the BQ25180's VBATSC (1.6–2.0 V), so it stays in
+  trickle charge at IBATSC ≈ 8 mA (SLUSE99C) and times out on its precharge safety timer. Q1 then dissipates
+  ≈ 8 mA × (4.2 + ~1) V ≈ 40 mW in its linear region: harmless. SYS still runs from USB. Not tested (TVP).
 - Use a **buck-boost**, not an LDO: Wi-Fi TX peaks at 355 mA at 3.3 V (module datasheet Table 6-4; ≈ 0.5 A from a
   3.0 V cell with the rest of the load), and an LDO drops out below a ~3.6 V cell.
   TPS63802DLAR (2 A, 11 µA Iq; LCSC C2845237), L = 0.47 µH DFE201612E, feedback 511 k / 91 k (TI Table 10-5;
@@ -263,7 +288,7 @@ The authoritative copy is `nets.py: MCU_PINS`. The constraints behind it:
 
 | Bus | Devices | Notes |
 |---|---|---|
-| I2C (GPIO13 SDA / GPIO14 SCL, 4.7 k to +3V3, 400 kHz) | BQ25180 (0x6A), MAX17048 (0x36), LIS2DW12 (**0x19, SA0 high**) | SA0 has an internal pull-up that cannot be disconnected: a grounded SA0 (0x18) burns 60–170 µA |
+| I2C (GPIO13 SDA / GPIO14 SCL, **2.2 k** to +3V3, 400 kHz; §12) | BQ25180 (0x6A), MAX17048 (0x36), LIS2DW12 (**0x19, SA0 high**) | SA0 has an internal pull-up that cannot be disconnected: a grounded SA0 (0x18) burns 60–170 µA |
 | SPI2 (GPIO33 SCK / GPIO34 MOSI / GPIO35 CS / GPIO36 DC / GPIO37 RST) | ST7789 LCD | 40 MHz, write-only. Panel pin order per DM-TFT114-397 §3.1; connector 0.5K-AX-13PWB (13 P, 0.5 mm, bottom contact) |
 | AS5311 SSI (GPIO7 CLK / GPIO8 DO / GPIO9 CSn) | AS5311 | bit-banged or SPI3, ≤1 MHz |
 
@@ -287,8 +312,8 @@ The authoritative copy is `nets.py: MCU_PINS`. The constraints behind it:
   (metal at y ≥ 41); a battery door replaces the back cover (§11).
 - **RF (D4):** within 5 mm of the antenna area (board x 0.15…15.55, y 29.5…34 with the module as placed; slider u 8.15…23.55) nothing metal and
   nothing carbon-filled: in rev A that means the PA-CF body is opened under and beside the antenna (or the body
-  is printed in unfilled PA/PETG), and the PA-CF moving inside jaw (4.70 mm in plan from the antenna area, clash check RISK) is noted as an
-  RF risk to check. In rev B the 6061 body needs a non-metal window there and the front shell must be printed.
+  is printed in unfilled PA/PETG), and the PA-CF moving inside jaw keeps 5.15 mm in plan from the antenna area: its root flank is relieved on an
+  R 5.15 arc round the antenna corner (it was 4.70 mm, a clash check RISK; docs/mechanical.md §12). In rev B the 6061 body needs a non-metal window there and the front shell must be printed.
 - The slider housing straddles the beam: printed PETG/PA-CF in rev A, CNC 6061 in rev B. Brass gibs with
   M2 set screws + springs set the 0.3 mm (magnetic) and 0.15 mm (capacitive) gaps. The fixed jaw is
   bolted and dowelled to the beam end. The moving jaw is part of the slider housing.
@@ -404,13 +429,18 @@ mechanics and the firmware now do where they differ from the first-draft section
   the D2 window), C8/C10 held ≤ 2 mm from U5, R50/Q50/R51, Q51/R56/R57, FID3 out of J1's courtyard, TP22/TP23 to the
   y 22.6 row. Moves ≤ 1 mm: U10 origin x 7.85, J50 y 7.5, J2 y 30.6, SW20 rotated 90 at y 15.7.
 * **Antenna.** With U10 at x 7.85 the antenna area is x 0.15…15.55; the mechanics' `params.ANTENNA` follows it. The
-  PA-CF moving inside jaw is then 4.70 mm in plan from it (clash check RISK; it was 5.02 against the draft position).
+  PA-CF moving inside jaw was then 4.70 mm in plan from it (clash check RISK; 5.02 against the draft position); since
+  2026-11-08 its root flank is relieved round the antenna corner and it is 5.15 mm away (docs/mechanical.md §12).
   The keep-out rule area on the board starts at y 29.2, not 29.0.
-* **Open layout items:** the module's 22 µF / 100 nF (C20, C21) are about 20 mm from its 3V3 pad (a bottom-side 0402
-  under the pad needs a decision against the 0.75 mm housing-floor gap); USB D+/D- are a B.Cu pair, 62.3 / 64.4 mm,
-  with about 17 mm not directly over a plane (full-speed only); **H5 is on the board only** (the schematic has
-  H1–H4); the SMT M2 standoff has no LCSC part yet; J50's JLC part (C2911931) does not match the FH12 land, so the
-  slider fab package is **review-only**.
+* **Open layout items:** USB D+/D- are a B.Cu pair with part of their length not directly over a plane (full-speed
+  only). The module decoupling, H5, the SMT standoff part and the J50 land were closed on 2026-11-08 (§12). From
+  the hwtools run on the re-routed board (2026-11-08), still open, for the next layout pass: the long, thin VBAT run
+  from Q1 to U2 (≈ 0.09 Ω, §3); U6 (+3V3_UI switch) has no input capacitor of its own (C5 is 12.5 mm away by copper;
+  add a 1 µF at its pin 1 or place it by C5/C6); one VBUS pad pair of J1 reaches U2 before D1 (the router's second
+  feed from A9/B4); CAP_RX is a 60 mm track beside digital lines with its filter (R85/C44) at the far end from GPIO1;
+  the board file carries no stack-up (KiCad falls back to its default); the re-route added a bypass around U1 on
+  each USB line. Backlight: up to ≈ 31 mA through R50 15 Ω at the VF-min / +3V3-max corner against a 20 mA typical
+  rating (R50 18–22 Ω or a firmware duty cap; owner decision).
 * **Mechanics (§7):** closed back web over the beam with the back plungers (u 14 and 64, y 5, 2.5 N each); Y plungers
   u 14 / 24 (4 N each) and the lock u 19 left of the battery pocket; housing end face u 77.4, roller rim u 78.0; the
   end stop is an M2×6 socket screw in a tapped hole; tab clamps use 0.3 mm shim washers bedded in epoxy on 0.150 mm
@@ -421,3 +451,28 @@ mechanics and the firmware now do where they differ from the first-draft section
   corrected against it (no cap zero is kept across sleep); LIVE flag bit 6 REZERO; CSV flags `H P F E Z`; on-flash
   log layout v2 (`log.hdr` + 4 KB `logNNN.bin` segments, docs/firmware.md). These are design choices the owner may
   revisit after bring-up.
+
+## 12. Hardware changes after phase 3 (2026-11-08)
+Designed, not built. Each item is in the schematics (`sheets/*.py`), the routed board and the docs.
+
+| # | Change | Why / numbers |
+|---|---|---|
+| H1 | **Battery reverse-polarity P-FET Q1** (AO3401A, C15127, JLC Basic) between J2 pin 1 (VBAT_RAW) and VBAT, gate to GND through R10 10 k, no zener | User decision. §3: ≤ 43 mV / ≤ 21 mW at 0.5 A (VGS −3.0 V, 85 mΩ max bound); conducts both ways for charging; the charger BAT pin and the MAX17048 stay on VBAT. Q1 at (25.1, 25.1) under J2 pin 1; RT1 moved to (22.3, 26.75), C7 to (27.37, 26.3) |
+| H2 | **I2C pull-ups R6/R7 4.7 k → 2.2 k** (C25879, Basic) | 400 kHz with ≈ 110 pF: rise (30→70 %) 0.847 RC = 205 ns (4.7 k: 438 ns > 300 ns). Sink at VOL 0.4 V ≤ 1.4 mA, inside fast mode's 3 mA and the devices' VOL ratings (ESP32-S3 0.1 VDD at 28 mA; BQ25180 0.4 V at 5 mA; MAX17048 0.4 V at 4 mA; LIS2DW12 per I2C fast mode) |
+| H3 | **J50 land = the C2911931 vendor drawing** (own footprint `caliper:HDGC_0.5K-AX-13PWB_1x13-1MP_P0.50mm_Horizontal`): contacts 0.30 × 1.25 at 0.5 mm, nails 2.00 × 3.00 at x ±4.54, 2.325 behind the contact row | The KiCad FH12 land put the part's nails 1.3 mm off copper. No genuine FH12-13S (C5700671) or Amphenol F32R 13-pin is stocked at LCSC/JLC. EasyEDA's land agrees on the contacts and nail x; its nails sit 0.37 mm nearer the row and still land on this land. Same origin/orientation as the FH12 footprint (contact row at x 23.35 on the board). Pin 1 at y 10.5; the panel tail must have its contacts on the viewer side and pin 1 on +y before the fold (§2.1) |
+| H4 | **Module decoupling under pad 3 on the bottom:** C21 100 nF moved there, C23 10 µF 0402 (C15525, 0.5 mm) added; C20 22 µF stays on top below the module as bulk | C21/C23 +3V3 pads 1.9 mm from pad 3 (C21 was 22.4 mm away on top; C20 stays 20.5 mm). Bottom-side exception in §2.1: x 1.8…4.4, y 24.8…27.0, outside the beam band (y 0…20), the antenna rule area (y ≥ 29.2) and the battery pocket (x ≥ 21.5); 0.55 mm max against the 0.75 mm housing-floor gap. The module has no bottom-side keep-out other than its antenna |
+| H5 | **E40 pins renamed** TX0…TX7 / RX → PHASE0…PHASE7 / RCV (they were already passive) | hwtools boardcheck reads a pin named TXn as a UART transmitter: it flagged E40.TX6 against U10 TXD0 (GPIO43) through R66/R76 as output-to-output (SERIAL_DIRECTION_WIRING). Gone after the rename. E40 stays excluded from the BOM and the position files (symbol `in_bom no`, footprint attributes exclude-from-BOM + exclude-from-pos) |
+| H6 | **H5 in the schematic** (power sheet, `MountingHole_2.2mm_M2_Pad_Via` on GND, linked to the board footprint) | parity: the board no longer carries a board-only part. **SMT M2 standoffs: fitted by hand.** The only LCSC M2 SMT nuts (SMTSO20x0CTJ, e.g. C2915626 M2 × 2, 34 k in stock) have a Ø5.6 base and land: on the 6 mm tab with the hole 2.5 mm from its outer edge they would overhang it, and they exceed the OD ≤ 4.0 the clamp faces assume |
+| H7 | **Silk at the edge:** J1's shell outline (the receptacle overhangs the right edge by 1 mm) and the module outline at the left/top edge are clipped on the instances (`silk.clip_silk_at_edge`) | the four `silk_edge_clearance` warnings are gone; J1 now reports a `lib_footprint_mismatch` (local override) like U10 |
+
+**Gates after these changes (2026-11-08):** `build.py` ERC clean apart from the two listed TPS22917 waivers, wiring
+check passing; `check_contract.py` OK (`nets.MCU_PINS` unchanged), firmware `gen_pins.py --check` up to date. The
+slider was re-placed and re-routed from scratch (`layout.py --route --minutes 8 --attempts 1`: Freerouting left 87
+open, the grid router closed them, then `--finish`). KiCad 9.0.9 DRC + schematic parity: **0 errors, 0 unconnected,
+0 parity**; warnings are 7 `lib_footprint_mismatch` (intended local overrides: E40, U10, J1, H2–H5); KiCad 10.0.8
+agrees (0 errors; 10 warnings, the same plus its own FID1–3 library versions). `release.py` passes for both boards
+and the slider package is **no longer review-only**: every CPL row, J50 included, lands on copper in the JLC
+placement simulation. Mechanics re-extracted (101 part envelopes plus the 4 standoffs, the H1 screw and the JST plug: 107) and `clash_check.py`: 0 clashes. Release gate
+added the same day: `release.py` now writes the CPL with jlcplace (`jlcplace cpl`, corrections in
+`design/jlcplace-db/`) and refuses on any red row of `jlcplace check` (docs: assembly §6). jlcplace 0.2.1: slider
+101 rows, 0 red, 1 yellow (BZ50 polarity: a preview item), 100 green; scale 0 rows, 0 red.

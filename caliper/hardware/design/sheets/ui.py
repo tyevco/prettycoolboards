@@ -8,9 +8,16 @@ This is the common pin order of the 13-pin 1.14in ST7789 glass sold under many p
 check the pin order AND the tail pitch of the panel actually bought (DM's drawing shows a 0.7 mm solder tail; the
 connector here needs a 0.5 mm-pitch, 0.3 mm-thick plug-in tail).
 
-Connector: Hroparts-style 0.5K-AX-13PWB (LCSC C2911931): 13 pins, 0.5 mm, bottom contact, slide lock, 2.0 mm high.
-The footprint used is KiCad's Hirose FH12-13S-0.5SH (same 0.5 mm / 13 + 2 MP class of land pattern; the FH12 itself is
-not stocked at LCSC). Layout must check the pad/nail geometry against the C2911931 drawing before release.
+Connector: HDGC 0.5K-AX-13PWB (LCSC C2911931, Shenzhen Huade co-create "0.5mm FPC (A type) bottom contact"): 13 pins,
+0.5 mm, bottom contact, slide lock, 2.0 mm high. The genuine Hirose FH12-13S-0.5SH(55) (C5700671) and the Amphenol
+F32R-1A7H1-11013 (KiCad has footprints for both) are not stocked at LCSC/JLC (2026-11-08), so the footprint is drawn here
+(footprints() below) from the vendor drawing (0.5K-AX-nPWB, A001, 2016-03-12, "PCB Layout"): 13 signal pads
+0.30 x 1.25 at 0.50 pitch (A = 6.00); two fitting-nail pads 2.00 x 3.00 whose inner edge is 2.54 - 2.00 = 0.54 beyond
+the outer contact centre (centre x = +-4.54) and whose edge nearest the contact row is 1.45 from the contact row's far
+edge (0.20 behind the contact pads: centre 2.325 from the contact row). Checked against the EasyEDA land of C2911931
+(jlcplace): same contact pads and nail x; EasyEDA puts the nail pads 0.37 mm nearer the contact row (centre
+1.953), which still lands inside this land (2.63 of its 3.00 overlap). Pin 1 is at the -x end of the row in the
+footprint (EasyEDA agrees). Bottom contact: the tail's contacts face the board when inserted.
 
 WS2812B-2020-V6 (Worldsemi, LCSC C52917434): LCSC lists 3.3-5.3 V supply, so it runs from +3V3_UI with a 3.3 V DIN
 (VIH 0.7 VDD). Pin order assumed identical to the WS2812B-2020 (KiCad LED:WS2812B-2020: 1 DOUT, 2 VSS, 3 DIN, 4 VDD);
@@ -21,7 +28,9 @@ from sheets.parts import R0603, SOT23, cap, res, testpoints
 
 SHEET = ("ui", "ui.kicad_sch", "Display, buttons, LED, piezo")
 
-FPC_FP = "Connector_FFC-FPC:Hirose_FH12-13S-0.5SH_1x13-1MP_P0.50mm_Horizontal"
+FPC_FP_NAME = "HDGC_0.5K-AX-13PWB_1x13-1MP_P0.50mm_Horizontal"
+FPC_FP = "caliper:" + FPC_FP_NAME
+FPC_DS = "https://www.lcsc.com/datasheet/C2911931.pdf"
 BTN_FP = "Button_Switch_SMD:SW_SPST_TS-1088-xR020"
 BTN_FIELDS = {"MPN": "TS-1088-AR02016", "Manufacturer": "XUNPU", "LCSC": "C720477"}
 FET_FIELDS = {"MPN": "AO3400A", "Manufacturer": "Alpha & Omega Semiconductor", "LCSC": "C20917"}
@@ -43,6 +52,43 @@ PANEL_PINS = {
 }
 
 
+def footprints(fpgen, lib_dir):
+    """J50 land from the HDGC 0.5K-AX-nPWB drawing (module docstring). Origin and orientation follow KiCad's Hirose FH12
+    footprint (contact row at y = -1.85, the FPC entering from +y), so the layout's J50 position and orientation checks
+    hold. Body (drawing, n = 13): C = 10.85 wide over the nail ears, D = 12.15 over the slide lock, 4.40 deep from the
+    contact-side face to the closed lock, 2.0 high; the contact tails stand 0.90 out of the body; the lock travels
+    about 1.6 toward the opening when open."""
+    pcbnew = fpgen.pcbnew
+    fp = fpgen.Footprint(
+        FPC_FP_NAME,
+        "HDGC 0.5K-AX-13PWB (LCSC C2911931) FFC/FPC connector, 13 pins, 0.5 mm pitch, bottom contact, slide lock, "
+        "2.0 mm high. Land from the vendor drawing 0.5K-AX-nPWB (A001): contacts 0.30 x 1.25, nails 2.00 x 3.00. "
+        + FPC_DS,
+        "FPC FFC 0.5mm 13P bottom contact HDGC 0.5K-AX-13PWB",
+    )
+    yc = -1.85                       # contact row centre
+    for i in range(13):
+        fp.smd(str(i + 1), round(-3.0 + 0.5 * i, 3), yc, 0.30, 1.25, shape="rect")
+    y_nail = round(yc + 0.625 + 0.20 + 1.50, 4)          # 1.45 from the contact pads' far edge, 3.00 tall
+    for x in (-4.54, 4.54):
+        fp.smd("MP", x, y_nail, 2.00, 3.00, shape="rect")
+    rear = yc + 0.45                 # body face on the contact side (tails stand 0.90 out of it)
+    front = rear + 4.40              # closed slide lock
+    fp.line(pcbnew.F_Fab, -5.425, rear, 5.425, rear, 0.1)
+    fp.line(pcbnew.F_Fab, -5.425, rear, -5.425, front - 1.3, 0.1)
+    fp.line(pcbnew.F_Fab, 5.425, rear, 5.425, front - 1.3, 0.1)
+    fp._rect(pcbnew.F_Fab, -6.075, front - 1.3, 6.075, front, 0.1)
+    fp.line(pcbnew.F_Fab, -3.0, rear, -2.75, rear + 0.35, 0.1)       # pin 1 mark
+    fp.line(pcbnew.F_Fab, -2.75, rear + 0.35, -2.5, rear, 0.1)
+    # silk: the slide lock's front edge and its corners, clear of the pads
+    fp.line(pcbnew.F_SilkS, -6.19, front + 0.11, 6.19, front + 0.11)
+    fp.line(pcbnew.F_SilkS, -6.19, front + 0.11, -6.19, y_nail + 1.5 + 0.2)
+    fp.line(pcbnew.F_SilkS, 6.19, front + 0.11, 6.19, y_nail + 1.5 + 0.2)
+    fp.pin1_dot(-3.0, yc - 0.625 - 0.55)
+    fp.courtyard_rect(-6.33, round(yc - 0.625 - 0.25, 3), 6.33, round(front + 1.6 + 0.25, 3))
+    fp.save(lib_dir)
+
+
 def build(d):
     d.sheet(*SHEET)
 
@@ -55,9 +101,9 @@ def build(d):
     cap(d, "C51", "100n", "+3V3_UI", "GND")
     d.add("J50", "Connector_Generic_MountingPin:Conn_01x13_MountingPin", "LCD_FPC", FPC_FP,
           pins={**{str(k): v for k, v in PANEL_PINS.items()}, "MP": "GND"},
-          datasheet="https://www.lcsc.com/datasheet/C2911931.pdf",
+          datasheet=FPC_DS,
           description="FFC/FPC connector 13P 0.5 mm, bottom contact, slide lock, 2.0 mm high",
-          fields={"MPN": "0.5K-AX-13PWB", "Manufacturer": "Hroparts", "LCSC": "C2911931"})
+          fields={"MPN": "0.5K-AX-13PWB", "Manufacturer": "HDGC (Shenzhen Huade co-create)", "LCSC": "C2911931"})
 
     d.group("Backlight: low-side N-MOSFET on LCD_BL (PWM)",
             "+3V3 -> R50 15R -> LEDA, LEDK -> Q50 -> GND. 1 white LED, VF 3.0 V (2.9-3.1) at 20 mA.\n"

@@ -164,3 +164,32 @@ def test_yaw_preload_margin():
     lever = sum(P.H_U1 - u for u in P.YGIB_PLUNGERS_U)
     p_end = P.JAW_FORCE * (37.0 + 35.0) / lever
     assert P.P_Y / p_end >= 1.25
+
+
+def test_rf_carbon_filled_jaws_clear_the_antenna():
+    """SPEC D4: the PA-CF moving inside jaw (relieved root flank) and the fixed jaw at R = 0 keep
+    >= RF_CLEAR from the antenna area in plan; the relief leaves the measuring tip alone."""
+    a = P.ANTENNA
+    ant = M.box(P.bu(a[0]), P.bu(a[2]), a[1], a[3], -60, 60)
+    jaw = M.prism(M.moving_inside_jaw_pts(), *P.IJ_MOVING_Z)
+    assert jaw.distance_to(ant) >= P.RF_CLEAR - 1e-6
+    assert M.fixed_jaw().distance_to(ant) >= P.RF_CLEAR - 1e-6
+    pts = M.moving_inside_jaw_pts()
+    for p in [(-P.IJ_TIP_W, P.IJ_TIP_Y1), (0, P.IJ_TIP_Y1), (0, P.IJ_TIP_Y0), (-P.IJ_TIP_W, P.IJ_TIP_Y0)]:
+        assert p in pts
+    # the scallop stays shallow, and the root is not narrower than the phase-3 one
+    old = M.prism(P.moving_inside_jaw_outline(rf_relief=False), *P.IJ_MOVING_Z)
+    assert (old - jaw).volume <= (jaw - old).volume
+
+
+def test_fixed_jaw_bolt_engages_the_nut():
+    """The M3 x 10 from the front face runs through the whole nut, ends under the back face, and the
+    trap floor keeps a web over the beam slot."""
+    end = P.FJ_Z1 - P.FJ_SCREW_L
+    seat = P.FJ_Z0 + P.FJ_NUT_TRAP_DEPTH
+    assert seat - end >= P.NUT_M3_M - 1e-9                 # full nut engaged (nominal)
+    assert end - P.FJ_Z0 >= 0.5                             # not proud of the back face
+    assert seat - P.NUT_M3_M >= P.FJ_Z0 + 0.5               # nut fully inside the trap
+    assert -P.BEAM_T - 0.05 - seat >= 0.8                   # web between trap floor and beam slot
+    fj = M.fixed_jaw()
+    assert fj.is_valid

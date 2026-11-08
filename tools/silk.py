@@ -69,15 +69,17 @@ def _edge_clear(box, pts, margin):
     return True
 
 
-def clip_footprint_silk(board, edge_pts, outline, margin=0.25):
+def clip_footprint_silk(board, edge_pts, outline, margin=0.25, refs=None):
     """Shorten footprint silk lines that run past (or too close to) the board edge, e.g. a connector overhanging
-    the outline. Returns the number of lines changed."""
+    the outline. Returns the number of lines changed. refs: only these footprints (default: all)."""
     def good(p):
         x, y = pcbnew.ToMM(p.x), pcbnew.ToMM(p.y)
         return outline.Contains(p) and _edge_clear((x, y, x, y), edge_pts, margin)
 
     n = 0
     for fp in board.GetFootprints():
+        if refs is not None and fp.GetReference() not in refs:
+            continue
         for g in list(fp.GraphicalItems()):
             if g.GetLayer() not in (pcbnew.F_SilkS, pcbnew.B_SilkS) or not isinstance(g, pcbnew.PCB_SHAPE) \
                     or g.GetShape() != pcbnew.SHAPE_T_SEGMENT:
@@ -103,6 +105,14 @@ def clip_footprint_silk(board, edge_pts, outline, margin=0.25):
                 g.SetStart(inside)
             n += 1
     return n
+
+
+def clip_silk_at_edge(board, refs, margin=0.25):
+    """clip_footprint_silk for the named footprints only (the edited instances show up as a local override, a
+    lib_footprint_mismatch warning, which is the intended trade for a silk line that would otherwise cross the edge)."""
+    outline = pcbnew.SHAPE_POLY_SET()
+    board.GetBoardPolygonOutlines(outline)
+    return clip_footprint_silk(board, _edge_points(board), outline, margin, refs=set(refs))
 
 
 def place_refs(board, height=0.8, thickness=0.15, gap=0.15, mask=0.1, edge=0.3, max_off=3.0, hide=("H", "FID"),

@@ -1,0 +1,47 @@
+{
+ "entries": [
+  {
+   "correction": {
+    "dx": 0.0,
+    "dy": -1.5709,
+    "mirror": false,
+    "rot": 0.0
+   },
+   "ee": {
+    "key": "ee-sha1:a1b2e8c325c7e1d6",
+    "title": "USB-C_SMD-TYPE-C-31-M-12_1"
+   },
+   "fit": {
+    "alternatives": [
+     {
+      "conflicts": 8,
+      "dx": 0.0,
+      "dy": -1.5342,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": true,
+      "names": 0,
+      "rot": 0.0
+     }
+    ],
+    "matched": 12,
+    "method": "number",
+    "rms": 0.0289,
+    "score": 78
+   },
+   "fitted": "2026-11-08",
+   "kicad": {
+    "fpid": "Connector_USB:USB_C_Receptacle_HRO_TYPE-C-31-M-12",
+    "pad_hash": "sha1:ff3595a0ce18289e"
+   },
+   "reasons": [
+    "fits by pad numbers: 12/12 matched (4 more with numbers KiCad does not have), rms 0.029 mm"
+   ],
+   "status": "auto",
+   "tool": "jlcplace 0.2.1",
+   "verdict": "green",
+   "verifications": []
+  }
+ ],
+ "lcsc": "C165948"
+}

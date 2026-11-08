@@ -1,7 +1,7 @@
 {
  "pinstate_version": 0,
  "board": "PrettyCool Caliper slider board rev A",
- "firmware": "caliper pin_plan.py@e3b39228636d6b60",
+ "firmware": "caliper pin_plan.py@2a079f2238dbb3c3",
  "provenance": "assumed: exported from caliper/firmware/tools/pin_plan.py (design intent, not measured)",
  "modes": {
   "RESET": {

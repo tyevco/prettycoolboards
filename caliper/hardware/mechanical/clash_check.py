@@ -146,7 +146,11 @@ def rf_check(parts):
     ant3 = M.box(bu(a[0]), bu(a[2]), a[1], a[3], P.BOARD_Z1, P.BOARD_Z1 + 2.55)
     dj = jaw.distance_to(ant)
     res.append(("OK  " if dj >= P.RF_CLEAR - 1e-6 else "RISK", f"PA-CF moving inside jaw: {dj:.2f} mm in plan, "
-                        f"{jaw.distance_to(ant3):.2f} mm in 3D from the antenna (it sits behind the beam plane)"))
+                        f"{jaw.distance_to(ant3):.2f} mm in 3D from the antenna (it sits behind the beam plane; "
+                        f"root flank relieved on an R {P.RF_CLEAR + P.IJ_RF_MARGIN:g} arc round the antenna corner)"))
+    df = M.fixed_jaw().distance_to(ant)          # closest at R = 0 (the antenna moves away with the slider)
+    res.append(("OK  " if df >= P.RF_CLEAR - 1e-6 else "RISK", f"PA-CF fixed jaw (its inside jaw tip) at R = 0: "
+                        f"{df:.2f} mm in plan from the antenna; further at any R > 0"))
     mod = M.rf_modifier()
     res.append(("OK  ", f"body within {P.RF_CLEAR:g} mm of the antenna: {mod.volume / 1000:.2f} cm^3, printed in unfilled PA "
                         "through the slicer modifier stl/slider_body_rf_modifier.stl"))
@@ -218,9 +222,10 @@ def main():
         clashes += ["(intended contact, not counted: " + "; ".join(i.strip() for i in intended) + ")"]
     src = BE.load_parts()[1]
     n_fail = sum(1 for s, _t in gaps + rf if s == "FAIL")
+    n_risk = sum(1 for s, _t in rf if s == "RISK")
     n_wall = sum(1 for s, _t in walls if s in ("BREAK", "THIN"))
     rep = [f"clash_check.py -- board envelope from {src}",
-           f"{len(out)} intersections, {n_bad} not clear; gap/board/RF rules: {n_fail} FAIL; "
+           f"{len(out)} intersections, {n_bad} not clear; gap/board/RF rules: {n_fail} FAIL, {n_risk} RISK; "
            f"body webs: {n_wall} BREAK/THIN", ""]
     rep += ["== not clear =="] + (clashes or ["(none)"]) + [""]
     rep += ["== gaps and board rules =="] + [f"{s} {t}" for s, t in gaps] + [""]

@@ -1,0 +1,68 @@
+{
+ "entries": [
+  {
+   "correction": {
+    "dx": 0.0,
+    "dy": 0.0,
+    "mirror": false,
+    "rot": 270.0
+   },
+   "ee": {
+    "key": "ee-sha1:1e8e7732e02c572c",
+    "title": "DSBGA-8_L1.6-W0.9-R2-C4-P0.40-BL"
+   },
+   "fit": {
+    "alternatives": [
+     {
+      "conflicts": 8,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": false,
+      "names": 0,
+      "rot": 90.0
+     },
+     {
+      "conflicts": 8,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": true,
+      "names": 0,
+      "rot": 270.0
+     },
+     {
+      "conflicts": 8,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": true,
+      "names": 0,
+      "rot": 90.0
+     }
+    ],
+    "matched": 8,
+    "method": "number",
+    "rms": 0.0001,
+    "score": 85
+   },
+   "fitted": "2026-11-08",
+   "kicad": {
+    "fpid": "caliper:Texas_DSBGA-8_1.04x1.59mm_Layout2x4_P0.4mm_YBG0008",
+    "pad_hash": "sha1:9d5a110fc68c20c7"
+   },
+   "reasons": [
+    "fits by pad numbers: 8/8 matched, rms 0.000 mm",
+    "rot 90 also lands every pad, on other nets; ruled out by pad numbers"
+   ],
+   "status": "auto",
+   "tool": "jlcplace 0.2.1",
+   "verdict": "green",
+   "verifications": []
+  }
+ ],
+ "lcsc": "C3682423"
+}

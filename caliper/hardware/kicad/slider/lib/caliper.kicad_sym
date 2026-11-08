@@ -1168,7 +1168,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(property "Reference" "E"
-			(at -7.62 13.97 0)
+			(at -10.16 13.97 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1177,7 +1177,7 @@
 			)
 		)
 		(property "Value" "CAP_ELECTRODES"
-			(at -7.62 -13.97 0)
+			(at -10.16 -13.97 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1223,8 +1223,8 @@
 		)
 		(symbol "CAP_ELECTRODES_0_1"
 			(rectangle
-				(start -7.62 12.7)
-				(end 7.62 -12.7)
+				(start -10.16 12.7)
+				(end 10.16 -12.7)
 				(stroke
 					(width 0.254)
 					(type default)
@@ -1236,9 +1236,9 @@
 		)
 		(symbol "CAP_ELECTRODES_1_1"
 			(pin passive line
-				(at -10.16 8.89 0)
+				(at -12.7 8.89 0)
 				(length 2.54)
-				(name "TX0"
+				(name "PHASE0"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1254,9 +1254,9 @@
 				)
 			)
 			(pin passive line
-				(at -10.16 6.35 0)
+				(at -12.7 6.35 0)
 				(length 2.54)
-				(name "TX1"
+				(name "PHASE1"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1272,9 +1272,9 @@
 				)
 			)
 			(pin passive line
-				(at -10.16 3.81 0)
+				(at -12.7 3.81 0)
 				(length 2.54)
-				(name "TX2"
+				(name "PHASE2"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1290,9 +1290,9 @@
 				)
 			)
 			(pin passive line
-				(at -10.16 1.27 0)
+				(at -12.7 1.27 0)
 				(length 2.54)
-				(name "TX3"
+				(name "PHASE3"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1308,9 +1308,9 @@
 				)
 			)
 			(pin passive line
-				(at -10.16 -1.27 0)
+				(at -12.7 -1.27 0)
 				(length 2.54)
-				(name "TX4"
+				(name "PHASE4"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1326,9 +1326,9 @@
 				)
 			)
 			(pin passive line
-				(at -10.16 -3.81 0)
+				(at -12.7 -3.81 0)
 				(length 2.54)
-				(name "TX5"
+				(name "PHASE5"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1344,9 +1344,9 @@
 				)
 			)
 			(pin passive line
-				(at -10.16 -6.35 0)
+				(at -12.7 -6.35 0)
 				(length 2.54)
-				(name "TX6"
+				(name "PHASE6"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1362,9 +1362,9 @@
 				)
 			)
 			(pin passive line
-				(at -10.16 -8.89 0)
+				(at -12.7 -8.89 0)
 				(length 2.54)
-				(name "TX7"
+				(name "PHASE7"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1380,9 +1380,9 @@
 				)
 			)
 			(pin passive line
-				(at 10.16 0 180)
+				(at 12.7 0 180)
 				(length 2.54)
-				(name "RX"
+				(name "RCV"
 					(effects
 						(font
 							(size 1.27 1.27)

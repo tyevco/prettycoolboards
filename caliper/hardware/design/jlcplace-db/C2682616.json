@@ -1,0 +1,68 @@
+{
+ "entries": [
+  {
+   "correction": {
+    "dx": 0.0,
+    "dy": 0.0,
+    "mirror": false,
+    "rot": 270.0
+   },
+   "ee": {
+    "key": "ee-sha1:00983c6aff20261e",
+    "title": "TDFN-8_L2.0-W2.0-P0.50-BL-EP1.2"
+   },
+   "fit": {
+    "alternatives": [
+     {
+      "conflicts": 4,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": false,
+      "matched": 1,
+      "mirror": true,
+      "names": 0,
+      "rot": 270.0
+     },
+     {
+      "conflicts": 8,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": false,
+      "matched": 1,
+      "mirror": false,
+      "names": 0,
+      "rot": 90.0
+     },
+     {
+      "conflicts": 8,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": false,
+      "matched": 1,
+      "mirror": true,
+      "names": 0,
+      "rot": 90.0
+     }
+    ],
+    "matched": 9,
+    "method": "number",
+    "rms": 0.0471,
+    "score": 77
+   },
+   "fitted": "2026-11-08",
+   "kicad": {
+    "fpid": "Package_DFN_QFN:TDFN-8-1EP_2x2mm_P0.5mm_EP0.8x1.2mm",
+    "pad_hash": "sha1:bf6cdd97abb4028d"
+   },
+   "reasons": [
+    "fits by pad numbers: 9/9 matched, rms 0.047 mm",
+    "rot 90 also lands every pad, on other nets; ruled out by pad numbers"
+   ],
+   "status": "auto",
+   "tool": "jlcplace 0.2.1",
+   "verdict": "green",
+   "verifications": []
+  }
+ ],
+ "lcsc": "C2682616"
+}

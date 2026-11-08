@@ -1,5 +1,5 @@
 clash_check.py -- board envelope from board_parts.json (../kicad/slider/prettycool-caliper-slider.kicad_pcb)
-6063 intersections, 0 not clear; gap/board/RF rules: 0 FAIL; body webs: 0 BREAK/THIN
+6207 intersections, 0 not clear; gap/board/RF rules: 0 FAIL, 0 RISK; body webs: 0 BREAK/THIN
 
 == not clear ==
 (intended contact, not counted: oring  x  beam)
@@ -92,7 +92,8 @@ OK   tab_clamp_5: 53.52 mm from the antenna area in plan
 OK   front_pad_2: 55.86 mm from the antenna area in plan
 OK   pad_insert_u74_y0.95: 56.17 mm from the antenna area in plan
 OK   stop_screw: 205.13 mm from the antenna area in plan
-RISK PA-CF moving inside jaw: 4.70 mm in plan, 8.73 mm in 3D from the antenna (it sits behind the beam plane)
+OK   PA-CF moving inside jaw: 5.15 mm in plan, 8.97 mm in 3D from the antenna (it sits behind the beam plane; root flank relieved on an R 5.15 arc round the antenna corner)
+OK   PA-CF fixed jaw (its inside jaw tip) at R = 0: 5.15 mm in plan from the antenna; further at any R > 0
 OK   body within 5 mm of the antenna: 3.03 cm^3, printed in unfilled PA through the slicer modifier stl/slider_body_rf_modifier.stl
 
 == all ==
@@ -141,6 +142,11 @@ CLEAR  R0     C22  x  fixed_jaw
 CLEAR  R0     C22  x  scale_pcb
 CLEAR  R0     C22  x  stop_screw
 CLEAR  R0     C22  x  tape
+CLEAR  R0     C23  x  beam
+CLEAR  R0     C23  x  fixed_jaw
+CLEAR  R0     C23  x  scale_pcb
+CLEAR  R0     C23  x  stop_screw
+CLEAR  R0     C23  x  tape
 CLEAR  R0     C3  x  beam
 CLEAR  R0     C3  x  fixed_jaw
 CLEAR  R0     C3  x  scale_pcb
@@ -316,6 +322,11 @@ CLEAR  R0     L1  x  fixed_jaw
 CLEAR  R0     L1  x  scale_pcb
 CLEAR  R0     L1  x  stop_screw
 CLEAR  R0     L1  x  tape
+CLEAR  R0     Q1  x  beam
+CLEAR  R0     Q1  x  fixed_jaw
+CLEAR  R0     Q1  x  scale_pcb
+CLEAR  R0     Q1  x  stop_screw
+CLEAR  R0     Q1  x  tape
 CLEAR  R0     Q50  x  beam
 CLEAR  R0     Q50  x  fixed_jaw
 CLEAR  R0     Q50  x  scale_pcb
@@ -331,6 +342,11 @@ CLEAR  R0     R1  x  fixed_jaw
 CLEAR  R0     R1  x  scale_pcb
 CLEAR  R0     R1  x  stop_screw
 CLEAR  R0     R1  x  tape
+CLEAR  R0     R10  x  beam
+CLEAR  R0     R10  x  fixed_jaw
+CLEAR  R0     R10  x  scale_pcb
+CLEAR  R0     R10  x  stop_screw
+CLEAR  R0     R10  x  tape
 CLEAR  R0     R2  x  beam
 CLEAR  R0     R2  x  fixed_jaw
 CLEAR  R0     R2  x  scale_pcb
@@ -830,6 +846,11 @@ CLEAR  R151   C22  x  fixed_jaw
 CLEAR  R151   C22  x  scale_pcb
 CLEAR  R151   C22  x  stop_screw
 CLEAR  R151   C22  x  tape
+CLEAR  R151   C23  x  beam
+CLEAR  R151   C23  x  fixed_jaw
+CLEAR  R151   C23  x  scale_pcb
+CLEAR  R151   C23  x  stop_screw
+CLEAR  R151   C23  x  tape
 CLEAR  R151   C3  x  beam
 CLEAR  R151   C3  x  fixed_jaw
 CLEAR  R151   C3  x  scale_pcb
@@ -1005,6 +1026,11 @@ CLEAR  R151   L1  x  fixed_jaw
 CLEAR  R151   L1  x  scale_pcb
 CLEAR  R151   L1  x  stop_screw
 CLEAR  R151   L1  x  tape
+CLEAR  R151   Q1  x  beam
+CLEAR  R151   Q1  x  fixed_jaw
+CLEAR  R151   Q1  x  scale_pcb
+CLEAR  R151   Q1  x  stop_screw
+CLEAR  R151   Q1  x  tape
 CLEAR  R151   Q50  x  beam
 CLEAR  R151   Q50  x  fixed_jaw
 CLEAR  R151   Q50  x  scale_pcb
@@ -1020,6 +1046,11 @@ CLEAR  R151   R1  x  fixed_jaw
 CLEAR  R151   R1  x  scale_pcb
 CLEAR  R151   R1  x  stop_screw
 CLEAR  R151   R1  x  tape
+CLEAR  R151   R10  x  beam
+CLEAR  R151   R10  x  fixed_jaw
+CLEAR  R151   R10  x  scale_pcb
+CLEAR  R151   R10  x  stop_screw
+CLEAR  R151   R10  x  tape
 CLEAR  R151   R2  x  beam
 CLEAR  R151   R2  x  fixed_jaw
 CLEAR  R151   R2  x  scale_pcb
@@ -1519,6 +1550,11 @@ CLEAR  R75    C22  x  fixed_jaw
 CLEAR  R75    C22  x  scale_pcb
 CLEAR  R75    C22  x  stop_screw
 CLEAR  R75    C22  x  tape
+CLEAR  R75    C23  x  beam
+CLEAR  R75    C23  x  fixed_jaw
+CLEAR  R75    C23  x  scale_pcb
+CLEAR  R75    C23  x  stop_screw
+CLEAR  R75    C23  x  tape
 CLEAR  R75    C3  x  beam
 CLEAR  R75    C3  x  fixed_jaw
 CLEAR  R75    C3  x  scale_pcb
@@ -1694,6 +1730,11 @@ CLEAR  R75    L1  x  fixed_jaw
 CLEAR  R75    L1  x  scale_pcb
 CLEAR  R75    L1  x  stop_screw
 CLEAR  R75    L1  x  tape
+CLEAR  R75    Q1  x  beam
+CLEAR  R75    Q1  x  fixed_jaw
+CLEAR  R75    Q1  x  scale_pcb
+CLEAR  R75    Q1  x  stop_screw
+CLEAR  R75    Q1  x  tape
 CLEAR  R75    Q50  x  beam
 CLEAR  R75    Q50  x  fixed_jaw
 CLEAR  R75    Q50  x  scale_pcb
@@ -1709,6 +1750,11 @@ CLEAR  R75    R1  x  fixed_jaw
 CLEAR  R75    R1  x  scale_pcb
 CLEAR  R75    R1  x  stop_screw
 CLEAR  R75    R1  x  tape
+CLEAR  R75    R10  x  beam
+CLEAR  R75    R10  x  fixed_jaw
+CLEAR  R75    R10  x  scale_pcb
+CLEAR  R75    R10  x  stop_screw
+CLEAR  R75    R10  x  tape
 CLEAR  R75    R2  x  beam
 CLEAR  R75    R2  x  fixed_jaw
 CLEAR  R75    R2  x  scale_pcb
@@ -2460,6 +2506,39 @@ CLEAR  board  C22  x  tab_clamp_6
 CLEAR  board  C22  x  tab_clamp_7
 CLEAR  board  C22  x  thumb_roller
 CLEAR  board  C22  x  y_gib
+CLEAR  board  C23  x  back_gib
+CLEAR  board  C23  x  battery
+CLEAR  board  C23  x  battery_door
+CLEAR  board  C23  x  button_cap_HOLD
+CLEAR  board  C23  x  button_cap_MODE
+CLEAR  board  C23  x  button_cap_ZERO
+CLEAR  board  C23  x  display
+CLEAR  board  C23  x  front_pad_0
+CLEAR  board  C23  x  front_pad_1
+CLEAR  board  C23  x  front_pad_2
+CLEAR  board  C23  x  front_pad_3
+CLEAR  board  C23  x  front_shell
+CLEAR  board  C23  x  lock_screw
+CLEAR  board  C23  x  oring
+CLEAR  board  C23  x  plunger_hw_0
+CLEAR  board  C23  x  plunger_hw_1
+CLEAR  board  C23  x  plunger_hw_2
+CLEAR  board  C23  x  plunger_hw_3
+CLEAR  board  C23  x  pusher_lock_u19
+CLEAR  board  C23  x  pusher_u14
+CLEAR  board  C23  x  pusher_u24
+CLEAR  board  C23  x  ref_strip
+CLEAR  board  C23  x  slider_body
+CLEAR  board  C23  x  tab_clamp_0
+CLEAR  board  C23  x  tab_clamp_1
+CLEAR  board  C23  x  tab_clamp_2
+CLEAR  board  C23  x  tab_clamp_3
+CLEAR  board  C23  x  tab_clamp_4
+CLEAR  board  C23  x  tab_clamp_5
+CLEAR  board  C23  x  tab_clamp_6
+CLEAR  board  C23  x  tab_clamp_7
+CLEAR  board  C23  x  thumb_roller
+CLEAR  board  C23  x  y_gib
 CLEAR  board  C3  x  back_gib
 CLEAR  board  C3  x  battery
 CLEAR  board  C3  x  battery_door
@@ -3615,6 +3694,39 @@ CLEAR  board  L1  x  tab_clamp_6
 CLEAR  board  L1  x  tab_clamp_7
 CLEAR  board  L1  x  thumb_roller
 CLEAR  board  L1  x  y_gib
+CLEAR  board  Q1  x  back_gib
+CLEAR  board  Q1  x  battery
+CLEAR  board  Q1  x  battery_door
+CLEAR  board  Q1  x  button_cap_HOLD
+CLEAR  board  Q1  x  button_cap_MODE
+CLEAR  board  Q1  x  button_cap_ZERO
+CLEAR  board  Q1  x  display
+CLEAR  board  Q1  x  front_pad_0
+CLEAR  board  Q1  x  front_pad_1
+CLEAR  board  Q1  x  front_pad_2
+CLEAR  board  Q1  x  front_pad_3
+CLEAR  board  Q1  x  front_shell
+CLEAR  board  Q1  x  lock_screw
+CLEAR  board  Q1  x  oring
+CLEAR  board  Q1  x  plunger_hw_0
+CLEAR  board  Q1  x  plunger_hw_1
+CLEAR  board  Q1  x  plunger_hw_2
+CLEAR  board  Q1  x  plunger_hw_3
+CLEAR  board  Q1  x  pusher_lock_u19
+CLEAR  board  Q1  x  pusher_u14
+CLEAR  board  Q1  x  pusher_u24
+CLEAR  board  Q1  x  ref_strip
+CLEAR  board  Q1  x  slider_body
+CLEAR  board  Q1  x  tab_clamp_0
+CLEAR  board  Q1  x  tab_clamp_1
+CLEAR  board  Q1  x  tab_clamp_2
+CLEAR  board  Q1  x  tab_clamp_3
+CLEAR  board  Q1  x  tab_clamp_4
+CLEAR  board  Q1  x  tab_clamp_5
+CLEAR  board  Q1  x  tab_clamp_6
+CLEAR  board  Q1  x  tab_clamp_7
+CLEAR  board  Q1  x  thumb_roller
+CLEAR  board  Q1  x  y_gib
 CLEAR  board  Q50  x  back_gib
 CLEAR  board  Q50  x  battery
 CLEAR  board  Q50  x  battery_door
@@ -3714,6 +3826,39 @@ CLEAR  board  R1  x  tab_clamp_6
 CLEAR  board  R1  x  tab_clamp_7
 CLEAR  board  R1  x  thumb_roller
 CLEAR  board  R1  x  y_gib
+CLEAR  board  R10  x  back_gib
+CLEAR  board  R10  x  battery
+CLEAR  board  R10  x  battery_door
+CLEAR  board  R10  x  button_cap_HOLD
+CLEAR  board  R10  x  button_cap_MODE
+CLEAR  board  R10  x  button_cap_ZERO
+CLEAR  board  R10  x  display
+CLEAR  board  R10  x  front_pad_0
+CLEAR  board  R10  x  front_pad_1
+CLEAR  board  R10  x  front_pad_2
+CLEAR  board  R10  x  front_pad_3
+CLEAR  board  R10  x  front_shell
+CLEAR  board  R10  x  lock_screw
+CLEAR  board  R10  x  oring
+CLEAR  board  R10  x  plunger_hw_0
+CLEAR  board  R10  x  plunger_hw_1
+CLEAR  board  R10  x  plunger_hw_2
+CLEAR  board  R10  x  plunger_hw_3
+CLEAR  board  R10  x  pusher_lock_u19
+CLEAR  board  R10  x  pusher_u14
+CLEAR  board  R10  x  pusher_u24
+CLEAR  board  R10  x  ref_strip
+CLEAR  board  R10  x  slider_body
+CLEAR  board  R10  x  tab_clamp_0
+CLEAR  board  R10  x  tab_clamp_1
+CLEAR  board  R10  x  tab_clamp_2
+CLEAR  board  R10  x  tab_clamp_3
+CLEAR  board  R10  x  tab_clamp_4
+CLEAR  board  R10  x  tab_clamp_5
+CLEAR  board  R10  x  tab_clamp_6
+CLEAR  board  R10  x  tab_clamp_7
+CLEAR  board  R10  x  thumb_roller
+CLEAR  board  R10  x  y_gib
 CLEAR  board  R2  x  back_gib
 CLEAR  board  R2  x  battery
 CLEAR  board  R2  x  battery_door

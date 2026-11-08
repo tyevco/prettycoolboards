@@ -298,7 +298,12 @@ def slider_fixed(comps):
         "D50": (51.5, 32.0, 0.0, "F"),
         # 30.6 (SPEC 31.4): at 31.4 the front fitting-nail pads (MP) cross the top edge
         "J2": (24.5, 30.6, 180.0, "F"),
-        "RT1": (24.5, 26.5, 0.0, "F"),
+        # RT1 2.2 left of SPEC's (24.5, 26.5) (still beside J2, over the cell) so the reverse-polarity FET Q1 sits
+        # right under J2 pin 1 (drain pad 3 up, toward it)
+        "RT1": (22.3, 26.75, 0.0, "F"),
+        "Q1": (25.1, 25.1, 90.0, "F"),
+        # the gauge's VBAT cap between Q1 and U4's VBAT pins 2/3 (x 28.61), under J2's courtyard
+        "C7": (27.37, 26.3, 90.0, "F"),
         "BZ50": (40.0, 24.3, 0.0, "F"),
         "U60": (30.0, 23.5, 0.0, "F"),
         "U30": (31.0, 6.0, 90.0, "B"),
@@ -332,6 +337,11 @@ def slider_fixed(comps):
         "U2": (57.2, 16.4, 0.0, "F"),
         "H1": (18.75, 24.0, 0.0, "F"),
         "H2": (-3.5, 5.5, 0.0, "F"), "H3": (-3.5, 14.0, 0.0, "F"), "H4": (65.5, 5.5, 0.0, "F"),
+        "H5": (65.5, 14.0, 0.0, "F"),
+        # module decoupling on the BOTTOM under its 3V3 pad 3 (0.85, 25.95), either side of that pad's escape via
+        # (2.0, 25.95): C21 100n above, C23 10u below, +3V3 pad (1) toward the via. 0402, 0.5 mm tall, in the upper
+        # band where the housing floor is 0.75 mm below the board (SPEC §2.1); clear of the antenna rule area (y >= 29.2)
+        "C21": (3.1, 26.5, 0.0, "B"), "C23": (3.1, 25.3, 0.0, "B"),
         # FID3 (SPEC 60.5, 32.8) would sit inside J1's courtyard (it reaches y 31.9 over x 54-63): top middle instead
         "FID1": (2.0, 1.5, 0.0, "F"), "FID2": (60.5, 1.2, 0.0, "F"), "FID3": (33.0, 27.6, 0.0, "F"),
         "E40": (SEED_FC[0], SEED_FC[1], 0.0, "B"),
@@ -354,7 +364,8 @@ SLIDER_PIN_ANCHORS = {
     # TPS63802 feedback divider at FB
 
     # gauge
-    "C7": ("U4", "VBAT", 2.5),
+    # gate resistor of the battery reverse-polarity P-FET Q1 (fixed under J2 pin 1)
+    "R10": ("Q1", "BATFET_G", 2.5),
     # load switches
     # (C8 / C10 are fixed next to U5 in slider_fixed)
     "C9": ("U5", "SNS_CT", 2.5), "R5": ("U5", "SNS_PWR_EN", 3.5),
@@ -380,8 +391,9 @@ SLIDER_REGION_PARTS = {
     # I2C / alert pull-ups below the module, next to the module pins they serve (the U60 corner is full)
     "R6": (7.0, 5.8, BELOW_MODULE), "R7": (8.6, 5.8, BELOW_MODULE),
     "R8": (7.0, 4.0, BELOW_MODULE), "R9": (8.6, 4.0, BELOW_MODULE),
-    # module support: bulk caps below the module (the left column, pad 3, has no room beside it), EN RC above H1
-    "C20": (3.0, 5.5, BELOW_MODULE), "C21": (5.0, 5.5, BELOW_MODULE),
+    # module support: the 22u bulk below the module on top (the 100n / 10u sit under pad 3 on the bottom, fixed);
+    # EN RC above H1
+    "C20": (3.0, 5.5, BELOW_MODULE),
     "R20": (17.6, 28.0, (16.3, 26.3, 21.0, 29.1)), "C22": (19.6, 28.0, (16.3, 26.3, 21.0, 29.1)),
     "R21": (24.0, 15.5, (16.6, 13.0, 30.5, 20.5)),
     # backlight driver beside J50, under the glass
@@ -714,11 +726,6 @@ def build_slider(bb, comps, nets):
     bb.edge_band_keepout(poly_page(outline), inset=0.3)
     ds = b.GetDesignSettings()
     ds.SetBoardThickness(MM(1.0))
-    # H5 is not in the netlist yet (the schematic still has H1-H4): a board-only copy of the same footprint on GND
-    if "H5" not in bb.footprints:
-        fp = bb.board_only("MountingHole:MountingHole_2.2mm_M2_Pad_Via", "H5", *P(65.5, 14.0))
-        for p in fp.Pads():
-            p.SetNet(bb.net("GND"))
     # SPEC antenna keep-out: all layers, no tracks / vias / pads / pours (parts: the module itself only)
     ant = rect(ANT[0] - 1.0, ANT_Y0, ANT[2], ANT[3] + 1.0)
     bb.keepout([pcbnew.F_Cu, pcbnew.In1_Cu, pcbnew.In2_Cu, pcbnew.B_Cu], poly_page(ant), tracks=True, vias=True,
@@ -940,7 +947,7 @@ BOARDS = {
                    pours=pours_slider, inside=slider_inside, keepouts=slider_keepouts, power_track=0.3,
                    # JLC 4-layer: 0.09/0.09 mm min, 0.15 mm min drill; the module LGA and the 0.4 mm DSBGA need fine rules
                    rules=dict(track=0.12, clearance=0.10, via=0.40, via_drill=0.20),
-                   power_nets=("VBUS", "VSYS", "VBAT", "BB_L1", "BB_L2"),
+                   power_nets=("VBUS", "VSYS", "VBAT", "VBAT_RAW", "BB_L1", "BB_L2"),
                    # +3V3 reaches ~33 pads and has the In2 +3V3 pour in parallel: 0.20 mm (~0.7 A on 1 oz outer copper,
                    # the module peaks at ~0.36 A) in a class the grid router may rip up and re-route
                    rail_nets=("+3V3",),
@@ -1040,6 +1047,10 @@ def generate(board, pours=True):
         for ref in fixed:
             if ref in bb.footprints:
                 bb.footprints[ref].SetLocked(True)
+    if board == "slider":
+        # J1's shell silk runs past the right edge (the receptacle overhangs it by 1 mm) and the module's outline
+        # silk sits on the left / bottom edge band: clip those lines on the two instances (local override)
+        print(f"[{board}] silk: {silk.clip_silk_at_edge(bb.board, ('J1', 'U10'))} J1/U10 outline lines clipped at the edge")
     moved, hidden = silk.place_refs(bb.board)
     print(f"[{board}] silk: {moved} references placed, {hidden} hidden (no room)")
     if pours:
@@ -1217,9 +1228,9 @@ def preroute_vbus(bb):
 
 # USB D+/D- from the module's escape vias to U1, as one locked pair (layout review 2026-11-08). The routers had run
 # them as two independent tracks, 85 % on B.Cu and up to 4.7 mm apart (D+ above the test-pad rows, D- between them,
-# crossing ~25 In2 signals broadside at 0.1 mm). Now they run together, 0.30 mm apart (0.14 mm tracks, 0.16 mm gap),
-# on B.Cu along y 19.2-19.6 just above the electrode ring, then up a 45-degree leg towards U1. D+ (with a stub to TP22)
-# goes on north along x 46.95, climbs to F.Cu at (47.85, 27.45), west of U1 pin 1, and enters pin 1, so the ESD array
+# crossing ~25 In2 signals broadside at 0.1 mm). Now they run together, 0.32 mm apart centre to centre (0.14 mm
+# tracks, 0.18 mm gap: y 19.568 / 19.247), on B.Cu along y 19.2-19.6 just above the electrode ring, then up a
+# 45-degree leg towards U1. D+ (with a stub to TP22) goes on north along x 46.95, climbs to F.Cu at (47.85, 27.45), west of U1 pin 1, and enters pin 1, so the ESD array
 # is in the line's path (J1 -> pin 6 -> pin 1 -> module); U1's GND pin 2 keeps a way out between that climb and the
 # part: a locked stub to the GND via (48.0, 26.5) (USB_U1_GND). D- runs through TP23 to the via (48.175, 23.097), from
 # which the router reaches U1 pin 3. Under the 45-degree leg and the long run, In2 is a GND strip (USB_REF_POLY).

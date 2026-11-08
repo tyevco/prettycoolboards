@@ -1,18 +1,30 @@
 #!/usr/bin/env python3
 """Produce fabrication + review outputs for each PrettyCool Caliper board into caliper/hardware/fab/<board>/.
 
-usage: python3 caliper/hardware/design/release.py [--board slider|scale] [--update-offsets] [--force]
+usage: python3 caliper/hardware/design/release.py [--board slider|scale] [--refit-jlc] [--force]
 
 Adapted from dial-me-spinner's hardware/design/release.py. Outputs: gerbers.zip (+ gerbers/), drill + map, the
-JLCPCB BOM + CPL (slider only; the scale has no parts), ORDER-NOTES.md, schematic PDF, board PDFs (per side and per
-copper layer), 3D renders (top/bottom) and the DRC/parity report the gate ran.
+JLCPCB BOM + CPL (slider only; the scale has no parts), ORDER-NOTES.md, the jlcplace preview checklist
+(jlcplace-checklist.md) and review report (jlcplace-report.html, git-ignored: it draws EasyEDA pad outlines), schematic
+PDF, board PDFs (per side and per copper layer), 3D renders (top/bottom) and the DRC/parity report the gate ran.
 
-The gate: kicad-cli DRC with schematic parity must report no error, else nothing is written (--force writes a
-REVIEW-ONLY package, marked as such in ORDER-NOTES.md and in a REVIEW-ONLY.txt next to it).
+Gates (each refuses the package; --force writes a REVIEW-ONLY package instead, marked as such in ORDER-NOTES.md and in
+a REVIEW-ONLY.txt next to it):
 
---update-offsets fetches the EasyEDA footprint of every LCSC part on the board (network) and refits
-caliper/hardware/design/jlc_offsets.json (tools/jlc_cpl.py). Without it the cached table is used. The CPL writer
-then simulates JLC's placement of every row and stops on a pad that lands off copper (or, with --force, records it).
+1. kicad-cli DRC with schematic parity must report no error.
+2. jlcplace (github.com/tyevco/jlcplace, >= 0.2.1, tools/jlcplace_gate.py): `jlcplace cpl` writes the CPL from the
+   Gerbers' (0, 0) with the corrections stored in caliper/hardware/design/jlcplace-db/, then `jlcplace check` simulates
+   JLC's placement of every row with JLC's own EasyEDA footprints over gerbers.zip, with the BOM. Any red row or red
+   run finding refuses the package. The yellow rows and the preview checklist go into ORDER-NOTES.md. A second check
+   without the database cross-checks the stored corrections against the EasyEDA records: a row the records alone call
+   red must be accepted by a human decision in the database (manual, preview- or board-verified), else it is red too.
+   The scale (no parts) is checked with an empty CPL: nothing on it may need placing, and its Gerbers must be this
+   board's.
+
+The check reads the EasyEDA record cache (~/.cache/jlcplace) and the committed database; it downloads nothing.
+--refit-jlc (network) runs `jlcplace fetch` for the board's and the BOM's LCSC codes and `jlcplace fit --db` to store
+corrections for new or changed parts. Without it, a part missing from the database is fitted from the cache for this
+run only (and a part with neither record nor correction is not simulated: red unless a two-pad non-polar part).
 """
 
 from __future__ import annotations
@@ -29,9 +41,9 @@ REPO = os.path.dirname(os.path.dirname(HW))
 sys.path.insert(0, os.path.join(REPO, "tools"))
 
 import fab  # noqa: E402
-import jlc_cpl  # noqa: E402
+import jlcplace_gate as jlcp  # noqa: E402
 
-jlc_cpl.OFFSETS = os.path.join(HERE, "jlc_offsets.json")
+JLC_DB = os.path.join(HERE, "jlcplace-db")  # jlcplace correction database (derived numbers only), committed
 LIB = "caliper"
 BOARDS = {"slider": 4, "scale": 2}
 
@@ -44,7 +56,7 @@ FAB_NOTES = {
         "prepreg; read the exact stack ID and dielectric thickness from JLC's impedance calculator when ordering). "
         "Symmetric is required by the flatness callout. L1 F.Cu signals, L2 In1 solid GND, L3 In2 +3V3 pour / signals "
         "/ electrode phase buses, L4 B.Cu sensors. **No impedance control** (it would buy nothing): USB_DP/USB_DM "
-        "are full-speed USB (12 Mb/s); they run as a 0.14 / 0.16 mm pair mostly on L4 over a GND strip on L3 "
+        "are full-speed USB (12 Mb/s); they run as a pair of 0.14 mm tracks with a 0.18 mm gap mostly on L4 over a GND strip on L3 "
         "(an L4-over-L3 pair, not the L1-over-L2 microstrip the 0.14 mm class width was estimated for), so there is "
         "no specified structure for JLC to tune (layout review 2026-11-08, docs/electronics.md §7.5).",
         "**Flatness callout (SPEC D3):** bow/twist <= 0.03 mm over y 0-20 mm (the beam band, x -6...68 incl. the end "
@@ -57,14 +69,15 @@ FAB_NOTES = {
         "plugging needed; epoxy-filled + capped is acceptable if JLC prefers).",
         "**Bottom side, beam band (y 0-20):** only U30 (AS5311) and C30/C31 are assembled there (<= 1.30 mm). The E40 "
         "electrode copper is bare (mask open per finger, no paste, no part).",
-        "**Assembly:** both sides. Top = everything else; bottom = U30, C30, C31 (and nothing else is placed on the "
-        "bottom: the 19 test pads are bare). If two-sided assembly is not wanted, U30/C30/C31 can be hand-soldered "
-        "(TSSOP-20, 0.65 mm pitch).",
+        "**Assembly:** both sides. Top = everything else; bottom = U30, C30, C31 (beam band) and C21, C23 (0402, under "
+        "the module's 3V3 pad, upper band); nothing else is placed on the bottom (the 19 test pads are bare). If "
+        "two-sided assembly is not wanted, these five can be hand-soldered (U30 is TSSOP-20, 0.65 mm pitch).",
         "**AS5311 supply:** U30 AS5311-ATST (LCSC C22459687) had only 80 pcs at LCSC on 2026-11-07. Check stock when "
         "ordering; if it is gone, order the board with U30 as DNP and consign/hand-fit the part (Mouser/DigiKey stock "
         "it as AS5311-ATST / AS5311-ATSU).",
-        "**SMT M2 standoffs on H2-H5 (tab clamp holes, SPEC D3):** not in this BOM yet (no LCSC part chosen: PEM "
-        "SMTSO-M2-2ET class, 2.0 mm tall). Fit by hand (reflow or iron) on the top pads until the schematic carries them.",
+        "**SMT M2 standoffs on H2-H5 (tab clamp holes, SPEC D3):** not in this BOM: fitted by hand (reflow or iron) on "
+        "the top pads (PEM SMTSO-M2-2ET class, 2.0 mm tall, OD <= 4.0). The LCSC M2 SMT nuts (SMTSO20x0CTJ, e.g. "
+        "C2915626) have a 5.6 mm base that overhangs the 6 mm tabs.",
         "**Not on the PCBA:** the LCD panel (plugs into J50 by hand), the LiPo (J2), the magnetic tape and the scale "
         "board.",
     ],
@@ -150,7 +163,7 @@ def gate(pcb, out):
     return r.returncode == 0, rpt, "; ".join(summary)
 
 
-def order_notes(board, pcb, net, path, review_only, cpl_notes, cpl_problems, gate_line):
+def order_notes(board, pcb, net, path, review_only, jlc_lines, gate_line):
     import pcbnew
     import pcbgen
     comps, _ = pcbgen.load_netlist(net)
@@ -161,12 +174,12 @@ def order_notes(board, pcb, net, path, review_only, cpl_notes, cpl_problems, gat
     bottom = sorted((fp.GetReference() for fp in b.GetFootprints()
                      if fp.IsFlipped() and not fp.GetAttributes() & pcbnew.FP_EXCLUDE_FROM_POS_FILES
                      and not fp.IsDNP()), key=fab._refkey)
-    with open(path, "w", encoding="utf-8") as f:
+    with open(path, "w", encoding="utf-8", newline="\n") as f:
         f.write(f"# Order notes: {os.path.basename(pcb)}\n\n")
         f.write("(generated by caliper/hardware/design/release.py; do not edit)\n\n")
         if review_only:
             f.write("> **REVIEW-ONLY PACKAGE: do not order.** It was written with `--force`: the DRC/parity gate or "
-                    "the JLC placement check did not pass (see below and drc-parity.rpt).\n\n")
+                    "the jlcplace placement gate did not pass (see below and drc-parity.rpt).\n\n")
         f.write("Rev A is **designed, not built**: nothing here has been fabricated, assembled or measured.\n\n")
         f.write(f"* DRC/parity gate (kicad-cli 9, errors only): {gate_line}\n")
         f.write(f"* Do not place (DNP): {', '.join(dnp) or 'none'}\n")
@@ -176,23 +189,61 @@ def order_notes(board, pcb, net, path, review_only, cpl_notes, cpl_problems, gat
         board_only = sorted(fp.GetReference() for fp in b.GetFootprints() if fp.GetAttributes() & pcbnew.FP_BOARD_ONLY)
         if board_only:
             f.write(f"* Board-only parts (no BOM): {', '.join(board_only)}\n")
-        if bottom or any(not fp.IsFlipped() and not fp.GetAttributes() & pcbnew.FP_EXCLUDE_FROM_POS_FILES
-                         for fp in b.GetFootprints()):
-            f.write("* CPL angles and origins include the JLC library corrections from "
-                    "caliper/hardware/design/jlc_offsets.json (top: θ+α, bottom: 180−θ+α). Every row was checked by "
-                    "putting the EasyEDA pads down at its point and angle"
-                    + (": all land on copper." if not cpl_problems else ": **problems listed below.**")
-                    + " Still check every IC and connector in JLC's placement preview.\n")
-        for n in cpl_problems:
-            f.write(f"  * CPL PROBLEM: {n}\n")
-        for n in cpl_notes:
-            f.write(f"  * note: {n}\n")
+        for ln in jlc_lines:
+            f.write(ln + "\n")
         for note in FAB_NOTES.get(board, []):
             f.write(f"* {note}\n")
     return path
 
 
-def release(board, force=False, update_offsets=False):
+def jlc_gate(board, pcb, out, tmp, proj, force, refit):
+    """Write the CPL with jlcplace (boards with parts) and run `jlcplace check` over gerbers.zip.
+
+    Returns (ok, ORDER-NOTES lines). Refuses (SystemExit) on red unless force."""
+    ver = jlcp.version()
+    gerbers = os.path.join(out, "gerbers.zip")
+    report = os.path.join(out, "jlcplace-report.html")
+    checklist = os.path.join(out, "jlcplace-checklist.md")
+    if board == "slider":
+        bom = os.path.join(out, f"{proj}-BOM-JLCPCB.csv")
+        cpl = os.path.join(out, f"{proj}-CPL-JLCPCB.csv")
+        db = JLC_DB
+        if refit:
+            try:
+                print(f"[{board}] jlcplace fetch + fit --db (network)")
+                jlcp.refit(pcb, db, bom)
+            except jlcp.JlcplaceError as e:
+                print(f"WARN: [{board}] could not refit the jlcplace database: {e}")
+        red_cpl, text = jlcp.write_cpl(pcb, cpl, bom=bom, gerbers=gerbers, db=db, force=force)
+        if red_cpl and not force:
+            raise SystemExit(f"[{board}] jlcplace cpl: red rows, no CPL written (use --force for a review-only "
+                             f"package):\n{text.strip()}")
+    else:
+        # no parts: an empty CPL (kept out of the package) proves that nothing on the board needs placing and that
+        # gerbers.zip is this board's, plotted from the aux origin
+        bom, db = None, None
+        cpl = os.path.join(tmp, f"{proj}-CPL-empty.csv")
+        jlcp.write_cpl(pcb, cpl, gerbers=gerbers)
+    res = jlcp.check(pcb, cpl, os.path.join(tmp, "jlcplace.json"), bom=bom, gerbers=gerbers, db=db,
+                     report=report, checklist=checklist)
+    if db:
+        # the same CPL from the EasyEDA records alone: a stored auto correction may not turn a red row green
+        jlcp.add_cross_check(res, jlcp.check(pcb, cpl, os.path.join(tmp, "jlcplace-records.json"), bom=bom,
+                                             gerbers=gerbers))
+    print(f"[{board}] jlcplace {'.'.join(map(str, ver))}: {res['summary_line']}")
+    for p in jlcp.problem_lines(res):
+        print(f"  RED {p}")
+    if res["red"] and not force:
+        raise SystemExit(f"[{board}] jlcplace check: red (see {report}); refusing to write the package "
+                         "(use --force for a review-only package)")
+    lines = jlcp.order_lines(res, ver)
+    if board != "slider":
+        lines.insert(1, "  * no parts, no CPL: checked with an empty CPL (not shipped), so nothing on the board needs "
+                        "placing and gerbers.zip is this board's, plotted from the CPL origin")
+    return not res["red"], lines
+
+
+def release(board, force=False, refit=False):
     kdir = os.path.join(HW, "kicad", board)
     proj = f"prettycool-caliper-{board}"
     pcb = os.path.join(kdir, proj + ".kicad_pcb")
@@ -219,33 +270,23 @@ def release(board, force=False, update_offsets=False):
         raise SystemExit(f"DRC/parity violations in {pcb} - see {rpt}; refusing to write fab outputs "
                          "(use --force for a review-only package)")
     fab.gerbers(pcb, out, BOARDS[board])
-    libs = {LIB: os.path.join(kdir, "lib", LIB + ".pretty")}
-    cpl_notes, cpl_problems = [], []
-    comps_with_parts = board == "slider"
-    if comps_with_parts:
+    if board == "slider":
         fab.jlc_bom(net, os.path.join(out, f"{proj}-BOM-JLCPCB.csv"))
-        if update_offsets:
-            try:
-                table = jlc_cpl.update_offsets([pcb], libs)
-                errs = {c: e["error"] for c, e in table.items() if "error" in e}
-                print(f"[{board}] jlc_offsets.json: {len(table)} parts, {len(errs)} without a fit"
-                      + "".join(f"\n  {c}: {e}" for c, e in errs.items()))
-            except Exception as e:  # noqa: BLE001 - network
-                print(f"WARN: [{board}] could not refresh jlc_offsets.json: {e}")
+    try:
         try:
-            _, missing, problems, notes = jlc_cpl.write_cpl(pcb, os.path.join(out, f"{proj}-CPL-JLCPCB.csv"), libs)
-            cpl_notes = notes
-            print(f"[{board}] CPL: every JLC pad lands on copper" + "".join(f"\n  note: {n}" for n in notes))
-        except RuntimeError as e:
+            jlc_ok, jlc_lines = jlc_gate(board, pcb, out, tmp, proj, force, refit)
+        except jlcp.JlcplaceError as e:
             if not force:
-                raise SystemExit(f"[{board}] CPL check failed: {e} (use --force for a review-only package)")
-            review_only = True
-            cpl_problems = [ln.strip() for ln in str(e).splitlines() if ln.strip()]
-            _, missing, problems, notes = jlc_cpl.write_cpl(pcb, os.path.join(out, f"{proj}-CPL-JLCPCB.csv"), libs,
-                                                            strict=False)
-            cpl_notes = notes
-            print(f"WARN: [{board}] CPL written unchecked (review only): {e}")
-    order_notes(board, pcb, net, os.path.join(out, "ORDER-NOTES.md"), review_only, cpl_notes, cpl_problems, gate_line)
+                raise SystemExit(f"[{board}] jlcplace could not run: {e} (use --force for a review-only package)")
+            jlc_ok, jlc_lines = False, [f"* **jlcplace placement gate did not run:** {e}"]
+    except SystemExit:
+        # the gerbers (and BOM) are already written: mark the half-written folder so it is never ordered from
+        with open(os.path.join(out, "REVIEW-ONLY.txt"), "w") as f:
+            f.write("INCOMPLETE: release.py was refused by the jlcplace placement gate. Do not order. "
+                    "Fix the red rows (see jlcplace-report.html) and release again.\n")
+        raise
+    review_only = review_only or not jlc_ok
+    order_notes(board, pcb, net, os.path.join(out, "ORDER-NOTES.md"), review_only, jlc_lines, gate_line)
     if review_only:
         with open(os.path.join(out, "REVIEW-ONLY.txt"), "w") as f:
             f.write("REVIEW-ONLY package written with --force: do not order. See ORDER-NOTES.md.\n")
@@ -267,12 +308,13 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--board", choices=sorted(BOARDS))
     ap.add_argument("--force", action="store_true", help="write a review-only package even if a gate fails")
-    ap.add_argument("--update-offsets", action="store_true", help="refit jlc_offsets.json from EasyEDA (network)")
+    ap.add_argument("--refit-jlc", "--update-offsets", dest="refit", action="store_true",
+                    help="jlcplace fetch (network) + fit --db: store corrections for new or changed parts")
     a = ap.parse_args()
     for b in BOARDS:
         if a.board and b != a.board:
             continue
-        out, review = release(b, a.force, a.update_offsets)
+        out, review = release(b, a.force, a.refit)
         print(f"[{b}] ->", out, "(REVIEW ONLY)" if review else "")
 
 
