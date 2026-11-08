@@ -72,6 +72,13 @@ export default withMermaid(defineConfig({
             { text: 'Companion app', link: '/caliper/docs/app' },
           ],
         },
+        {
+          text: 'Future ideas',
+          items: [
+            { text: 'Oh, neat: maybe later', link: '/caliper/docs/ideas/' },
+            { text: 'Electronic slide lock', link: '/caliper/docs/ideas/slide-lock' },
+          ],
+        },
       ],
     },
     outline: { level: [2, 3] },
