@@ -21,7 +21,9 @@ void csv_civil_from_unix(uint32_t t, csv_civil_t *c);
 /* Header line, "\r\n" terminated. with_utc adds an ISO-8601 column. */
 int csv_header(bool with_utc, char *buf, size_t n);
 
-/* One record, e.g. "12,1762500000,2025-11-07T07:20:00Z,12.34,mm,HP,3\r\n".
+/* One record, e.g. "12,1762500000,2025-11-07T07:20:00Z,12.34,mm,HP,3,min\r\n".
+ * kind (the last column, added with the capture modes): "" plain, "settle", "min" or "max" (a SWEEP
+ * extreme); appended at the end so readers that take the first seven columns are unaffected.
  * The value is formatted in the record's unit with mm_decimals (settings "decimals").
  * flags column: H hold, P pass, F fail, E sensor error, Z zero lost (CALIPER_FLAG_REZERO: the value
  * is relative to an origin set after a sleep/reset, not to the user's zero); "" if none.
@@ -29,7 +31,8 @@ int csv_header(bool with_utc, char *buf, size_t n);
 int csv_line(const logrec_t *r, uint8_t mm_decimals, bool with_utc, char *buf, size_t n);
 
 /* The longest line csv_line() can produce (with_utc, every field at its widest), CRLF included. */
-#define CSV_LINE_MAX 96
+#define CSV_LINE_MAX 104
+
 
 /* Formats as many of the n records as fit, whole lines only, into buf (n_buf bytes, NUL-terminated).
  * *used gets the bytes written. Returns the number of records formatted; the caller flushes buf

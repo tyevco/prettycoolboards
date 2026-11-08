@@ -40,7 +40,8 @@ bool ble_conn_get(uint16_t handle, ble_conn_t *out);  /* false if not connected 
 int ble_conn_snapshot(ble_conn_t out[BLE_MAX_CONN]); /* copies the used entries, returns how many */
 int ble_notify(uint16_t conn, uint16_t attr, const void *data, uint16_t len); /* retries on ENOMEM */
 void ble_worker_start(void);
-void ble_worker_log_read(uint16_t conn, uint32_t from_seq);
+/* ext: the 6-byte LOG_READ with CALIPER_LOG_OPT_KIND (record byte 12 whole, else only the unit) */
+void ble_worker_log_read(uint16_t conn, uint32_t from_seq, bool ext);
 
 #ifdef __cplusplus
 }

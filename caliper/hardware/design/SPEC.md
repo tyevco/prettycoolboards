@@ -290,15 +290,50 @@ The authoritative copy is `nets.py: MCU_PINS`. The constraints behind it:
   lives in `public/caliper/app/`, published with the docs site; the empty `caliper/app/` was removed) (D7).
 - **Advertising:** the advertisement or the scan response carries the complete **128-bit service UUID**
   (`7c0a0001-5e1f-4b8a-9c3d-2f6a1e0c7b11`); the app's chooser filters on it. Rev A puts it in the scan response.
-- **LIVE (D6):** **12 bytes** `{i32 value_nm, i32 cap_nm, u8 unit, u8 flags, u16 active_profile_id}`;
-  `active_profile_id` 0 = none. Readers accept **10 or 12 bytes** (10 = firmware from before this change: active
-  profile unknown) and ignore anything past 12. Reason: a profile chosen on the caliper's own MODE menu was
-  invisible to the app, which then judged readings against a stale band. Appending keeps old readers working.
+- **LIVE (D6, extended to v3 2026-11-07 for the capture modes):** **20 bytes**
+  `{i32 value_nm, i32 cap_nm, u8 unit, u8 flags, u16 active_profile_id, u8 capture, u8 capture_state,
+  u16 capture_n, i32 capture_aux_nm}`, one notification at the default ATT_MTU of 23. `active_profile_id` 0 = none.
+  `value_nm` is always the **shown** value: the capture result when frozen, the running extreme while a SWEEP is
+  in contact, else the live (or held) value, so an old reader shows the right number; a frozen capture also sets
+  HOLD. `capture`: bits 0..3 mode (0 LIVE, 1 SETTLE, 2 SWEEP, **3 SET reserved**), bits 4..5 sweep selection
+  (0 auto, 1 min, 2 max). `capture_state`: bits 0..2 state (0 idle, 1 armed, 2 in contact / settling, 3 frozen,
+  4 aborted by a sensor error), bits 4..5 which extreme `value_nm` is (0 n/a, 1 MIN, 2 MAX). `capture_n`: samples
+  in the capture (saturating 65535). `capture_aux_nm`: SWEEP the other extreme (R = |value − aux|), SETTLE the
+  window's standard deviation, `INT32_MIN` = n/a. Readers accept **10, 12 or 20 bytes** (10 = before the profile
+  id; 12 = before the capture modes: no capture UI) and ignore anything past 20. Reasons: the profile id, because a
+  profile chosen on the caliper was invisible to the app; the capture block, so a client can show and set the
+  capture without old clients seeing anything but the right value.
 - **Flags** (LIVE and the log record use the same bit meanings): bit 0 HOLD, 1 TOL_PASS, 2 TOL_FAIL, 3 SENSOR_ERR,
-  4 CAP_VALID, 5 CHARGING.
-- **Log record:** `{u32 seq, u32 unix_s, i32 value_nm, u8 unit, u8 flags, u16 profile_id}` = 16 bytes. After LOG_READ
-  the records come packed in notifications; the **end marker** (seq = 0xFFFFFFFF, 12 zero bytes) is sent **in a
-  notification of its own**, so a reader never has to split a packet at the marker.
+  4 CAP_VALID, 5 CHARGING, 6 REZERO (the zero could not be carried across a sleep/reset; cleared by ZERO); bit 7 free.
+- **Log record:** `{u32 seq, u32 unix_s, i32 value_nm, u8 unit_kind, u8 flags, u16 profile_id}` = 16 bytes. Byte 12
+  as stored: **bit 0 unit**, bits 1..3 **kind** (0 plain/live/hand hold, 1 SETTLE median, 2 SWEEP min, 3 SWEEP max),
+  bit 4 SET member and bit 5 first of a set (**reserved**, never set yet), bits 6..7 0. Records stored before the
+  kind existed have bits 1..7 = 0. **A plain LOG_READ (len 5) sends bit 0 only**, because existing readers
+  compare byte 12 with the inch value and would read an extended byte as mm; the **6-byte LOG_READ** with opts
+  bit 0 sends the whole byte. After LOG_READ the records come packed in notifications; the **end marker**
+  (seq = 0xFFFFFFFF, 12 zero bytes) is sent **in a notification of its own**, so a reader never has to split a
+  packet at the marker.
+- **COMMAND opcodes** (length includes the opcode): 0x01 ZERO (1; also clears and re-arms the capture), 0x02
+  HOLD_TOGGLE (1; in a capture mode it freezes a running capture, clears and re-arms a frozen one, else holds the
+  live value by hand), 0x03 RECORD_NOW (1), 0x04 SET_UNIT (2), **0x05 SET_CAPTURE (3: u8 mode 0..2, u8 sweep
+  selection 0..2; persisted; mode 3 SET or a value out of range → 0x80)**, **0x06 CAPTURE_RESET (1)**, 0x10
+  LOG_READ (5: u32 from_seq; **or 6: u32 from_seq, u8 opts**, opts bit 0 = the whole unit_kind byte, other bits 0
+  or 0x80), 0x11 LOG_CLEAR (1), 0x20 SELECT_PROFILE (3), 0x30 SET_TIME (5). Feature detection: firmware without the
+  capture modes sends a 12-byte LIVE, answers 0x05/0x06 with 0x06 and a 6-byte LOG_READ with 0x0D; a client sends
+  the new forms only to a caliper whose LIVE is 20 bytes.
+- **Capture semantics** (designed, not bench-tested; parameters and the reasoning in `docs/firmware.md`
+  "Capture modes"): **SETTLE** freezes the median of the last 32 samples (320 ms at 100 Hz) once the reading has
+  stayed within a 10 µm span for 0.8 s after a move of more than 0.5 mm, and releases when the jaws move 0.5 mm
+  away. **SWEEP** starts when the jaws stop (≤ 20 µm span over 100 ms after a 0.5 mm move), keeps the persisted
+  MIN and MAX (a value must hold for 2 samples) of the samples within ±1 mm of the contact reference, and freezes
+  50 ms after the reading leaves that gate (lift-off), with the departure taken back out. An exit on the side a
+  rock or a bore sweep goes, within 2 mm, must also stay out for 1 s, because a wide sweep of a small bore leaves
+  the gate and comes back. A sensor error or a confirmed count-slip correction aborts it. AUTO shows MIN when the
+  jaws closed onto the part and MAX when they opened. It suits ODs and single bores; bores in a row need MAX, and
+  depth and steps need MIN. **Tolerance** is judged on the shown value rounded to the
+  display step: the median for SETTLE, the selected extreme for SWEEP (live while in contact, final when frozen),
+  never the other extreme.
+
 - **COMMAND errors** (ATT error codes on the write response): **0x06** unknown opcode; **0x0D** wrong length for the
   opcode; **0x80** bad argument (e.g. SET_UNIT other than 0/1). PROFILES and SETTINGS writes use 0x0D for a bad
   length (PROFILES not a non-zero multiple of 30 or more than 16 records; SETTINGS over 240 bytes or a result that
@@ -344,7 +379,7 @@ detailed in the section named; this list gives the decision and its reason.
 | D3 | Slider outline **74 × 34**: end **tabs** x −6…0 and 62…68, y 2.5…16.5, with **SMT M2 standoffs** on plated holes H2–H5 clamped by the towers as the **Z datum**; H1 (18.75, 24) the only upper-band hole (support only); **flatness ≤ 0.03 mm over y 0…20** | The lower band (AS5311, electrodes) was held only by bosses at y > 22, 7–24 mm away; nothing can go under the board over the beam (0.15 mm), so the tabs are pulled up from above; y 2.5…16.5 keeps them clear of the front pads | §2, §2.1, §7 |
 | D4 | **Landscape display** (31 mm along X) over the beam band; **MINI-1 in the top-left corner**, antenna flush with the top edge, all-layer keep-out x 0…21, y 29…34; buttons ZERO / HOLD / MODE at x 31 / 38.5 / 46, y 31; USB-C right edge y 26.5; battery pocket moved to board x ≥ 21.5; full placement table | Portrait glass (y 1.5…32.5) left no room for the module, MODE and USB-C together (the clash check's U_MCU × SW_MODE and MODE cap × USB-C). Landscape frees the upper band and makes the digits ~1.8× wider. The battery behind the old module position (x 39…55) and a USB-C 1 mm from the antenna would have detuned it; the top-left corner keeps both away | §1, §2.1, §7 |
 | D5 | Scale coupler/reflector bands aligned with the slider RX/TX (one coordinate table); scale pattern 38 cells centred on the electrode sweep (SCALE_X0 14.5); scale bonded, no screws; **5 kHz** rotation, position **modulo 2.54 mm**, tracked, **≈ 25 mm/s** limit | The bands only partly overlapped (RX 10.6…11.8 vs coupler 11.0…12.8); the ADC tops out near 83 kS/s; the forward/reverse burst that cancels the ADC delay halves the range | §2.2, §4.2 |
-| D6 | GATT clarifications (magnitudes, upsert, delete, 16 max, id 0, end marker alone, error codes, encrypted SETTINGS write, partial update, field limits, decimals, LOG flags, UUID in the scan response) and **LIVE = 12 bytes** with `u16 active_profile_id` (readers accept 10 or 12) | These were implemented one way in the firmware and guessed in the app; the app could not see a profile chosen on the caliper | §8, caliper_gatt.h, protocol.js |
+| D6 | GATT clarifications (magnitudes, upsert, delete, 16 max, id 0, end marker alone, error codes, encrypted SETTINGS write, partial update, field limits, decimals, LOG flags, UUID in the scan response) and **LIVE = 12 bytes** with `u16 active_profile_id` (readers accept 10 or 12); extended to **20 bytes (v3)** for the capture modes on 2026-11-07 (§8) | These were implemented one way in the firmware and guessed in the app; the app could not see a profile chosen on the caliper | §8, caliper_gatt.h, protocol.js |
 | D7 | The app lives in `public/caliper/app/` | the empty `caliper/app/` was removed | §8 |
 | D8 | RT1 (10 k NTC on TS) **populated**, firmware **TS enabled**; IMU_INT1 is push-pull, active-low, latched with **no pull** on the net | Checked in the netlist and the firmware defaults; a pull on a push-pull line would only waste current, and ext1 ANY_LOW needs every wake line active low | §3, §5 |
 | D9 | Sleep target **≤ 35 µA** everywhere | the buck-boost's Iq and divider alone exceed the first-draft figure | §3, docs |

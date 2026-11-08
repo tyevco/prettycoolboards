@@ -293,11 +293,11 @@ static void test_store_csv(void)
         lines += s.buf[i] == '\n';
     }
     CHECK_EQ_INT(lines, 1 + 600); /* header + every stored record, none dropped */
-    CHECK(strncmp(s.buf, "seq,unix_s,utc,value,unit,flags,profile\r\n", 41) == 0);
+    CHECK(strncmp(s.buf, "seq,unix_s,utc,value,unit,flags,profile,kind\r\n", 46) == 0);
     CHECK(strstr(s.buf, "\r\n51,") != NULL);  /* the oldest kept (650 - 600 + 1) */
     CHECK(strstr(s.buf, "\r\n50,") == NULL);  /* overwritten */
     CHECK(strstr(s.buf, "\r\n650,") != NULL); /* the newest */
-    /* every line is complete: seq, unix_s, utc, value, unit, flags, profile */
+    /* every line is complete: seq, unix_s, utc, value, unit, flags, profile, kind */
     int bad = 0;
     char *line = strstr(s.buf, "\r\n") + 2;
     while (*line) {
@@ -310,7 +310,7 @@ static void test_store_csv(void)
         for (char *c = line; c < eol; c++) {
             commas += *c == ',';
         }
-        bad += commas != 6;
+        bad += commas != 7;
         line = eol + 2;
     }
     CHECK_EQ_INT(bad, 0);

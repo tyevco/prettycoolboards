@@ -10,7 +10,8 @@ static void menu_select(bool long_press)
     switch (ui_menu_selected()) {
     case UI_MENU_UNIT: core_command(CORE_CMD_TOGGLE_UNIT, 0); break;
     case UI_MENU_PROFILE: core_command(CORE_CMD_NEXT_PROFILE, 0); break;
-    case UI_MENU_AUTOHOLD: core_command(CORE_CMD_AUTOHOLD_TOGGLE, 0); break;
+    case UI_MENU_CAPTURE: core_command(CORE_CMD_CAPTURE_NEXT, 0); break;
+    case UI_MENU_SWEEP_SEL: core_command(CORE_CMD_SWEEP_SEL_NEXT, 0); break;
     case UI_MENU_WIFI: core_command(CORE_CMD_WIFI, CAL_WIFI_TOGGLE); break;
     case UI_MENU_PROVISION: core_command(CORE_CMD_WIFI, CAL_WIFI_PROVISION); break;
     case UI_MENU_STATS_RESET: core_command(CORE_CMD_STATS_RESET, 0); break;

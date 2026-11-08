@@ -4,6 +4,7 @@
  */
 #pragma once
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -21,17 +22,28 @@ typedef struct {
     uint8_t unit;
     uint8_t flags;
     uint16_t active_profile_id; /* CALIPER_PROFILE_ID_NONE (0) = none */
+    /* v3 */
+    uint8_t capture_mode;       /* CALIPER_CAPTURE_*; GATT_CAPTURE_UNKNOWN when unpacked from < 20 bytes */
+    uint8_t sweep_sel;          /* CALIPER_SWEEP_* */
+    uint8_t capture_state;      /* CALIPER_CAPST_* */
+    uint8_t which;              /* 0 n/a, CALIPER_CAPST_WHICH_MIN / _MAX */
+    uint16_t capture_n;
+    int32_t capture_aux_nm;     /* CALIPER_AUX_INVALID = n/a */
 } gatt_live_t;
 
+#define GATT_CAPTURE_UNKNOWN 0xFF
+
 void gatt_live_pack(const gatt_live_t *l, uint8_t out[CALIPER_LIVE_LEN]);
-/* Decodes a LIVE value of len bytes (>= CALIPER_LIVE_LEN_MIN; bytes past 12 are ignored). A 10-byte
- * value has no profile id: active_profile_id is then CALIPER_PROFILE_ID_NONE. Returns 0, or -1 if
- * len is too short. */
+/* Decodes a LIVE value of len bytes (>= CALIPER_LIVE_LEN_MIN; bytes past 20 are ignored). A 10-byte
+ * value has no profile id: active_profile_id is then CALIPER_PROFILE_ID_NONE. A value shorter than
+ * 20 bytes has no capture fields: capture_mode is GATT_CAPTURE_UNKNOWN, the rest 0 / n/a. Returns 0,
+ * or -1 if len is too short. */
 int gatt_live_unpack(const uint8_t *in, size_t len, gatt_live_t *l);
 
 typedef struct {
     uint8_t op;
-    uint32_t arg; /* unit, from_seq, profile id or unix time, by opcode */
+    uint32_t arg; /* unit, from_seq, profile id, unix time, or SET_CAPTURE mode | sel << 8 */
+    uint8_t opts; /* LOG_READ: CALIPER_LOG_OPT_* (the 6-byte form); 0 for the 5-byte form */
 } gatt_cmd_t;
 
 #define GATT_CMD_OK          0
@@ -40,8 +52,13 @@ typedef struct {
 #define GATT_CMD_ERR_VALUE   -3 /* e.g. SET_UNIT with a unit other than 0/1 */
 
 int gatt_cmd_parse(const uint8_t *buf, size_t len, gatt_cmd_t *out);
-/* Builds a command (used by the tests and by the USB CLI). Returns the length written. */
+/* Builds a command (used by the tests and by the USB CLI). Returns the length written. LOG_READ is
+ * the 6-byte form when opts != 0. */
 size_t gatt_cmd_build(const gatt_cmd_t *c, uint8_t *out, size_t n);
+
+/* A log record as sent in the LOG stream: byte 12 whole (unit + kind) when ext, else only the unit
+ * bit (the plain LOG_READ, for clients that read byte 12 as the unit). */
+void gatt_log_record_pack(const logrec_t *r, bool ext, uint8_t out[CALIPER_LOGREC_LEN]);
 
 void gatt_profile_pack(const meas_profile_t *p, uint8_t out[CALIPER_PROFILE_LEN]);
 void gatt_profile_unpack(const uint8_t in[CALIPER_PROFILE_LEN], meas_profile_t *p);

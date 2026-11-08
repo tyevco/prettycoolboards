@@ -82,6 +82,15 @@ label.field > span { font-weight: 600; }
 .chip.fail.on { color: var(--fail); background: var(--fail-bg); }
 .chip.err.on { color: var(--fail); background: var(--fail-bg); }
 .chip.warn.on { color: var(--warn); background: var(--warn-bg); }
+.chip.run.on { color: var(--accent); }
+.capline { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 15px; text-align: right; min-height: 1.4em;
+  overflow-wrap: anywhere; }
+.capctl { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin-top: 10px; }
+.capctl .seg { display: inline-flex; gap: 0; }
+.capctl .seg button { border-radius: 0; min-height: 40px; padding: 6px 12px; }
+.capctl .seg button:first-of-type { border-radius: 8px 0 0 8px; }
+.capctl .seg button:last-of-type { border-radius: 0 8px 8px 0; }
+.capctl .lbl { font-size: 13px; color: var(--muted); font-weight: 600; margin-right: 6px; }
 .subreadings { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin-top: 10px; }
 .sub { background: var(--surface-2); border-radius: 8px; padding: 8px 10px; min-width: 0; }
 .sub .k { font-size: 12px; color: var(--muted); font-weight: 600; }
@@ -167,10 +176,12 @@ footer { max-width: 1160px; margin: 0 auto; padding: 4px 16px 32px; color: var(-
             <span class="chip" id="fCap">CAP</span>
             <span class="chip warn" id="fChg">CHG</span>
             <span class="chip err" id="fErr">SENSOR ERR</span>
+            <span class="chip" id="fCapture" hidden></span>
           </div>
           <span class="small" id="battery" aria-label="Battery"></span>
         </div>
         <div class="reading stale" id="reading" aria-live="off"><span id="readingVal">--.--</span><span class="u" id="readingUnit">mm</span></div>
+        <div class="capline" id="capLine" hidden></div>
       </div>
       <div class="subreadings">
         <div class="sub"><div class="k">Magnetic (AS5311)</div><div class="v" id="vMag">--</div></div>
@@ -184,6 +195,20 @@ footer { max-width: 1160px; margin: 0 auto; padding: 4px 16px 32px; color: var(-
         <button type="button" id="cUnit" disabled>mm / in <kbd>U</kbd></button>
         <button type="button" id="cTime" disabled>Set time</button>
       </div>
+      <div class="capctl" id="capCtl" hidden>
+        <span class="seg" role="group" aria-label="Capture mode"><span class="lbl">Capture</span>
+          <button type="button" id="capOff" aria-pressed="false" title="The live value; Hold freezes it">Off</button>
+          <button type="button" id="capSettle" aria-pressed="false" title="Freezes the median of a 320 ms still window">Settle</button>
+          <button type="button" id="capSweep" aria-pressed="false" title="Min/max while the jaws are on the part; freezes on lift-off">Sweep</button>
+        </span>
+        <span class="seg" role="group" aria-label="Sweep shows" id="selGroup"><span class="lbl">Show</span>
+          <button type="button" id="selAuto" aria-pressed="false" title="Closing onto the part = OD = min; opening = ID = max. For several bores in a row use Max, for depth Min">Auto</button>
+          <button type="button" id="selMin" aria-pressed="false" title="OD, depth, step">Min</button>
+          <button type="button" id="selMax" aria-pressed="false" title="ID: sweep across the bore, keep the jaws square along it">Max</button>
+        </span>
+        <button type="button" id="capReset" title="Clear the capture and re-arm">Re-arm</button>
+      </div>
+
     </section>
 
     <section class="card" aria-labelledby="hChart">

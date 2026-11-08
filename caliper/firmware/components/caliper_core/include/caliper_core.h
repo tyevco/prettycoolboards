@@ -13,6 +13,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "capture.h"
 #include "esp_err.h"
 #include "esp_event.h"
 #include "logrec.h"
@@ -29,7 +30,7 @@ typedef enum {
     CAL_EVT_CMD = 0,     /* internal: core_cmd_msg_t */
     CAL_EVT_RECORDED,    /* logrec_t: a reading was stored */
     CAL_EVT_SEND,        /* cal_send_t: type this text over BLE HID */
-    CAL_EVT_STATE,       /* unit / hold / zero / profile changed (no payload) */
+    CAL_EVT_STATE,       /* unit / hold / zero / profile / capture changed (no payload) */
     CAL_EVT_SETTINGS,    /* settings changed (no payload) */
     CAL_EVT_PROFILES,    /* profile list changed (no payload) */
     CAL_EVT_LOG_CLEARED, /* no payload */
@@ -53,7 +54,10 @@ typedef enum {
     CORE_CMD_NEXT_PROFILE,
     CORE_CMD_SET_TIME,       /* arg: unix seconds */
     CORE_CMD_STATS_RESET,
-    CORE_CMD_AUTOHOLD_TOGGLE,
+    CORE_CMD_SET_CAPTURE,    /* arg: mode (CALIPER_CAPTURE_*) | sweep selection (CALIPER_SWEEP_*) << 8 */
+    CORE_CMD_CAPTURE_NEXT,   /* the menu: Off -> Settle -> Sweep -> Off */
+    CORE_CMD_SWEEP_SEL_NEXT, /* the menu: Auto -> Min -> Max (re-renders a frozen result) */
+    CORE_CMD_CAPTURE_RESET,  /* clear the capture result and re-arm */
     CORE_CMD_SLEEP,
     CORE_CMD_WIFI,           /* arg: CAL_WIFI_* */
 } core_cmd_t;
@@ -67,6 +71,19 @@ typedef struct {
     char text[28]; /* the formatted reading + hid_suffix */
 } cal_send_t;
 
+/* The capture shown with the reading (capture.h): what the display, LIVE v3 and the log use. */
+typedef struct {
+    uint8_t mode;      /* CALIPER_CAPTURE_* (= meas_cap_mode_t) */
+    uint8_t sel;       /* CALIPER_SWEEP_* (= meas_sweep_sel_t) */
+    uint8_t state;     /* CALIPER_CAPST_* (= meas_cap_state_t) */
+    int8_t which;      /* SWEEP: -1 MIN, +1 MAX, else 0 */
+    bool manual_hold;  /* HOLD froze the live value by hand (the capture is paused) */
+    uint32_t n;
+    int32_t other_nm;  /* SWEEP: the other extreme */
+    int32_t range_nm;  /* SWEEP: max - min; SETTLE: the window's max - min */
+    int32_t sd_nm;     /* SETTLE: the window's standard deviation */
+} cal_capture_t;
+
 typedef struct {
     int32_t value_nm;  /* shown value (the held value while holding), zeroed */
     int32_t live_nm;   /* zeroed live magnetic value */
@@ -78,7 +95,7 @@ typedef struct {
     char text[16];     /* value_nm formatted in the current unit */
     uint16_t profile_id;
     char profile_name[MEAS_PROFILE_NAME_LEN + 1];
-    bool autohold;
+    cal_capture_t capture;
     uint32_t samples;
 } cal_live_t;
 
@@ -106,6 +123,12 @@ esp_err_t bus_subscribe(cal_evt_t id, esp_event_handler_t handler, void *arg); /
 /* Called by the sensor task for every sample. raw_nm: un-zeroed magnetic position. */
 void core_sample(int64_t raw_nm, bool mag_ok, int64_t cap_raw_nm, bool cap_ok, uint32_t t_ms);
 void core_get_live(cal_live_t *out);
+/* Debounced button edges from the button task: samples taken while a button is pressed (it lifts
+ * the slider pads) are kept out of a capture. */
+void core_button_edge(bool down, uint32_t t_ms);
+/* The sensor applied a confirmed count-slip correction (the position stepped): a running SWEEP
+ * capture is dropped, a SETTLE still window restarts. Called by the sensor task before core_sample(). */
+void core_mag_slip(void);
 void core_get_stats(meas_stats_t *out);
 /* The zero point, kept in RTC memory across deep sleep. */
 int64_t core_zero_raw(void);

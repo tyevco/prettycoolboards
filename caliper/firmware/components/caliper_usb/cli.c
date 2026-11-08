@@ -86,6 +86,12 @@ static void print_live(void)
     core_get_live(&lv);
     out("%s %s flags=0x%02x%s cap=%ld nm profile=%u\n", lv.text, lv.unit ? "in" : "mm", lv.flags,
            (lv.flags & 1) ? " HOLD" : "", (long)lv.cap_nm, (unsigned)lv.profile_id);
+    const cal_capture_t *c = &lv.capture;
+    static const char *const modes[] = {"off", "settle", "sweep", "set"}, *const sels[] = {"auto", "min", "max"};
+    static const char *const states[] = {"idle", "armed", "tracking", "frozen", "aborted"};
+    out("capture %s/%s %s%s which=%d n=%lu other=%ld range=%ld sd=%ld nm\n", modes[c->mode & 3], sels[c->sel % 3],
+        states[c->state % 5], c->manual_hold ? " (hand hold)" : "", c->which, (unsigned long)c->n,
+        (long)c->other_nm, (long)c->range_nm, (long)c->sd_nm);
 }
 
 static void print_status(void)
@@ -135,6 +141,7 @@ static void print_profiles(void)
 static void help(void)
 {
     out("read | status | zero | hold | rec | send | unit mm|in | log [from] [n] | csv | clear yes\n"
+           "capture off|settle|sweep [auto|min|max] | rearm\n"
            "get | set <key> <value> | profiles | profile <id> | time <unix_s> | wifi on|off|ap\n"
            "export | sleep | reboot | bootloader\n");
 }
@@ -156,6 +163,14 @@ static void run(char *line)
     else if (!strcmp(cmd, "rec")) core_command(CORE_CMD_RECORD, 0);
     else if (!strcmp(cmd, "send")) core_command(CORE_CMD_SEND, 0);
     else if (!strcmp(cmd, "unit") && a1) core_command(CORE_CMD_SET_UNIT, !strcmp(a1, "in") ? 1 : 0);
+    else if (!strcmp(cmd, "capture") && a1) {
+        uint32_t mode = !strcmp(a1, "sweep") ? CALIPER_CAPTURE_SWEEP : !strcmp(a1, "settle") ? CALIPER_CAPTURE_SETTLE
+                                                                                               : CALIPER_CAPTURE_LIVE;
+        uint32_t sel = a2 && !strcmp(a2, "min") ? CALIPER_SWEEP_MIN : a2 && !strcmp(a2, "max") ? CALIPER_SWEEP_MAX
+                                                                                                : CALIPER_SWEEP_AUTO;
+        core_command(CORE_CMD_SET_CAPTURE, mode | (sel << 8));
+    } else if (!strcmp(cmd, "rearm")) core_command(CORE_CMD_CAPTURE_RESET, 0);
+
     else if (!strcmp(cmd, "log")) print_log(a1 ? (uint32_t)strtoul(a1, NULL, 10) : 0, a2 ? (uint32_t)strtoul(a2, NULL, 10) : 20);
     else if (!strcmp(cmd, "csv")) {
         settings_t s;

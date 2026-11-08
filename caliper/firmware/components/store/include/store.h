@@ -3,7 +3,7 @@
  *   - reading log: a ring of 16-byte records (logrec.h) in LittleFS segment files of 256 records
  *     (one 4 KiB block each) plus a 16-byte header file; see store.c for why
  *   - tolerance profiles: a LittleFS file of 30-byte records (the GATT PROFILES layout)
- *   - settings and small state (unit, active profile, auto-hold): NVS
+ *   - settings and small state (unit, active profile, capture mode): NVS
  * All functions are thread-safe (one internal mutex).
  */
 #pragma once
@@ -55,7 +55,8 @@ esp_err_t store_settings_save(const settings_t *s);
 typedef struct {
     uint8_t unit;
     uint16_t profile_id;
-    bool autohold;
+    uint8_t capture;   /* CALIPER_CAPTURE_LIVE / _SETTLE / _SWEEP (default SETTLE) */
+    uint8_t sweep_sel; /* CALIPER_SWEEP_* (default AUTO) */
 } store_state_t;
 
 esp_err_t store_state_load(store_state_t *st);

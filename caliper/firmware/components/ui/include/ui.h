@@ -1,13 +1,14 @@
 /*
  * ui: the 240 x 135 ST7789 IPS display (esp_lcd + esp_lvgl_port + LVGL 9) and the buttons.
  *
- * Screens (MODE cycles): MAIN (big reading, unit, hold, profile + tolerance gauge, status
- * icons) -> CHART (last 100 live values, 10 Hz) -> STATS -> MENU. A provisioning screen is
- * shown while the Wi-Fi setup AP runs.
+ * Screens (MODE cycles): MAIN (big reading, unit, capture tag + detail line, profile + tolerance
+ * gauge, status icons) -> CHART (last 100 live values, 10 Hz) -> STATS -> MENU. A provisioning
+ * screen is shown while the Wi-Fi setup AP runs.
  *
  * Buttons outside the menu:
- *   ZERO  short: zero            long: mm <-> inch
- *   HOLD  short: hold on/off     long: SEND (record + type over BLE HID)
+ *   ZERO  short: zero (also clears / re-arms the capture)          long: mm <-> inch
+ *   HOLD  short: hold on/off; in a capture mode: freeze a running capture, clear + re-arm a
+ *                frozen one, else a hand hold                        long: SEND (record + type over BLE HID)
  *   MODE  short: next screen     long: next tolerance profile
  *   ZERO+MODE 1.5 s: Wi-Fi setup AP     ZERO+HOLD 1.5 s: reset stats
  *   HOLD+MODE 1.5 s: sleep now
@@ -42,7 +43,8 @@ void ui_unlock(void);
 enum {
     UI_MENU_UNIT = 0,
     UI_MENU_PROFILE,
-    UI_MENU_AUTOHOLD,
+    UI_MENU_CAPTURE,   /* Capture: Off / Settle / Sweep (replaces Auto-hold) */
+    UI_MENU_SWEEP_SEL, /* Sweep: Auto / Min / Max */
     UI_MENU_WIFI,
     UI_MENU_PROVISION,
     UI_MENU_STATS_RESET,

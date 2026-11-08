@@ -10,6 +10,7 @@ set(FW ${CMAKE_CURRENT_LIST_DIR}/../..)
 
 set(PORTABLE_SRCS
     ${FW}/components/measure/measure.c
+    ${FW}/components/measure/capture.c
     ${FW}/components/measure/logrec.c
     ${FW}/components/measure/gatt_codec.c
     ${FW}/components/measure/settings.c
@@ -27,11 +28,17 @@ set(PORTABLE_INCS
 )
 set(WARN -Wall -Wextra -Werror -Wshadow -Wconversion -Wno-sign-conversion)
 
-add_executable(caliper_tests test_main.c ${PORTABLE_SRCS})
+add_executable(caliper_tests test_main.c test_capture.c ${PORTABLE_SRCS})
 target_include_directories(caliper_tests PRIVATE ${CMAKE_CURRENT_LIST_DIR} ${PORTABLE_INCS})
-target_compile_options(caliper_tests PRIVATE ${WARN} -fsanitize=address,undefined -fno-omit-frame-pointer -O1 -g)
+target_compile_options(caliper_tests PRIVATE ${WARN} -fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer -O1 -g)
 target_link_options(caliper_tests PRIVATE -fsanitize=address,undefined)
 target_link_libraries(caliper_tests PRIVATE m)
+
+# The app's byte vectors (public/caliper/app/protocol.vectors.test.mjs) come from this: ./gen_vectors
+add_executable(gen_vectors gen_vectors.c ${PORTABLE_SRCS})
+target_include_directories(gen_vectors PRIVATE ${PORTABLE_INCS})
+target_compile_options(gen_vectors PRIVATE ${WARN})
+target_link_libraries(gen_vectors PRIVATE m)
 
 # The portable sources must also build as strict ISO C11 (-std=c11, no GNU/POSIX extensions such as
 # strnlen), since the firmware may be built with either. Compiled only; part of the default build.
@@ -47,7 +54,7 @@ target_include_directories(store_tests PRIVATE ${CMAKE_CURRENT_LIST_DIR} ${CMAKE
                            ${FW}/components/store/include ${PORTABLE_INCS})
 # fsync -> a no-op counter in test_store.c (POSIX fsync per record made the test take ~30 s)
 target_compile_definitions(store_tests PRIVATE STORE_HOST_TEST fsync=store_host_fsync "STORE_BASE_PATH=\"${CMAKE_CURRENT_BINARY_DIR}/store_fs\"")
-target_compile_options(store_tests PRIVATE ${WARN} -fsanitize=address,undefined -fno-omit-frame-pointer -O1 -g)
+target_compile_options(store_tests PRIVATE ${WARN} -fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer -O1 -g)
 target_link_options(store_tests PRIVATE -fsanitize=address,undefined)
 target_link_libraries(store_tests PRIVATE m)
 
@@ -56,7 +63,7 @@ set(PIN_PLAN_SRCS ${FW}/components/board/pin_plan.c ${FW}/components/board/pin_p
 add_executable(pin_plan_tests test_pin_plan.c ${PIN_PLAN_SRCS})
 target_include_directories(pin_plan_tests PRIVATE ${CMAKE_CURRENT_LIST_DIR} ${FW}/main ${FW}/components/board/include)
 target_compile_definitions(pin_plan_tests PRIVATE PIN_PLAN_HOST)
-target_compile_options(pin_plan_tests PRIVATE ${WARN} -fsanitize=address,undefined -fno-omit-frame-pointer -O1 -g)
+target_compile_options(pin_plan_tests PRIVATE ${WARN} -fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer -O1 -g)
 target_link_options(pin_plan_tests PRIVATE -fsanitize=address,undefined)
 add_library(pin_plan_c11 OBJECT ${PIN_PLAN_SRCS})
 set_target_properties(pin_plan_c11 PROPERTIES C_EXTENSIONS OFF)

@@ -54,8 +54,22 @@ void ble_gatt_pack_live(uint8_t out[CALIPER_LIVE_LEN])
 {
     cal_live_t lv;
     core_get_live(&lv);
+    const cal_capture_t *cp = &lv.capture;
+    bool sweep = cp->mode == CALIPER_CAPTURE_SWEEP && cp->state >= CALIPER_CAPST_RUN && cp->state <= CALIPER_CAPST_DONE;
+    bool settle = cp->mode == CALIPER_CAPTURE_SETTLE && cp->state == CALIPER_CAPST_DONE;
     gatt_live_t g = {.value_nm = lv.value_nm, .cap_nm = lv.cap_nm, .unit = lv.unit, .flags = lv.flags,
-                     .active_profile_id = lv.profile_id};
+                     .active_profile_id = lv.profile_id,
+                     .capture_mode = cp->mode, .sweep_sel = cp->sel, .capture_state = cp->state,
+                     .which = sweep ? (cp->which < 0 ? CALIPER_CAPST_WHICH_MIN : CALIPER_CAPST_WHICH_MAX) : 0,
+                     .capture_n = (uint16_t)(cp->n > 0xFFFFu ? 0xFFFFu : cp->n),
+                     .capture_aux_nm = sweep ? cp->other_nm : settle ? cp->sd_nm : CALIPER_AUX_INVALID};
+    if (cp->manual_hold) {
+        /* a hand hold: HOLD is set, no capture result (the capture waits; LIVE mode stays idle) */
+        g.capture_state = cp->mode == CALIPER_CAPTURE_LIVE ? CALIPER_CAPST_IDLE : CALIPER_CAPST_WAIT;
+        g.which = 0;
+        g.capture_n = 0;
+        g.capture_aux_nm = CALIPER_AUX_INVALID;
+    }
     gatt_live_pack(&g, out);
 }
 
@@ -79,7 +93,9 @@ static int on_command(uint16_t conn, struct ble_gatt_access_ctxt *ctxt)
     case CALIPER_OP_HOLD_TOGGLE: core_command(CORE_CMD_HOLD_TOGGLE, 0); break;
     case CALIPER_OP_RECORD_NOW: core_command(CORE_CMD_RECORD, 0); break;
     case CALIPER_OP_SET_UNIT: core_command(CORE_CMD_SET_UNIT, c.arg); break;
-    case CALIPER_OP_LOG_READ: ble_worker_log_read(conn, c.arg); break;
+    case CALIPER_OP_SET_CAPTURE: core_command(CORE_CMD_SET_CAPTURE, c.arg); break;
+    case CALIPER_OP_CAPTURE_RESET: core_command(CORE_CMD_CAPTURE_RESET, 0); break;
+    case CALIPER_OP_LOG_READ: ble_worker_log_read(conn, c.arg, (c.opts & CALIPER_LOG_OPT_KIND) != 0); break;
     case CALIPER_OP_LOG_CLEAR: core_command(CORE_CMD_LOG_CLEAR, 0); break;
     case CALIPER_OP_SELECT_PROFILE: core_command(CORE_CMD_SELECT_PROFILE, c.arg); break;
     case CALIPER_OP_SET_TIME: core_command(CORE_CMD_SET_TIME, c.arg); break;

@@ -82,10 +82,19 @@ static void sensor_task(void *arg)
 {
     (void)arg;
     TickType_t last = xTaskGetTickCount();
+    bool have_slips = false;
+    uint32_t slips = 0;
     for (;;) {
         mag_reading_t m;
         /* SSI on every sample (~40 us): the count is refined to 488 nm only with a fresh frame */
         bool ok = sensor_mag_read(&m, true) == ESP_OK && m.ok;
+        if (ok) {
+            if (have_slips && m.slips != slips) {
+                core_mag_slip(); /* the count was re-aligned: the reading stepped, drop a running capture */
+            }
+            have_slips = true;
+            slips = m.slips;
+        }
         int64_t cap_nm;
         bool cap_ok = cap_get(&cap_nm);
         core_sample(m.raw_nm, ok, cap_nm, cap_ok, now_ms());
@@ -123,13 +132,20 @@ static void buttons_task(void *arg)
     pin_plan_apply(PP_MODE_RUN, pin_plan_init_mask(PP_INIT_BUTTONS), 0);
     btn_sm_t sm;
     btn_init(&sm);
+    uint8_t stable = 0;
     TickType_t last = xTaskGetTickCount();
     for (;;) {
         uint8_t raw = 0;
         if (!gpio_get_level(PIN_BTN_ZERO_N)) raw |= BTN_ZERO;
         if (!gpio_get_level(PIN_BTN_HOLD_N)) raw |= BTN_HOLD;
         if (!gpio_get_level(PIN_BTN_MODE_N)) raw |= BTN_MODE;
-        btn_event_t ev = btn_update(&sm, raw, now_ms());
+        uint32_t t = now_ms();
+        btn_event_t ev = btn_update(&sm, raw, t);
+        if (sm.stable != stable) {
+            /* pressing the housing lifts the slider pads (calcs §3): keep it out of a capture */
+            stable = sm.stable;
+            core_button_edge(stable != 0, t);
+        }
         if (ev.type != BTN_EV_NONE) {
             ui_handle_button(ev);
         }

@@ -2,12 +2,13 @@
 
 > **Status: builds for the target, not run on hardware.** The ESP-IDF project in
 > [`caliper/firmware`](../firmware/README.md) **builds with `idf.py build` on ESP-IDF v5.4.2** for the
-> esp32s3 (4 MB / N4R2 layout, clean build, **0 warnings**). The image is **1 660 592 B and fits the
-> 1 728 KB app slot with 108 880 B (6 %) to spare** (§13). No binary has been flashed: nothing has run on a
-> chip. The portable core (units, rounding, tolerance, statistics, log records, GATT codecs, settings JSON,
-> CSV, button gestures, the AS5311 frame logic, the SSI fine interpolation and the capacitive demodulator)
-> is compiled and tested on the host: **25 test groups, 792 checks, 0 failures**, with `-Werror`,
-> AddressSanitizer and UBSan, and also compiled as strict ISO C11; the reading-log store (`store.c`) has its
+> esp32s3 (4 MB / N4R2 layout, clean build, **0 warnings**). The image is **1 664 912 B and fits the
+> 1 728 KB app slot with 105 584 B (6 %) to spare** (§13). No binary has been flashed: nothing has run on a
+> chip. The portable core (units, rounding, tolerance, statistics, the SETTLE / SWEEP capture modes, log
+> records, GATT codecs, settings JSON, CSV, button gestures, the AS5311 frame logic, the SSI fine
+> interpolation and the capacitive demodulator) is compiled and tested on the host: **50 test groups, 1110
+> checks, 0 failures**, with `-Werror`,
+> AddressSanitizer and UBSan (fatal: any undefined behaviour fails the run), and also compiled as strict ISO C11; the reading-log store (`store.c`) has its
 > own host test against stubbed LittleFS/NVS (**3 groups, 2589 checks, 0 failures**). Everything that
 > touches a peripheral is unverified. Numbers marked **TVP** are to be verified on the prototype. The
 > adversarial review of the capacitive, UI, storage, Wi-Fi and USB modules and the SSI interpolation
@@ -204,12 +205,194 @@ offset, also zeroed) are **TVP**.
 | mm display | `decimals` (settings) = 1–3 digits; default 2 → step 10 µm | |
 | Inch display | `decimals + 2` digits; at the default 4 digits the step is **0.0005 in = 12 700 nm**, so the last digit is always 0 or 5 | 0.0005 / 0.00075 / 150 mm = 5.9055 in |
 | Zero / hold | Zero stores the raw position; hold freezes the shown value; zeroing while held shows 0 | |
-| Auto-hold | Fires once when the reading has moved > 0.5 mm since the last hold and then stays within ±5 µm for 0.8 s; an automatic hold releases itself when the jaws move > 0.5 mm away; a manual hold stays | power-up stillness does not fire; re-arm |
-| Tolerance | Band = `nominal − |tol_minus| … nominal + |tol_plus|`, **inclusive**, decided on the **displayed (rounded)** value. Green inside the inner 80 % of each half, amber in the outer 20 % (still a pass), red outside. Gauge −1000 at the lower limit, +1000 at the upper, clamped ±1500 | limits ±1 nm, one-sided, negative nominal, sign of tol_minus ignored |
+| Capture: SETTLE | Replaces the auto-hold. Fires once when the reading has moved > 0.5 mm since the last capture and then stays within a 10 µm span (±5 µm) for 0.8 s; holds the **median of the last 32 samples** (320 ms), not the first still sample; releases when the jaws move > 0.5 mm away (§6.1) | exact median against a reference sort, a +40 µm glitch moves it ≤ 1 LSB, a 20 µm/s ramp never fires, power-up stillness never fires |
+| Capture: SWEEP | Min/max peak-hold while the jaws are on the part; freezes on lift-off; shows MIN (OD) or MAX (ID) from the approach direction, or forced (§6.1) | analytic rocked-cylinder, bore and depth traces (§6.1) |
+| Tolerance | Band = `nominal − \|tol_minus\| … nominal + \|tol_plus\|`, **inclusive**, decided on the **displayed (rounded)** value. Green inside the inner 80 % of each half, amber in the outer 20 % (still a pass), red outside. Gauge −1000 at the lower limit, +1000 at the upper, clamped ±1500 | limits ±1 nm, one-sided, negative nominal, sign of tol_minus ignored |
 | Statistics | Welford over the **recorded** readings: n, min, max, mean, sample σ (n − 1) | vs a two-pass long-double computation on 5000 values at 150 mm (σ to 1e-9 relative) |
-| Log record | 16 bytes LE `{u32 seq, u32 unix_s, i32 value_nm, u8 unit, u8 flags, u16 profile_id}` | byte-exact pack, round trip, end marker |
+| Log record | 16 bytes LE `{u32 seq, u32 unix_s, i32 value_nm, u8 unit_kind, u8 flags, u16 profile_id}` (byte 12: bit 0 unit, bits 1..3 the capture kind, §8.1) | byte-exact pack, round trip, end marker |
 | Ring log | seq *s* lives in slot (s − 1) mod capacity; seq numbers never restart (a clear moves `base_seq`), so incremental sync never sees a reused number | wraparound, clear, restore after reboot, bijection over 12 345 appends; the flash layout in `store_tests` (§11) |
-| CSV | `seq,unix_s[,utc],value,unit,flags,profile`; flags `H` hold, `P` pass, `F` fail, `E` sensor error, **`Z` zero lost** (REZERO, added in the review: such a value is relative to an origin set after a sleep/reset). `csv_pack()` emits whole lines only and the export flushes and continues, so a batch that does not fit the 1 KiB buffer is split instead of losing its tail (the old loop dropped the rest of the batch) | widest line < 96 B, a 16-record batch of widest lines in 1 KiB, `HPFEZ` |
+| CSV | `seq,unix_s[,utc],value,unit,flags,profile,kind`; flags `H` hold, `P` pass, `F` fail, `E` sensor error, **`Z` zero lost** (REZERO, added in the review: such a value is relative to an origin set after a sleep/reset); **`kind`** (appended last with the capture modes, so readers of the first seven columns are unaffected): empty for a plain reading, `settle`, `min` or `max`. `csv_pack()` emits whole lines only and the export flushes and continues, so a batch that does not fit the 1 KiB buffer is split instead of losing its tail (the old loop dropped the rest of the batch) | widest line < 104 B, a 16-record batch of widest lines in 1 KiB, `HPFEZ`, the kind column |
+
+### 6.1 Capture modes
+
+Code: `components/measure/capture.c` (portable C, host-tested), glued in `caliper_core.c`.
+
+> **Status: designed and host-tested on synthetic traces, not run on hardware or tried by a user.** Every
+> parameter below is a design value to tune on the bench (**TVP**). The design note behind it is summarised
+> here; the numbers marked *calc* are geometry, not measurement.
+
+**Why.** A reading that "fluctuates a tenth of a mm" is almost all technique, not the sensor. The sensor's step
+is 0.488 µm at 100 Hz; the display step is 10 µm, so the sensor alone flickers by at most one digit at a rounding
+boundary. The dominant term is **jaw-to-part misalignment**. Flat outside jaws are 7.8 mm thick
+(`hardware/mechanical/calcs_output.txt` §1), so a cylinder of diameter D rocked across its axis by a tilt *t*
+reads *w = D / cos t + l·|tan t|* with *l* = 7.8 mm: a V-shaped minimum at *t* = 0 (*calc*, D = 20 mm):
+
+| tilt | l·tan t | D (1/cos t − 1) | reading error |
+|---|---|---|---|
+| 0.25° | 34 µm | 0.2 µm | +34 µm |
+| 0.5° | 68 µm | 0.8 µm | **+69 µm** |
+| 1° | 136 µm | 3 µm | **+139 µm** |
+
+Thumb force on the printed jaws adds about ±10 µm (PA-CF) to ±26 µm (PETG) per jaw at the tip (calcs §2);
+burrs and seating add more, all one-sided. **So an average is the wrong statistic**: misalignment only ever
+pushes an OD reading up, and averaging a rock reads high. The true size is an extreme, the turning point of the
+rock: the **minimum for OD, depth and step**, and for a bore the **maximum across it** (the chord
+2·√(r² − y²) is largest at the diameter). Tilting *along* the bore axis depends on how the inside jaws touch
+(*calc*, re-derived in the review, §14.4; the design note covered only the tip case). With a **line contact** along
+the bore (each jaw edge bearing over a length *l*ᵢ, the usual case once the jaws are in), the reading is
+*D / cos t − l*ᵢ *·|tan t|*. That is an inverted V whose top is the square position, so **MAX is right for the
+axial rock too** (Ø12 mm, *l*ᵢ = 5 mm, 1°: 85 µm low), with the same half-sample cusp bias as an OD, the other way
+up. Only with **tip contact** (*l*ᵢ ≈ 0: a shallow bore or pointed tips) does an axial tilt read *larger*, by
+*D (1/cos t − 1) ≈ D t²/2*: 1.8 µm at 1° on Ø12 mm, 15 µm at 1° on Ø100 mm. That is the wrong way for MAX and
+no statistic removes it, so keep the jaws square along the axis. That is what peak-hold indicators
+do (Mitutoyo MAX/MIN/TIR, Sylvac MIN/MAX/DELTA). An average is right only for random noise on a still reading,
+and there a median is better: that is SETTLE.
+
+**UX.**
+
+* **MENU → Capture: off / settle / sweep** (HOLD cycles it; it replaces *Auto-hold*, persisted in NVS as
+  `capture`; the old `autohold` key migrates: on = settle, off = off, and is still written for one release).
+  **MENU → Sweep: auto / min / max** (`sweep_sel`). Both are also set from the app (COMMAND `0x05`) and the USB
+  CLI (`capture off|settle|sweep [auto|min|max]`, `rearm`).
+* **MAIN**: the big number is the **chosen extreme** (SWEEP) or the **median** (SETTLE). Top left, the tag:
+  `▼MIN auto ▶` while in contact, `▼MIN auto ■` frozen, `SWEEP auto ...` armed, `SETTLE ▶` settling, `SETTLE ■`
+  frozen, `SWEEP SENSOR` (red) after a sensor error, `HOLD` for a hand hold (LVGL's built-in arrow, play and stop
+  symbols: no new font). Under the number, the detail line: `▲20.04  R 0.029  n 214` (the other extreme, the
+  range with one digit more, computed from the exact nm difference, and the sample count), or for SETTLE
+  `median  n 32  sd 0.4 um` (amber when the window's range is more than one display step: not really settled).
+  The profile line names what was judged: `GO (min)`, `NO GO (max)`, `GO (median)`. In LIVE mode the same line
+  shows the capacitive reading as before.
+* **HOLD short**: in contact → **freeze now** (a part in a vise you cannot pull away from); on a frozen result →
+  **clear and re-arm**; with nothing captured or running → a **hand hold** of the live value, as in LIVE mode
+  (pressing HOLD again releases it and re-arms). **ZERO** also clears and re-arms the capture (a capture across
+  a zero shift means nothing). **HOLD long = SEND** records and types the **shown** value; the record carries its
+  kind (§8.1). The other gestures are unchanged.
+* **Beeps**: 30 ms when a capture freezes (as the auto-hold did), 15 ms on a record.
+
+**SETTLE.** Each ok sample joins a still run while the run's span stays ≤ 10 µm; up to two isolated single
+samples outside the band are tolerated (the median ignores them), two in a row restart the run, and a bad
+(`!ok`) sample restarts it too. Once armed (moved > 0.5 mm since the last capture; never right after power-up or
+ZERO) and still for 0.8 s, it freezes the median of the last 32 samples (insertion sort of 32 int32), with their
+standard deviation and range. It releases when the reading moves 0.5 mm away from the median.
+
+**SWEEP.** Per 100 Hz sample, in `core_sample()` under the core lock:
+
+| parameter | value | why |
+|---|---|---|
+| contact | span ≤ 20 µm over 100 ms (10 samples), armed | hand closing runs 5–50 mm/s, a rock at the cusp ≤ 0.9 mm/s: this catches the stop, not the rocking |
+| re-arm | the jaws moved > 0.5 mm since the last capture (or since power-up / ZERO / re-arm) | jitter at rest never starts a capture |
+| reference | median of the 10 contact samples | |
+| approach | sign of the move over the 200 ms before the still window. If that is < 0.2 mm (the first stop came mid-rock, at a turning point 0.25 s or more after the contact), the direction of the **last move of ≥ 0.5 mm** (`leg_nm`, more than any rock). Neither: the last used, else MIN | closing = OD = MIN, opening = ID = MAX |
+| gate | ±1 mm about the reference | a 1° rock on 7.8 mm jaws is 0.14 mm; a real withdrawal leaves it |
+| lift-off | 5 consecutive samples (50 ms) outside the gate. An exit **against** the approach (the side a rock or a bore sweep goes) that stays within 2 × the gate counts only if the reading has not come back into the gate within 1 s (`resume_ms`). If it comes back in time, the run continues | a wide sweep of a small bore drops the chord out of the gate and back (Ø6 mm swept ±1.8 mm: 1.2 mm). A fast withdrawal passes 2 mm at once and is not delayed |
+| persistence | an extreme must hold 2 samples: MIN = min over i of max(x[i−1], x[i]), MAX the converse | a 1-sample glitch is rejected; costs ≤ 1 sample at a sharp cusp |
+| minimum contact | 200 ms | a shorter stop is a pause |
+| safety | freeze after 10 min; more than 5 consecutive bad samples abort | |
+
+The last 64 in-gate samples are held back uncommitted (a FIFO); at lift-off the ones that were already leaving
+faster than 20 µm per sample (2 mm/s) in the lift-off direction are taken back out, so the withdrawal does not
+inflate the other extreme or R. While in contact the display shows the committed statistics plus the FIFO
+(O(64) per sample). Out-of-gate and bad samples are never added and break the persistence window.
+
+A stop is not always a contact: the user may pause in the air. Two rules handle that (**deviations from the
+design note, chosen here**):
+
+1. **A capture that ends moving on in its own approach direction is a pause, not a contact**, and is discarded
+   (the previous result comes back): a part blocks the approach direction, so a real contact always lifts off the
+   opposite way. This also means sliding straight on from one diameter to one more than 1 mm smaller *without
+   withdrawing* discards the first (the note's test expected it frozen); a diameter within the gate is followed
+   (MIN follows it, R spans both). **Except a hover** (added in the review, §14.4): if the run's mean lies
+   ≥ 0.2 mm (`approach_nm`) from the stop *against* the approach, the stop was the jaws being lined up over the
+   part within the gate, and the contact was made from the other side. The run is then frozen as a contact
+   approached that way. Without this, the usual "open, line up 0.4–1 mm over the part, close onto it" lost the
+   OD, even with MIN forced, and the mirror case lost a bore. Then R includes the hover. While in contact, AUTO
+   shows the hover's extreme (MAX for an OD) until the lift-off decides; with MIN or MAX forced, the shown value
+   is right throughout.
+2. **A frozen result stays on the display until the jaws have come back** (reversed by > 0.5 mm against the
+   lift-off direction) and stopped again, or until HOLD/ZERO. A stop before that (the pause after pulling the
+   caliper off, while reading the display) runs as a *background candidate* that is not shown. Such a candidate
+   replaces the result at its own lift-off only if its approach is the preferred kind: **closing (OD) for AUTO and
+   MIN, opening (ID) for MAX**. The reason: "pause in the air after an OD lift-off, then close onto the next part"
+   and "pause in the air before an OD, then close onto it" are mirror images in the position signal, and only the
+   expected kind can break the tie. A background candidate is decided only at its own lift-off: the 10-minute
+   safety freeze and a hand freeze never replace the result on show. Before the review, a caliper put down open
+   after a measurement replaced the result with the air value after 10 minutes. **Consequences (TVP, bench):** in
+   AUTO, a pause in the air *after opening the jaws and before the first OD* freezes that air value briefly; the
+   real OD then runs in the background (not shown live) and replaces it at lift-off. **AUTO does not handle bores
+   in a row.** After an ID lift-off the jaws are closed, and a stop there (reading the display) is a
+   closing-approached candidate, which AUTO prefers. When the jaws open for the next bore, that air value
+   replaces the ID, and the next bore (opening, the same direction as that lift-off) is then not shown. AUTO is
+   dependable for ODs and for one bore at a time. **For bores in a row set Sweep: max**; for depth and steps,
+   **Sweep: min**.
+
+A sensor error (> 5 bad samples) during a shown capture **aborts** it: `SWEEP SENSOR`, the live value, no frozen
+value, a toast. So does a confirmed count-slip correction: `sensor_mag` re-aligns the count to the SSI, which
+steps the reading. The sensor task calls `core_mag_slip()` when `mag_reading_t.slips` changes, and that also
+restarts a SETTLE still window (added in the review; the note asked for it). It stays aborted until the jaws move 0.5 mm away and stop again (a deliberate re-measure). The
+button task reports debounced edges (`core_button_edge()`): samples are ignored while a button is down and for
+100 ms after release, and on the press the last 50 ms are taken back out of a running capture, because pressing
+the housing lifts the slider pads and moves the reading (calcs §3).
+
+**Cusp refinement** (`cfg.refine`, **off** in the firmware until the bench shows it helps): a least-squares line
+through each flank of the persisted extreme (≤ 7 samples within 50 µm), intersected, used only if every fit
+residual is ≤ 1.5 µm and the lines meet between the flanks, and clamped to [raw extreme − half a sample at the
+fitted slope, persisted extreme]. On an ideal V it recovers the sub-sample cusp; on a rounded (self-seating)
+bottom the residual check rejects it and the persisted value stands.
+
+**Arithmetic.** Integer nm throughout. The statistics use shifted sums in int64 (*x0* = the first sample,
+Σd, Σd²); the variance numerator is formed exactly as Σd² − q²n − 2qr − r²/n with Σd = qn + r, so it cannot
+overflow inside the ±1 mm gate up to 2·10⁶ samples (n saturates there); only the final square root is floating
+point. Inputs far apart cannot overflow either (a tolerated glitch in a SETTLE window can be anywhere in the
+int32 range): d² is formed in uint64, Σd² saturates, and σ then reads INT32_MAX. The review found a signed
+overflow there with UBSan. A unit switch only reformats (the capture never sees the unit); R and σ are formatted from the exact nm
+values with one digit more than the reading, never as a difference of two rounded numbers. A capture across
+zero needs nothing special (signed values, `meas_div_round` symmetric). The capture state is RAM only: deep sleep
+or a reset drops it, like a hold.
+
+**Tolerance per mode.** The go/no-go is judged on the shown value rounded to the display step (`refresh_locked()`):
+
+| mode | judged | label |
+|---|---|---|
+| LIVE / hand hold | the displayed value | `GO` |
+| SETTLE | the median | `GO (median)` |
+| SWEEP | the **selected extreme**, live while in contact, final when frozen; never the other extreme, which is a misalignment artefact, not a size | `GO (min)` / `GO (max)` |
+
+**Not built:** SET (multi-point sets, contract value 3 and the log's set bits are reserved), the CHART screen's
+min/max lines, the 5 ms contact tick, an IMU stillness gate.
+
+**Host tests** (`test/host/test_capture.c`, 14 groups plus 11 from the review; the traces are analytic and quantised to the
+488.28125 nm SSI step, with deterministic Gaussian jitter σ = 0.3 µm from an LCG so every host gives the same
+numbers; the bounds come from the geometry, so changing PERSIST, the gate or the refinement fails a bound
+deliberately). Results of 2026-11-07 (WSL Ubuntu 24.04, gcc 13.3):
+
+| # | case | asserted | measured |
+|---|---|---|---|
+| 1 | OD rock D 20 mm, l 7.8 mm, ±0.5° at 0.5 Hz, 4 s, approach and lift-off at 20 mm/s | one DONE after the lift-off, MIN, 0 ≤ MIN − D ≤ l·θ̇max·Δt·P/2 + 1 µm (3.1 µm), R within 10 % of 68.8 µm, n = 400 ± 15; the air pause after the lift-off keeps it on screen; 40 random rock phases and ±0.1° biases all within the bound | MIN − D = 0.49 µm, R 68.4 µm, n 401 |
+| 2 | fast cusp ±1° at 1 Hz (8.6 µm per sample) | persisted MIN within 9.6 µm; with refinement \|MIN − D\| ≤ 2 µm over 20 phases, never below raw min − half a sample; a rounded bottom (x = D + kθ²) never below its raw minimum | 6.3 µm persisted, 0.2 µm refined |
+| 3 | ID sweep, 12 mm bore, ±1 mm across | MAX, within 2 µm; the other extreme = the 1 mm-offset chord | MAX − D = 0 |
+| – | depth rod tilted 2°, approached by opening | AUTO picks MAX (the documented caveat); switching to MIN afterwards re-renders d within 2 µm; forced MIN gives the same | |
+| 4 | spike −50 µm at a cusp | 1 sample rejected; 3 samples persist and become the MIN (documented) | |
+| 5 | bad samples, a slip | 1 ignored; 6 in a row abort, and it stays aborted while on the part; a +2 mm pole slip for 3 samples is ignored and kept out of R | |
+| 6 | zero crossing | zero 30 µm above D (the rock crosses 0) and 1 mm above (all negative): every result shifts by exactly the zero, R/σ/n identical | |
+| 7 | gate | a 2nd diameter 0.6 mm smaller is followed (one contact, R spans both); 1.5 mm smaller: the first is discarded as a pause, the second captured | |
+| 8 | re-arm | ±3 µm jitter at rest for 10 s never starts; after a hand freeze, resting on the part captures nothing; lift-off, air pause, more opening: the result stays shown; back onto a 15 mm part: a new shown contact, frozen at its lift-off | |
+| 9 | SETTLE | fires once, exactly still_ms after the stop; the median equals a reference sort; a +40 µm glitch in the window moves it ≤ 1 LSB; a 20 µm/s ramp never fires; release and re-fire; a bad sample restarts the window | |
+| 10 | accumulator | 10⁶ samples within ±1 mm against a long-double two-pass: mean and σ within 1 nm; ±1 mm about a −1 mm first sample at the 2·10⁶ limit: exact | |
+| 11 | units | the same trace with an inch reformat mid-capture: bit-identical; R at 3 (mm) / 5 (inch) decimals from the exact difference (12.3546 − 12.3454 = `0.009`, not 0.010) | |
+| 12 | (SET) | not built | |
+| 13 | contract | in `test_main.c`: LIVE v3 bytes and round trip, 10/12/20/24-byte unpack, SET_CAPTURE / CAPTURE_RESET lengths and values (SET refused), LOG_READ 5/6 bytes and its option bits, record byte 12 masked for the plain read and whole for the extended one | |
+| 14 | buttons | HOLD: nothing captured = hand hold, in contact = freeze, frozen = re-arm; ZERO mid-capture resets; SETTLE HOLD while settling freezes; a −30 µm pad-lift dip around a press is blanked (without blanking it would have been the MIN) | |
+| – | clock wrap | the same capture with the ms clock wrapping mid-way (refinement on) | |
+| R1 | review: hover over an OD | open from 2 mm, line up 0.4 / 0.7 / 0.95 / 2 mm over a 20 mm part for 0.5 s, close at 5 mm/s, rock, release: AUTO and MIN both freeze the MIN within the cusp bound | before: lost for every hover inside the gate |
+| R2 | review: hover under a bore | the mirror on a 12 mm bore: MAX within 2 µm, AUTO and MAX (AUTO with a 2 mm hover is the documented AUTO limit) | before: lost inside the gate |
+| R3 | review: pauses stay pauses | an air pause while closing onto a part 2 mm further is discarded. An OD rocked ±1.5°, then slid off axially while the jaws keep closing, is discarded, not frozen as a MAX | before: frozen (the first stop came mid-rock, so the approach was unknown) |
+| R4 | review: background candidate | the caliper left open for 610 s after an OD: no freeze, the OD stays; a hand freeze of the hidden candidate leaves it too | before: the air value after 600 s |
+| R5 | review: slip | a 2-count slip correction mid-capture aborts it, and it stays aborted on the part; a SETTLE window restarts and fires 0.8 s after the slip | before: ignored |
+| R6 | review: int32 edges | the accumulator with INT32_MIN / INT32_MAX (no UB, σ saturates); a SETTLE window at −2·10⁹ nm with a glitch at +2.14·10⁹; a whole OD trace shifted to both int32 ends (refinement on): every result shifts exactly | before: signed overflow (UBSan) |
+| R7 | review: cusp spikes | a +50 µm glitch on the exact cusp sample: MIN within 2.5 samples of slope (P = 2 drops both pairs that hold it) | |
+| R8 | review: false lift-off | a Ø6 mm bore swept ±1.8 mm at 0.25 Hz leaves the gate by 1.2 mm each side: AUTO and MAX keep the MAX within 2 µm | before: AUTO froze the 4.80 mm chord as a MIN |
+| R9 | review: short release | an OD released by only 1.2 mm and held still: frozen ≤ 1.05 s after the exit, R without the release, then the next part 0.5 mm smaller; a bore released by 1.2 mm | |
+| R10 | review: view = freeze | at every 7th sample of a fast rock, what the display shows equals what HOLD would freeze (refinement off and on) | |
 
 ## 7. Display and buttons
 
@@ -225,25 +408,25 @@ with a frame flush on the same SPI device.
 
 | Screen | Content |
 |---|---|
-| MAIN | Reading in Montserrat 48, unit, HOLD / auto, status icons (BLE, Wi-Fi or AP, USB, battery or charging, %), the capacitive reading in small type when valid, profile name + GO / GO (edge) / NO GO, and a symmetrical gauge bar (green/amber/red) with white ticks at the limits |
+| MAIN | Reading in Montserrat 48, unit, the capture tag (HOLD / ZERO? / `▼MIN ▶`, `SETTLE ■`, …: §6.1), status icons (BLE, Wi-Fi or AP, USB, battery or charging, %), a detail line (the capture's other extreme, R and n, or the SETTLE spread; in LIVE mode the capacitive reading when valid), profile name + GO / GO (edge) / NO GO with what was judged (`(min)`, `(max)`, `(median)`), and a symmetrical gauge bar (green/amber/red) with white ticks at the limits |
 | CHART | The last 100 live values at 10 Hz (10 s), auto-scaled with a minimum ±10 µm span, plus min..max |
 | STATS | n, mean, σ (one extra digit), min, max, range of the recorded readings |
-| MENU | Unit, profile, auto-hold, Wi-Fi on/off, Wi-Fi setup (AP), reset stats, clear log (long press), sleep, about |
+| MENU | Unit, profile, **capture (off / settle / sweep)**, **sweep (auto / min / max)**, Wi-Fi on/off, Wi-Fi setup (AP), reset stats, clear log (long press), sleep, about |
 | Wi-Fi setup | Overlay with the AP name, its password and `http://192.168.4.1` while the provisioning AP runs |
 
 Buttons (100 k pull-ups + 100 nF on the board; 20 ms firmware debounce; `components/measure/buttons.c`):
 
 | Gesture | Outside the menu | In the menu |
 |---|---|---|
-| ZERO short / long (0.8 s) | zero / mm ↔ inch | up |
-| HOLD short / long | hold on/off / **SEND** (record + type over BLE HID) | select / select (destructive items need long) |
+| ZERO short / long (0.8 s) | zero (also clears and re-arms the capture) / mm ↔ inch | up |
+| HOLD short / long | hold on/off; in a capture mode freeze a running capture, clear + re-arm a frozen one (§6.1) / **SEND** (record + type over BLE HID) | select / select (destructive items need long) |
 | MODE short / long | next screen / next tolerance profile | down / leave the menu |
 | ZERO + MODE 1.5 s | Wi-Fi setup AP on/off | |
 | ZERO + HOLD 1.5 s | reset statistics | |
 | HOLD + MODE 1.5 s | sleep now | |
 
 The backlight (LEDC 20 kHz, duty ∝ brightness²) runs at 70 % and dims to 10 % after 30 s without use; the
-piezo beeps 15 ms on a record and 30 ms on an auto-hold (LEDC 4 kHz, the BZ50 resonance); the RGB LED flashes
+piezo beeps 15 ms on a record and 30 ms when a capture freezes (LEDC 4 kHz, the BZ50 resonance); the RGB LED flashes
 green / red / white for 150 ms on a pass / fail / plain record.
 
 ## 8. BLE
@@ -257,7 +440,7 @@ UUIDs share the base `7c0a0001-5e1f-4b8a-9c3d-2f6a1e0c7b11` with the second 16-b
 | UUID | Name | Properties | Payload |
 |---|---|---|---|
 | `7c0a0001-…` | service | primary | |
-| `7c0a0002-…` | LIVE | read, notify | **12 B**: `i32 value_nm` (magnetic, zeroed; the held value while holding), `i32 cap_nm` (zeroed; `INT32_MIN` if invalid), `u8 unit` (0 mm, 1 in), `u8 flags`, **`u16 active_profile_id`** (0 = none; SPEC D6). Readers accept ≥ 10 bytes (firmware before the extension sent 10: "profile unknown") and ignore bytes past 12 |
+| `7c0a0002-…` | LIVE | read, notify | **20 B** (v3): `i32 value_nm` (magnetic, zeroed; the **shown** value: the held one while holding, the capture result when frozen, the running extreme while a SWEEP is in contact), `i32 cap_nm` (zeroed; `INT32_MIN` if invalid), `u8 unit` (0 mm, 1 in), `u8 flags`, `u16 active_profile_id` (0 = none; SPEC D6), then the capture block: `u8 capture` (bits 0..3 mode 0 live / 1 settle / 2 sweep / 3 set reserved, bits 4..5 sweep selection 0 auto / 1 min / 2 max), `u8 capture_state` (bits 0..2: 0 idle, 1 armed, 2 in contact / settling, 3 frozen, 4 aborted; bits 4..5 which extreme `value_nm` is: 0 n/a, 1 MIN, 2 MAX), `u16 capture_n` (saturating), `i32 capture_aux_nm` (SWEEP the other extreme, SETTLE σ, `INT32_MIN` n/a). Readers accept ≥ 10 bytes (10: before the profile id; 12: before the capture modes) and ignore bytes past 20. 20 B fits one notification at the default ATT_MTU of 23 |
 | `7c0a0003-…` | COMMAND | write | `u8 opcode` + payload (table below) |
 | `7c0a0004-…` | LOG | notify | after LOG_READ: notifications of 1..N packed 16-byte records, then **one notification holding only the end record** (`seq = 0xFFFFFFFF`, rest zero) |
 | `7c0a0005-…` | SETTINGS | read, write (**write needs encryption**) | UTF-8 JSON ≤ 240 B; keys `name`, `wifi_ssid`, `wifi_pass` (write-only), `mqtt_url`, `http_post_url`, `auto_off_s`, `hid_suffix`, `decimals` |
@@ -266,7 +449,15 @@ UUIDs share the base `7c0a0001-5e1f-4b8a-9c3d-2f6a1e0c7b11` with the second 16-b
 LIVE flags (the log record's `flags` use the same bits): bit0 HOLD, bit1 TOL_PASS (green or amber), bit2
 TOL_FAIL, bit3 SENSOR_ERR, bit4 CAP_VALID, bit5 CHARGING, **bit6 REZERO** (added by the firmware track on
 2026-11-07: the zero could not be carried across a deep sleep or reset, §4; cleared by ZERO; a client that
-does not know it ignores it). A record stores HOLD/PASS/FAIL/SENSOR_ERR/REZERO.
+does not know it ignores it). A record stores HOLD/PASS/FAIL/SENSOR_ERR/REZERO. A frozen capture sets HOLD, so an
+old client shows it as a held reading.
+
+**Log record byte 12** (`unit_kind`, added with the capture modes; the flash format is unchanged): bit 0 unit,
+bits 1..3 kind (0 plain, 1 SETTLE median, 2 SWEEP min, 3 SWEEP max), bits 4..5 reserved for SET, 6..7 zero. Old
+records read as kind 0. The existing app and the CSV code compared the whole byte with the inch value, so an
+unmasked byte would have turned an inch SWEEP record into mm: the **plain LOG_READ (5 bytes) sends bit 0 only**
+(`gatt_log_record_pack()`), and only the **6-byte LOG_READ** with opts bit 0 sends the whole byte. Inside the
+firmware `logrec_t` keeps `unit` and `kind` apart, so nothing that reads `unit` can see the kind.
 
 | Opcode | Command | Length (incl. opcode) | Action |
 |---|---|---|---|
@@ -274,13 +465,17 @@ does not know it ignores it). A record stores HOLD/PASS/FAIL/SENSOR_ERR/REZERO.
 | `0x02` | HOLD_TOGGLE | 1 | |
 | `0x03` | RECORD_NOW | 1 | store the shown value (refused with a toast while SENSOR_ERR) |
 | `0x04` | SET_UNIT | 2 | `u8` 0 mm / 1 in |
-| `0x10` | LOG_READ | 5 | `u32 from_seq`: stream every stored record with seq ≥ from_seq (0 = from the oldest). Ignored unless this connection subscribed to LOG |
+| `0x05` | SET_CAPTURE | 3 | `u8 mode` (0 live, 1 settle, 2 sweep), `u8` sweep selection (0 auto, 1 min, 2 max); persisted. Mode 3 (SET, reserved) or a value out of range → `0x80`. Changing the mode resets the capture; changing only the selection re-renders a frozen result |
+| `0x06` | CAPTURE_RESET | 1 | clear the capture result and re-arm |
+| `0x10` | LOG_READ | 5 or 6 | `u32 from_seq`: stream every stored record with seq ≥ from_seq (0 = from the oldest). The 6th byte `u8 opts` (bit 0: send record byte 12 whole, with the kind; other bits must be 0, else `0x80`) is new; firmware without it answers 6 bytes with `0x0D`. Ignored unless this connection subscribed to LOG |
 | `0x11` | LOG_CLEAR | 1 | numbering continues after a clear |
 | `0x20` | SELECT_PROFILE | 3 | `u16 id`, 0 = none |
 | `0x30` | SET_TIME | 5 | `u32` Unix seconds (`settimeofday`) |
 
 Write errors: wrong length → ATT `0x0D` (invalid attribute value length); unknown opcode → `0x06` (request not
-supported); bad value (e.g. unit 2, a rejected setting, a full profile table) → `0x80` (application error);
+supported; firmware without the capture modes answers `0x05`/`0x06` this way, which is how a client can tell);
+bad value (e.g. unit 2, capture mode 3, a rejected setting, a full profile table) → `0x80` (application error);
+
 SETTINGS whose JSON would exceed 240 B → `0x0D`. These are `CALIPER_ATT_ERR_*` in `caliper_gatt.h`, which
 `ble_gatt.c` uses directly (with compile-time checks against NimBLE's constants). A SETTINGS write on an
 unencrypted link is refused by the stack before our code runs: ESP-IDF v5.4.2 NimBLE
@@ -715,12 +910,27 @@ https/mqtts push needs. With the pin plan (§12.5) and the MAX17048 ship-mode sl
 app partition is 0x1b0000 bytes. 0x19400 bytes (6%) free."* (total image 1 665 922 B; that build also carries
 the other tracks' uncommitted changes of the day, so the difference is not the pin plan's alone).
 
+**With the capture modes** (§6.1; 2026-11-07, a fresh copy of `caliper/firmware` only in WSL `/tmp`, `set-target`
+then `build` from an empty build directory, 0 warnings): *"caliper.bin binary size 0x196130 bytes. Smallest app
+partition is 0x1b0000 bytes. 0x19ed0 bytes (6%) free."* That is **2 768 B smaller** than the same tree without
+them (0x196c00, built the same way the same day): the MAIN screen no longer uses Montserrat 12 (the capacitive
+reading moved to the 14 pt detail line), so that font's 11 484 B of glyph data are no longer linked, and the
+capture modes add about 8.7 KB (the capture module is 5 525 B of code, about 1.5 KB of it the cusp refinement,
+which is linked but off; the rest is the core glue, the UI lines, LIVE v3, the codec and the CLI).
+`CONFIG_LV_FONT_MONTSERRAT_12` is still set; it costs nothing while unreferenced. The copy had no `hardware/` next to it, so the board component printed its "nets.py
+not found" CMake notice and skipped the generated-file check (the host ctest runs that check, and it passed).
+**After the capture review's fixes** (§14.4; rebuilt the same way from a fresh copy, `set-target` then `build`,
+0 warnings): *"caliper.bin binary size 0x196390 bytes. Smallest app partition is 0x1b0000 bytes. 0x19c70 bytes
+(6%) free."*, 608 B more. The capture call chain's stack, from `-fstack-usage` with the target compiler and
+flags: `core_sample` 64 → `refresh_locked` 64 → `meas_cap_result` 432 → `run_extremes` 48 → `refine_extreme` 400
+→ `line_fit` 96, about 1.1 KB of the sensor task's 4 KB (`sweep_start`, on the update path, 560 B).
+
 | `idf.py size` (4 MB / N4R2) | Used | Of |
 |---|---|---|
-| Image (.bin) | **1 660 592 B** | 1 769 472 B app slot (`ota_0`/`ota_1`): **108 880 B (6 %) free** |
-| Flash code (.text) | 1 129 456 B | |
-| Flash data (.rodata) | 380 160 B | |
-| DIRAM (.text + .data + .bss) | 216 971 B (63.5 %) | 341 760 B, 124 789 B free |
+| Image (.bin) | **1 664 912 B** | 1 769 472 B app slot (`ota_0`/`ota_1`): **105 584 B (6 %) free** |
+| Flash code (.text) | 1 139 292 B | |
+| Flash data (.rodata) | 373 544 B | |
+| DIRAM (.text + .data + .bss) | 218 711 B (64.0 %) | 341 760 B, 123 049 B free (the capture state is about 1.7 KB) |
 | IRAM | 16 383 B | 16 384 B: the S3's fixed IRAM block, which the linker always fills before using DIRAM |
 | RTC slow / fast | 52 B / 148 B | 8 KB each (the AS5311 position, the zero) |
 
@@ -739,9 +949,11 @@ cmake --build build-host && ctest --test-dir build-host --output-on-failure   # 
 
 They build with `-Wall -Wextra -Werror -Wshadow -Wconversion` and AddressSanitizer + UBSan; the same portable
 sources are also compiled as strict ISO C11 (`-std=c11 -pedantic`, target `portable_c11`, part of the default
-build), which is what caught `strnlen` (POSIX, not C11) in `gatt_codec.c`. Result (2026-11-07, after the
-review, WSL Ubuntu 24.04, gcc 13.3): `caliper_tests` **25 groups PASS, 792 checks, 0 failures**;
-`store_tests` **3 groups PASS, 2589 checks, 0 failures** (ctest: "100% tests passed, 0 tests failed out of 2").
+build), which is what caught `strnlen` (POSIX, not C11) in `gatt_codec.c`. The sanitizers run with
+`-fno-sanitize-recover=all` since the capture review, so a UBSan report fails the test instead of scrolling past.
+Result (2026-11-07, after the capture review, WSL Ubuntu 24.04, gcc 13.3): `caliper_tests` **50 groups PASS, 1110
+checks, 0 failures** (the 25 before, the 14 capture groups of §6.1 and the review's 11); `store_tests` **3 groups PASS, 2589 checks, 0 failures**; ctest
+"100% tests passed, 0 tests failed out of 6" (with `pin_plan_tests` and the generated-file checks).
 Covered: count → nm (1953.125 nm/count) and SSI LSB → nm (488.28125 nm) and their
 symmetry, mm and inch rounding edges (halves, −0, carries, ±150 mm, the 0.0005 in step), zero/hold, auto-hold
 timing and re-arm, tolerance limits ±1 nm (one-sided, negative nominal, sign of tol_minus, rounding before the
@@ -757,14 +969,16 @@ tracks the true one to ≤ 1 LSB and is never flagged; explicit 4095 → 0 pole-
 mismatch edge; sleep recovery with the stored offset continuing the fine position exactly for moves of
 ±2000 LSB), **slip confirmation** (3 equal mismatches correct, one bad frame or alternating noise never does,
 coarse frames neither confirm nor reset), **the PCNT wrap-race filter** (±30000 races held and re-read,
-persistent jumps accepted on the 3rd sample, re-reads never counting as samples), the 12-byte LIVE and its
-10-byte legacy decode, capacitive pattern, demodulation vs delay and position, unwrap, the Wi-Fi password rules
-(63-char passphrase, 64-hex PSK, non-hex / control / non-ASCII refused, 32-byte SSID), CSV `Z` flag, widest
-line and `csv_pack` batch splitting.
+persistent jumps accepted on the 3rd sample, re-reads never counting as samples), the 20-byte LIVE and its
+12- and 10-byte legacy decodes, the capture commands and the 6-byte LOG_READ, the log record's unit_kind byte
+(masked for the plain read), capacitive pattern, demodulation vs delay and position, unwrap, the Wi-Fi password
+rules (63-char passphrase, 64-hex PSK, non-hex / control / non-ASCII refused, 32-byte SSID), CSV `Z` flag and
+`kind` column, widest line and `csv_pack` batch splitting, and the capture modes (§6.1).
 
-The app's protocol tests use LIVE vectors generated from this C codec (`gatt_live_pack`, 12 bytes):
+The app's protocol tests use vectors generated from this C codec by `test/host/gen_vectors.c` (built with the
+host tests; `./gen_vectors` prints LIVE v3, LOG and COMMAND bytes):
 `node --test public/caliper/app/protocol.test.mjs public/caliper/app/protocol.vectors.test.mjs` on Windows
-gave **tests 36, pass 36, fail 0**.
+(Node 24.11) gave **tests 41, pass 41, fail 0**.
 
 ## 14. What is not verified
 
@@ -777,6 +991,13 @@ gave **tests 36, pass 36, fail 0**.
   the segmented log on real LittleFS (timing per record, the wear), the Host/Origin checks with real browsers
   (Chrome, Safari, Firefox; a router-provided DNS name other than the DHCP hostname is refused), the TLS
   bundle against real brokers, CLI output speed over CDC, `lvgl_port_stop()` before deep sleep.
+* **The capture modes (§6.1) are tested only on synthetic traces.** Not checked: real hand motion (contact
+  detection, the 20 µm / 100 ms stop, the 2 mm/s lift-off roll-back with a hand that accelerates), the air-pause
+  and hover rules and the 1 s exit hold against real users, the pad-lift blanking window, the SETTLE timing
+  (0.8 s vs 0.5 s), the sensor task's real stack high-water mark (the capture chain is about 1.1 KB by
+  `-fstack-usage`, §13), the LVGL arrow/play/stop glyphs on the panel, and the
+  layout of the detail line at inch widths. The design note's bench plan (noise floor, force, a ground dowel in
+  a V-block by three users against a micrometer, a ring gauge for ID, gauge blocks for depth) has not been run.
 * **Nothing has run on hardware.** In particular (**TVP**): the AS5311 SSI timing, the direction of SSI vs
   count (`SSI_SIGN`), the fine-combine tolerance (12 LSB) against real hysteresis and SSI noise, the 100 Hz
   SSI cost, whether the wrap race happens at all on this core layout, the MagINC/MagDEC interpretation, the
@@ -870,6 +1091,60 @@ build was not run until §14.2.)
 * **BQ25180 SHIP_RST** 0x09 → **0x08** (EN_PUSH off, 1 µA) and the storage write 0x49 → **0x28**
   (shutdown, adapter wake only); see §12.1.
 * **MAX17048 VRESET.Dis** is now set (§12.2).
+
+### 14.4 Adversarial review of the capture modes (2026-11-07)
+
+The SWEEP / SETTLE build (§6.1) was reviewed against the design note: the geometry re-derived, the state
+machine driven with adversarial synthetic traces (host tests R1–R10), the contract checked byte by byte for
+old clients, the app's LIVE lengths and the gestures. Defects found and fixed (**designed and host-tested, not
+run**):
+
+| # | Where | Defect | Fix |
+|---|---|---|---|
+| 1 | capture.c | The usual way onto an OD: open, line up 0.4–1 mm over the part (a stop), close onto it. Hover and contact are one run approached by *opening*, and the release (opening) is in that run's own approach direction, so the pause rule **discarded the measurement**, also with MIN forced (and AUTO showed the hover as MAX while on the part). The mirror case lost a bore | a run whose mean lies ≥ 0.2 mm from the stop against the approach is a hover-then-contact: frozen as a contact approached the other way (R1, R2) |
+| 2 | capture.c | A wide sweep of a small bore (Ø6 mm, ±1.8 mm) drops the chord out of the ±1 mm gate: false lift-off, then each sweep turning point was a closing-approached candidate, which AUTO prefers, so the 6.000 bore became a **4.800 MIN** | an exit against the approach within 2 × the gate is held for up to 1 s; coming back into the gate continues the run (R8); a short real release freezes 1 s after the exit (R9) |
+| 3 | capture.c | When the user rocks from the first moment, the first stop is a rock turning point, and the 300 ms look-back sees only the rock: approach **unknown**, so the pause rule was skipped. An OD slid off axially then froze its rock top as a MAX | fallback to the direction of the last move of ≥ 0.5 mm (R3) |
+| 4 | capture.c | A hidden background candidate (the caliper put down open after a measurement) reached the 10-minute safety freeze and **replaced the result on show with the air value** | hidden candidates are decided only at their own lift-off (R4) |
+| 5 | capture.c, caliper_core, app_main | The note's "a slip increment aborts" was not built: a confirmed count-slip correction steps the reading and went straight into the extremes | `core_mag_slip()` from the sensor task when `slips` changes: a running SWEEP aborts, a SETTLE window restarts (R5) |
+| 6 | capture.c | `meas_acc_add`: d² in int64 overflows for samples far apart (signed overflow, UB; reachable through a tolerated SETTLE glitch) | d² in uint64, Σd² saturates, σ = INT32_MAX (R6) |
+| 7 | ble_gatt.c | A hand hold in LIVE mode reported capture state 1 (armed) | 0 (idle) in LIVE mode, as the contract says |
+| 8 | docs | The ID axial-tilt caveat had the wrong sign for the usual case: with a line contact along the bore the reading is *D/cos t − l*ᵢ*·\|tan t\|* (reads low, so MAX is right), and only tip contact reads high, by *D t²/2* (1.8 µm at 1° on Ø12) | §6.1 corrected |
+| 9 | test/host | UBSan reports did not fail the run | `-fno-sanitize-recover=all` |
+
+**Geometry, re-derived** (*calc*). OD between flat jaws of thickness *l* tilted by *t* in the axial plane: a face
+point *(w/2)·n + s·u* must stay outside |x| ≤ r for |s| ≤ l/2, so *w = D/cos t + l·|tan t|*, a V-shaped minimum
+at *t* = 0 (68.1 µm at 0.5° for *l* = 7.8 mm); tilt in the cross-section plane changes nothing; **MIN is the size**.
+ID: across the bore the chord 2√(r² − y²) peaks at the diameter (**MAX**); along the axis see §6.1 (line contact:
+MAX is right; tip contact: up to *D t²/2* high, keep square). Depth rod: *d/cos t*, **MIN**. The 100 Hz sampling
+puts the persisted extreme at most P/2 samples of cusp slope off the cusp (*l·θ̇·Δt·P/2*: 2.1 µm for ±0.5° at
+0.5 Hz, 8.6 µm for ±1° at 1 Hz, always on the safe side for OD, high, and for a line-contact ID, low); a +50 µm
+one-sample glitch on the cusp sample costs up to 2.5 samples of slope (R7).
+
+**Checked and found correct:** zero crossing and the int32 ends (all differences in int64; the whole capture
+shifted to ±2.1·10⁹ nm gives identical results, R6); a unit switch (only formatting); ZERO and HOLD mid-capture;
+the clock wrap; the display view during contact equals what HOLD freezes (R10); the persistence filter; the
+lift-off roll-back. **Contract:** bytes 0–11 of LIVE v3 are byte-identical to v2, and `value_nm` is the shown
+value with HOLD set on a frozen capture, so a 10- or 12-byte reader shows the right number held. LIVE byte 8 (unit)
+is unchanged. Log byte 12 reaches a plain LOG_READ (5 bytes), the HTTP `/api/log` JSON, MQTT/HTTP push, the USB
+CLI and the CSV only as bit 0 (`logrec_unpack()` splits it), so no old reader sees the kind. The app decodes 10,
+11, 12, 14, 19, 20 and 24-byte LIVE (a 19-byte test added) and sends the 6-byte LOG_READ only to a 20-byte LIVE
+caliper. **Gestures:** no new ones; HOLD short in a capture mode means freeze / re-arm / hand hold by state, HOLD
+long stays SEND of the shown value, ZERO resets the capture; the button-edge blanking covers the whole press.
+
+**Not changed (for the bench / the owner):**
+* **AUTO's ambiguities stay**, now documented plainly in §6.1: bores in a row (use MAX), depth (use MIN), the
+  brief freeze of an air pause before the first OD, a hover inside the gate shown as the hover's extreme until
+  the lift-off, and R including the hover in that case.
+* A very slow move in the air (< 0.2 mm/s, e.g. the thumb roller turned slowly) passes the 20 µm / 100 ms contact
+  test; if no previous result is shown, it is captured as a contact at its starting point.
+* The hover rule (fix 1) cannot tell a part from the jaws closed by ≥ 0.2 mm *in the air* within the gate and
+  opened again: the position signals are identical, so such a fidget is kept as a contact (before the fix, both
+  were discarded, which lost the far more common real hover).
+* A downgrade to firmware before the capture modes would read the stored byte 12 whole, so an inch record with
+  a kind would show as mm there (the flash keeps the whole byte; the old `autohold` key is kept for downgrades,
+  this is not).
+* `meas_acc_mean_nm` rounds the shifted mean, so a mean exactly on a half nm can round toward zero (±0.5 nm,
+  irrelevant at the 488 nm LSB); the SWEEP's mean is not shown.
 
 ## 15. References
 

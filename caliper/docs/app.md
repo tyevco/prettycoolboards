@@ -18,6 +18,7 @@ from [`public/caliper/app/`](../../public/caliper/app/) into the docs site.
 | [`app.js`](../../public/caliper/app/app.js) | UI, Web Bluetooth transport, demo simulator, chart, Web Serial console |
 | [`protocol.js`](../../public/caliper/app/protocol.js) | The GATT contract as pure functions: encode/decode of every characteristic, units, stats, CSV |
 | [`protocol.test.mjs`](../../public/caliper/app/protocol.test.mjs) | `node --test` suite against hand-built byte arrays |
+| [`protocol.vectors.test.mjs`](../../public/caliper/app/protocol.vectors.test.mjs) | byte vectors produced by the firmware's C codec (`test/host/gen_vectors.c`) |
 
 ## What it does
 
@@ -32,6 +33,17 @@ from [`public/caliper/app/`](../../public/caliper/app/) into the docs site.
 - **Buttons** that send COMMAND opcodes: Zero, Hold, Record, mm/in, Set time. The clock is set
   automatically on every connect (SET_TIME with the phone's/PC's Unix time), because the caliper
   has no RTC battery. Keyboard shortcuts: <kbd>Z</kbd>, <kbd>H</kbd>, <kbd>R</kbd>, <kbd>U</kbd>.
+- **Capture modes** (firmware [§6.1](firmware.md#_6-1-capture-modes)), shown
+  only when the caliper sends the 20-byte LIVE (older firmware: no capture controls). **Capture: Off / Settle /
+  Sweep** and, for Sweep, **Show: Auto / Min / Max** send SET_CAPTURE (`0x05`); **Re-arm** sends CAPTURE_RESET
+  (`0x06`). A chip names the mode, the extreme shown and the state (`SWEEP · MIN (auto) · tracking`, `· frozen`,
+  `SETTLE · settling`, `· aborted`), and a line under the digits gives the other extreme, the range R (one digit
+  more than the reading) and n, or for Settle the median's sample count and σ. The big digits are always
+  `value_nm`, the shown value: the chosen extreme or the median. PASS / FAIL say what was judged:
+  `PASS (min)`, `FAIL (max)`, `PASS (median)`. Hold on the caliper or the page freezes a running capture and
+  re-arms a frozen one, as on the device. **Auto** reads the approach (closing = OD = min, opening = bore = max):
+  it suits ODs and one bore at a time; for several bores in a row choose **Max**, for depth and steps **Min**
+  (firmware §6.1).
 - **Live chart** of the last 30 s, drawn on a `<canvas>` by hand (no chart library): magnetic as
   a solid line, capacitive dashed, and the active profile's tolerance band shaded with the nominal
   as a dashed line. The y-axis autoscales; it includes the band when the readings are within
@@ -42,7 +54,10 @@ from [`public/caliper/app/`](../../public/caliper/app/) into the docs site.
 - **Log download.** LOG_READ from a chosen sequence number (0 = everything), reassembly of the
   16-byte records until the end marker, a table (newest first) and CSV export. If no
   notification arrives for 5 s before the end marker, the download stops and keeps what it has.
-  "Clear log on caliper" sends LOG_CLEAR after a confirmation dialog.
+  "Clear log on caliper" sends LOG_CLEAR after a confirmation dialog. With a caliper that has the capture
+  modes the page sends the 6-byte LOG_READ that returns each record's kind; the table tags SETTLE / MIN / MAX
+  records and the CSV gets a last `kind` column (`settle`, `min`, `max` or empty). If that read is refused it
+  falls back to the plain 5-byte one.
 - **Tolerance profiles editor**: read, add, edit, delete and write the PROFILES records, and
   select the active one (SELECT_PROFILE; "No profile" selects id 0). Values are edited in the
   current display unit and stored in nm.
@@ -105,8 +120,13 @@ The simulator:
   scale pitch, a 2.5 µm offset and 1.5 µm of noise, and marks it invalid while the jaw moves faster
   than 60 mm/s and on 2 % of samples at random. These are illustrative numbers, not predictions;
   the real error budget is in [simulation](simulation.md) and has to be measured at [bring-up](bringup.md);
-- starts with three profiles and 42 past log records, reports the active profile in the 12-byte LIVE, and lets the
-  battery run down and charge.
+- starts with three profiles and 42 past log records, reports the active profile in the LIVE, and lets the
+  battery run down and charge;
+- models the capture modes roughly (not the firmware's algorithm, enough to drive the page): it starts in
+  Settle, which freezes the reading after 0.8 s still; in Sweep the simulated user rocks the part while the jaws
+  dwell on it (7.8 mm jaws, ±0.6° at 0.7 Hz, so an OD reads up to 82 µm high), the page shows the running MIN or
+  MAX, and it freezes when the jaws move off. It answers SET_CAPTURE with mode 3 like the firmware (an error), and
+  sends the record kind only for the 6-byte LOG_READ.
 
 ## BLE GATT contract
 
@@ -118,14 +138,15 @@ the second 16-bit group changed:
 
 | UUID | Name | Properties | Payload |
 |---|---|---|---|
-| `7c0a0002-…` | LIVE | read, notify | 12 B: `i32 value_nm` (magnetic, zeroed), `i32 cap_nm` (capacitive, zeroed; `INT32_MIN` if invalid), `u8 unit` (0 mm, 1 inch), `u8 flags`, `u16 active_profile_id` (0 = none). Firmware from before the extension sends the first 10 B only; the page accepts both |
+| `7c0a0002-…` | LIVE | read, notify | 20 B: `i32 value_nm` (magnetic, zeroed; the shown value), `i32 cap_nm` (capacitive, zeroed; `INT32_MIN` if invalid), `u8 unit` (0 mm, 1 inch), `u8 flags`, `u16 active_profile_id` (0 = none), `u8 capture` (bits 0..3 mode: 0 live, 1 settle, 2 sweep, 3 set reserved; bits 4..5 sweep selection: 0 auto, 1 min, 2 max), `u8 capture_state` (bits 0..2: 0 idle, 1 armed, 2 in contact / settling, 3 frozen, 4 aborted; bits 4..5: 0 n/a, 1 value is the MIN, 2 the MAX), `u16 capture_n`, `i32 capture_aux_nm` (Sweep: the other extreme; Settle: σ; `INT32_MIN` n/a). Older firmware sends the first 12 B (no capture modes) or 10 B (no profile id); the page accepts all three |
 | `7c0a0003-…` | COMMAND | write | `u8 opcode` + payload (below) |
-| `7c0a0004-…` | LOG | notify | after LOG_READ: notifications of 1…N packed 16-byte records `{u32 seq, u32 unix_s, i32 value_nm, u8 unit, u8 flags, u16 profile_id}`; the stream ends with a record whose `seq = 0xFFFFFFFF`, sent in a notification of its own |
+| `7c0a0004-…` | LOG | notify | after LOG_READ: notifications of 1…N packed 16-byte records `{u32 seq, u32 unix_s, i32 value_nm, u8 unit_kind, u8 flags, u16 profile_id}`; the stream ends with a record whose `seq = 0xFFFFFFFF`, sent in a notification of its own. `unit_kind`: bit 0 unit, bits 1..3 kind (0 plain, 1 settle, 2 sweep min, 3 sweep max); the plain LOG_READ sends bit 0 only |
 | `7c0a0005-…` | SETTINGS | read, write (encrypted link) | UTF-8 JSON ≤ 240 B, partial update: `name`, `wifi_ssid`, `wifi_pass` (write-only), `mqtt_url`, `http_post_url`, `auto_off_s`, `hid_suffix` (`"\n"`, `"\t"` or `""`), `decimals` |
 | `7c0a0006-…` | PROFILES | read, write | one or more 30-byte records `{u16 id, i32 nominal_nm, i32 tol_minus_nm, i32 tol_plus_nm, char name[16]}`, name NUL-padded; a write is a per-record upsert, all or nothing |
 
-Flags: bit 0 HOLD, bit 1 TOL_PASS, bit 2 TOL_FAIL, bit 3 SENSOR_ERR, bit 4 CAP_VALID, bit 5 CHARGING.
-The app reads the log record's `flags` byte with the same bit meanings.
+Flags: bit 0 HOLD, bit 1 TOL_PASS, bit 2 TOL_FAIL, bit 3 SENSOR_ERR, bit 4 CAP_VALID, bit 5 CHARGING,
+bit 6 REZERO (the zero was lost in a sleep or reset). The app reads the log record's `flags` byte with the
+same bit meanings. A frozen capture sets HOLD.
 
 | Opcode | Command | Payload |
 |---|---|---|
@@ -133,7 +154,9 @@ The app reads the log record's `flags` byte with the same bit meanings.
 | `0x02` | HOLD_TOGGLE | none |
 | `0x03` | RECORD_NOW | none |
 | `0x04` | SET_UNIT | `u8` unit |
-| `0x10` | LOG_READ | `u32` from_seq |
+| `0x05` | SET_CAPTURE | `u8` mode (0 live, 1 settle, 2 sweep; 3 SET is refused with 0x80), `u8` sweep selection (0 auto, 1 min, 2 max) |
+| `0x06` | CAPTURE_RESET | none (clear and re-arm the capture) |
+| `0x10` | LOG_READ | `u32` from_seq, optionally `u8` opts (bit 0: send each record's kind) |
 | `0x11` | LOG_CLEAR | none |
 | `0x20` | SELECT_PROFILE | `u16` id |
 | `0x30` | SET_TIME | `u32` Unix seconds |
@@ -184,6 +207,11 @@ contract, so `protocol.js`, the firmware and `caliper_gatt.h` now agree on them:
   the page keeps the profile it last selected (remembered in the browser), which may be stale.
 - **Advertising**: the page filters the device chooser on the custom service UUID, which the
   firmware puts in the scan response.
+- **Capture modes (feature detection).** A LIVE of 20 bytes means the firmware has the capture modes, the
+  capture commands and the 6-byte LOG_READ (one release added all three); a 10- or 12-byte LIVE means none of
+  them, and the page hides the capture controls and sends the plain LOG_READ. Firmware without them would answer
+  `0x05`/`0x06` with 0x06 and a 6-byte LOG_READ with 0x0D. The page decodes the log record's byte 12 as
+  `unit = byte & 1`, `kind = (byte >> 1) & 7` in both cases, so neither form can turn an inch record into mm.
 
 ## Tests
 
@@ -193,31 +221,37 @@ node --test public/caliper/app/protocol.test.mjs public/caliper/app/protocol.vec
 
 (Give the file paths; `node --test public/caliper/app/` with a folder does not find them on Node 24.)
 
-`protocol.test.mjs`: 22 tests, run with Node 24.11 on Windows: all pass (36 with the vectors file, re-run
-after the 12-byte LIVE change). They check the UUIDs; LIVE decode
+`protocol.test.mjs`: 23 tests, run with Node 24.11 on Windows: all pass (41 with the vectors file, re-run
+after the capture modes, 2026-11-07). They check the UUIDs; LIVE decode
 (positive/negative values, `INT32_MIN` and CAP_VALID handling, a `DataView` with an offset, short
-packets, 12-byte packets with `active_profile_id`, 10- and 11-byte packets without it, trailing bytes) and
-encode (12 bytes, and the 10-byte legacy form); every COMMAND encoding; LOG packets, multi-notification
+packets, 12-, 14- and 19-byte packets with `active_profile_id` and no capture block, 10- and 11-byte packets without the id,
+trailing bytes, the 20-byte capture block for a frozen Sweep MIN, a Settle median and a waiting Sweep) and
+encode (20 bytes, the 12- and 10-byte legacy forms, `n` saturating); every COMMAND encoding including
+SET_CAPTURE, CAPTURE_RESET and the 6-byte LOG_READ; LOG packets (with the kind), multi-notification
 streams, the end marker in its own notification, empty logs and duplicates; PROFILES decode/encode including a 16-character name without
 a NUL and UTF-8 truncation; tolerance evaluation; SETTINGS encode/decode and the 240-byte limit;
 formatting, stats and CSV. Each expected byte array is written out by hand from the contract, not
 generated by the code under test.
 
-`protocol.vectors.test.mjs`: 14 more tests added in review, all pass. Their expected bytes were
-produced by the firmware's portable C codec (`gatt_codec.c`, `logrec.c`), compiled with gcc in
-WSL, so they check that page and firmware agree byte for byte: every LIVE flag bit, `INT32_MIN`
-and `INT32_MAX`, a high-bit LOG seq and the end marker, a 16-byte name with no NUL, a UTF-8 name,
-delete records, the 16-record limit and the u32/u16 command extremes. **Exception:** the two LIVE
-vectors were 10 bytes from `gatt_live_pack()`; for the 12-byte LIVE their last two bytes (the profile
-id) were appended by hand, and the 10-byte originals stay as decode-only checks. The firmware track
-regenerates them from C once its codec writes 12 bytes. The other direction was
+`protocol.vectors.test.mjs`: 18 tests, all pass. Their expected bytes were produced by the firmware's portable C
+codec (`gatt_codec.c`, `logrec.c`), compiled with gcc in WSL, so they check that page and firmware agree byte for
+byte: every LIVE flag bit, `INT32_MIN` and `INT32_MAX`, a high-bit LOG seq and the end marker, a 16-byte name
+with no NUL, a UTF-8 name, delete records, the 16-record limit and the u32/u16 command extremes. With the capture
+modes every LIVE and command vector was **regenerated from C** by `caliper/firmware/test/host/gen_vectors.c`
+(2026-11-07, gcc 13.3): the 20-byte LIVE (the first 12 and 10 bytes of each stay as decode checks for older
+firmware; they equal the earlier vectors), a frozen Sweep MIN, a running forced MAX with `n` saturated and a
+negative other extreme, a Settle median with its σ, an aborted Sweep, a log record's byte 12 masked for the plain
+read and whole for the extended one, and the SET_CAPTURE / CAPTURE_RESET / 6-byte LOG_READ bytes. The other direction was
 checked once by hand and is not automated: profiles, SETTINGS JSON and commands encoded by
 `protocol.js` were fed to the firmware's `gatt_profile_unpack()`, `settings_from_json()` and
 `gatt_cmd_parse()`, which accepted all of them and decoded the same values (a throwaway harness,
 not in the repo). That was the firmware code as it stood during the review; it was still being written.
 
 Not tested: the DOM code, the chart, the Web Bluetooth transport and Web Serial. Those were only
-exercised by hand in demo mode in Chrome.
+exercised by hand in demo mode in Chrome. The capture controls were exercised only by a scripted run of
+`app.js` in demo mode under Node against a stub DOM (2026-11-07: every Settle and Sweep state rendered, the mode
+and selection buttons round-tripped through SET_CAPTURE, Re-arm, a record and a log download with the kind, no
+exceptions); they have not been looked at in a browser yet.
 
 ## To verify on the prototype
 
@@ -226,3 +260,6 @@ exercised by hand in demo mode in Chrome.
 - LOG_READ of a full log (thousands of records): time, and whether the 5 s idle timeout is long enough.
 - Long reads of SETTINGS (240 B) and PROFILES (up to 480 B) through Chrome's Read Blob handling.
 - Reconnect after the caliper's auto-off; the page offers "Reconnect" to the same device without the chooser.
+- The capture controls in a real browser (layout at 320–412 px, dark mode) and against the firmware: the 20-byte
+  LIVE notifications at the default MTU, SET_CAPTURE persistence across a reconnect, the 6-byte LOG_READ.
+

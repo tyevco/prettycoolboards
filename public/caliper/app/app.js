@@ -115,6 +115,11 @@ class DemoTransport {
     this.charging = false;
     this.timeOffsetS = 0;
     this.activeProfile = 0;
+    // capture modes, simulated roughly like the firmware (capture.c): SETTLE freezes when still for 0.8 s,
+    // SWEEP tracks min/max while the jaws dwell on a part (the demo rocks it) and freezes on lift-off
+    this.capMode = P.CAPTURE.SETTLE;
+    this.capSel = P.SWEEP.AUTO;
+    this.cap = { state: P.CAPST.WAIT, run: null, frozen: null, stillSince: 0 };
     this.settings = { name: 'PCC-demo', wifi_ssid: 'workshop', mqtt_url: '', http_post_url: '', auto_off_s: 300, hid_suffix: '\n', decimals: 2 };
     this.profiles = [
       { id: 1, nominalNm: 25_400_000, tolMinusNm: 20_000, tolPlusNm: 20_000, name: '1in gauge' },
@@ -181,20 +186,67 @@ class DemoTransport {
     const now = performance.now();
     const { pos, speed } = this._absNm(now);
     this.posNm = pos;
-    const magAbs = Math.round((pos + gauss() * 250) / AS5311_COUNT_NM) * AS5311_COUNT_NM;
-    let mag = Math.round(magAbs - this.zeroNm);
+    // dwelling on a part (not the closed jaws): in SWEEP the simulated user rocks it, 7.8 mm jaws tilted
+    // +-0.6 deg at 0.7 Hz read up to l tan(t) = 82 um high (the V-shaped minimum at t = 0)
+    const onPart = speed === 0 && this.to > 1e6;
+    let rock = 0;
+    if (onPart && this.capMode === P.CAPTURE.SWEEP) {
+      const th = (0.6 * Math.PI / 180) * Math.sin(2 * Math.PI * 0.7 * (now - this.t1) / 1000);
+      rock = 7.8e6 * Math.abs(Math.tan(th)) * (this.from > this.to ? 1 : -1); // OD reads high, ID low
+    }
+    const magAbs = Math.round((pos + rock + gauss() * 250) / AS5311_COUNT_NM) * AS5311_COUNT_NM;
+    const live = Math.round(magAbs - this.zeroNm);
+    let mag = live;
     // capacitive: a few um of periodic (scale-pitch) error + noise, drops out when moving fast
     const capErr = 4_000 * Math.sin((2 * Math.PI * pos) / 5.08e6) + gauss() * 1_500 + 2_500;
     const capValid = speed < 60e6 && Math.random() > 0.02;
     let cap = capValid ? Math.round(mag + capErr) : null;
+    const c = this._captureStep(live, speed, onPart, now);
+    let held = this.hold;
     if (this.hold) { mag = this.holdNm; cap = this.holdCap; }
+    else if (c.shown !== null) { mag = c.shown; held = c.state === P.CAPST.DONE; }
     let flags = 0;
-    if (this.hold) flags |= P.FLAG.HOLD;
+    if (held) flags |= P.FLAG.HOLD;
     if (cap !== null) flags |= P.FLAG.CAP_VALID;
     if (this.charging) flags |= P.FLAG.CHARGING;
     const prof = this.profiles.find((p) => p.id === this.activeProfile);
     if (prof) flags |= P.evaluateTolerance(mag, prof) === 'pass' ? P.FLAG.TOL_PASS : P.FLAG.TOL_FAIL;
-    return { valueNm: mag, capNm: cap, unit: this.unit, flags, activeProfileId: this.activeProfile };
+    // a hand hold: no capture result (the firmware reports the capture waiting, or idle in LIVE mode)
+    const capture = this.hold ? { mode: this.capMode, sel: this.capSel, state: this.capMode === P.CAPTURE.LIVE ? P.CAPST.IDLE : P.CAPST.WAIT } : c.wire;
+    return { valueNm: mag, capNm: cap, unit: this.unit, flags, activeProfileId: this.activeProfile, capture };
+  }
+
+  // A rough model of capture.c, enough to exercise the page. Returns the shown value (or null = live).
+  _captureStep(live, speed, onPart, now) {
+    const k = this.cap;
+    const which = (r) => (this.capSel === P.SWEEP.MIN ? 'min' : this.capSel === P.SWEEP.MAX ? 'max' : r.approach < 0 ? 'min' : 'max');
+    if (this.capMode === P.CAPTURE.SWEEP) {
+      if (onPart) {
+        if (!k.run) k.run = { min: live, max: live, n: 0, approach: this.from > this.to ? -1 : 1 };
+        const r = k.run;
+        r.min = Math.min(r.min, live); r.max = Math.max(r.max, live); r.n++;
+      } else if (k.run && speed > 0) {
+        if (k.run.n > 4) k.frozen = { ...k.run }; // lift-off: freeze
+        k.run = null;
+      }
+      const r = k.run ?? k.frozen;
+      k.state = k.run ? P.CAPST.RUN : k.frozen ? P.CAPST.DONE : P.CAPST.WAIT;
+      if (!r) return { shown: null, state: k.state, wire: { mode: this.capMode, sel: this.capSel, state: k.state } };
+      const w = which(r);
+      const shown = w === 'min' ? r.min : r.max;
+      return { shown, state: k.state, wire: { mode: this.capMode, sel: this.capSel, state: k.state, which: w, n: r.n * 5, auxNm: w === 'min' ? r.max : r.min } };
+    }
+    if (this.capMode === P.CAPTURE.SETTLE) {
+      if (k.frozen && Math.abs(live - k.frozen.median) > 500_000) k.frozen = null; // released by opening
+      if (!k.frozen) {
+        if (speed > 0) k.stillSince = now;
+        else if (now - k.stillSince > 800 && Math.abs(live) > 500_000) k.frozen = { median: live, sd: 180 + Math.round(Math.random() * 200) };
+      }
+      k.state = k.frozen ? P.CAPST.DONE : speed === 0 && now - k.stillSince > 100 ? P.CAPST.RUN : P.CAPST.WAIT;
+      if (!k.frozen) return { shown: null, state: k.state, wire: { mode: this.capMode, sel: this.capSel, state: k.state } };
+      return { shown: k.frozen.median, state: k.state, wire: { mode: this.capMode, sel: this.capSel, state: k.state, n: 32, auxNm: k.frozen.sd } };
+    }
+    return { shown: null, state: P.CAPST.IDLE, wire: { mode: P.CAPTURE.LIVE, sel: this.capSel, state: P.CAPST.IDLE } };
   }
   _tick() {
     const s = this._sample();
@@ -208,21 +260,40 @@ class DemoTransport {
   async command(bytes) {
     const c = P.decodeCommand(bytes);
     const cur = this.last ?? this._sample();
+    const capReset = () => { this.cap = { state: P.CAPST.WAIT, run: null, frozen: null, stillSince: performance.now() }; };
     switch (c.name) {
-      case 'ZERO': this.zeroNm = this.posNm; this.hold = false; break;
-      case 'HOLD_TOGGLE':
-        this.hold = !this.hold;
-        if (this.hold) { this.holdNm = cur.valueNm; this.holdCap = cur.capNm; }
+      case 'ZERO': this.zeroNm = this.posNm; this.hold = false; capReset(); break;
+      case 'HOLD_TOGGLE': {
+        const st = cur.capture?.state;
+        if (this.hold) { this.hold = false; capReset(); }
+        else if (this.capMode !== P.CAPTURE.LIVE && st === P.CAPST.RUN) {
+          if (this.cap.run) { this.cap.frozen = { ...this.cap.run }; this.cap.run = null; } // freeze now
+          else if (this.capMode === P.CAPTURE.SETTLE) this.cap.frozen = { median: cur.valueNm, sd: 300 };
+        } else if (this.capMode !== P.CAPTURE.LIVE && st === P.CAPST.DONE) capReset(); // re-arm
+        else { this.hold = true; this.holdNm = cur.valueNm; this.holdCap = cur.capNm; }
         break;
-      case 'RECORD_NOW':
+      }
+      case 'RECORD_NOW': {
         if (this.log.length >= 4000) this.log.shift();
+        const cc = cur.capture;
+        const kind = this.hold || !cc ? P.LOG_KIND.PLAIN
+          : cc.mode === P.CAPTURE.SETTLE && cc.state === P.CAPST.DONE ? P.LOG_KIND.SETTLE
+            : cc.mode === P.CAPTURE.SWEEP && cc.which ? (cc.which === 'min' ? P.LOG_KIND.SWEEP_MIN : P.LOG_KIND.SWEEP_MAX) : P.LOG_KIND.PLAIN;
         this.log.push({ seq: ++this.seq, unixS: this._nowS(), valueNm: cur.valueNm, unit: cur.unit,
-          flags: cur.flags & (P.FLAG.HOLD | P.FLAG.TOL_PASS | P.FLAG.TOL_FAIL), profileId: this.activeProfile });
+          flags: cur.flags & (P.FLAG.HOLD | P.FLAG.TOL_PASS | P.FLAG.TOL_FAIL), profileId: this.activeProfile, kind });
         break;
+      }
       case 'SET_UNIT': this.unit = c.unit ? P.UNIT.INCH : P.UNIT.MM; break;
+      case 'SET_CAPTURE':
+        if (c.mode > P.CAPTURE.SWEEP || c.sel > P.SWEEP.MAX) throw new Error('GATT Error: 0x80 (capture mode not available)');
+        if (c.mode !== this.capMode) { this.capMode = c.mode; this.hold = false; capReset(); }
+        this.capSel = c.sel;
+        break;
+      case 'CAPTURE_RESET': this.hold = false; capReset(); break;
       case 'LOG_READ': {
         const recs = this.log.filter((r) => r.seq >= c.fromSeq);
-        const packets = P.encodeLogPackets(recs, { perPacket: 15 }); // 15 x 16 = 240 B fits a 247 B MTU
+        // 15 x 16 = 240 B fits a 247 B MTU; the record kind only with the 6-byte LOG_READ (opts bit 0)
+        const packets = P.encodeLogPackets(recs, { perPacket: 15, ext: (c.opts & P.LOG_OPT_KIND) !== 0 });
         packets.forEach((p, i) => setTimeout(() => this.connected && this.handlers.log(P.toDataView(p)), 30 * (i + 1)));
         break;
       }
@@ -324,6 +395,7 @@ function setConnectedUi(on) {
   for (const id of ['cZero', 'cHold', 'cRecord', 'cUnit', 'cTime', 'logRead', 'logClear', 'profRead', 'profWrite', 'profNone', 'setRead', 'setWrite', 'sAdd']) {
     $(id).disabled = !on;
   }
+  if (!on) $('capCtl').hidden = true;
   $('btnDisconnect').hidden = !on;
   $('btnConnect').hidden = on;
   $('btnDemo').hidden = on;
@@ -432,6 +504,44 @@ function onLive(dv) {
 
 function setChip(id, on) { $(id).classList.toggle('on', !!on); }
 
+// R and sigma get one digit more than the reading (the firmware's rule), computed from the exact nm
+const fmtFine = (nm) => P.formatReading(nm, S.unit, Math.min(S.decimals + 1, 3)); // mm 3 / inch 5 at the default
+
+function renderCapture(l) {
+  const c = l.capture;
+  const ctl = $('capCtl');
+  ctl.hidden = !c; // firmware without capture modes (LIVE < 20 bytes): no capture UI
+  const chip = $('fCapture'), line = $('capLine');
+  if (!c) { chip.hidden = true; line.hidden = true; return; }
+  for (const [id, mode] of [['capOff', P.CAPTURE.LIVE], ['capSettle', P.CAPTURE.SETTLE], ['capSweep', P.CAPTURE.SWEEP]]) {
+    $(id).setAttribute('aria-pressed', String(c.mode === mode));
+  }
+  for (const [id, sel] of [['selAuto', P.SWEEP.AUTO], ['selMin', P.SWEEP.MIN], ['selMax', P.SWEEP.MAX]]) {
+    $(id).setAttribute('aria-pressed', String(c.sel === sel));
+  }
+  $('selGroup').hidden = c.mode !== P.CAPTURE.SWEEP;
+  const live = c.mode === P.CAPTURE.LIVE;
+  chip.hidden = live;
+  line.hidden = live;
+  if (live) return;
+  const which = c.which ? ` · ${c.which.toUpperCase()}${c.sel === P.SWEEP.AUTO ? ' (auto)' : ''}` : '';
+  const stName = c.mode === P.CAPTURE.SETTLE && c.state === P.CAPST.RUN ? 'settling' : c.stateName;
+  chip.textContent = `${c.modeName.toUpperCase()}${which} · ${stName}`;
+  chip.className = 'chip on ' + (c.state === P.CAPST.DONE ? 'warn' : c.state === P.CAPST.ABORT ? 'err' : c.state === P.CAPST.RUN ? 'run' : '');
+  const u = P.unitLabel(S.unit);
+  if (c.mode === P.CAPTURE.SWEEP && c.otherNm !== null) {
+    const other = c.which === 'min' ? `max ${fmt(c.otherNm)}` : `min ${fmt(c.otherNm)}`;
+    line.textContent = `${other}  ·  R ${fmtFine(c.rangeNm)} ${u}  ·  n ${c.n}${c.n === 65535 ? '+' : ''}`;
+  } else if (c.mode === P.CAPTURE.SWEEP) {
+    line.textContent = c.state === P.CAPST.ABORT ? 'capture dropped (sensor error): lift off and measure again'
+      : 'waiting for contact: close (OD) or open (ID) onto the part, then rock or sweep slowly';
+  } else if (c.sdNm !== null) {
+    line.textContent = `median of ${c.n} samples  ·  σ ${fmtDelta(c.sdNm).replace(/^[+−±]/, '')}`;
+  } else {
+    line.textContent = c.state === P.CAPST.RUN ? 'settling… hold still' : 'waiting: move to the part and hold still';
+  }
+}
+
 function renderLive() {
   const l = S.live;
   if (!l) return;
@@ -439,6 +549,11 @@ function renderLive() {
   $('readingVal').textContent = l.sensorErr ? 'Err' : fmt(l.valueNm);
   $('readingUnit').textContent = P.unitLabel(S.unit);
   setChip('fHold', l.hold); setChip('fPass', l.tolPass); setChip('fFail', l.tolFail);
+  // what the go/no-go judged: the chosen SWEEP extreme or the SETTLE median, when it is a capture result
+  const judged = P.judgedLabel(l.capture);
+  $('fPass').textContent = judged ? `PASS (${judged})` : 'PASS';
+  $('fFail').textContent = judged ? `FAIL (${judged})` : 'FAIL';
+  renderCapture(l);
   setChip('fCap', l.capValid); setChip('fChg', l.charging); setChip('fErr', l.sensorErr);
   const lcd = $('lcd');
   lcd.classList.toggle('pass', l.tolPass && !l.tolFail);
@@ -624,7 +739,15 @@ async function readLog() {
   $('logRead').disabled = true;
   $('logStatus').textContent = 'requesting…';
   S.logTimer = setTimeout(() => finishLog(false), LOG_IDLE_TIMEOUT_MS);
-  try { await sendCmd(P.encodeCommand.logRead(from), 'Log read'); } catch { S.logAsm = null; clearTimeout(S.logTimer); $('logRead').disabled = false; $('logStatus').textContent = ''; }
+  // A caliper with capture modes (20-byte LIVE) also takes the 6-byte LOG_READ that returns the record
+  // kind (SETTLE median, SWEEP min/max). If it refuses (older firmware: ATT 0x0D), use the plain read.
+  const ext = !!S.live?.capture;
+  try {
+    if (ext) {
+      try { await S.t.command(P.encodeCommand.logRead(from, { kind: true })); return; } catch (e) { console.warn('LOG_READ with kind refused, retrying plain', e); }
+    }
+    await sendCmd(P.encodeCommand.logRead(from), 'Log read');
+  } catch { S.logAsm = null; clearTimeout(S.logTimer); $('logRead').disabled = false; $('logStatus').textContent = ''; }
 }
 function renderLog() {
   const names = new Map(S.profiles.map((p) => [p.id, p.name]));
@@ -632,7 +755,8 @@ function renderLog() {
   const rows = S.log.slice(-2000).reverse().map((r) => {
     const tr = document.createElement('tr');
     const f = P.decodeFlags(r.flags);
-    const tags = [f.hold && 'HOLD', f.tolPass && 'PASS', f.tolFail && 'FAIL'].filter(Boolean);
+    const kind = { [P.LOG_KIND.SETTLE]: 'SETTLE', [P.LOG_KIND.SWEEP_MIN]: 'MIN', [P.LOG_KIND.SWEEP_MAX]: 'MAX' }[r.kind ?? 0];
+    const tags = [kind, f.hold && 'HOLD', f.tolPass && 'PASS', f.tolFail && 'FAIL'].filter(Boolean);
     const cells = [
       [String(r.seq), 'num'],
       [r.unixS ? new Date(r.unixS * 1000).toLocaleString() : '(no clock)', ''],
@@ -897,6 +1021,17 @@ async function init() {
     try { await sendCmd(P.encodeCommand.recordNow(), 'Record'); addSession(v); } catch { /* reported */ }
   });
   $('cUnit').addEventListener('click', () => sendCmd(P.encodeCommand.setUnit(S.unit === P.UNIT.MM ? 1 : 0), 'Unit').catch(() => {}));
+  const setCapture = (mode, sel) => sendCmd(P.encodeCommand.setCapture(mode, sel), 'Capture mode').catch(() => {});
+  const curSel = () => S.live?.capture?.sel ?? P.SWEEP.AUTO;
+  const curMode = () => S.live?.capture?.mode ?? P.CAPTURE.LIVE;
+  $('capOff').addEventListener('click', () => setCapture(P.CAPTURE.LIVE, curSel()));
+  $('capSettle').addEventListener('click', () => setCapture(P.CAPTURE.SETTLE, curSel()));
+  $('capSweep').addEventListener('click', () => setCapture(P.CAPTURE.SWEEP, curSel()));
+  $('selAuto').addEventListener('click', () => setCapture(curMode(), P.SWEEP.AUTO));
+  $('selMin').addEventListener('click', () => setCapture(curMode(), P.SWEEP.MIN));
+  $('selMax').addEventListener('click', () => setCapture(curMode(), P.SWEEP.MAX));
+  $('capReset').addEventListener('click', () => sendCmd(P.encodeCommand.captureReset(), 'Re-arm').catch(() => {}));
+
   $('cTime').addEventListener('click', () => sendTime(false));
   $('sAdd').addEventListener('click', () => { if (S.live && !S.live.sensorErr) addSession(S.live.valueNm); });
   $('sReset').addEventListener('click', () => { S.session = []; $('sLast').textContent = ''; renderStats(); });

@@ -30,8 +30,8 @@ void csv_civil_from_unix(uint32_t t, csv_civil_t *c)
 
 int csv_header(bool with_utc, char *buf, size_t n)
 {
-    int len = snprintf(buf, n, "%s", with_utc ? "seq,unix_s,utc,value,unit,flags,profile\r\n"
-                                              : "seq,unix_s,value,unit,flags,profile\r\n");
+    int len = snprintf(buf, n, "%s", with_utc ? "seq,unix_s,utc,value,unit,flags,profile,kind\r\n"
+                                              : "seq,unix_s,value,unit,flags,profile,kind\r\n");
     return (len < 0 || (size_t)len >= n) ? -1 : len;
 }
 
@@ -65,11 +65,11 @@ int csv_line(const logrec_t *r, uint8_t mm_decimals, bool with_utc, char *buf, s
     }
     int len;
     if (with_utc) {
-        len = snprintf(buf, n, "%lu,%s,%s,%s,%s,%s,%u\r\n", (unsigned long)r->seq, unix_s, utc, val,
-                       meas_unit_str(unit), flags, (unsigned)r->profile_id);
+        len = snprintf(buf, n, "%lu,%s,%s,%s,%s,%s,%u,%s\r\n", (unsigned long)r->seq, unix_s, utc, val,
+                       meas_unit_str(unit), flags, (unsigned)r->profile_id, logrec_kind_str(r->kind));
     } else {
-        len = snprintf(buf, n, "%lu,%s,%s,%s,%s,%u\r\n", (unsigned long)r->seq, unix_s, val, meas_unit_str(unit),
-                       flags, (unsigned)r->profile_id);
+        len = snprintf(buf, n, "%lu,%s,%s,%s,%s,%u,%s\r\n", (unsigned long)r->seq, unix_s, val,
+                       meas_unit_str(unit), flags, (unsigned)r->profile_id, logrec_kind_str(r->kind));
     }
     return (len < 0 || (size_t)len >= n) ? -1 : len;
 }

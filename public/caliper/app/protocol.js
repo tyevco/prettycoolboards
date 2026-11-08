@@ -42,9 +42,11 @@ export const DIS_CHARS = Object.freeze([
 
 export const INT32_MIN = -0x80000000;
 export const LOG_END_SEQ = 0xffffffff;
-// LIVE grew from 10 to 12 bytes (SPEC §8, 2026-11-07): u16 active_profile_id appended. Readers accept
-// >= 10 bytes (10 = firmware from before the extension, active profile unknown) and ignore anything past 12.
-export const LIVE_LEN = 12;
+// LIVE grew from 10 to 12 bytes (u16 active_profile_id) and then to 20 (v3, the capture modes: SPEC §8,
+// 2026-11-07). Readers accept >= 10 bytes (10 = firmware before v2: active profile unknown; 12 = before v3:
+// no capture modes) and ignore anything past 20.
+export const LIVE_LEN = 20;
+export const LIVE_LEN_V2 = 12;
 export const LIVE_LEN_MIN = 10;
 export const LOG_RECORD_LEN = 16;
 export const PROFILE_RECORD_LEN = 30;
@@ -64,13 +66,30 @@ export const FLAG = Object.freeze({
   SENSOR_ERR: 1 << 3,
   CAP_VALID: 1 << 4,
   CHARGING: 1 << 5,
+  REZERO: 1 << 6, // the zero was lost in a sleep/reset: press ZERO (firmware 2026-11-07)
 });
+
+// Capture modes (caliper_gatt.h CALIPER_CAPTURE_* / _SWEEP_* / _CAPST_*). SET (3) is reserved: the firmware
+// refuses it (ATT 0x80) until multi-point sets exist.
+export const CAPTURE = Object.freeze({ LIVE: 0, SETTLE: 1, SWEEP: 2, SET: 3 });
+export const SWEEP = Object.freeze({ AUTO: 0, MIN: 1, MAX: 2 });
+export const CAPST = Object.freeze({ IDLE: 0, WAIT: 1, RUN: 2, DONE: 3, ABORT: 4 });
+export const CAPTURE_NAMES = Object.freeze(['live', 'settle', 'sweep', 'set']);
+export const SWEEP_NAMES = Object.freeze(['auto', 'min', 'max']);
+export const CAPST_NAMES = Object.freeze(['idle', 'armed', 'tracking', 'frozen', 'aborted']);
+// LOG record byte 12 (unit_kind): bit 0 unit, bits 1..3 kind, bits 4..5 reserved for SET. Only the 6-byte
+// LOG_READ (opts bit 0) returns the kind; the plain one sends the unit alone.
+export const LOG_KIND = Object.freeze({ PLAIN: 0, SETTLE: 1, SWEEP_MIN: 2, SWEEP_MAX: 3 });
+export const LOG_KIND_NAMES = Object.freeze(['', 'settle', 'min', 'max']);
+export const LOG_OPT_KIND = 0x01;
 
 export const OP = Object.freeze({
   ZERO: 0x01,
   HOLD_TOGGLE: 0x02,
   RECORD_NOW: 0x03,
   SET_UNIT: 0x04,
+  SET_CAPTURE: 0x05,
+  CAPTURE_RESET: 0x06,
   LOG_READ: 0x10,
   LOG_CLEAR: 0x11,
   SELECT_PROFILE: 0x20,
@@ -146,12 +165,14 @@ export function decodeFlags(f) {
     sensorErr: !!(f & FLAG.SENSOR_ERR),
     capValid: !!(f & FLAG.CAP_VALID),
     charging: !!(f & FLAG.CHARGING),
+    rezero: !!(f & FLAG.REZERO),
   };
 }
 
 export function encodeFlags(o) {
   return (o.hold ? FLAG.HOLD : 0) | (o.tolPass ? FLAG.TOL_PASS : 0) | (o.tolFail ? FLAG.TOL_FAIL : 0) |
-    (o.sensorErr ? FLAG.SENSOR_ERR : 0) | (o.capValid ? FLAG.CAP_VALID : 0) | (o.charging ? FLAG.CHARGING : 0);
+    (o.sensorErr ? FLAG.SENSOR_ERR : 0) | (o.capValid ? FLAG.CAP_VALID : 0) | (o.charging ? FLAG.CHARGING : 0) |
+    (o.rezero ? FLAG.REZERO : 0);
 }
 
 export function flagNames(f) {
@@ -159,47 +180,93 @@ export function flagNames(f) {
 }
 
 // ---------------------------------------------------------------------------------------------
-// LIVE (7c0a0002): 12 bytes {i32 value_nm, i32 cap_nm, u8 unit, u8 flags, u16 active_profile_id}
-//   (10 bytes, without active_profile_id, from firmware built before the extension)
+// LIVE (7c0a0002): 20 bytes
+//   {i32 value_nm, i32 cap_nm, u8 unit, u8 flags, u16 active_profile_id,                 (v2: 12 bytes)
+//    u8 capture, u8 capture_state, u16 capture_n, i32 capture_aux_nm}                     (v3: 20 bytes)
+//   capture: bits 0..3 mode (CAPTURE), bits 4..5 sweep selection (SWEEP)
+//   capture_state: bits 0..2 state (CAPST), bits 4..5 which extreme value_nm is (0 n/a, 1 min, 2 max)
+//   capture_aux_nm: SWEEP the other extreme, SETTLE the window's standard deviation, INT32_MIN n/a
+//   value_nm is always the SHOWN value (the capture result when frozen, the running extreme in contact).
 // ---------------------------------------------------------------------------------------------
 
 /**
- * Decode a LIVE notification/read (10 or 12 bytes; bytes past 12 are ignored).
+ * Decode a LIVE notification/read (10, 12 or 20 bytes; bytes past 20 are ignored).
  * capNm is null when cap_nm == INT32_MIN or the CAP_VALID flag is clear.
  * activeProfileId is null on a 10-byte packet (the caliper did not say), else 0 (none) or the profile id.
+ * capture is null on a packet shorter than 20 bytes (firmware without capture modes), else
+ * { mode, modeName, sel, selName, state, stateName, which: 'min'|'max'|null, n, auxNm, otherNm, rangeNm, sdNm }.
  */
 export function decodeLive(data) {
   const dv = toDataView(data);
-  if (dv.byteLength < LIVE_LEN_MIN) throw new RangeError(`LIVE needs ${LIVE_LEN_MIN} or ${LIVE_LEN} bytes, got ${dv.byteLength}`);
+  if (dv.byteLength < LIVE_LEN_MIN) throw new RangeError(`LIVE needs ${LIVE_LEN_MIN}, ${LIVE_LEN_V2} or ${LIVE_LEN} bytes, got ${dv.byteLength}`);
   const valueNm = dv.getInt32(0, true);
   const capRaw = dv.getInt32(4, true);
   const unit = dv.getUint8(8);
   const flags = dv.getUint8(9);
-  const activeProfileId = dv.byteLength >= LIVE_LEN ? dv.getUint16(10, true) : null;
+  const activeProfileId = dv.byteLength >= LIVE_LEN_V2 ? dv.getUint16(10, true) : null;
   const f = decodeFlags(flags);
   const capNm = capRaw === INT32_MIN || !f.capValid ? null : capRaw;
-  return { valueNm, capNm, capRaw, unit, flags, activeProfileId, ...f };
+  let capture = null;
+  if (dv.byteLength >= LIVE_LEN) {
+    const c = dv.getUint8(12), s = dv.getUint8(13);
+    const mode = c & 0x0f, sel = (c >> 4) & 3, state = s & 7, w = (s >> 4) & 3;
+    const n = dv.getUint16(14, true);
+    const auxRaw = dv.getInt32(16, true);
+    const auxNm = auxRaw === INT32_MIN ? null : auxRaw;
+    const which = w === 1 ? 'min' : w === 2 ? 'max' : null;
+    const sweep = mode === CAPTURE.SWEEP && which !== null && auxNm !== null;
+    capture = {
+      mode, modeName: CAPTURE_NAMES[mode] ?? `mode ${mode}`, sel, selName: SWEEP_NAMES[sel] ?? `sel ${sel}`,
+      state, stateName: CAPST_NAMES[state] ?? `state ${state}`, which, n, auxNm,
+      otherNm: sweep ? auxNm : null,
+      rangeNm: sweep ? Math.abs(valueNm - auxNm) : null,
+      sdNm: mode === CAPTURE.SETTLE && state === CAPST.DONE ? auxNm : null,
+    };
+  }
+  return { valueNm, capNm, capRaw, unit, flags, activeProfileId, capture, ...f };
 }
 
 /**
- * Encode a LIVE packet (used by demo mode and tests). capNm null -> INT32_MIN.
- * 12 bytes; { legacy: true } gives the 10-byte form of firmware from before the extension.
+ * Encode a LIVE packet (used by demo mode and tests). capNm null -> INT32_MIN, auxNm null -> INT32_MIN.
+ * 20 bytes; { version: 2 } gives the 12-byte form of firmware without capture modes, { legacy: true }
+ * (or version 1) the 10-byte form of firmware from before the profile id.
+ * capture: { mode, sel, state, which: 'min'|'max'|null, n, auxNm } (default: LIVE mode, idle).
  */
-export function encodeLive({ valueNm, capNm = null, unit = UNIT.MM, flags = 0, activeProfileId = PROFILE_ID_NONE }, { legacy = false } = {}) {
+export function encodeLive({ valueNm, capNm = null, unit = UNIT.MM, flags = 0, activeProfileId = PROFILE_ID_NONE, capture = null },
+  { legacy = false, version = legacy ? 1 : 3 } = {}) {
   checkI32('valueNm', valueNm);
   const cap = capNm === null || capNm === undefined ? INT32_MIN : capNm;
   checkI32('capNm', cap);
   checkU('unit', unit, 8);
   checkU('flags', flags, 8);
   checkU('activeProfileId', activeProfileId, 16);
-  const out = new Uint8Array(legacy ? LIVE_LEN_MIN : LIVE_LEN);
+  const out = new Uint8Array(version === 1 ? LIVE_LEN_MIN : version === 2 ? LIVE_LEN_V2 : LIVE_LEN);
   const dv = new DataView(out.buffer);
   dv.setInt32(0, valueNm, true);
   dv.setInt32(4, cap, true);
   dv.setUint8(8, unit);
   dv.setUint8(9, flags);
-  if (!legacy) dv.setUint16(10, activeProfileId, true);
+  if (version >= 2) dv.setUint16(10, activeProfileId, true);
+  if (version >= 3) {
+    const c = { mode: CAPTURE.LIVE, sel: SWEEP.AUTO, state: CAPST.IDLE, which: null, n: 0, auxNm: null, ...(capture ?? {}) };
+    checkU('capture mode', c.mode, 4); checkU('sweep sel', c.sel, 2); checkU('capture state', c.state, 3);
+    const n = Math.min(Math.max(0, Math.round(c.n)), 0xffff);
+    const aux = c.auxNm === null || c.auxNm === undefined ? INT32_MIN : c.auxNm;
+    checkI32('auxNm', aux);
+    dv.setUint8(12, c.mode | (c.sel << 4));
+    dv.setUint8(13, c.state | ((c.which === 'min' ? 1 : c.which === 'max' ? 2 : 0) << 4));
+    dv.setUint16(14, n, true);
+    dv.setInt32(16, aux, true);
+  }
   return out;
+}
+
+/** The label for what a reading is ("min", "max", "median") when it is a capture result, else ''. */
+export function judgedLabel(capture) {
+  if (!capture) return '';
+  if (capture.mode === CAPTURE.SWEEP && capture.which && (capture.state === CAPST.RUN || capture.state === CAPST.DONE)) return capture.which;
+  if (capture.mode === CAPTURE.SETTLE && capture.state === CAPST.DONE) return 'median';
+  return '';
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -218,7 +285,21 @@ export const encodeCommand = Object.freeze({
   holdToggle: () => cmd(OP.HOLD_TOGGLE, 0),
   recordNow: () => cmd(OP.RECORD_NOW, 0),
   setUnit: (unit) => { checkU('unit', unit, 8); return cmd(OP.SET_UNIT, 1, (d) => d.setUint8(0, unit)); },
-  logRead: (fromSeq = 0) => { checkU('fromSeq', fromSeq, 32); return cmd(OP.LOG_READ, 4, (d) => d.setUint32(0, fromSeq, true)); },
+  // mode 0 live, 1 settle, 2 sweep (3 = SET is reserved: the firmware answers 0x80); sel 0 auto, 1 min, 2 max
+  setCapture: (mode, sel = SWEEP.AUTO) => {
+    checkU('capture mode', mode, 8); checkU('sweep sel', sel, 8);
+    if (mode > CAPTURE.SET || sel > SWEEP.MAX) throw new RangeError(`capture mode 0..3 and sel 0..2, got ${mode}, ${sel}`);
+    return cmd(OP.SET_CAPTURE, 2, (d) => { d.setUint8(0, mode); d.setUint8(1, sel); });
+  },
+  captureReset: () => cmd(OP.CAPTURE_RESET, 0),
+  // { kind: true } = the 6-byte form: the records' byte 12 comes whole (unit + kind). Firmware without it
+  // answers ATT 0x0D; send it only to a caliper whose LIVE is 20 bytes (the same release added both).
+  logRead: (fromSeq = 0, { kind = false } = {}) => {
+    checkU('fromSeq', fromSeq, 32);
+    return kind
+      ? cmd(OP.LOG_READ, 5, (d) => { d.setUint32(0, fromSeq, true); d.setUint8(4, LOG_OPT_KIND); })
+      : cmd(OP.LOG_READ, 4, (d) => d.setUint32(0, fromSeq, true));
+  },
   logClear: () => cmd(OP.LOG_CLEAR, 0),
   selectProfile: (id) => { checkU('profile id', id, 16); return cmd(OP.SELECT_PROFILE, 2, (d) => d.setUint16(0, id, true)); },
   setTime: (unixS) => { checkU('unix_s', unixS, 32); return cmd(OP.SET_TIME, 4, (d) => d.setUint32(0, unixS, true)); },
@@ -233,11 +314,13 @@ export function decodeCommand(data) {
   const op = dv.getUint8(0);
   const name = OP_NAMES[op];
   if (!name) throw new RangeError(`unknown opcode 0x${op.toString(16)}`);
-  const need = { SET_UNIT: 2, LOG_READ: 5, SELECT_PROFILE: 3, SET_TIME: 5 }[name] ?? 1;
-  if (dv.byteLength !== need) throw new RangeError(`${name} needs ${need} bytes, got ${dv.byteLength}`);
+  const need = { SET_UNIT: 2, SET_CAPTURE: 3, LOG_READ: 5, SELECT_PROFILE: 3, SET_TIME: 5 }[name] ?? 1;
+  const ok = dv.byteLength === need || (name === 'LOG_READ' && dv.byteLength === 6);
+  if (!ok) throw new RangeError(`${name} needs ${need} bytes, got ${dv.byteLength}`);
   const c = { op, name };
   if (name === 'SET_UNIT') c.unit = dv.getUint8(1);
-  if (name === 'LOG_READ') c.fromSeq = dv.getUint32(1, true);
+  if (name === 'SET_CAPTURE') { c.mode = dv.getUint8(1); c.sel = dv.getUint8(2); }
+  if (name === 'LOG_READ') { c.fromSeq = dv.getUint32(1, true); c.opts = dv.byteLength === 6 ? dv.getUint8(5) : 0; }
   if (name === 'SELECT_PROFILE') c.profileId = dv.getUint16(1, true);
   if (name === 'SET_TIME') c.unixS = dv.getUint32(1, true);
   return c;
@@ -245,7 +328,9 @@ export function decodeCommand(data) {
 
 // ---------------------------------------------------------------------------------------------
 // LOG (7c0a0004): notifications of packed 16-byte records
-//   {u32 seq, u32 unix_s, i32 value_nm, u8 unit, u8 flags, u16 profile_id}
+//   {u32 seq, u32 unix_s, i32 value_nm, u8 unit_kind, u8 flags, u16 profile_id}
+//   unit_kind: bit 0 unit, bits 1..3 kind (LOG_KIND), bits 4..5 reserved (SET). The plain LOG_READ sends
+//   bit 0 only; the 6-byte LOG_READ sends the whole byte. Decoding always masks, so both read correctly.
 //   The stream ends with a record whose seq == 0xFFFFFFFF, sent in a notification of its own.
 //   The flags byte uses the LIVE bit meanings (FLAG).
 // ---------------------------------------------------------------------------------------------
@@ -253,11 +338,13 @@ export function decodeCommand(data) {
 export function decodeLogRecord(dv, off = 0) {
   const seq = dv.getUint32(off, true);
   const flags = dv.getUint8(off + 13);
+  const uk = dv.getUint8(off + 12);
   return {
     seq,
     unixS: dv.getUint32(off + 4, true),
     valueNm: dv.getInt32(off + 8, true),
-    unit: dv.getUint8(off + 12),
+    unit: uk & 1,
+    kind: (uk >> 1) & 7,
     flags,
     profileId: dv.getUint16(off + 14, true),
     end: seq === LOG_END_SEQ,
@@ -275,15 +362,16 @@ export function decodeLogPacket(data) {
   return out;
 }
 
-export function encodeLogRecord({ seq, unixS = 0, valueNm = 0, unit = 0, flags = 0, profileId = 0 }) {
+/** kind is only sent by the 6-byte LOG_READ; { ext: false } encodes the plain read's byte 12 (unit only). */
+export function encodeLogRecord({ seq, unixS = 0, valueNm = 0, unit = 0, flags = 0, profileId = 0, kind = 0 }, { ext = true } = {}) {
   checkU('seq', seq, 32); checkU('unixS', unixS, 32); checkI32('valueNm', valueNm);
-  checkU('unit', unit, 8); checkU('flags', flags, 8); checkU('profileId', profileId, 16);
+  checkU('unit', unit, 1); checkU('flags', flags, 8); checkU('profileId', profileId, 16); checkU('kind', kind, 3);
   const out = new Uint8Array(LOG_RECORD_LEN);
   const dv = new DataView(out.buffer);
   dv.setUint32(0, seq, true);
   dv.setUint32(4, unixS, true);
   dv.setInt32(8, valueNm, true);
-  dv.setUint8(12, unit);
+  dv.setUint8(12, unit | (ext ? kind << 1 : 0));
   dv.setUint8(13, flags);
   dv.setUint16(14, profileId, true);
   return out;
@@ -297,8 +385,8 @@ export function encodeLogEnd() {
  * Pack records into notifications of at most perPacket records each, then (optionally) the end
  * marker in a notification of its own, as the firmware sends it (SPEC §8).
  */
-export function encodeLogPackets(records, { perPacket = 15, withEnd = true } = {}) {
-  const all = records.map(encodeLogRecord);
+export function encodeLogPackets(records, { perPacket = 15, withEnd = true, ext = true } = {}) {
+  const all = records.map((r) => encodeLogRecord(r, { ext }));
   const packets = [];
   for (let i = 0; i < all.length; i += perPacket) {
     const chunk = all.slice(i, i + perPacket);
@@ -543,15 +631,16 @@ function csvCell(v) {
 /** CSV of log records. profiles: optional array, used to add a profile-name column. */
 export function logToCsv(records, profiles = []) {
   const names = new Map(profiles.map((p) => [p.id, p.name]));
-  const head = ['seq', 'unix_s', 'time_utc', 'value_nm', 'value', 'unit', 'hold', 'tol_pass', 'tol_fail', 'flags_hex', 'profile_id', 'profile_name'];
+  const head = ['seq', 'unix_s', 'time_utc', 'value_nm', 'value', 'unit', 'hold', 'tol_pass', 'tol_fail', 'flags_hex', 'profile_id', 'profile_name', 'kind'];
   const rows = records.map((r) => {
     const f = decodeFlags(r.flags);
     return [
       r.seq, r.unixS, r.unixS ? new Date(r.unixS * 1000).toISOString() : '', r.valueNm,
       nmToUnit(r.valueNm, r.unit).toFixed(r.unit === UNIT.INCH ? 5 : 4), unitLabel(r.unit),
       f.hold ? 1 : 0, f.tolPass ? 1 : 0, f.tolFail ? 1 : 0, '0x' + r.flags.toString(16).padStart(2, '0'),
-      r.profileId, names.get(r.profileId) ?? '',
+      r.profileId, names.get(r.profileId) ?? '', LOG_KIND_NAMES[r.kind ?? 0] ?? '',
     ];
   });
+
   return [head, ...rows].map((row) => row.map(csvCell).join(',')).join('\r\n') + '\r\n';
 }

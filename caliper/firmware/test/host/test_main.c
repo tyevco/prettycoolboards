@@ -321,6 +321,34 @@ static void test_logrec_pack(void)
     logrec_t m = logrec_end_marker();
     logrec_pack(&m, b);
     CHECK(b[0] == 0xFF && b[1] == 0xFF && b[2] == 0xFF && b[3] == 0xFF && b[4] == 0 && b[15] == 0);
+
+    /* byte 12 = unit_kind: bit 0 unit, bits 1..3 kind; a record stored before the kind existed (bits
+     * 1..7 = 0) unpacks as kind PLAIN with its unit */
+    logrec_t k = r;
+    k.kind = CALIPER_LOG_KIND_SWEEP_MAX;
+    logrec_pack(&k, b);
+    CHECK_EQ_INT(b[12], 0x07); /* inch | 3 << 1 */
+    logrec_unpack(b, &u);
+    CHECK_EQ_INT(u.unit, 1);
+    CHECK_EQ_INT(u.kind, CALIPER_LOG_KIND_SWEEP_MAX);
+    CHECK_EQ_INT(u.set_bits, 0);
+    b[12] = 0x01;
+    logrec_unpack(b, &u);
+    CHECK(u.unit == 1 && u.kind == CALIPER_LOG_KIND_PLAIN);
+    k.unit = 0;
+    k.kind = CALIPER_LOG_KIND_SETTLE;
+    logrec_pack(&k, b);
+    CHECK_EQ_INT(b[12], 0x02);
+    CHECK_EQ_STR(logrec_kind_str(CALIPER_LOG_KIND_SWEEP_MIN), "min");
+    CHECK_EQ_STR(logrec_kind_str(CALIPER_LOG_KIND_PLAIN), "");
+    /* the LOG stream: the plain LOG_READ masks byte 12 to the unit, the 6-byte form sends it whole */
+    k.unit = 1;
+    k.kind = CALIPER_LOG_KIND_SWEEP_MIN;
+    gatt_log_record_pack(&k, false, b);
+    CHECK_EQ_INT(b[12], 0x01);
+    gatt_log_record_pack(&k, true, b);
+    CHECK_EQ_INT(b[12], 0x05);
+    CHECK_EQ_INT(b[13], 0x23);
 }
 
 static void test_ring_wraparound(void)
@@ -388,31 +416,62 @@ static void test_ring_wraparound(void)
 static void test_gatt_live(void)
 {
     gatt_live_t l = {.value_nm = 12345000, .cap_nm = CALIPER_CAP_INVALID, .unit = CALIPER_UNIT_INCH,
-                     .flags = CALIPER_FLAG_HOLD | CALIPER_FLAG_CHARGING, .active_profile_id = 0xBEEF};
-    CHECK_EQ_INT(CALIPER_LIVE_LEN, 12);
+                     .flags = CALIPER_FLAG_HOLD | CALIPER_FLAG_CHARGING, .active_profile_id = 0xBEEF,
+                     .capture_mode = CALIPER_CAPTURE_SWEEP, .sweep_sel = CALIPER_SWEEP_AUTO,
+                     .capture_state = CALIPER_CAPST_DONE, .which = CALIPER_CAPST_WHICH_MIN, .capture_n = 214,
+                     .capture_aux_nm = 12374000};
+    CHECK_EQ_INT(CALIPER_LIVE_LEN, 20);
     CHECK_EQ_INT(CALIPER_LIVE_OFF_PROFILE, 10);
+    CHECK_EQ_INT(CALIPER_LIVE_OFF_CAPTURE, 12);
     uint8_t b[CALIPER_LIVE_LEN];
     memset(b, 0xAA, sizeof(b));
     gatt_live_pack(&l, b);
-    const uint8_t exp[12] = {0xA8, 0x5E, 0xBC, 0x00, 0x00, 0x00, 0x00, 0x80, 0x01, 0x21, 0xEF, 0xBE};
-    CHECK(memcmp(b, exp, 12) == 0);
+    const uint8_t exp[20] = {0xA8, 0x5E, 0xBC, 0x00, 0x00, 0x00, 0x00, 0x80, 0x01, 0x21,
+                             0xEF, 0xBE, 0x02, 0x13, 0xD6, 0x00, 0xF0, 0xCF, 0xBC, 0x00};
+
+    CHECK(memcmp(b, exp, 20) == 0);
     gatt_live_t u;
     memset(&u, 0x55, sizeof(u));
-    CHECK_EQ_INT(gatt_live_unpack(b, 12, &u), 0);
+    CHECK_EQ_INT(gatt_live_unpack(b, 20, &u), 0);
     CHECK(u.value_nm == l.value_nm && u.cap_nm == INT32_MIN && u.unit == 1 && u.flags == 0x21);
     CHECK_EQ_INT(u.active_profile_id, 0xBEEF);
-    /* a 10-byte LIVE (pre-extension firmware) has no profile id; bytes past 12 are ignored */
+    CHECK_EQ_INT(u.capture_mode, CALIPER_CAPTURE_SWEEP);
+    CHECK_EQ_INT(u.sweep_sel, CALIPER_SWEEP_AUTO);
+    CHECK_EQ_INT(u.capture_state, CALIPER_CAPST_DONE);
+    CHECK_EQ_INT(u.which, CALIPER_CAPST_WHICH_MIN);
+    CHECK_EQ_INT(u.capture_n, 214);
+    CHECK_EQ_INT(u.capture_aux_nm, 12374000);
+    /* sweep selection and the reserved bits */
+    l.sweep_sel = CALIPER_SWEEP_MAX;
+    l.which = CALIPER_CAPST_WHICH_MAX;
+    l.capture_state = CALIPER_CAPST_RUN;
+    gatt_live_pack(&l, b);
+    CHECK_EQ_INT(b[12], 0x22);
+    CHECK_EQ_INT(b[13], 0x22);
+    /* a 12-byte LIVE (v2 firmware): profile id, no capture fields */
+    memset(&u, 0x55, sizeof(u));
+    CHECK_EQ_INT(gatt_live_unpack(b, 12, &u), 0);
+    CHECK_EQ_INT(u.active_profile_id, 0xBEEF);
+    CHECK_EQ_INT(u.capture_mode, GATT_CAPTURE_UNKNOWN);
+    CHECK_EQ_INT(u.capture_n, 0);
+    CHECK_EQ_INT(u.capture_aux_nm, CALIPER_AUX_INVALID);
+    /* a 10-byte LIVE (pre-extension firmware) has no profile id; bytes past 20 are ignored */
     memset(&u, 0x55, sizeof(u));
     CHECK_EQ_INT(gatt_live_unpack(b, 10, &u), 0);
     CHECK(u.value_nm == l.value_nm && u.flags == 0x21);
     CHECK_EQ_INT(u.active_profile_id, CALIPER_PROFILE_ID_NONE);
-    uint8_t longer[14];
-    memcpy(longer, b, 12);
-    longer[12] = 0x12;
-    longer[13] = 0x34;
+    CHECK_EQ_INT(u.capture_mode, GATT_CAPTURE_UNKNOWN);
+    uint8_t longer[24];
+    memcpy(longer, b, 20);
+    memset(longer + 20, 0x77, 4);
     CHECK_EQ_INT(gatt_live_unpack(longer, sizeof(longer), &u), 0);
     CHECK_EQ_INT(u.active_profile_id, 0xBEEF);
+    CHECK_EQ_INT(u.capture_mode, CALIPER_CAPTURE_SWEEP);
     CHECK_EQ_INT(gatt_live_unpack(b, 9, &u), -1);
+    /* n/a aux */
+    l.capture_aux_nm = CALIPER_AUX_INVALID;
+    gatt_live_pack(&l, b);
+    CHECK(b[16] == 0 && b[17] == 0 && b[18] == 0 && b[19] == 0x80);
     /* no profile: the id is 0 on the wire */
     l.active_profile_id = CALIPER_PROFILE_ID_NONE;
     gatt_live_pack(&l, b);
@@ -472,6 +531,50 @@ static void test_gatt_cmd(void)
     CHECK_EQ_INT(n, 5);
     CHECK_EQ_INT(gatt_cmd_parse(buf, n, &out), GATT_CMD_OK);
     CHECK_EQ_INT(out.arg, 42);
+    CHECK_EQ_INT(out.opts, 0);
+
+    /* capture commands */
+    uint8_t sc[] = {0x05, 0x02, 0x01};
+    CHECK_EQ_INT(gatt_cmd_parse(sc, 3, &c), GATT_CMD_OK);
+    CHECK_EQ_INT(c.op, CALIPER_OP_SET_CAPTURE);
+    CHECK_EQ_INT(c.arg & 0xFF, CALIPER_CAPTURE_SWEEP);
+    CHECK_EQ_INT(c.arg >> 8, CALIPER_SWEEP_MIN);
+    CHECK_EQ_INT(gatt_cmd_parse(sc, 2, &c), GATT_CMD_ERR_LEN);
+    CHECK_EQ_INT(gatt_cmd_parse(sc, 1, &c), GATT_CMD_ERR_LEN);
+    uint8_t sc_set[] = {0x05, 0x03, 0x00}; /* SET is reserved */
+    CHECK_EQ_INT(gatt_cmd_parse(sc_set, 3, &c), GATT_CMD_ERR_VALUE);
+    uint8_t sc_bad[] = {0x05, 0x01, 0x03};
+    CHECK_EQ_INT(gatt_cmd_parse(sc_bad, 3, &c), GATT_CMD_ERR_VALUE);
+    uint8_t sc_off[] = {0x05, 0x00, 0x02};
+    CHECK_EQ_INT(gatt_cmd_parse(sc_off, 3, &c), GATT_CMD_OK);
+    uint8_t cr[] = {0x06, 0x00};
+    CHECK_EQ_INT(gatt_cmd_parse(cr, 1, &c), GATT_CMD_OK);
+    CHECK_EQ_INT(c.op, CALIPER_OP_CAPTURE_RESET);
+    CHECK_EQ_INT(gatt_cmd_parse(cr, 2, &c), GATT_CMD_ERR_LEN);
+    gatt_cmd_t sci = {.op = CALIPER_OP_SET_CAPTURE, .arg = CALIPER_CAPTURE_SETTLE | (CALIPER_SWEEP_MAX << 8)};
+    n = gatt_cmd_build(&sci, buf, sizeof(buf));
+    CHECK_EQ_INT(n, 3);
+    CHECK(buf[0] == 0x05 && buf[1] == 0x01 && buf[2] == 0x02);
+    /* LOG_READ with the opts byte (6 bytes); unknown option bits are refused; 7 bytes is a length error */
+    uint8_t lr6[] = {0x10, 0x07, 0x00, 0x00, 0x00, 0x01, 0x00};
+    CHECK_EQ_INT(gatt_cmd_parse(lr6, 6, &c), GATT_CMD_OK);
+    CHECK_EQ_INT(c.arg, 7);
+    CHECK_EQ_INT(c.opts, CALIPER_LOG_OPT_KIND);
+    CHECK_EQ_INT(gatt_cmd_parse(lr6, 7, &c), GATT_CMD_ERR_LEN);
+    lr6[5] = 0x02;
+    CHECK_EQ_INT(gatt_cmd_parse(lr6, 6, &c), GATT_CMD_ERR_VALUE);
+    lr6[5] = 0x00;
+    CHECK_EQ_INT(gatt_cmd_parse(lr6, 6, &c), GATT_CMD_OK); /* opts 0 = the plain read */
+    CHECK_EQ_INT(c.opts, 0);
+    uint8_t zero6[] = {0x01, 0, 0, 0, 0, 0}; /* only LOG_READ has the optional byte */
+    CHECK_EQ_INT(gatt_cmd_parse(zero6, 6, &c), GATT_CMD_ERR_LEN);
+    in.opts = CALIPER_LOG_OPT_KIND;
+    n = gatt_cmd_build(&in, buf, sizeof(buf));
+    CHECK_EQ_INT(n, 6);
+    CHECK_EQ_INT(buf[5], 1);
+    CHECK_EQ_INT(gatt_cmd_parse(buf, n, &out), GATT_CMD_OK);
+    CHECK_EQ_INT(out.arg, 42);
+    CHECK_EQ_INT(out.opts, 1);
 }
 
 static void test_gatt_profile(void)
@@ -636,15 +739,21 @@ static void test_csv(void)
     logrec_t r = {.seq = 12, .unix_s = 1700000000u, .value_nm = 12345000, .unit = 0,
                   .flags = CALIPER_FLAG_HOLD | CALIPER_FLAG_TOL_PASS, .profile_id = 3};
     CHECK(csv_line(&r, 2, true, line, sizeof(line)) > 0);
-    CHECK_EQ_STR(line, "12,1700000000,2023-11-14T22:13:20Z,12.35,mm,HP,3\r\n");
+    CHECK_EQ_STR(line, "12,1700000000,2023-11-14T22:13:20Z,12.35,mm,HP,3,\r\n");
+    r.kind = CALIPER_LOG_KIND_SWEEP_MIN;
+    CHECK(csv_line(&r, 2, true, line, sizeof(line)) > 0);
+    CHECK_EQ_STR(line, "12,1700000000,2023-11-14T22:13:20Z,12.35,mm,HP,3,min\r\n");
+    r.kind = CALIPER_LOG_KIND_PLAIN;
     r.unit = 1;
     r.unix_s = 0;
     r.flags = CALIPER_FLAG_TOL_FAIL | CALIPER_FLAG_SENSOR_ERR;
     r.value_nm = -25400000;
     CHECK(csv_line(&r, 2, false, line, sizeof(line)) > 0);
-    CHECK_EQ_STR(line, "12,,-1.0000,in,FE,3\r\n");
+    CHECK_EQ_STR(line, "12,,-1.0000,in,FE,3,\r\n");
     CHECK(csv_header(true, line, sizeof(line)) > 0);
-    CHECK_EQ_STR(line, "seq,unix_s,utc,value,unit,flags,profile\r\n");
+    CHECK_EQ_STR(line, "seq,unix_s,utc,value,unit,flags,profile,kind\r\n");
+    CHECK(csv_header(false, line, sizeof(line)) > 0);
+    CHECK_EQ_STR(line, "seq,unix_s,value,unit,flags,profile,kind\r\n");
     char tiny[8];
     CHECK_EQ_INT(csv_line(&r, 2, true, tiny, sizeof(tiny)), -1);
 
@@ -654,11 +763,15 @@ static void test_csv(void)
     r.unit = 0;
     r.value_nm = 1000;
     CHECK(csv_line(&r, 3, false, line, sizeof(line)) > 0);
-    CHECK_EQ_STR(line, "12,,0.001,mm,HPFEZ,3\r\n");
+    CHECK_EQ_STR(line, "12,,0.001,mm,HPFEZ,3,\r\n");
+    r.kind = CALIPER_LOG_KIND_SETTLE;
+    CHECK(csv_line(&r, 3, false, line, sizeof(line)) > 0);
+    CHECK_EQ_STR(line, "12,,0.001,mm,HPFEZ,3,settle\r\n");
 
     /* the widest possible line fits CSV_LINE_MAX */
     logrec_t w = {.seq = 0xFFFFFFFEu, .unix_s = 0xFFFFFFFFu, .value_nm = INT32_MIN, .unit = 1, .flags = 0xFF,
-                  .profile_id = 0xFFFF};
+                  .profile_id = 0xFFFF, .kind = CALIPER_LOG_KIND_SETTLE};
+
     char big[CSV_LINE_MAX];
     int lw = csv_line(&w, 3, true, big, sizeof(big));
     CHECK(lw > 0 && lw < CSV_LINE_MAX);
@@ -1218,6 +1331,8 @@ static void test_cap_unwrap(void)
     CHECK_EQ_INT(cap_unwrap_update(&u, 0.80f), -508000); /* below the start */
 }
 
+void capture_tests(void); /* test_capture.c */
+
 int main(void)
 {
     printf("caliper firmware host tests\n");
@@ -1246,6 +1361,7 @@ int main(void)
     RUN(test_cap_pattern);
     RUN(test_cap_demod);
     RUN(test_cap_unwrap);
+    capture_tests();
     printf("%d checks, %d failures\n", tt_checks, tt_failures);
     return tt_failures ? 1 : 0;
 }

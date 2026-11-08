@@ -25,8 +25,9 @@
 static lv_obj_t *s_scr[UI_SCR_COUNT];
 static ui_screen_t s_cur;
 
-/* main */
-static lv_obj_t *s_value, *s_unit, *s_hold, *s_status, *s_profile, *s_gauge, *s_cap;
+/* main. s_tag (top left): HOLD / ZERO? / the capture mode and state. s_line (under the reading): the
+ * capture's other extreme, range and count, the SETTLE spread, or the capacitive reading. */
+static lv_obj_t *s_value, *s_unit, *s_tag, *s_status, *s_profile, *s_gauge, *s_line;
 /* chart */
 static lv_obj_t *s_chart, *s_chart_lbl;
 static lv_chart_series_t *s_series;
@@ -64,12 +65,18 @@ static lv_obj_t *label(lv_obj_t *parent, const lv_font_t *font, lv_color_t color
     return l;
 }
 
-static void fmt_nm(int32_t nm, uint8_t unit, char *buf, size_t n)
+/* extra: digits beyond the reading's (R and sigma take one more, from the exact nm value) */
+static void fmt_nm_x(int32_t nm, uint8_t unit, uint8_t extra, char *buf, size_t n)
 {
     settings_t st;
     core_get_settings(&st);
-    meas_fmt_t f = meas_fmt_for(unit ? MEAS_UNIT_INCH : MEAS_UNIT_MM, st.decimals);
+    meas_fmt_t f = meas_fmt_for(unit ? MEAS_UNIT_INCH : MEAS_UNIT_MM, (uint8_t)(st.decimals + extra));
     meas_format(nm, &f, buf, n);
+}
+
+static void fmt_nm(int32_t nm, uint8_t unit, char *buf, size_t n)
+{
+    fmt_nm_x(nm, unit, 0, buf, n);
 }
 
 static const char *battery_symbol(uint8_t pct)
@@ -93,6 +100,82 @@ static void refresh_status(lv_obj_t *lbl, const cal_status_t *st)
     lv_label_set_text(lbl, b);
 }
 
+/* The capture tag: mode, the extreme shown, and the state ("..." armed, PLAY tracking, STOP frozen). */
+static void refresh_tag(const cal_live_t *lv, bool rezero)
+{
+    const cal_capture_t *c = &lv->capture;
+    lv_color_t col = C_DIM;
+    char b[40];
+    const char *st = c->state == CALIPER_CAPST_RUN    ? " " LV_SYMBOL_PLAY
+                     : c->state == CALIPER_CAPST_DONE ? " " LV_SYMBOL_STOP
+                                                      : " ...";
+    if (c->manual_hold) {
+        snprintf(b, sizeof(b), "HOLD");
+        col = C_AMBER;
+    } else if (rezero) {
+        snprintf(b, sizeof(b), "ZERO?");
+        col = C_AMBER;
+    } else if (c->mode == CALIPER_CAPTURE_SETTLE) {
+        snprintf(b, sizeof(b), "SETTLE%s", st);
+    } else if (c->mode == CALIPER_CAPTURE_SWEEP && c->state == CALIPER_CAPST_ABORT) {
+        snprintf(b, sizeof(b), "SWEEP SENSOR");
+        col = C_RED;
+    } else if (c->mode == CALIPER_CAPTURE_SWEEP && (c->state == CALIPER_CAPST_RUN || c->state == CALIPER_CAPST_DONE)) {
+        snprintf(b, sizeof(b), "%s%s%s%s", c->which < 0 ? LV_SYMBOL_DOWN : LV_SYMBOL_UP, c->which < 0 ? "MIN" : "MAX",
+                 c->sel == CALIPER_SWEEP_AUTO ? " auto" : "", st);
+    } else if (c->mode == CALIPER_CAPTURE_SWEEP) {
+        snprintf(b, sizeof(b), "SWEEP %s%s", c->sel == CALIPER_SWEEP_MIN ? "min" : c->sel == CALIPER_SWEEP_MAX ? "max" : "auto", st);
+    } else {
+        b[0] = '\0';
+    }
+    if (!c->manual_hold && !rezero) {
+        col = c->state == CALIPER_CAPST_DONE ? C_AMBER : c->state == CALIPER_CAPST_RUN ? C_ACCENT : col;
+    }
+    lv_label_set_text(s_tag, b);
+    lv_obj_set_style_text_color(s_tag, col, 0);
+}
+
+/* The detail line under the reading. */
+static void refresh_line(const cal_live_t *lv)
+{
+    const cal_capture_t *c = &lv->capture;
+    char a[16], r[16], b[48];
+    lv_color_t col = C_DIM;
+    b[0] = '\0';
+    if (c->manual_hold) {
+        /* nothing: a hand hold of the live value */
+    } else if (c->mode == CALIPER_CAPTURE_SWEEP && (c->state == CALIPER_CAPST_RUN || c->state == CALIPER_CAPST_DONE)) {
+        fmt_nm(c->other_nm, lv->unit, a, sizeof(a));
+        fmt_nm_x(c->range_nm, lv->unit, 1, r, sizeof(r)); /* the exact nm difference, one digit more */
+        snprintf(b, sizeof(b), "%s%s  R %s  n %lu", c->which < 0 ? LV_SYMBOL_UP : LV_SYMBOL_DOWN, a, r,
+                 (unsigned long)c->n);
+        col = C_TEXT;
+    } else if (c->mode == CALIPER_CAPTURE_SWEEP) {
+        snprintf(b, sizeof(b), c->state == CALIPER_CAPST_ABORT ? "capture dropped: lift off, retry"
+                                                                : "on the part: rock / sweep slowly");
+    } else if (c->mode == CALIPER_CAPTURE_SETTLE && c->state == CALIPER_CAPST_DONE) {
+        /* the spread is normally below one display step: sigma in um (mm) or 1e-5 in */
+        if (lv->unit) {
+            fmt_nm_x(c->sd_nm, 1, 1, r, sizeof(r));
+            snprintf(b, sizeof(b), "median  n %lu  sd %s in", (unsigned long)c->n, r);
+        } else {
+            snprintf(b, sizeof(b), "median  n %lu  sd %ld.%ld um", (unsigned long)c->n, (long)(c->sd_nm / 1000),
+                     (long)((c->sd_nm % 1000) / 100));
+        }
+        settings_t s;
+        core_get_settings(&s);
+        meas_fmt_t f = meas_fmt_for(lv->unit ? MEAS_UNIT_INCH : MEAS_UNIT_MM, s.decimals);
+        col = c->range_nm > meas_step_nm(&f) ? C_AMBER : C_TEXT; /* more than a step: not really settled */
+    } else if (c->mode == CALIPER_CAPTURE_SETTLE && c->state == CALIPER_CAPST_RUN) {
+        snprintf(b, sizeof(b), "settling...");
+    } else if (lv->flags & CALIPER_FLAG_CAP_VALID) {
+        fmt_nm(lv->cap_nm, lv->unit, a, sizeof(a));
+        snprintf(b, sizeof(b), "cap %s", a);
+    }
+    lv_label_set_text(s_line, b);
+    lv_obj_set_style_text_color(s_line, col, 0);
+}
+
 static void refresh_main(const cal_live_t *lv, const cal_status_t *st)
 {
     lv_label_set_text(s_value, lv->text);
@@ -100,17 +183,23 @@ static void refresh_main(const cal_live_t *lv, const cal_status_t *st)
     lv_obj_set_style_text_color(s_value,
                                 (lv->flags & CALIPER_FLAG_SENSOR_ERR) ? C_RED : rezero ? C_AMBER : C_TEXT, 0);
     lv_label_set_text(s_unit, lv->unit ? "in" : "mm");
-    lv_label_set_text(s_hold, (lv->flags & CALIPER_FLAG_HOLD) ? "HOLD"
-                              : rezero                         ? "ZERO?"
-                              : lv->autohold                   ? "auto"
-                                                               : "");
-    lv_obj_set_style_text_color(s_hold, (lv->flags & CALIPER_FLAG_HOLD) || rezero ? C_AMBER : C_DIM, 0);
+    refresh_tag(lv, rezero);
+    refresh_line(lv);
     refresh_status(s_status, st);
 
     if (lv->profile_id) {
         const char *verdict = lv->tol == MEAS_TOL_PASS ? "GO" : lv->tol == MEAS_TOL_WARN ? "GO (edge)"
                                                                                            : "NO GO";
-        lv_label_set_text_fmt(s_profile, "%s  %s", lv->profile_name, verdict);
+        /* name what was judged when it is not simply the live value */
+        const cal_capture_t *cp = &lv->capture;
+        const char *judged = "";
+        if (!cp->manual_hold && cp->mode == CALIPER_CAPTURE_SWEEP &&
+            (cp->state == CALIPER_CAPST_RUN || cp->state == CALIPER_CAPST_DONE)) {
+            judged = cp->which < 0 ? " (min)" : " (max)";
+        } else if (!cp->manual_hold && cp->mode == CALIPER_CAPTURE_SETTLE && cp->state == CALIPER_CAPST_DONE) {
+            judged = " (median)";
+        }
+        lv_label_set_text_fmt(s_profile, "%s  %s%s", lv->profile_name, verdict, judged);
         lv_color_t c = lv->tol == MEAS_TOL_PASS ? C_GREEN : lv->tol == MEAS_TOL_WARN ? C_AMBER : C_RED;
         lv_obj_set_style_text_color(s_profile, c, 0);
         lv_obj_set_style_bg_color(s_gauge, c, LV_PART_INDICATOR);
@@ -119,13 +208,6 @@ static void refresh_main(const cal_live_t *lv, const cal_status_t *st)
     } else {
         lv_label_set_text(s_profile, "");
         lv_obj_add_flag(s_gauge, LV_OBJ_FLAG_HIDDEN);
-    }
-    if (lv->flags & CALIPER_FLAG_CAP_VALID) {
-        char b[20];
-        fmt_nm(lv->cap_nm, lv->unit, b, sizeof(b));
-        lv_label_set_text_fmt(s_cap, "cap %s", b);
-    } else {
-        lv_label_set_text(s_cap, "");
     }
 }
 
@@ -157,7 +239,16 @@ static const char *menu_text(int i, const cal_live_t *lv, const cal_status_t *st
     switch (i) {
     case UI_MENU_UNIT: snprintf(b, n, "Unit: %s", lv->unit ? "inch" : "mm"); break;
     case UI_MENU_PROFILE: snprintf(b, n, "Profile: %s", lv->profile_id ? lv->profile_name : "none"); break;
-    case UI_MENU_AUTOHOLD: snprintf(b, n, "Auto-hold: %s", lv->autohold ? "on" : "off"); break;
+    case UI_MENU_CAPTURE:
+        snprintf(b, n, "Capture: %s", lv->capture.mode == CALIPER_CAPTURE_SWEEP    ? "sweep"
+                                      : lv->capture.mode == CALIPER_CAPTURE_SETTLE ? "settle"
+                                                                                   : "off");
+        break;
+    case UI_MENU_SWEEP_SEL:
+        snprintf(b, n, "Sweep: %s", lv->capture.sel == CALIPER_SWEEP_MIN   ? "min"
+                                    : lv->capture.sel == CALIPER_SWEEP_MAX ? "max"
+                                                                           : "auto");
+        break;
     case UI_MENU_WIFI: snprintf(b, n, "Wi-Fi: %s", st->wifi == 2 ? st->ip : st->wifi ? "starting" : "off"); break;
     case UI_MENU_PROVISION: snprintf(b, n, "Wi-Fi setup (AP)"); break;
     case UI_MENU_STATS_RESET: snprintf(b, n, "Reset stats"); break;
@@ -263,10 +354,11 @@ static void create_main(void)
 {
     lv_obj_t *s = s_scr[UI_SCR_MAIN] = new_screen();
     s_status = label(s, &lv_font_montserrat_14, C_DIM, LV_ALIGN_TOP_RIGHT, -4, 2);
-    s_hold = label(s, &lv_font_montserrat_14, C_AMBER, LV_ALIGN_TOP_LEFT, 4, 2);
-    s_value = label(s, &lv_font_montserrat_48, C_TEXT, LV_ALIGN_RIGHT_MID, -40, -8);
-    s_unit = label(s, &lv_font_montserrat_20, C_DIM, LV_ALIGN_RIGHT_MID, -6, 2);
-    s_cap = label(s, &lv_font_montserrat_12, C_DIM, LV_ALIGN_TOP_LEFT, 60, 4);
+    s_tag = label(s, &lv_font_montserrat_14, C_AMBER, LV_ALIGN_TOP_LEFT, 4, 2);
+    s_value = label(s, &lv_font_montserrat_48, C_TEXT, LV_ALIGN_RIGHT_MID, -40, -14);
+    s_unit = label(s, &lv_font_montserrat_20, C_DIM, LV_ALIGN_RIGHT_MID, -6, -4);
+    s_line = label(s, &lv_font_montserrat_14, C_DIM, LV_ALIGN_TOP_LEFT, 4, 82);
+
     s_profile = label(s, &lv_font_montserrat_14, C_GREEN, LV_ALIGN_BOTTOM_LEFT, 4, -18);
 
     s_gauge = lv_bar_create(s);

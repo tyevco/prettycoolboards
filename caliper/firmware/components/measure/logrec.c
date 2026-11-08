@@ -10,7 +10,7 @@ void logrec_pack(const logrec_t *r, uint8_t out[LOGREC_SIZE])
     le_put_u32(out + 0, r->seq);
     le_put_u32(out + 4, r->unix_s);
     le_put_i32(out + 8, r->value_nm);
-    out[12] = r->unit;
+    out[12] = (uint8_t)((r->unit & 1u) | ((r->kind & 7u) << 1) | (r->set_bits & 0x30u));
     out[13] = r->flags;
     le_put_u16(out + 14, r->profile_id);
 }
@@ -20,9 +20,21 @@ void logrec_unpack(const uint8_t in[LOGREC_SIZE], logrec_t *r)
     r->seq = le_get_u32(in + 0);
     r->unix_s = le_get_u32(in + 4);
     r->value_nm = le_get_i32(in + 8);
-    r->unit = in[12];
+    r->unit = in[12] & 1u;
+    r->kind = (uint8_t)((in[12] >> 1) & 7u);
+    r->set_bits = in[12] & 0x30u;
     r->flags = in[13];
     r->profile_id = le_get_u16(in + 14);
+}
+
+const char *logrec_kind_str(uint8_t kind)
+{
+    switch (kind) {
+    case 1: return "settle";
+    case 2: return "min";
+    case 3: return "max";
+    default: return "";
+    }
 }
 
 logrec_t logrec_end_marker(void)

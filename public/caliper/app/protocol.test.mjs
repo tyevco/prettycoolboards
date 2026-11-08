@@ -72,16 +72,64 @@ test('LIVE decode: 12-byte packet carries active_profile_id; 10-byte (pre-extens
   assert.equal(v2.tolPass, true);
   assert.equal(P.decodeLive([...NM_25_4, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00]).activeProfileId, 0);
   assert.equal(P.decodeLive([...NM_25_4, 0x00, 0x00, 0x00, 0x80, 0x00, 0x02]).activeProfileId, null);
-  // 11 bytes: not enough for the id, treated as the 10-byte form; bytes past 12 are ignored
+  // 11 bytes: not enough for the id, treated as the 10-byte form; 14 bytes: the id, no capture block
   assert.equal(P.decodeLive([...NM_25_4, 0, 0, 0, 0x80, 0, 0, 0x05]).activeProfileId, null);
-  assert.equal(P.decodeLive([...NM_25_4, 0, 0, 0, 0x80, 0, 0, 0x05, 0x00, 0xee, 0xff]).activeProfileId, 5);
+  const v14 = P.decodeLive([...NM_25_4, 0, 0, 0, 0x80, 0, 0, 0x05, 0x00, 0xee, 0xff]);
+  assert.equal(v14.activeProfileId, 5);
+  assert.equal(v14.capture, null, 'no capture fields below 20 bytes: the page hides the capture UI');
+  // 19 bytes (one short of v3, e.g. a truncated notification): still no capture block, the v2 fields intact
+  const v19 = P.decodeLive(P.encodeLive({ valueNm: 7, activeProfileId: 9, capture: { mode: P.CAPTURE.SWEEP, state: P.CAPST.DONE, which: 'min', n: 3, auxNm: 9 } }).slice(0, 19));
+  assert.equal(v19.capture, null);
+  assert.equal(v19.valueNm, 7);
+  assert.equal(v19.activeProfileId, 9);
+  assert.equal(v2.capture, null);
+});
+
+test('LIVE decode: v3 capture block (a frozen SWEEP MIN, the other extreme, n)', () => {
+  // value 20.012 mm, HOLD|TOL_PASS, profile 7; capture = sweep|auto, state = done|min, n = 214, aux = 20.041 mm
+  const b = [0xe0, 0x5b, 0x31, 0x01, 0x00, 0x00, 0x00, 0x80, 0x00, 0x03, 0x07, 0x00,
+    0x02, 0x13, 0xd6, 0x00, 0x28, 0xcd, 0x31, 0x01];
+  const l = P.decodeLive(b);
+  assert.equal(l.valueNm, 20_012_000);
+  assert.equal(l.hold, true, 'a frozen capture is a hold for old clients too');
+  assert.equal(l.capture.mode, P.CAPTURE.SWEEP);
+  assert.equal(l.capture.modeName, 'sweep');
+  assert.equal(l.capture.selName, 'auto');
+  assert.equal(l.capture.state, P.CAPST.DONE);
+  assert.equal(l.capture.stateName, 'frozen');
+  assert.equal(l.capture.which, 'min');
+  assert.equal(l.capture.n, 214);
+  assert.equal(l.capture.otherNm, 20_041_000);
+  assert.equal(l.capture.rangeNm, 29_000);
+  assert.equal(l.capture.sdNm, null);
+  assert.equal(P.judgedLabel(l.capture), 'min');
+  // 24 bytes: anything past 20 is ignored
+  assert.equal(P.decodeLive([...b, 1, 2, 3, 4]).capture.n, 214);
+  // SETTLE frozen: aux is the standard deviation
+  const s = P.decodeLive(P.encodeLive({ valueNm: 25_000_000, flags: P.FLAG.HOLD,
+    capture: { mode: P.CAPTURE.SETTLE, state: P.CAPST.DONE, n: 32, auxNm: 412 } }));
+  assert.equal(s.capture.sdNm, 412);
+  assert.equal(s.capture.otherNm, null);
+  assert.equal(P.judgedLabel(s.capture), 'median');
+  // waiting: no which, aux n/a
+  const w = P.decodeLive(P.encodeLive({ valueNm: 5, capture: { mode: P.CAPTURE.SWEEP, sel: P.SWEEP.MAX, state: P.CAPST.WAIT } }));
+  assert.equal(w.capture.which, null);
+  assert.equal(w.capture.auxNm, null);
+  assert.equal(w.capture.selName, 'max');
+  assert.equal(P.judgedLabel(w.capture), '');
 });
 
 test('LIVE encode matches the hand-built bytes and round-trips', () => {
+  const NO_CAPTURE = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80]; // live mode, idle, n 0, aux INT32_MIN
   const e = P.encodeLive({ valueNm: 25_400_000, capNm: null, unit: 0, flags: P.FLAG.HOLD | P.FLAG.CHARGING });
-  assert.deepEqual(Array.from(e), [...NM_25_4, 0x00, 0x00, 0x00, 0x80, 0x00, 0x21, 0x00, 0x00]);
+  assert.deepEqual(Array.from(e), [...NM_25_4, 0x00, 0x00, 0x00, 0x80, 0x00, 0x21, 0x00, 0x00, ...NO_CAPTURE]);
+  const v2 = P.encodeLive({ valueNm: 25_400_000, flags: P.FLAG.HOLD | P.FLAG.CHARGING }, { version: 2 });
+  assert.deepEqual(Array.from(v2), [...NM_25_4, 0x00, 0x00, 0x00, 0x80, 0x00, 0x21, 0x00, 0x00]);
   const e2 = P.encodeLive({ valueNm: -25_400_000, capNm: 0x01020304, unit: 1, flags: P.FLAG.CAP_VALID, activeProfileId: 0x0102 });
-  assert.deepEqual(Array.from(e2), [...NM_NEG_25_4, 0x04, 0x03, 0x02, 0x01, 0x01, 0x10, 0x02, 0x01]);
+  assert.deepEqual(Array.from(e2), [...NM_NEG_25_4, 0x04, 0x03, 0x02, 0x01, 0x01, 0x10, 0x02, 0x01, ...NO_CAPTURE]);
+  const e3 = P.encodeLive({ valueNm: 0, capture: { mode: P.CAPTURE.SWEEP, sel: P.SWEEP.MAX, state: P.CAPST.RUN, which: 'max', n: 70000, auxNm: -1 } });
+  assert.deepEqual(Array.from(e3).slice(12), [0x22, 0x22, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff], 'n saturates at 65535');
+  assert.throws(() => P.encodeLive({ valueNm: 0, capture: { mode: 16 } }), RangeError);
   assert.deepEqual(P.decodeLive(e2).capNm, 0x01020304);
   assert.equal(P.decodeLive(e2).activeProfileId, 0x0102);
   const legacy = P.encodeLive({ valueNm: 25_400_000, flags: P.FLAG.HOLD | P.FLAG.CHARGING }, { legacy: true });
@@ -96,8 +144,14 @@ test('COMMAND encodings', () => {
   assert.deepEqual(Array.from(c.holdToggle()), [0x02]);
   assert.deepEqual(Array.from(c.recordNow()), [0x03]);
   assert.deepEqual(Array.from(c.setUnit(1)), [0x04, 0x01]);
+  assert.deepEqual(Array.from(c.setCapture(P.CAPTURE.SWEEP, P.SWEEP.MIN)), [0x05, 0x02, 0x01]);
+  assert.deepEqual(Array.from(c.setCapture(P.CAPTURE.LIVE)), [0x05, 0x00, 0x00]);
+  assert.throws(() => c.setCapture(4), RangeError);
+  assert.throws(() => c.setCapture(2, 3), RangeError);
+  assert.deepEqual(Array.from(c.captureReset()), [0x06]);
   assert.deepEqual(Array.from(c.logRead(0)), [0x10, 0, 0, 0, 0]);
   assert.deepEqual(Array.from(c.logRead(0x12345678)), [0x10, 0x78, 0x56, 0x34, 0x12]);
+  assert.deepEqual(Array.from(c.logRead(9, { kind: true })), [0x10, 9, 0, 0, 0, 0x01]);
   assert.deepEqual(Array.from(c.logClear()), [0x11]);
   assert.deepEqual(Array.from(c.selectProfile(0x0102)), [0x20, 0x02, 0x01]);
   // 1 700 000 000 = 0x6553F100
@@ -107,7 +161,11 @@ test('COMMAND encodings', () => {
 
 test('COMMAND decode (used by demo mode) round-trips and rejects bad lengths', () => {
   assert.deepEqual(P.decodeCommand([0x30, 0x00, 0xf1, 0x53, 0x65]), { op: 0x30, name: 'SET_TIME', unixS: 1_700_000_000 });
-  assert.deepEqual(P.decodeCommand([0x10, 5, 0, 0, 0]), { op: 0x10, name: 'LOG_READ', fromSeq: 5 });
+  assert.deepEqual(P.decodeCommand([0x10, 5, 0, 0, 0]), { op: 0x10, name: 'LOG_READ', fromSeq: 5, opts: 0 });
+  assert.deepEqual(P.decodeCommand([0x10, 5, 0, 0, 0, 1]), { op: 0x10, name: 'LOG_READ', fromSeq: 5, opts: 1 });
+  assert.deepEqual(P.decodeCommand([0x05, 2, 2]), { op: 0x05, name: 'SET_CAPTURE', mode: 2, sel: 2 });
+  assert.deepEqual(P.decodeCommand([0x06]), { op: 0x06, name: 'CAPTURE_RESET' });
+  assert.throws(() => P.decodeCommand([0x05, 2]), RangeError);
   assert.deepEqual(P.decodeCommand([0x20, 7, 0]), { op: 0x20, name: 'SELECT_PROFILE', profileId: 7 });
   assert.throws(() => P.decodeCommand([0x04]), RangeError);
   assert.throws(() => P.decodeCommand([0x99]), RangeError);
@@ -122,8 +180,8 @@ const LOG_END = [0xff, 0xff, 0xff, 0xff, ...new Array(12).fill(0)];
 test('LOG packet decode: two records', () => {
   const recs = P.decodeLogPacket(Uint8Array.from([...LOG_REC_1, ...LOG_REC_2]));
   assert.equal(recs.length, 2);
-  assert.deepEqual(recs[0], { seq: 1, unixS: 1_700_000_000, valueNm: -25_400_000, unit: 0, flags: 3, profileId: 0x0102, end: false });
-  assert.deepEqual(recs[1], { seq: 2, unixS: 1_700_000_001, valueNm: 25_400_000, unit: 1, flags: 4, profileId: 0, end: false });
+  assert.deepEqual(recs[0], { seq: 1, unixS: 1_700_000_000, valueNm: -25_400_000, unit: 0, kind: 0, flags: 3, profileId: 0x0102, end: false });
+  assert.deepEqual(recs[1], { seq: 2, unixS: 1_700_000_001, valueNm: 25_400_000, unit: 1, kind: 0, flags: 4, profileId: 0, end: false });
 });
 
 test('LOG packet decode rejects lengths that are not a multiple of 16', () => {
@@ -242,6 +300,9 @@ test('CSV export', () => {
     [{ id: 7, name: 'BORE, A' }],
   );
   const lines = csv.trim().split('\r\n');
-  assert.equal(lines[0], 'seq,unix_s,time_utc,value_nm,value,unit,hold,tol_pass,tol_fail,flags_hex,profile_id,profile_name');
-  assert.equal(lines[1], '1,1700000000,2023-11-14T22:13:20.000Z,-25400000,-25.4000,mm,1,1,0,0x03,7,"BORE, A"');
+  assert.equal(lines[0], 'seq,unix_s,time_utc,value_nm,value,unit,hold,tol_pass,tol_fail,flags_hex,profile_id,profile_name,kind');
+  assert.equal(lines[1], '1,1700000000,2023-11-14T22:13:20.000Z,-25400000,-25.4000,mm,1,1,0,0x03,7,"BORE, A",');
+  const k = P.logToCsv([{ seq: 2, unixS: 0, valueNm: 1, unit: 1, flags: 1, profileId: 0, kind: P.LOG_KIND.SWEEP_MAX }]);
+  assert.match(k.trim().split('\r\n')[1], /,max$/);
+
 });

@@ -486,7 +486,8 @@ esp_err_t store_state_load(store_state_t *st)
 {
     st->unit = 0;
     st->profile_id = 0;
-    st->autohold = true;
+    st->capture = CALIPER_CAPTURE_SETTLE; /* the old default (auto-hold on) */
+    st->sweep_sel = CALIPER_SWEEP_AUTO;
     nvs_handle_t h;
     if (nvs_open(NVS_NS, NVS_READONLY, &h) != ESP_OK) {
         return ESP_OK;
@@ -499,8 +500,14 @@ esp_err_t store_state_load(store_state_t *st)
     if (nvs_get_u16(h, "profile", &u16) == ESP_OK) {
         st->profile_id = u16;
     }
-    if (nvs_get_u8(h, "autohold", &u8) == ESP_OK) {
-        st->autohold = u8 != 0;
+    if (nvs_get_u8(h, "capture", &u8) == ESP_OK && u8 <= CALIPER_CAPTURE_SWEEP) {
+        st->capture = u8;
+    } else if (nvs_get_u8(h, "autohold", &u8) == ESP_OK) {
+        /* firmware before the capture modes: auto-hold on = SETTLE, off = LIVE */
+        st->capture = u8 ? CALIPER_CAPTURE_SETTLE : CALIPER_CAPTURE_LIVE;
+    }
+    if (nvs_get_u8(h, "sweep_sel", &u8) == ESP_OK && u8 <= CALIPER_SWEEP_MAX) {
+        st->sweep_sel = u8;
     }
     nvs_close(h);
     return ESP_OK;
@@ -515,7 +522,11 @@ esp_err_t store_state_save(const store_state_t *st)
     }
     nvs_set_u8(h, "unit", st->unit);
     nvs_set_u16(h, "profile", st->profile_id);
-    nvs_set_u8(h, "autohold", st->autohold ? 1 : 0);
+    nvs_set_u8(h, "capture", st->capture);
+    nvs_set_u8(h, "sweep_sel", st->sweep_sel);
+    /* kept for one release, so a downgrade still finds its auto-hold setting */
+    nvs_set_u8(h, "autohold", st->capture == CALIPER_CAPTURE_SETTLE ? 1 : 0);
+
     err = nvs_commit(h);
     nvs_close(h);
     return err;

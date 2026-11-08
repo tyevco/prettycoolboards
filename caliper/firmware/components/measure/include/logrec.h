@@ -18,13 +18,18 @@ typedef struct {
     uint32_t seq;      /* 1, 2, 3, ... (0 = empty slot) */
     uint32_t unix_s;   /* 0 if the clock was never set */
     int32_t value_nm;  /* zeroed magnetic value as shown (held value if holding) */
-    uint8_t unit;      /* 0 mm, 1 inch: the unit shown when it was recorded */
+    uint8_t unit;      /* 0 mm, 1 inch: the unit shown when it was recorded (byte 12 bit 0) */
     uint8_t flags;     /* CALIPER_FLAG_* bits (HOLD, TOL_PASS, TOL_FAIL, SENSOR_ERR, ...) */
     uint16_t profile_id;
+    uint8_t kind;      /* CALIPER_LOG_KIND_* (byte 12 bits 1..3); 0 in records stored before it existed */
+    uint8_t set_bits;  /* byte 12 bits 4..5 (CALIPER_LOG_SET_*), reserved: 0 */
 } logrec_t;
 
+/* Byte 12 = unit | kind << 1 | set_bits (caliper_gatt.h CALIPER_LOG_*). The flash keeps the whole
+ * byte; the LOG stream masks it for the plain LOG_READ (gatt_log_record_pack). */
 void logrec_pack(const logrec_t *r, uint8_t out[LOGREC_SIZE]);
 void logrec_unpack(const uint8_t in[LOGREC_SIZE], logrec_t *r);
+const char *logrec_kind_str(uint8_t kind); /* "", "settle", "min", "max" (CSV / text) */
 logrec_t logrec_end_marker(void);
 
 /*

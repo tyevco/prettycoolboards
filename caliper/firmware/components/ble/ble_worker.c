@@ -28,20 +28,21 @@ typedef struct {
     job_type_t type;
     uint16_t conn;
     uint32_t from;
+    bool ext; /* LOG_READ with CALIPER_LOG_OPT_KIND: byte 12 whole */
     char text[28];
 } job_t;
 
 static QueueHandle_t s_q;
 
-void ble_worker_log_read(uint16_t conn, uint32_t from_seq)
+void ble_worker_log_read(uint16_t conn, uint32_t from_seq, bool ext)
 {
-    job_t j = {.type = JOB_LOG_READ, .conn = conn, .from = from_seq};
+    job_t j = {.type = JOB_LOG_READ, .conn = conn, .from = from_seq, .ext = ext};
     if (!s_q || xQueueSend(s_q, &j, 0) != pdTRUE) {
         ESP_LOGW(TAG, "log read dropped");
     }
 }
 
-static void stream_log(uint16_t conn, uint32_t from)
+static void stream_log(uint16_t conn, uint32_t from, bool ext)
 {
     ble_conn_t c;
     if (!ble_conn_get(conn, &c) || !c.log_sub) {
@@ -66,7 +67,7 @@ static void stream_log(uint16_t conn, uint32_t from)
             break;
         }
         for (size_t i = 0; i < n; i++) {
-            logrec_pack(&recs[i], buf + i * CALIPER_LOGREC_LEN);
+            gatt_log_record_pack(&recs[i], ext, buf + i * CALIPER_LOGREC_LEN);
         }
         if (ble_notify(conn, g_h_log, buf, (uint16_t)(n * CALIPER_LOGREC_LEN)) != 0) {
             ESP_LOGW(TAG, "log stream aborted after %u records", (unsigned)total);
@@ -79,7 +80,7 @@ static void stream_log(uint16_t conn, uint32_t from)
     logrec_t end = logrec_end_marker();
     logrec_pack(&end, buf);
     ble_notify(conn, g_h_log, buf, CALIPER_LOGREC_LEN);
-    ESP_LOGI(TAG, "streamed %u records from seq %lu", (unsigned)total, (unsigned long)from);
+    ESP_LOGI(TAG, "streamed %u records from seq %lu%s", (unsigned)total, (unsigned long)from, ext ? " (ext)" : "");
 }
 
 static void type_text(const char *text)
@@ -125,7 +126,8 @@ static void worker(void *arg)
             continue;
         }
         if (j.type == JOB_LOG_READ) {
-            stream_log(j.conn, j.from);
+            stream_log(j.conn, j.from, j.ext);
+
         } else {
             type_text(j.text);
         }

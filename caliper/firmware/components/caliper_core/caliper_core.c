@@ -7,6 +7,7 @@
 #include <time.h>
 
 #include "caliper_gatt.h"
+#include "capture.h"
 #include "esp_attr.h"
 #include "esp_log.h"
 #include "esp_timer.h"
@@ -19,10 +20,12 @@ static const char *TAG = "core";
 
 esp_err_t bus_init(void);
 
-/* Auto-hold: still within +-5 um for 0.8 s after moving at least 0.5 mm. */
-#define AUTOHOLD_BAND_NM  5000
-#define AUTOHOLD_STILL_MS 800
-#define AUTOHOLD_REARM_NM 500000
+/* Capture modes (capture.h; the parameters are meas_cap_cfg_default()): SETTLE (the old auto-hold,
+ * now the median of the still window) and SWEEP (min/max while in contact). Button presses blank
+ * the capture from 50 ms before the debounced press to 100 ms after the release. */
+#define CAPTURE_SAMPLE_MS 10 /* app_main sensor_task */
+#define BLANK_BEFORE_MS   50
+#define BLANK_AFTER_MS    100
 /* Activity: a change of more than 20 um counts as use (resets auto-off). */
 #define ACTIVITY_NM 20000
 #define TIME_VALID_AFTER 1700000000u
@@ -49,7 +52,9 @@ static cal_live_t s_live;
 static int64_t s_raw_nm;
 static int64_t s_cap_raw_nm;
 static bool s_cap_ok;
-static meas_autohold_t s_ah;
+static meas_capture_t s_cap;
+static meas_cap_result_t s_capres; /* the shown capture result, refreshed with s_live */
+static bool s_manual_hold;         /* HOLD froze the live value by hand; the capture waits */
 static meas_stats_t s_stats;
 static settings_t s_settings;
 static store_state_t s_state;
@@ -58,7 +63,6 @@ static size_t s_nprofiles;
 static cal_status_t s_status;
 static uint32_t s_last_activity_ms;
 static int32_t s_activity_ref_nm;
-static bool s_auto_held; /* the current hold was set by auto-hold (released by moving) */
 static bool s_zero_from_rtc; /* the zero came from RTC memory: valid only if the count was recovered */
 static bool s_need_zero;     /* CALIPER_FLAG_REZERO: the zero could not be carried over */
 
@@ -87,19 +91,42 @@ static meas_fmt_t fmt_locked(void)
     return meas_fmt_for(s_state.unit ? MEAS_UNIT_INCH : MEAS_UNIT_MM, s_settings.decimals);
 }
 
+/* The capture result decides the hold: a frozen capture is a hold (old clients see HOLD and the
+ * held value), anything else is not, unless HOLD froze the live value by hand. */
+static void cap_sync_locked(void)
+{
+    meas_cap_result(&s_cap, &s_capres);
+    if (s_manual_hold) {
+        return;
+    }
+    s_zh.hold = s_capres.state == MEAS_CAPST_DONE;
+    if (s_zh.hold) {
+        s_zh.held_nm = s_capres.value_nm;
+    }
+}
+
 /* Recomputes everything derived from the raw values. Caller holds the lock. */
 static void refresh_locked(bool mag_ok)
 {
     meas_fmt_t f = fmt_locked();
+    cap_sync_locked();
     s_live.live_nm = meas_zh_value(&s_zh, s_raw_nm);
-    s_live.value_nm = meas_zh_shown(&s_zh, s_raw_nm);
+    if (s_zh.hold) {
+        s_live.value_nm = s_zh.held_nm;
+    } else if (s_capres.state == MEAS_CAPST_RUN && s_cap.mode == MEAS_CAP_SWEEP) {
+        s_live.value_nm = s_capres.value_nm; /* the running extreme while in contact */
+    } else {
+        s_live.value_nm = s_live.live_nm;
+    }
     bool cap_valid = s_cap_ok && s_cap_seeded;
     s_live.cap_nm = cap_valid ? meas_sat_i32(s_cap_raw_nm - s_cap_zero_nm) : CALIPER_CAP_INVALID;
     s_live.unit = s_state.unit;
     meas_format(s_live.value_nm, &f, s_live.text, sizeof(s_live.text));
 
     const meas_profile_t *p = active_profile_locked();
-    /* go/no-go is decided on the displayed (rounded) value, like a hand-held gauge */
+    /* go/no-go is decided on the displayed (rounded) value, like a hand-held gauge. In a capture
+     * mode that is the judged statistic: SWEEP the selected extreme (live while in contact, final
+     * when frozen), SETTLE the median; the other extreme is a misalignment artefact, not a size. */
     s_live.tol = meas_tol_check(p, meas_round_nm(s_live.value_nm, &f), &s_live.gauge);
     s_live.profile_id = p ? p->id : 0;
     if (p) {
@@ -107,7 +134,16 @@ static void refresh_locked(bool mag_ok)
     } else {
         s_live.profile_name[0] = '\0';
     }
-    s_live.autohold = s_state.autohold;
+    cal_capture_t *cp = &s_live.capture;
+    cp->mode = (uint8_t)s_cap.mode;
+    cp->sel = (uint8_t)s_cap.sel;
+    cp->state = (uint8_t)s_capres.state;
+    cp->which = s_capres.which;
+    cp->manual_hold = s_manual_hold;
+    cp->n = s_capres.n;
+    cp->other_nm = s_capres.other_nm;
+    cp->range_nm = s_capres.range_nm;
+    cp->sd_nm = s_capres.sd_nm;
 
     uint8_t fl = s_live.flags & CALIPER_FLAG_CHARGING;
     if (s_zh.hold) fl |= CALIPER_FLAG_HOLD;
@@ -121,7 +157,7 @@ static void refresh_locked(bool mag_ok)
 
 void core_sample(int64_t raw_nm, bool mag_ok, int64_t cap_raw_nm, bool cap_ok, uint32_t t_ms)
 {
-    bool fire = false, released = false;
+    meas_cap_ev_t ev = MEAS_CAPEV_NONE;
     LOCK();
     s_raw_nm = raw_nm;
     s_cap_raw_nm = cap_raw_nm;
@@ -140,22 +176,8 @@ void core_sample(int64_t raw_nm, bool mag_ok, int64_t cap_raw_nm, bool cap_ok, u
             }
         }
     }
-    if (s_zh.hold && s_auto_held) {
-        /* an automatic hold lets go once the jaws open again */
-        int64_t away = (int64_t)live - s_zh.held_nm;
-        if (away > AUTOHOLD_REARM_NM || away < -AUTOHOLD_REARM_NM) {
-            meas_zh_set_hold(&s_zh, false, raw_nm);
-            s_auto_held = false;
-            released = true;
-        }
-    }
-    if (!s_zh.hold) {
-        bool f = meas_autohold_update(&s_ah, live, t_ms); /* always tracked so it re-arms properly */
-        if (f && s_state.autohold && mag_ok) {
-            meas_zh_set_hold(&s_zh, true, raw_nm);
-            s_auto_held = true;
-            fire = true;
-        }
+    if (!s_manual_hold) {
+        ev = meas_cap_update(&s_cap, live, mag_ok, t_ms);
     }
     int64_t d = (int64_t)live - s_activity_ref_nm;
     if (d > ACTIVITY_NM || d < -ACTIVITY_NM) {
@@ -165,11 +187,38 @@ void core_sample(int64_t raw_nm, bool mag_ok, int64_t cap_raw_nm, bool cap_ok, u
     refresh_locked(mag_ok);
     s_live.samples++;
     UNLOCK();
-    if (fire) {
-        uint32_t ms = 30;
+    if (ev == MEAS_CAPEV_DONE) {
+        uint32_t ms = 30; /* "captured" */
         bus_post(CAL_EVT_BEEP, &ms, sizeof(ms));
+    } else if (ev == MEAS_CAPEV_ABORT) {
+        toast("Sensor error: capture dropped");
     }
-    if (fire || released) {
+    if (ev != MEAS_CAPEV_NONE) {
+        bus_post(CAL_EVT_STATE, NULL, 0);
+    }
+}
+
+void core_button_edge(bool down, uint32_t t_ms)
+{
+    if (!s_lock) {
+        return;
+    }
+    LOCK();
+    meas_cap_button(&s_cap, down, t_ms, BLANK_BEFORE_MS, BLANK_AFTER_MS);
+    UNLOCK();
+}
+
+void core_mag_slip(void)
+{
+    if (!s_lock) {
+        return;
+    }
+    LOCK();
+    meas_cap_ev_t ev = s_manual_hold ? MEAS_CAPEV_NONE : meas_cap_slip(&s_cap);
+    refresh_locked(!(s_live.flags & CALIPER_FLAG_SENSOR_ERR));
+    UNLOCK();
+    if (ev == MEAS_CAPEV_ABORT) {
+        toast("Sensor slip: capture dropped");
         bus_post(CAL_EVT_STATE, NULL, 0);
     }
 }
@@ -242,6 +291,15 @@ static bool record(logrec_t *rec, cal_send_t *send)
     rec->unit = s_live.unit;
     rec->flags = s_live.flags & (CALIPER_FLAG_HOLD | CALIPER_FLAG_TOL_PASS | CALIPER_FLAG_TOL_FAIL |
                                  CALIPER_FLAG_SENSOR_ERR | CALIPER_FLAG_REZERO);
+    /* what the shown value is: a SETTLE median, a SWEEP extreme (frozen or running), or plain */
+    rec->kind = CALIPER_LOG_KIND_PLAIN;
+    rec->set_bits = 0;
+    if (!s_manual_hold && s_capres.state == MEAS_CAPST_DONE && s_cap.mode == MEAS_CAP_SETTLE) {
+        rec->kind = CALIPER_LOG_KIND_SETTLE;
+    } else if (!s_manual_hold && s_cap.mode == MEAS_CAP_SWEEP &&
+               (s_capres.state == MEAS_CAPST_DONE || s_capres.state == MEAS_CAPST_RUN)) {
+        rec->kind = s_capres.which < 0 ? CALIPER_LOG_KIND_SWEEP_MIN : CALIPER_LOG_KIND_SWEEP_MAX;
+    }
     rec->profile_id = s_live.profile_id;
     if (send) {
         snprintf(send->text, sizeof(send->text), "%s%s", s_live.text, s_settings.hid_suffix);
@@ -288,6 +346,7 @@ static void run_command(const core_cmd_msg_t *m)
     case CORE_CMD_ZERO:
         LOCK();
         meas_zh_zero(&s_zh, s_raw_nm);
+        meas_cap_reset(&s_cap); /* a capture spanning a zero shift means nothing */
         s_cap_zero_nm = s_cap_raw_nm;
         s_cap_seeded = s_cap_ok; /* no valid burst now: the next one is seeded from the new zero */
         s_zh_magic = ZH_MAGIC;
@@ -298,8 +357,19 @@ static void run_command(const core_cmd_msg_t *m)
         break;
     case CORE_CMD_HOLD_TOGGLE:
         LOCK();
-        meas_zh_set_hold(&s_zh, !s_zh.hold, s_raw_nm);
-        s_auto_held = false; /* a manual hold stays until HOLD is pressed again */
+        if (s_manual_hold) {
+            /* release a hand hold; in a capture mode it also re-arms */
+            s_manual_hold = false;
+            s_zh.hold = false;
+            meas_cap_reset(&s_cap);
+        } else if (s_cap.mode == MEAS_CAP_LIVE ||
+                   meas_cap_hold_press(&s_cap) == MEAS_CAP_HOLD_MANUAL) {
+            /* nothing captured or running: freeze the live value by hand (stays until HOLD) */
+            s_manual_hold = true;
+            s_zh.hold = false;
+            meas_zh_set_hold(&s_zh, true, s_raw_nm);
+        }
+        /* else: a running capture was frozen, or a frozen one cleared and re-armed */
         refresh_locked(!(s_live.flags & CALIPER_FLAG_SENSOR_ERR));
         UNLOCK();
         bus_post(CAL_EVT_STATE, NULL, 0);
@@ -360,12 +430,53 @@ static void run_command(const core_cmd_msg_t *m)
         UNLOCK();
         toast("Stats reset");
         break;
-    case CORE_CMD_AUTOHOLD_TOGGLE:
+    case CORE_CMD_SET_CAPTURE:
+    case CORE_CMD_CAPTURE_NEXT:
+    case CORE_CMD_SWEEP_SEL_NEXT: {
         LOCK();
-        s_state.autohold = !s_state.autohold;
+        meas_cap_mode_t mode = s_cap.mode;
+        meas_sweep_sel_t sel = s_cap.sel;
+        if (m->cmd == CORE_CMD_SET_CAPTURE) {
+            mode = (meas_cap_mode_t)(m->arg & 0xFFu);
+            sel = (meas_sweep_sel_t)((m->arg >> 8) & 0xFFu);
+        } else if (m->cmd == CORE_CMD_CAPTURE_NEXT) {
+            mode = (meas_cap_mode_t)((mode + 1) % (MEAS_CAP_SWEEP + 1)); /* SET is not offered */
+        } else {
+            sel = (meas_sweep_sel_t)((sel + 1) % MEAS_SWEEP_SELS);
+        }
+        bool ok = true;
+        if (mode != s_cap.mode) {
+            ok = meas_cap_set_mode(&s_cap, mode, sel);
+            if (ok) {
+                s_manual_hold = false;
+                s_zh.hold = false;
+            }
+        } else if ((unsigned)sel < MEAS_SWEEP_SELS) {
+            meas_cap_set_sel(&s_cap, sel); /* both extremes are kept: a frozen result re-renders */
+        } else {
+            ok = false;
+        }
+        if (ok) {
+            s_state.capture = (uint8_t)s_cap.mode;
+            s_state.sweep_sel = (uint8_t)s_cap.sel;
+        }
         refresh_locked(!(s_live.flags & CALIPER_FLAG_SENSOR_ERR));
         UNLOCK();
-        save_state();
+        if (ok) {
+            save_state();
+            bus_post(CAL_EVT_STATE, NULL, 0);
+        } else {
+            toast("Capture mode not available");
+        }
+        break;
+    }
+    case CORE_CMD_CAPTURE_RESET:
+        LOCK();
+        s_manual_hold = false;
+        s_zh.hold = false;
+        meas_cap_reset(&s_cap);
+        refresh_locked(!(s_live.flags & CALIPER_FLAG_SENSOR_ERR));
+        UNLOCK();
         bus_post(CAL_EVT_STATE, NULL, 0);
         break;
     case CORE_CMD_SLEEP:
@@ -582,13 +693,22 @@ esp_err_t core_init(void)
     store_settings_load(&s_settings);
     store_state_load(&s_state);
     s_nprofiles = store_profiles_load(s_profiles, CALIPER_PROFILES_MAX);
-    meas_autohold_init(&s_ah, AUTOHOLD_BAND_NM, AUTOHOLD_STILL_MS, AUTOHOLD_REARM_NM);
+    meas_cap_cfg_t cc;
+    meas_cap_cfg_default(&cc);
+    cc.sample_ms = CAPTURE_SAMPLE_MS;
+    meas_cap_init(&s_cap, &cc, MEAS_CAP_LIVE, MEAS_SWEEP_AUTO);
+    if (!meas_cap_set_mode(&s_cap, (meas_cap_mode_t)s_state.capture, (meas_sweep_sel_t)s_state.sweep_sel)) {
+        s_state.capture = CALIPER_CAPTURE_LIVE;
+        s_state.sweep_sel = CALIPER_SWEEP_AUTO;
+    }
     meas_stats_reset(&s_stats);
     s_live.cap_nm = CALIPER_CAP_INVALID;
     s_last_activity_ms = now_ms();
     refresh_locked(false);
     ESP_ERROR_CHECK(bus_subscribe(CAL_EVT_CMD, on_cmd, NULL));
-    ESP_LOGI(TAG, "unit %s, %u profiles, active %u, %lu log records", s_state.unit ? "in" : "mm",
-             (unsigned)s_nprofiles, (unsigned)s_state.profile_id, (unsigned long)store_log_count());
+    ESP_LOGI(TAG, "unit %s, %u profiles, active %u, capture %u/%u, %lu log records", s_state.unit ? "in" : "mm",
+             (unsigned)s_nprofiles, (unsigned)s_state.profile_id, (unsigned)s_state.capture,
+             (unsigned)s_state.sweep_sel, (unsigned long)store_log_count());
+
     return ESP_OK;
 }
