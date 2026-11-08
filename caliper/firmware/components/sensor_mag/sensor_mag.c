@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "board_pins.h"
+#include "pin_plan.h"
 #include "driver/gpio.h"
 #include "driver/pulse_cnt.h"
 #include "esp_attr.h"
@@ -19,10 +20,13 @@
 static const char *TAG = "mag";
 
 #define PCNT_LIMIT       30000 /* hardware counter is 16-bit; the driver accumulates overflows */
-/* SSI vs count disagreement tolerated before a correction, in SSI LSB (4 per count): the
- * incremental outputs have 2 counts (8 LSB) of hysteresis on a direction change (datasheet §7.2),
- * plus a few LSB of SSI jitter. */
-#define SLIP_TOL_LSB     14
+/* Wrap-race filter: the largest believable count change between two reads. A read that races the
+ * driver's overflow ISR is off by PCNT_LIMIT (30000 counts, 58.6 mm). 15000 counts is 29 mm in one
+ * 10 ms sample (2.9 m/s), well above any hand movement, and half the race error. */
+#define JUMP_MAX_COUNTS  15000
+#define JUMP_REREADS     2
+#define JUMP_REREAD_US   20
+/* The SSI vs count consistency limit is AS5311_FINE_TOL_LSB (as5311_proto.h): 3 edges. */
 #define IDX_TOL_LSB      16
 #define UNLOCK_SETTLE_MS 2     /* A/B leave their power-up "all high" state after the first CSn low */
 #define BAD_FRAMES_LIMIT 3
@@ -39,20 +43,25 @@ static const char *TAG = "mag";
 #define USER_DIR 1
 #endif
 
-#define RTC_MAGIC 0xA5311A55u
+#define RTC_MAGIC 0xA5311A56u /* bumped when the layout gained the offset */
 typedef struct {
     uint32_t magic;
     int64_t count;
     uint16_t ssi;
+    int32_t offset; /* the slip tracker's SSI/count offset: keeps the fine position continuous */
 } mag_rtc_t;
 RTC_DATA_ATTR static mag_rtc_t s_rtc;
 
 static pcnt_unit_handle_t s_unit;
 static int64_t s_base; /* internal count = s_base + pcnt */
 static as5311_slip_t s_slip;
+static as5311_mismatch_t s_mm;
+static as5311_jump_t s_jump;
+static mag_origin_t s_origin;
 static bool s_powered;
 static uint8_t s_bad_frames;
 static uint32_t s_slips;
+static uint32_t s_jumps;
 static volatile int s_idx_pcnt;
 static volatile bool s_idx_new;
 static int32_t s_idx_ref = -1;
@@ -87,6 +96,34 @@ static bool ssi_read(as5311_frame_t *f)
 {
     as5311_decode(ssi_read_raw(), f);
     return as5311_frame_valid(f);
+}
+
+/* ---- count ---------------------------------------------------------------------------------- */
+
+static int pcnt_raw(void)
+{
+    int c = 0;
+    pcnt_unit_get_count(s_unit, &c);
+    return c;
+}
+
+/* The driver count through the wrap-race filter: an implausible step is re-read (the race lasts
+ * only until the overflow ISR has run), then the filter sees this sample's last read once, so a
+ * jump is only believed after it has persisted for AS5311_JUMP_ACCEPT samples (30 ms), never
+ * after a few microsecond-spaced re-reads of one stuck race. */
+static int64_t pcnt_filtered(bool *held)
+{
+    int raw = pcnt_raw();
+    for (int i = 0; i < JUMP_REREADS && !as5311_jump_plausible(&s_jump, raw, JUMP_MAX_COUNTS); i++) {
+        esp_rom_delay_us(JUMP_REREAD_US);
+        raw = pcnt_raw();
+    }
+    int64_t c = 0;
+    *held = !as5311_jump_filter(&s_jump, raw, JUMP_MAX_COUNTS, &c);
+    if (*held) {
+        s_jumps++;
+    }
+    return c; /* the previous count if held */
 }
 
 /* ---- index ---------------------------------------------------------------------------------- */
@@ -174,26 +211,23 @@ static esp_err_t pcnt_setup(void)
 
 esp_err_t sensor_mag_init(void)
 {
-    gpio_config_t out = {
-        .pin_bit_mask = (1ULL << PIN_SNS_PWR_EN) | (1ULL << PIN_MAG_CLK) | (1ULL << PIN_MAG_CSN),
-        .mode = GPIO_MODE_OUTPUT,
-    };
-    ESP_RETURN_ON_ERROR(gpio_config(&out), TAG, "gpio out");
-    gpio_config_t in = {
-        .pin_bit_mask = (1ULL << PIN_MAG_DO) | (1ULL << PIN_MAG_INC_N) | (1ULL << PIN_MAG_DEC_N),
-        .mode = GPIO_MODE_INPUT,
-    };
-    ESP_RETURN_ON_ERROR(gpio_config(&in), TAG, "gpio in");
-    gpio_config_t idx = {
-        .pin_bit_mask = 1ULL << PIN_MAG_IDX,
-        .mode = GPIO_MODE_INPUT,
-        .intr_type = GPIO_INTR_POSEDGE,
-    };
-    ESP_RETURN_ON_ERROR(gpio_config(&idx), TAG, "gpio idx");
+    /* Pads from the pin plan's RUN state (tools/pin_plan.py): SNS_PWR_EN / MAG_CLK / MAG_CSN outputs,
+     * MAG_DO (with its pull-up: DO is tri-state between frames), MAG_IDX, MAG_INC_N / MAG_DEC_N inputs,
+     * no other pulls. The outputs start low (rail off); sensor_mag_power() then sequences them. */
+    gpio_set_level(PIN_SNS_PWR_EN, 0);
+    gpio_set_level(PIN_MAG_CLK, 0);
+    gpio_set_level(PIN_MAG_CSN, 0);
+    ESP_RETURN_ON_ERROR(pin_plan_apply(PP_MODE_RUN, pin_plan_init_mask(PP_INIT_SENSOR_MAG), 0), TAG, "gpio");
+    ESP_RETURN_ON_ERROR(gpio_set_intr_type(PIN_MAG_IDX, GPIO_INTR_POSEDGE), TAG, "idx intr");
+    ESP_RETURN_ON_ERROR(gpio_intr_enable(PIN_MAG_IDX), TAG, "idx intr");
 
     s_powered = false;
     ESP_RETURN_ON_ERROR(sensor_mag_power(true), TAG, "power");
     ESP_RETURN_ON_ERROR(pcnt_setup(), TAG, "pcnt");
+    /* pcnt_new_channel() turns the pad pull-UP on (esp_driver_pcnt pulse_cnt.c); A / B are push-pull
+     * outputs of the AS5311, so that pull-up only burns ~73 uA per pin while one is low (and would
+     * back-power the AS5311 if it survived into sleep). The plan says none. */
+    pin_plan_apply_pulls(PP_MODE_RUN, (1ULL << PIN_MAG_A) | (1ULL << PIN_MAG_B));
 
     esp_err_t err = gpio_install_isr_service(ESP_INTR_FLAG_IRAM);
     if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
@@ -202,6 +236,9 @@ esp_err_t sensor_mag_init(void)
     ESP_RETURN_ON_ERROR(gpio_isr_handler_add(PIN_MAG_IDX, idx_isr, NULL), TAG, "idx isr");
 
     as5311_slip_init(&s_slip, SSI_SIGN);
+    as5311_mismatch_init(&s_mm);
+    as5311_jump_init(&s_jump);
+    s_origin = MAG_ORIGIN_NONE;
     as5311_frame_t f;
     bool got = wait_first_frame(&f);
     if (got) {
@@ -218,20 +255,43 @@ esp_err_t sensor_mag_init(void)
         s_rtc.magic = 0;
         return ESP_OK; /* keep counting; readings are flagged SENSOR_ERR */
     }
-    int c = 0;
-    pcnt_unit_get_count(s_unit, &c);
+    bool held;
+    int64_t c = pcnt_filtered(&held);
+    bool recovered = false;
     if (esp_reset_reason() == ESP_RST_DEEPSLEEP && s_rtc.magic == RTC_MAGIC) {
         int64_t cnt = as5311_recover_count(s_rtc.count, s_rtc.ssi, f.pos, SSI_SIGN);
-        s_base = cnt - c;
-        ESP_LOGI(TAG, "recovered count %lld after sleep (moved %ld SSI LSB while off)", (long long)cnt,
-                 (long)as5311_wrap_diff(f.pos, s_rtc.ssi));
-    } else {
-        s_base = -c; /* cold boot: origin here */
+        /* keep the offset learned at the first power-up, so the fine position carries on
+         * seamlessly; the recovered count must agree with it like any other reading */
+        as5311_slip_t chk = {.locked = true, .offset = s_rtc.offset, .dir = SSI_SIGN};
+        as5311_fine_t fc = as5311_fine_combine(&chk, cnt, true, f.pos);
+        if (fc.status == AS5311_FINE_OK) {
+            s_base = cnt - c;
+            s_slip = chk;
+            recovered = true;
+            ESP_LOGI(TAG, "recovered count %lld after sleep (moved %ld SSI LSB while off, residual %ld)",
+                     (long long)cnt, (long)as5311_wrap_diff(f.pos, s_rtc.ssi), (long)fc.residual);
+        } else {
+            ESP_LOGW(TAG, "sleep recovery inconsistent (residual %ld LSB): new origin", (long)fc.residual);
+        }
+    } else if (esp_reset_reason() == ESP_RST_DEEPSLEEP) {
+        ESP_LOGW(TAG, "woke from deep sleep without a saved position: new origin");
     }
+    if (!recovered) {
+        s_base = -c; /* new origin here */
+        as5311_slip_lock(&s_slip, s_base + c, f.pos);
+    }
+    s_origin = recovered ? MAG_ORIGIN_RECOVERED
+               : esp_reset_reason() == ESP_RST_DEEPSLEEP ? MAG_ORIGIN_LOST
+                                                         : MAG_ORIGIN_COLD;
     s_rtc.magic = 0; /* only valid for the next wake */
-    as5311_slip_lock(&s_slip, s_base + c, f.pos);
-    ESP_LOGI(TAG, "AS5311 ok, pos %u, field %d", f.pos, (int)as5311_field(&f));
+    ESP_LOGI(TAG, "AS5311 ok, pos %u, field %d, origin %s", f.pos, (int)as5311_field(&f),
+             recovered ? "recovered" : "new");
     return ESP_OK;
+}
+
+mag_origin_t sensor_mag_origin(void)
+{
+    return s_origin;
 }
 
 /* ---- read ----------------------------------------------------------------------------------- */
@@ -242,14 +302,15 @@ esp_err_t sensor_mag_read(mag_reading_t *out, bool do_ssi)
     if (!s_unit) {
         return ESP_ERR_INVALID_STATE;
     }
-    int c1 = 0;
-    pcnt_unit_get_count(s_unit, &c1);
+    bool held;
+    int64_t c1 = pcnt_filtered(&held);
+    as5311_fine_t fine = {.lsb = (s_base + c1) * AS5311_LSB_PER_COUNT, .residual = 0, .status = AS5311_FINE_COARSE};
 
     if (do_ssi && s_powered) {
         as5311_frame_t f;
         bool valid = ssi_read(&f);
-        int c2 = 0;
-        pcnt_unit_get_count(s_unit, &c2);
+        /* not moving during the frame (and the count read was believed): the comparison is meaningful */
+        bool still = !held && pcnt_raw() == (int)c1;
         if (valid) {
             s_bad_frames = 0;
             out->ssi_valid = true;
@@ -257,16 +318,20 @@ esp_err_t sensor_mag_read(mag_reading_t *out, bool do_ssi)
             out->field = as5311_field(&f);
             if (!s_slip.locked) {
                 as5311_slip_lock(&s_slip, s_base + c1, f.pos);
-            } else if (c1 == c2) { /* not moving during the frame: the comparison is meaningful */
-                int32_t r = as5311_slip_residual(&s_slip, s_base + c1, f.pos);
-                out->slip = r;
-                if (r > SLIP_TOL_LSB || r < -SLIP_TOL_LSB) {
-                    /* the SSI position is absolute within the pole: trust it */
-                    int32_t k = as5311_slip_correction(&s_slip, r);
-                    s_base += k;
-                    s_slips++;
-                    ESP_LOGW(TAG, "count slip of %ld counts (%ld LSB) corrected", (long)k, (long)r);
-                }
+            }
+            fine = as5311_fine_combine(&s_slip, s_base + c1, still, f.pos);
+            out->slip = fine.residual;
+            int32_t k = as5311_mismatch_update(&s_mm, &s_slip, &fine);
+            if (k != 0) {
+                /* the same disagreement on AS5311_SLIP_CONFIRM still frames in a row: the SSI is
+                 * absolute within the pole, so re-align the count to it */
+                s_base += k;
+                s_slips++;
+                ESP_LOGW(TAG, "count slip of %ld counts (%ld LSB) corrected", (long)k, (long)fine.residual);
+                fine = as5311_fine_combine(&s_slip, s_base + c1, still, f.pos);
+                out->slip = fine.residual;
+            } else if (fine.status == AS5311_FINE_MISMATCH) {
+                ESP_LOGD(TAG, "SSI/count mismatch %ld LSB", (long)fine.residual);
             }
         } else if (s_bad_frames < 255) {
             s_bad_frames++;
@@ -288,19 +353,29 @@ esp_err_t sensor_mag_read(mag_reading_t *out, bool do_ssi)
 
     int64_t internal = s_base + c1;
     out->count = USER_DIR * internal;
-    out->raw_nm = meas_counts_to_nm(out->count);
+    out->fine = fine.status;
+    /* SSI-refined when the two agree; the count alone (a quarter as fine) otherwise */
+    out->raw_nm = meas_lsb_to_nm(USER_DIR * fine.lsb);
     out->slips = s_slips;
-    out->ok = s_powered && s_bad_frames < BAD_FRAMES_LIMIT && out->field != AS5311_FIELD_BAD;
+    out->jumps = s_jumps;
+    out->ok = s_powered && s_bad_frames < BAD_FRAMES_LIMIT && out->field != AS5311_FIELD_BAD &&
+              fine.status != AS5311_FINE_MISMATCH;
     return ESP_OK;
 }
 
 void sensor_mag_prepare_sleep(void)
 {
     as5311_frame_t f;
-    int c = 0;
-    if (s_unit && s_powered && ssi_read(&f) && pcnt_unit_get_count(s_unit, &c) == ESP_OK) {
+    bool held = true;
+    int64_t c = 0;
+    if (s_unit && s_powered && s_slip.locked) {
+        c = pcnt_filtered(&held);
+    }
+    /* a still, believed count and a valid frame taken together, else no recovery on wake */
+    if (!held && ssi_read(&f) && pcnt_raw() == (int)c) {
         s_rtc.count = s_base + c;
         s_rtc.ssi = f.pos;
+        s_rtc.offset = s_slip.offset;
         s_rtc.magic = RTC_MAGIC;
     } else {
         s_rtc.magic = 0;

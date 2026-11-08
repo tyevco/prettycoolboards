@@ -92,19 +92,21 @@ the CSS (every colour token is redefined under `prefers-color-scheme: dark`), no
 Click **Demo mode** (or open the page with `?demo`). A simulated caliper runs inside the page and
 speaks the same bytes as the firmware: it produces LIVE packets with `encodeLive()`, decodes every
 COMMAND with `decodeCommand()`, streams the log with `encodeLogPackets()` (15 records per
-notification, then the end marker) and serves PROFILES and SETTINGS as bytes. So demo mode
+notification, then the end marker in a notification of its own, as the firmware sends it) and serves PROFILES and SETTINGS as bytes. So demo mode
 exercises the same decode paths as a real connection; only the Web Bluetooth calls differ.
 
 The simulator:
 
 - moves the jaws between "closed", a 1 in gauge block (25.40 mm), an M6 shank (≈ 5.98 mm), a
   12 mm bore and random positions, with a smoothstep move at about 40 mm/s and a 1.5–5 s dwell;
-- quantizes the magnetic reading to the AS5311 count (2 mm / 4096 = 488 nm) with 0.25 µm of noise;
+- quantizes the magnetic reading to the rev A internal step, 488.28125 nm (2 mm / 4096: the firmware interpolates
+  the 1.953 µm quadrature count with the 12-bit SSI position, SPEC §4.1), with 0.25 µm of noise;
 - makes the capacitive reading the magnetic one plus a 4 µm sinusoidal error at the 5.08 mm
   scale pitch, a 2.5 µm offset and 1.5 µm of noise, and marks it invalid while the jaw moves faster
   than 60 mm/s and on 2 % of samples at random. These are illustrative numbers, not predictions;
   the real error budget is in [simulation](simulation.md) and has to be measured at [bring-up](bringup.md);
-- starts with three profiles and 42 past log records, and lets the battery run down and charge.
+- starts with three profiles and 42 past log records, reports the active profile in the 12-byte LIVE, and lets the
+  battery run down and charge.
 
 ## BLE GATT contract
 
@@ -116,11 +118,11 @@ the second 16-bit group changed:
 
 | UUID | Name | Properties | Payload |
 |---|---|---|---|
-| `7c0a0002-…` | LIVE | read, notify | 10 B: `i32 value_nm` (magnetic, zeroed), `i32 cap_nm` (capacitive, zeroed; `INT32_MIN` if invalid), `u8 unit` (0 mm, 1 inch), `u8 flags` |
+| `7c0a0002-…` | LIVE | read, notify | 12 B: `i32 value_nm` (magnetic, zeroed), `i32 cap_nm` (capacitive, zeroed; `INT32_MIN` if invalid), `u8 unit` (0 mm, 1 inch), `u8 flags`, `u16 active_profile_id` (0 = none). Firmware from before the extension sends the first 10 B only; the page accepts both |
 | `7c0a0003-…` | COMMAND | write | `u8 opcode` + payload (below) |
-| `7c0a0004-…` | LOG | notify | after LOG_READ: notifications of 1…N packed 16-byte records `{u32 seq, u32 unix_s, i32 value_nm, u8 unit, u8 flags, u16 profile_id}`; the stream ends with a record whose `seq = 0xFFFFFFFF` |
-| `7c0a0005-…` | SETTINGS | read, write | UTF-8 JSON ≤ 240 B: `name`, `wifi_ssid`, `wifi_pass` (write-only), `mqtt_url`, `http_post_url`, `auto_off_s`, `hid_suffix` (`"\n"`, `"\t"` or `""`), `decimals` |
-| `7c0a0006-…` | PROFILES | read, write | one or more 30-byte records `{u16 id, i32 nominal_nm, i32 tol_minus_nm, i32 tol_plus_nm, char name[16]}`, name NUL-padded |
+| `7c0a0004-…` | LOG | notify | after LOG_READ: notifications of 1…N packed 16-byte records `{u32 seq, u32 unix_s, i32 value_nm, u8 unit, u8 flags, u16 profile_id}`; the stream ends with a record whose `seq = 0xFFFFFFFF`, sent in a notification of its own |
+| `7c0a0005-…` | SETTINGS | read, write (encrypted link) | UTF-8 JSON ≤ 240 B, partial update: `name`, `wifi_ssid`, `wifi_pass` (write-only), `mqtt_url`, `http_post_url`, `auto_off_s`, `hid_suffix` (`"\n"`, `"\t"` or `""`), `decimals` |
+| `7c0a0006-…` | PROFILES | read, write | one or more 30-byte records `{u16 id, i32 nominal_nm, i32 tol_minus_nm, i32 tol_plus_nm, char name[16]}`, name NUL-padded; a write is a per-record upsert, all or nothing |
 
 Flags: bit 0 HOLD, bit 1 TOL_PASS, bit 2 TOL_FAIL, bit 3 SENSOR_ERR, bit 4 CAP_VALID, bit 5 CHARGING.
 The app reads the log record's `flags` byte with the same bit meanings.
@@ -141,39 +143,47 @@ Standard services alongside: Battery (0x180F), Device Information (0x180A) and H
 The page asks for Battery and Device Information. It cannot use HID, because 0x1812 is on the
 Web Bluetooth blocklist; the operating system talks to the HID keyboard directly.
 
-### How the app reads the parts the contract leaves open
+COMMAND, PROFILES and SETTINGS writes fail with ATT error **0x06** (unknown opcode), **0x0D** (wrong length; PROFILES
+not a multiple of 30 or over 16 records; SETTINGS over 240 B) or **0x80** (bad value). An unpaired SETTINGS write is
+refused by the stack (0x05 on NimBLE, 0x0F on some stacks) and the browser pairs. `protocol.js` exports these as
+`ATT_ERR`. The advertisement or scan response carries the 128-bit service UUID (rev A: the scan response).
 
-These choices are made in `protocol.js`; the firmware should match them or the contract should be
-tightened:
+### How the app reads the contract
+
+These used to be the app's guesses; the contract reconciliation (SPEC §8, decision D6) made each one part of the
+contract, so `protocol.js`, the firmware and `caliper_gatt.h` now agree on them:
 
 - **Units.** `value_nm` is always nanometres; `unit` only says how to display it.
   `decimals` (1…3) is the number of mm decimals; inch shows two more (2 → 0.01 mm / 0.0001 in),
   the same rule as the firmware's `meas_fmt_for()`. The caliper's own display also rounds inch to a
   0.0005 in step (`meas_step_nm()`); the page shows the unrounded value to 0.0001 in.
-- **Tolerance band** = `nominal − |tol_minus| … nominal + |tol_plus|`, inclusive. `tol_minus`
-  is written as a positive magnitude; the `abs()` means a firmware that stores it signed gives the
-  same band.
+- **Tolerance band** = `nominal − |tol_minus| … nominal + |tol_plus|`, inclusive. Both tolerances
+  are magnitudes: the page writes them positive and ignores a sign when reading.
 - **Profile names** are UTF-8, at most 16 bytes, cut on a character boundary and NUL-padded; a
   full 16-byte name has no NUL, which the firmware's `gatt_profile_unpack()` handles. Profile id 0
-  means "no profile". At most 16 records per write (`CALIPER_PROFILES_MAX`, 16 × 30 = 480 B).
-- **Deleting a profile.** The firmware codec defines a delete record: an empty name with
-  nominal = tol− = tol+ = 0 deletes that id (`gatt_profile_is_delete()`). The contract doesn't
-  say whether a PROFILES write replaces the whole table or updates record by record, so the page
-  sends the full list **plus** a delete record for every id it read from the caliper that is no
-  longer in the list. That gives the same result under either reading. Because of this the page
-  insists on reading the profiles before it writes, and refuses a profile with an empty name.
-- **SETTINGS write** sends every key in the form (an empty string clears that field), except
-  `wifi_pass`, which is only sent when typed. Unknown keys are dropped. The page checks the value
-  limits the firmware enforces in `settings.c` before writing (the firmware rejects the whole write
-  on any bad value): `name` ≤ 20 B, `wifi_ssid` ≤ 32 B, `wifi_pass` 8…64 B, the URLs ≤ 64 B with
-  an `mqtt://`/`mqtts://`/`ws://`/`wss://` or `http://`/`https://` prefix, `auto_off_s` 0 or
-  30…3600, `decimals` 1…3. These limits are not in `caliper_gatt.h`, so they can drift.
-- **LOG**: a notification whose length is not a multiple of 16 is rejected; duplicate `seq`
-  values are dropped; anything after the end marker is ignored.
-- **The active profile** isn't reported in LIVE, so after a reconnect the app shows the profile it
-  last selected (remembered in the browser), which may be stale if it was changed on the caliper.
-- **Advertising**: the page filters the device chooser on the custom service UUID, so the
-  firmware has to put the 128-bit UUID in the advertisement or the scan response.
+  means "no profile" (never stored; a record with id 0 is refused). The caliper stores at most 16
+  profiles, which is also the most records per write (`CALIPER_PROFILES_MAX`, 16 × 30 = 480 B).
+- **Deleting a profile.** A record with an empty name and nominal = tol− = tol+ = 0 deletes that id
+  (`gatt_profile_is_delete()`). A PROFILES write is a per-record upsert, so the page sends the full
+  list **plus** a delete record for every id it read from the caliper that is no longer in the list.
+  The firmware applies the write all or nothing (a table that would exceed 16 is refused). Because
+  of this the page insists on reading the profiles before it writes, and refuses a profile with an
+  empty name.
+- **SETTINGS write** is a partial update: a key that is absent keeps its stored value. The page
+  sends every key in the form (an empty string clears that field), except `wifi_pass`, which is
+  only sent when typed (absent = keep the stored password). Unknown keys are dropped. The page
+  checks the contract's limits before writing (the firmware rejects the whole write on any bad
+  value): `name` ≤ 20 B, `wifi_ssid` ≤ 32 B, `wifi_pass` 8…64 B, the URLs ≤ 64 B with an
+  `mqtt://`/`mqtts://`/`ws://`/`wss://` or `http://`/`https://` prefix, `auto_off_s` 0 or
+  30…3600, `decimals` 1…3. They are `CALIPER_SET_*` in `caliper_gatt.h` and SPEC §8 now.
+- **LOG**: the record flags use the LIVE bit meanings. A notification whose length is not a
+  multiple of 16 is rejected; duplicate `seq` values are dropped. The end marker comes in its own
+  notification; one inside a packet would still end the stream, and anything after it is ignored.
+- **The active profile** comes in the 12-byte LIVE (`active_profile_id`), and the page follows it, so
+  a profile chosen on the caliper shows up. From a 10-byte LIVE (firmware from before the extension)
+  the page keeps the profile it last selected (remembered in the browser), which may be stale.
+- **Advertising**: the page filters the device chooser on the custom service UUID, which the
+  firmware puts in the scan response.
 
 ## Tests
 
@@ -183,10 +193,12 @@ node --test public/caliper/app/protocol.test.mjs public/caliper/app/protocol.vec
 
 (Give the file paths; `node --test public/caliper/app/` with a folder does not find them on Node 24.)
 
-`protocol.test.mjs`: 21 tests, run with Node 24.11 on Windows: all pass. They check the UUIDs; LIVE decode
+`protocol.test.mjs`: 22 tests, run with Node 24.11 on Windows: all pass (36 with the vectors file, re-run
+after the 12-byte LIVE change). They check the UUIDs; LIVE decode
 (positive/negative values, `INT32_MIN` and CAP_VALID handling, a `DataView` with an offset, short
-packets) and encode; every COMMAND encoding; LOG packets, multi-notification streams, the end
-marker, empty logs and duplicates; PROFILES decode/encode including a 16-character name without
+packets, 12-byte packets with `active_profile_id`, 10- and 11-byte packets without it, trailing bytes) and
+encode (12 bytes, and the 10-byte legacy form); every COMMAND encoding; LOG packets, multi-notification
+streams, the end marker in its own notification, empty logs and duplicates; PROFILES decode/encode including a 16-character name without
 a NUL and UTF-8 truncation; tolerance evaluation; SETTINGS encode/decode and the 240-byte limit;
 formatting, stats and CSV. Each expected byte array is written out by hand from the contract, not
 generated by the code under test.
@@ -195,7 +207,10 @@ generated by the code under test.
 produced by the firmware's portable C codec (`gatt_codec.c`, `logrec.c`), compiled with gcc in
 WSL, so they check that page and firmware agree byte for byte: every LIVE flag bit, `INT32_MIN`
 and `INT32_MAX`, a high-bit LOG seq and the end marker, a 16-byte name with no NUL, a UTF-8 name,
-delete records, the 16-record limit and the u32/u16 command extremes. The other direction was
+delete records, the 16-record limit and the u32/u16 command extremes. **Exception:** the two LIVE
+vectors were 10 bytes from `gatt_live_pack()`; for the 12-byte LIVE their last two bytes (the profile
+id) were appended by hand, and the 10-byte originals stay as decode-only checks. The firmware track
+regenerates them from C once its codec writes 12 bytes. The other direction was
 checked once by hand and is not automated: profiles, SETTINGS JSON and commands encoded by
 `protocol.js` were fed to the firmware's `gatt_profile_unpack()`, `settings_from_json()` and
 `gatt_cmd_parse()`, which accepted all of them and decoded the same values (a throwaway harness,

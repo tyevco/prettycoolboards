@@ -42,11 +42,15 @@ export const DIS_CHARS = Object.freeze([
 
 export const INT32_MIN = -0x80000000;
 export const LOG_END_SEQ = 0xffffffff;
-export const LIVE_LEN = 10;
+// LIVE grew from 10 to 12 bytes (SPEC §8, 2026-11-07): u16 active_profile_id appended. Readers accept
+// >= 10 bytes (10 = firmware from before the extension, active profile unknown) and ignore anything past 12.
+export const LIVE_LEN = 12;
+export const LIVE_LEN_MIN = 10;
 export const LOG_RECORD_LEN = 16;
 export const PROFILE_RECORD_LEN = 30;
 export const PROFILE_NAME_LEN = 16;
-export const PROFILES_MAX = 16; // CALIPER_PROFILES_MAX: 16 x 30 = 480 B
+export const PROFILES_MAX = 16; // CALIPER_PROFILES_MAX: 16 x 30 = 480 B, also the size of the caliper's table
+export const PROFILE_ID_NONE = 0; // CALIPER_PROFILE_ID_NONE: "no profile" (never a stored id)
 export const SETTINGS_MAX_BYTES = 240;
 
 export const UNIT = Object.freeze({ MM: 0, INCH: 1 });
@@ -73,12 +77,22 @@ export const OP = Object.freeze({
   SET_TIME: 0x30,
 });
 
+// ATT error codes the firmware returns on COMMAND / SETTINGS / PROFILES writes (caliper_gatt.h CALIPER_ATT_ERR_*).
+export const ATT_ERR = Object.freeze({
+  REQ_NOT_SUPPORTED: 0x06, // COMMAND: unknown opcode
+  INVALID_LEN: 0x0d, // wrong length for the opcode; PROFILES not a multiple of 30; SETTINGS JSON too long
+  INSUFFICIENT_AUTHEN: 0x05, // SETTINGS write on an unencrypted link (NimBLE's code): pair first
+  INSUFFICIENT_ENC: 0x0f, // the same condition as other stacks report it
+  APP_BAD_VALUE: 0x80, // a bad argument / value, profile id 0, profile table full, JSON syntax
+});
+
 export const SETTINGS_KEYS = Object.freeze([
   'name', 'wifi_ssid', 'wifi_pass', 'mqtt_url', 'http_post_url', 'auto_off_s', 'hid_suffix', 'decimals',
 ]);
 export const HID_SUFFIXES = Object.freeze(['\n', '\t', '']);
 // Value limits the firmware enforces in settings.c (it rejects the whole write on any bad value);
-// mirrored here so the page can say what is wrong before writing. Not part of caliper_gatt.h.
+// mirrored here so the page can say what is wrong before writing. Now part of the contract:
+// caliper_gatt.h CALIPER_SET_* and SPEC §8.
 export const SETTINGS_STR_BYTES = Object.freeze({
   name: [0, 20], wifi_ssid: [0, 32], wifi_pass: [8, 64], mqtt_url: [0, 64], http_post_url: [0, 64],
 });
@@ -145,38 +159,46 @@ export function flagNames(f) {
 }
 
 // ---------------------------------------------------------------------------------------------
-// LIVE (7c0a0002): 10 bytes {i32 value_nm, i32 cap_nm, u8 unit, u8 flags}
+// LIVE (7c0a0002): 12 bytes {i32 value_nm, i32 cap_nm, u8 unit, u8 flags, u16 active_profile_id}
+//   (10 bytes, without active_profile_id, from firmware built before the extension)
 // ---------------------------------------------------------------------------------------------
 
 /**
- * Decode a LIVE notification/read.
+ * Decode a LIVE notification/read (10 or 12 bytes; bytes past 12 are ignored).
  * capNm is null when cap_nm == INT32_MIN or the CAP_VALID flag is clear.
+ * activeProfileId is null on a 10-byte packet (the caliper did not say), else 0 (none) or the profile id.
  */
 export function decodeLive(data) {
   const dv = toDataView(data);
-  if (dv.byteLength < LIVE_LEN) throw new RangeError(`LIVE needs ${LIVE_LEN} bytes, got ${dv.byteLength}`);
+  if (dv.byteLength < LIVE_LEN_MIN) throw new RangeError(`LIVE needs ${LIVE_LEN_MIN} or ${LIVE_LEN} bytes, got ${dv.byteLength}`);
   const valueNm = dv.getInt32(0, true);
   const capRaw = dv.getInt32(4, true);
   const unit = dv.getUint8(8);
   const flags = dv.getUint8(9);
+  const activeProfileId = dv.byteLength >= LIVE_LEN ? dv.getUint16(10, true) : null;
   const f = decodeFlags(flags);
   const capNm = capRaw === INT32_MIN || !f.capValid ? null : capRaw;
-  return { valueNm, capNm, capRaw, unit, flags, ...f };
+  return { valueNm, capNm, capRaw, unit, flags, activeProfileId, ...f };
 }
 
-/** Encode a LIVE packet (used by demo mode and tests). capNm null -> INT32_MIN. */
-export function encodeLive({ valueNm, capNm = null, unit = UNIT.MM, flags = 0 }) {
+/**
+ * Encode a LIVE packet (used by demo mode and tests). capNm null -> INT32_MIN.
+ * 12 bytes; { legacy: true } gives the 10-byte form of firmware from before the extension.
+ */
+export function encodeLive({ valueNm, capNm = null, unit = UNIT.MM, flags = 0, activeProfileId = PROFILE_ID_NONE }, { legacy = false } = {}) {
   checkI32('valueNm', valueNm);
   const cap = capNm === null || capNm === undefined ? INT32_MIN : capNm;
   checkI32('capNm', cap);
   checkU('unit', unit, 8);
   checkU('flags', flags, 8);
-  const out = new Uint8Array(LIVE_LEN);
+  checkU('activeProfileId', activeProfileId, 16);
+  const out = new Uint8Array(legacy ? LIVE_LEN_MIN : LIVE_LEN);
   const dv = new DataView(out.buffer);
   dv.setInt32(0, valueNm, true);
   dv.setInt32(4, cap, true);
   dv.setUint8(8, unit);
   dv.setUint8(9, flags);
+  if (!legacy) dv.setUint16(10, activeProfileId, true);
   return out;
 }
 
@@ -224,7 +246,8 @@ export function decodeCommand(data) {
 // ---------------------------------------------------------------------------------------------
 // LOG (7c0a0004): notifications of packed 16-byte records
 //   {u32 seq, u32 unix_s, i32 value_nm, u8 unit, u8 flags, u16 profile_id}
-//   The stream ends with a record whose seq == 0xFFFFFFFF.
+//   The stream ends with a record whose seq == 0xFFFFFFFF, sent in a notification of its own.
+//   The flags byte uses the LIVE bit meanings (FLAG).
 // ---------------------------------------------------------------------------------------------
 
 export function decodeLogRecord(dv, off = 0) {
@@ -270,10 +293,12 @@ export function encodeLogEnd() {
   return encodeLogRecord({ seq: LOG_END_SEQ });
 }
 
-/** Pack records (and optionally the end marker) into notifications of at most perPacket records each. */
+/**
+ * Pack records into notifications of at most perPacket records each, then (optionally) the end
+ * marker in a notification of its own, as the firmware sends it (SPEC §8).
+ */
 export function encodeLogPackets(records, { perPacket = 15, withEnd = true } = {}) {
   const all = records.map(encodeLogRecord);
-  if (withEnd) all.push(encodeLogEnd());
   const packets = [];
   for (let i = 0; i < all.length; i += perPacket) {
     const chunk = all.slice(i, i + perPacket);
@@ -281,12 +306,14 @@ export function encodeLogPackets(records, { perPacket = 15, withEnd = true } = {
     chunk.forEach((r, j) => p.set(r, j * LOG_RECORD_LEN));
     packets.push(p);
   }
+  if (withEnd) packets.push(encodeLogEnd());
   return packets;
 }
 
 /**
  * Collects a LOG_READ stream. feed() each notification; it returns true once the end marker arrived.
- * Records after the end marker in the same packet are ignored. Duplicate seq numbers are dropped.
+ * The contract sends the marker in its own notification; a marker inside a packet is still honoured
+ * and anything after it is ignored. Duplicate seq numbers are dropped.
  */
 export class LogAssembler {
   constructor() { this.records = []; this.done = false; this.packets = 0; this._seen = new Set(); }
@@ -375,9 +402,9 @@ export function isProfileDelete(p) {
 }
 
 /**
- * The records to write so the caliper ends up holding exactly `list`, whether the firmware treats a
- * PROFILES write as "replace all" or as "upsert each record": the profiles themselves, plus a delete
- * record for every id the caliper had (`deviceIds`) that is no longer in the list.
+ * The records to write so the caliper ends up holding exactly `list`. A PROFILES write is a per-record
+ * upsert by id (SPEC §8), so this is the profiles themselves plus a delete record for every id the
+ * caliper had (`deviceIds`) that is no longer in the list. The firmware applies a write all or nothing.
  * Throws on duplicate ids, id 0, an empty name, or more than PROFILES_MAX records.
  */
 export function profilesWriteRecords(list, deviceIds = []) {
@@ -397,8 +424,8 @@ export function profilesWriteRecords(list, deviceIds = []) {
 }
 
 /**
- * Tolerance band of a profile, in nm. tol_minus_nm is treated as a magnitude below nominal
- * (abs() so that a firmware that stores it signed, e.g. -20000, gives the same band).
+ * Tolerance band of a profile, in nm. Both tolerances are magnitudes (SPEC §8): the band is
+ * nominal - |tol_minus| .. nominal + |tol_plus|; a sign on the wire is ignored, as the firmware does.
  */
 export function toleranceBand(p) {
   return { lo: p.nominalNm - Math.abs(p.tolMinusNm), hi: p.nominalNm + Math.abs(p.tolPlusNm) };
@@ -412,6 +439,8 @@ export function evaluateTolerance(valueNm, p) {
 
 // ---------------------------------------------------------------------------------------------
 // SETTINGS (7c0a0005): UTF-8 JSON, at most 240 bytes. wifi_pass is write-only.
+//   A write is a partial update: a key that is absent keeps its stored value (an absent wifi_pass
+//   keeps the stored password; "" clears it). The write needs an encrypted (paired) link.
 // ---------------------------------------------------------------------------------------------
 
 /** Decode a SETTINGS read. wifi_pass is dropped even if a firmware bug sends it. */

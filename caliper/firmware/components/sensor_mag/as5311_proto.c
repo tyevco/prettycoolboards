@@ -99,3 +99,79 @@ int64_t as5311_recover_count(int64_t stored_count, uint16_t ssi_stored, uint16_t
     int32_t k = as5311_lsb_to_counts(as5311_wrap_diff(ssi_now, ssi_stored));
     return stored_count + (dir < 0 ? -k : k);
 }
+
+/* ---- fine position (SPEC D1) ------------------------------------------------------------- */
+
+as5311_fine_t as5311_fine_combine(const as5311_slip_t *s, int64_t count, bool ssi_ok, uint16_t ssi_pos)
+{
+    as5311_fine_t f = {.lsb = count * AS5311_LSB_PER_COUNT, .residual = 0, .status = AS5311_FINE_COARSE};
+    if (!s->locked || !ssi_ok) {
+        return f;
+    }
+    int32_t r = as5311_slip_residual(s, count, ssi_pos);
+    f.residual = r;
+    if (r > AS5311_FINE_TOL_LSB || r < -AS5311_FINE_TOL_LSB) {
+        f.status = AS5311_FINE_MISMATCH; /* count alone */
+        return f;
+    }
+    f.lsb += s->dir < 0 ? -r : r;
+    f.status = AS5311_FINE_OK;
+    return f;
+}
+
+void as5311_mismatch_init(as5311_mismatch_t *m)
+{
+    m->n = 0;
+    m->k = 0;
+}
+
+int32_t as5311_mismatch_update(as5311_mismatch_t *m, const as5311_slip_t *s, const as5311_fine_t *f)
+{
+    if (f->status == AS5311_FINE_COARSE) {
+        return 0; /* no evidence either way */
+    }
+    if (f->status == AS5311_FINE_OK) {
+        m->n = 0;
+        return 0;
+    }
+    int32_t k = as5311_slip_correction(s, f->residual);
+    /* the same slip, give or take one count of jitter at the rounding edge */
+    if (m->n > 0 && (k - m->k > 1 || m->k - k > 1)) {
+        m->n = 0;
+    }
+    m->k = k;
+    if (++m->n >= AS5311_SLIP_CONFIRM) {
+        m->n = 0;
+        return k;
+    }
+    return 0;
+}
+
+/* ---- PCNT wrap-race filter ------------------------------------------------------------- */
+
+void as5311_jump_init(as5311_jump_t *j)
+{
+    j->have = false;
+    j->last = 0;
+    j->rejects = 0;
+}
+
+bool as5311_jump_plausible(const as5311_jump_t *j, int64_t raw, int64_t max_step)
+{
+    int64_t d = raw - j->last;
+    return !j->have || (d <= max_step && d >= -max_step);
+}
+
+bool as5311_jump_filter(as5311_jump_t *j, int64_t raw, int64_t max_step, int64_t *out)
+{
+    int64_t d = raw - j->last;
+    if (!j->have || (d <= max_step && d >= -max_step) || ++j->rejects >= AS5311_JUMP_ACCEPT) {
+        j->have = true;
+        j->last = raw;
+        j->rejects = 0;
+        *out = raw;
+        return true;
+    }
+    *out = j->last;
+    return false;
+}

@@ -43,12 +43,12 @@ void ble_worker_log_read(uint16_t conn, uint32_t from_seq)
 
 static void stream_log(uint16_t conn, uint32_t from)
 {
-    ble_conn_t *c = ble_conn_find(conn);
-    if (!c || !c->log_sub) {
+    ble_conn_t c;
+    if (!ble_conn_get(conn, &c) || !c.log_sub) {
         ESP_LOGW(TAG, "LOG_READ without a LOG subscription; ignored");
         return;
     }
-    size_t per = gatt_log_records_per_notify(c->mtu);
+    size_t per = gatt_log_records_per_notify(c.mtu);
     if (per > MAX_PER_NOTIFY) {
         per = MAX_PER_NOTIFY;
     }
@@ -57,7 +57,7 @@ static void stream_log(uint16_t conn, uint32_t from)
     uint32_t seq = from;
     size_t total = 0;
     for (;;) {
-        if (!ble_conn_find(conn)) {
+        if (!ble_conn_get(conn, &c)) {
             return; /* disconnected mid-stream */
         }
         uint32_t next;
@@ -87,9 +87,11 @@ static void type_text(const char *text)
     uint8_t reports[2 * 28][8];
     size_t n = hid_build_reports(text, reports, sizeof(reports) / sizeof(reports[0]));
     bool sent = false;
-    for (int i = 0; i < BLE_MAX_CONN; i++) {
-        ble_conn_t *c = &g_ble_conn[i];
-        if (!c->used || !c->hid_sub || !c->encrypted) {
+    ble_conn_t conns[BLE_MAX_CONN];
+    int nc = ble_conn_snapshot(conns); /* type outside the lock */
+    for (int i = 0; i < nc; i++) {
+        const ble_conn_t *c = &conns[i];
+        if (!c->hid_sub || !c->encrypted) {
             continue;
         }
         for (size_t k = 0; k < n; k++) {

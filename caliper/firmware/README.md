@@ -5,8 +5,10 @@ experimental capacitive scale, an LVGL UI on the ST7789, NimBLE (custom GATT ser
 Information + HID keyboard), Wi-Fi with a web page and MQTT/HTTP push, TinyUSB CDC + MSC, a LittleFS reading
 log, and the BQ25180 / MAX17048 / LIS2DW12 power side.
 
-> **Status:** source complete, **not yet built with `idf.py`** and never run on hardware. The portable core
-> passes its host tests (22 groups, 649 checks, re-run after the 2026-11-07 review fixes). Details, design and the list of unverified items:
+> **Status:** **builds with `idf.py build` on ESP-IDF v5.4.2** (esp32s3, 4 MB layout, 0 warnings; image
+> 1 660 592 B, 6 % of the app slot free) but has **never run on hardware**. The portable core passes its host
+> tests (25 groups, 792 checks, ASan + UBSan, `-Werror`), and the log store its own (3 groups, 2589 checks).
+> Details, design, the 2026-11-07 review fixes and the list of unverified items:
 > [docs/firmware.md](../docs/firmware.md).
 
 ## Build
@@ -30,7 +32,7 @@ python3 tools/gen_pins.py
 ## Host tests
 
 ```sh
-cmake -S test/host -B build-host -G Ninja && cmake --build build-host && ./build-host/caliper_tests
+cmake -S test/host -B build-host -G Ninja && cmake --build build-host && ctest --test-dir build-host --output-on-failure
 ```
 
 ## Layout
@@ -44,4 +46,4 @@ cmake -S test/host -B build-host -G Ninja && cmake --build build-host && ./build
 | `components/sensor_mag`, `sensor_cap` | AS5311 and the experimental capacitive scale |
 | `components/caliper_core` | event bus, live state, commands |
 | `components/store`, `ui`, `ble`, `caliper_wifi`, `caliper_usb`, `power` | the rest |
-| `test/host` | host unit tests |
+| `test/host` | host unit tests (`caliper_tests`: the portable core; `store_tests`: `store.c` against `test/host/stubs`) |

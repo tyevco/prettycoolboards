@@ -75,6 +75,11 @@ CONFIG_ESP_COEX_SW_COEXIST_ENABLE=y
 CONFIG_HTTPD_MAX_REQ_HDR_LEN=1024
 CONFIG_HTTPD_MAX_URI_LEN=256
 CONFIG_ESP_HTTP_CLIENT_ENABLE_HTTPS=y
+# https:// POST and mqtts:// / wss:// verify the server against the ESP-IDF certificate bundle
+# (push.c attaches esp_crt_bundle_attach; without it every TLS connection failed with "no server
+# verification option set"). The common-CA subset keeps the flash cost down.
+CONFIG_MBEDTLS_CERTIFICATE_BUNDLE=y
+CONFIG_MBEDTLS_CERTIFICATE_BUNDLE_DEFAULT_CMN=y
 CONFIG_MQTT_PROTOCOL_311=y
 CONFIG_LWIP_MAX_SOCKETS=12
 
@@ -86,6 +91,9 @@ CONFIG_TINYUSB_DESC_MANUFACTURER_STRING="PrettyCool"
 CONFIG_TINYUSB_DESC_PRODUCT_STRING="PrettyCool Caliper"
 CONFIG_TINYUSB_DESC_CDC_STRING="Caliper console"
 CONFIG_TINYUSB_DESC_MSC_STRING="Caliper log"
+# esp_tinyusb defaults its task to CPU1, where the sensor (prio 10) and the capacitive burst
+# (interrupts masked ~7 ms) run: keep USB work on core 0 with the other I/O tasks.
+CONFIG_TINYUSB_TASK_AFFINITY_CPU0=y
 
 # ---- storage --------------------------------------------------------------------------------
 CONFIG_FATFS_LFN_HEAP=y
@@ -95,6 +103,10 @@ CONFIG_WL_SECTOR_SIZE_4096=y
 # ---- drivers ------------------------------------------------------------------------------
 CONFIG_PCNT_CTRL_FUNC_IN_IRAM=y
 CONFIG_GPIO_CTRL_FUNC_IN_IRAM=y
+# The capacitive burst's ADC DMA ISR must keep running while core 0 writes flash (the log, NVS):
+# otherwise the 5-frame DMA ring (4 ms at 80 kS/s) is overwritten before the ISR copies it out
+# and the burst is demodulated from spliced samples without any error (sensor_cap.c).
+CONFIG_ADC_CONTINUOUS_ISR_IRAM_SAFE=y
 
 # ---- LVGL 9 -------------------------------------------------------------------------------
 CONFIG_LV_COLOR_DEPTH_16=y

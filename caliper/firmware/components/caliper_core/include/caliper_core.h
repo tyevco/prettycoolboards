@@ -109,6 +109,11 @@ void core_get_live(cal_live_t *out);
 void core_get_stats(meas_stats_t *out);
 /* The zero point, kept in RTC memory across deep sleep. */
 int64_t core_zero_raw(void);
+/* Call once after sensor_mag_init(). recovered: the AS5311 count continues from before the deep
+ * sleep, so the zero kept in RTC memory still applies. Otherwise that zero is dropped, and if one
+ * had been set, or lost (woke from deep sleep but the position could not be recovered), LIVE and
+ * the display carry CALIPER_FLAG_REZERO until ZERO is pressed. */
+void core_mag_origin(bool recovered, bool lost);
 
 /* ---- commands ---- */
 esp_err_t core_command(core_cmd_t cmd, uint32_t arg);

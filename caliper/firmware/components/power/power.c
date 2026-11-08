@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "board_pins.h"
+#include "driver/gpio.h"
 #include "driver/temperature_sensor.h"
 #include "esp_check.h"
 #include "esp_log.h"
@@ -38,11 +39,18 @@ static const char *TAG = "power";
 #define BQ_IC_CTRL_VAL 0x17  /* TS_EN = 0: only for a board without the RT1 NTC */
 #endif
 
-/* ---- MAX17048 ---- */
+/* ---- MAX17048 (Maxim 19-6171 Rev 7, Table 2 p. 10-11, Figs. 8-10 pp. 11-12) ---- */
 #define FG_VCELL   0x02
 #define FG_SOC     0x04
+#define FG_MODE    0x06   /* write-only; bit 14 Quick-Start, bit 13 EnSleep */
 #define FG_VERSION 0x08
+#define FG_HIBRT   0x0A   /* HibThr (MSB) / ActThr (LSB); 0xFFFF = always hibernate, POR 0x8030 */
+#define FG_CONFIG  0x0C   /* RCOMP (MSB) | SLEEP bit 7, ALSC bit 6, ALRT bit 5, ATHD 4..0 (LSB) */
 #define FG_VRESET  0x18
+#define FG_MODE_ENSLEEP    0x2000u
+#define FG_HIBRT_ALWAYS    0xFFFFu
+#define FG_HIBRT_POR       0x8030u
+#define FG_CONFIG_SLEEP    0x0080u
 
 /* ---- LIS2DW12 ---- */
 #define IMU_WHO_AM_I     0x0F
@@ -83,6 +91,63 @@ static esp_err_t wr8(i2c_master_dev_handle_t d, uint8_t reg, uint8_t v)
 static esp_err_t rd(i2c_master_dev_handle_t d, uint8_t reg, uint8_t *v, size_t n)
 {
     return i2c_master_transmit_receive(d, &reg, 1, v, n, I2C_TIMEOUT);
+}
+
+/* MAX17048 registers are 16 bits, MSB first */
+static esp_err_t fg_rd16(uint8_t reg, uint16_t *v)
+{
+    uint8_t b[2];
+    esp_err_t err = rd(s_fg, reg, b, 2);
+    *v = (uint16_t)(((uint16_t)b[0] << 8) | b[1]);
+    return err;
+}
+
+static esp_err_t fg_wr16(uint8_t reg, uint16_t v)
+{
+    uint8_t w[3] = {reg, (uint8_t)(v >> 8), (uint8_t)v};
+    return i2c_master_transmit(s_fg, w, sizeof(w), I2C_TIMEOUT);
+}
+
+/* Undo fg_ship_prepare() (a previous ship mode): CONFIG.SLEEP = 0 is the only way out of a forced
+ * sleep besides POR (19-6171 p. 10 "Sleep Mode": "Other communication does not wake up the IC"),
+ * MODE.EnSleep = 0 so a low bus cannot put it to sleep, HIBRT back to its POR value (automatic
+ * hibernate). Harmless when nothing was set. */
+static void fg_wake(void)
+{
+    uint16_t cfg, hib;
+    if (fg_rd16(FG_CONFIG, &cfg) == ESP_OK && (cfg & FG_CONFIG_SLEEP)) {
+        fg_wr16(FG_CONFIG, (uint16_t)(cfg & ~FG_CONFIG_SLEEP));
+        ESP_LOGI(TAG, "MAX17048 woken from sleep (ship mode)");
+    }
+    fg_wr16(FG_MODE, 0x0000);
+    if (fg_rd16(FG_HIBRT, &hib) == ESP_OK && hib != FG_HIBRT_POR) {
+        fg_wr16(FG_HIBRT, FG_HIBRT_POR);
+    }
+}
+
+/* Before ship mode. The BQ25180 then turns VSYS off: +3V3 and the 4.7 k I2C pull-ups die while the
+ * MAX17048 stays on VBAT with SDA / SCL floating. Left alone it would sit in (automatic) hibernate at
+ * 3 uA, or wake on noise on the floating bus. 19-6171 p. 10 "Sleep Mode": with MODE.EnSleep = 1,
+ * CONFIG.SLEEP = 1 forces sleep (IDD0 0.5 uA typ / 2 uA max, p. 2), and only CONFIG.SLEEP = 0 or a POR
+ * leaves it; a low bus for tSLEEP (1.75-2.5 s) also enters it, a rising SDA / SCL edge leaves that one
+ * (p. 2: tSLEEP, and IPD, a 0.2 uA bus low-detection pull-down on SDA / SCL, so a dead bus does read low).
+ *  1. HIBRT = 0xFFFF (p. 12 "HIBRT Register"): always hibernate, 3 uA, the fallback if 2-3 fail.
+ *  2. MODE = EnSleep (p. 11 Fig. 8).
+ *  3. CONFIG.SLEEP = 1 (p. 12 Fig. 10, read-modify-write: RCOMP and ATHD kept) - only without VBUS:
+ *     with a cable in, the BQ25180 holds the ship request until the cable goes (SLUSE99C §8.3.11), the
+ *     caliper keeps running meanwhile and needs the gauge; it then sleeps on the low bus (step 2).
+ * fg_wake() at the next boot undoes all three. */
+static esp_err_t fg_ship_prepare(bool vbus)
+{
+    esp_err_t err = fg_wr16(FG_HIBRT, FG_HIBRT_ALWAYS);
+    if (err == ESP_OK) {
+        err = fg_wr16(FG_MODE, FG_MODE_ENSLEEP);
+    }
+    uint16_t cfg;
+    if (err == ESP_OK && !vbus && (err = fg_rd16(FG_CONFIG, &cfg)) == ESP_OK) {
+        err = fg_wr16(FG_CONFIG, (uint16_t)(cfg | FG_CONFIG_SLEEP));
+    }
+    return err;
 }
 
 static uint8_t ichg_code(int ma)
@@ -179,6 +244,7 @@ esp_err_t power_init(void)
     uint8_t ver[2] = {0, 0};
     s_fg_ok = rd(s_fg, FG_VERSION, ver, 2) == ESP_OK;
     if (s_fg_ok) {
+        fg_wake(); /* a previous ship mode left it in forced sleep / hibernate */
         /* VRESET/ID (0x18): set Dis (bit 0 of the MSB) so the reset comparator is off in
          * hibernate (SPEC §3 sleep budget: 3 uA instead of 4 uA, 19-6171 IDD0). The register is
          * 16 bits wide: write both bytes back, the LSB (ID) is read-only. */
@@ -294,17 +360,27 @@ void power_poll(power_status_t *o)
     }
 }
 
-void power_ship_mode(void)
+esp_err_t power_ship_mode(void)
 {
-    if (s_chg_ok) {
-        /* EN_RST_SHIP = 01: shutdown mode, wake on adapter insert only (SLUSE99C Table 8-18).
-         * TS/MR has no button on rev A, so the button-wake ship mode (10) would only cost
-         * IBAT_SHIP 3.2 uA for its push-button scan instead of IBAT_SHUTDOWN 15 nA. */
-        wr8(s_bq, BQ_SHIP_RST, 0x28);
+    if (!s_chg_ok) {
+        return ESP_ERR_INVALID_STATE;
     }
+    uint8_t st0 = 0;
+    bool vbus = rd(s_bq, BQ_STAT0, &st0, 1) == ESP_OK && (st0 & 0x01); /* VIN_PGOOD_STAT */
+    /* the gauge first: once SHIP_RST is written (without VBUS) the I2C bus is gone with VSYS */
+    if (s_fg_ok && fg_ship_prepare(vbus) != ESP_OK) {
+        ESP_LOGW(TAG, "MAX17048 sleep request failed: it stays in automatic hibernate (3 uA)");
+    }
+    ESP_LOGI(TAG, "ship mode%s", vbus ? " (pending until USB is unplugged)" : "");
+    /* EN_RST_SHIP = 01: shutdown mode, wake on adapter insert only (SLUSE99C Table 8-18).
+     * TS/MR has no button on rev A, so the button-wake ship mode (10) would only cost
+     * IBAT_SHIP 3.2 uA for its push-button scan instead of IBAT_SHUTDOWN 15 nA. */
+    return wr8(s_bq, BQ_SHIP_RST, 0x28) == ESP_OK ? ESP_OK : ESP_FAIL;
 }
 
-/* Clears a latched wake-up interrupt so INT1 is high again before sleeping. */
+/* Clears a latched wake-up interrupt so INT1 is high again before sleeping. Returns true only if
+ * INT1 then reads high: CTRL3 (active low) was written at boot, but a LIS2DW12 that reset since
+ * would drive INT1 active-high (its default) and wake the caliper at once, forever. */
 bool power_imu_clear(void);
 bool power_imu_clear(void)
 {
@@ -314,5 +390,10 @@ bool power_imu_clear(void)
     uint8_t src;
     rd(s_imu, IMU_WAKE_UP_SRC, &src, 1);
     rd(s_imu, IMU_ALL_INT_SRC, &src, 1);
+    gpio_set_direction(PIN_IMU_INT1, GPIO_MODE_INPUT);
+    if (!gpio_get_level(PIN_IMU_INT1)) {
+        ESP_LOGW(TAG, "IMU INT1 still low after clearing: pickup wake disabled for this sleep");
+        return false;
+    }
     return true;
 }

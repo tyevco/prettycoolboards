@@ -388,14 +388,36 @@ static void test_ring_wraparound(void)
 static void test_gatt_live(void)
 {
     gatt_live_t l = {.value_nm = 12345000, .cap_nm = CALIPER_CAP_INVALID, .unit = CALIPER_UNIT_INCH,
-                     .flags = CALIPER_FLAG_HOLD | CALIPER_FLAG_CHARGING};
+                     .flags = CALIPER_FLAG_HOLD | CALIPER_FLAG_CHARGING, .active_profile_id = 0xBEEF};
+    CHECK_EQ_INT(CALIPER_LIVE_LEN, 12);
+    CHECK_EQ_INT(CALIPER_LIVE_OFF_PROFILE, 10);
     uint8_t b[CALIPER_LIVE_LEN];
+    memset(b, 0xAA, sizeof(b));
     gatt_live_pack(&l, b);
-    const uint8_t exp[10] = {0xA8, 0x5E, 0xBC, 0x00, 0x00, 0x00, 0x00, 0x80, 0x01, 0x21};
-    CHECK(memcmp(b, exp, 10) == 0);
+    const uint8_t exp[12] = {0xA8, 0x5E, 0xBC, 0x00, 0x00, 0x00, 0x00, 0x80, 0x01, 0x21, 0xEF, 0xBE};
+    CHECK(memcmp(b, exp, 12) == 0);
     gatt_live_t u;
-    gatt_live_unpack(b, &u);
+    memset(&u, 0x55, sizeof(u));
+    CHECK_EQ_INT(gatt_live_unpack(b, 12, &u), 0);
     CHECK(u.value_nm == l.value_nm && u.cap_nm == INT32_MIN && u.unit == 1 && u.flags == 0x21);
+    CHECK_EQ_INT(u.active_profile_id, 0xBEEF);
+    /* a 10-byte LIVE (pre-extension firmware) has no profile id; bytes past 12 are ignored */
+    memset(&u, 0x55, sizeof(u));
+    CHECK_EQ_INT(gatt_live_unpack(b, 10, &u), 0);
+    CHECK(u.value_nm == l.value_nm && u.flags == 0x21);
+    CHECK_EQ_INT(u.active_profile_id, CALIPER_PROFILE_ID_NONE);
+    uint8_t longer[14];
+    memcpy(longer, b, 12);
+    longer[12] = 0x12;
+    longer[13] = 0x34;
+    CHECK_EQ_INT(gatt_live_unpack(longer, sizeof(longer), &u), 0);
+    CHECK_EQ_INT(u.active_profile_id, 0xBEEF);
+    CHECK_EQ_INT(gatt_live_unpack(b, 9, &u), -1);
+    /* no profile: the id is 0 on the wire */
+    l.active_profile_id = CALIPER_PROFILE_ID_NONE;
+    gatt_live_pack(&l, b);
+    CHECK(b[10] == 0 && b[11] == 0);
+    CHECK_EQ_INT(CALIPER_FLAG_REZERO, 0x40);
     CHECK_EQ_INT(CALIPER_FLAG_HOLD, 0x01);
     CHECK_EQ_INT(CALIPER_FLAG_TOL_PASS, 0x02);
     CHECK_EQ_INT(CALIPER_FLAG_TOL_FAIL, 0x04);
@@ -569,6 +591,28 @@ static void test_settings_json(void)
     CHECK_EQ_STR(s.hid_suffix, "");
     CHECK_EQ_INT(settings_set_kv(&s, "mqtt_url", "mqtt://10.0.0.2"), SETTINGS_OK);
 
+    /* wifi_pass: 8..63 printable ASCII, or exactly 64 hex digits (the raw PSK); "" clears */
+    settings_defaults(&s);
+    char psk[80];
+    memset(psk, 'a', 63);
+    psk[63] = 0;
+    CHECK_EQ_INT(settings_set_kv(&s, "wifi_pass", psk), SETTINGS_OK); /* 63-char passphrase */
+    memset(psk, 'F', 64);
+    psk[64] = 0;
+    psk[10] = '0';
+    CHECK_EQ_INT(settings_set_kv(&s, "wifi_pass", psk), SETTINGS_OK); /* 64 hex = PSK */
+    CHECK_EQ_INT(strlen(s.wifi_pass), 64);
+    psk[10] = 'g';
+    CHECK_EQ_INT(settings_set_kv(&s, "wifi_pass", psk), SETTINGS_ERR_VALUE); /* 64, not hex */
+    CHECK_EQ_INT(settings_set_kv(&s, "wifi_pass", "tab\there!"), SETTINGS_ERR_VALUE); /* control char */
+    CHECK_EQ_INT(settings_set_kv(&s, "wifi_pass", "caf\xc3\xa9" "caf\xc3\xa9"), SETTINGS_ERR_VALUE); /* not ASCII */
+    CHECK_EQ_INT(settings_set_kv(&s, "wifi_pass", "with spaces ok"), SETTINGS_OK);
+    CHECK_EQ_INT(settings_set_kv(&s, "wifi_pass", ""), SETTINGS_OK);
+    CHECK_EQ_STR(s.wifi_pass, "");
+    /* a 32-byte SSID is legal (the station code copies it without a terminator) */
+    CHECK_EQ_INT(settings_set_kv(&s, "wifi_ssid", "SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS"), SETTINGS_OK);
+    CHECK_EQ_INT(strlen(s.wifi_ssid), 32);
+
     char dec[32];
     settings_url_decode(dec, sizeof(dec), "a+b%2Fc%3d%zz%", 15);
     CHECK_EQ_STR(dec, "a b/c=%zz%");
@@ -603,6 +647,56 @@ static void test_csv(void)
     CHECK_EQ_STR(line, "seq,unix_s,utc,value,unit,flags,profile\r\n");
     char tiny[8];
     CHECK_EQ_INT(csv_line(&r, 2, true, tiny, sizeof(tiny)), -1);
+
+    /* REZERO is exported ('Z'), after the others */
+    r.flags = CALIPER_FLAG_HOLD | CALIPER_FLAG_TOL_PASS | CALIPER_FLAG_TOL_FAIL | CALIPER_FLAG_SENSOR_ERR |
+              CALIPER_FLAG_REZERO;
+    r.unit = 0;
+    r.value_nm = 1000;
+    CHECK(csv_line(&r, 3, false, line, sizeof(line)) > 0);
+    CHECK_EQ_STR(line, "12,,0.001,mm,HPFEZ,3\r\n");
+
+    /* the widest possible line fits CSV_LINE_MAX */
+    logrec_t w = {.seq = 0xFFFFFFFEu, .unix_s = 0xFFFFFFFFu, .value_nm = INT32_MIN, .unit = 1, .flags = 0xFF,
+                  .profile_id = 0xFFFF};
+    char big[CSV_LINE_MAX];
+    int lw = csv_line(&w, 3, true, big, sizeof(big));
+    CHECK(lw > 0 && lw < CSV_LINE_MAX);
+    w.unit = 0;
+    lw = csv_line(&w, 3, true, big, sizeof(big));
+    CHECK(lw > 0 && lw < CSV_LINE_MAX);
+
+    /* csv_pack: whole lines only, never skips a record, and the rest goes in the next call. The old
+     * export loop dropped the records of a batch that did not fit its 1 KiB buffer. */
+    logrec_t recs[16];
+    for (int i = 0; i < 16; i++) {
+        recs[i] = w;
+        recs[i].seq = 4000000000u + (uint32_t)i;
+    }
+    char out[1024];
+    size_t used = 0, done = 0, lines = 0, total_bytes = 0;
+    int calls = 0;
+    while (done < 16) {
+        size_t k = csv_pack(recs + done, 16 - done, 3, true, out, sizeof(out), &used);
+        CHECK(k > 0);
+        CHECK_EQ_INT(strlen(out), used);
+        for (size_t b = 0; b < used; b++) {
+            lines += out[b] == '\n';
+        }
+        total_bytes += used;
+        done += k;
+        calls++;
+        if (k == 0) {
+            break;
+        }
+    }
+    CHECK_EQ_INT(lines, 16);
+    CHECK_EQ_INT(done, 16);
+    CHECK(calls >= 2); /* 16 widest lines do not fit 1 KiB */
+    CHECK_EQ_INT(total_bytes, 16 * (size_t)lw);
+    /* a buffer with no room for even one line formats nothing (and says so) */
+    CHECK_EQ_INT(csv_pack(recs, 16, 3, true, tiny, sizeof(tiny), &used), 0);
+    CHECK_EQ_INT(used, 0);
 }
 
 /* ---- buttons --------------------------------------------------------------------------- */
@@ -790,6 +884,236 @@ static void test_as5311_tracking(void)
     CHECK_EQ_INT(as5311_recover_count(0, 0, 2047, 1), 512); /* just under 1 mm */
 }
 
+/* ---- AS5311 fine position (SSI-refined count) ------------------------------------------ */
+
+/* A model of the sensor: the true position x in SSI LSB (488.28125 nm). The quadrature count steps
+ * every 4 LSB at a hardware phase ph (0..3) and lags by `hyst` counts after a reversal; the SSI is
+ * (dir * x + c0) mod 4096 plus jitter. */
+typedef struct {
+    int dir;
+    int32_t c0;
+    int ph;
+    int hyst;
+    int64_t count;
+} mag_model_t;
+
+static int64_t floor_div4(int64_t v)
+{
+    return v >= 0 ? v / 4 : -((-v + 3) / 4);
+}
+
+static void model_move(mag_model_t *m, int64_t x)
+{
+    /* backlash: the count stays within [ideal - hyst, ideal], so it lags by up to `hyst` counts
+     * depending on the direction of travel */
+    int64_t ideal = floor_div4(x - m->ph);
+    if (m->count < ideal - m->hyst) {
+        m->count = ideal - m->hyst;
+    }
+    if (m->count > ideal) {
+        m->count = ideal;
+    }
+}
+
+static uint16_t model_ssi(const mag_model_t *m, int64_t x, int jitter)
+{
+    int64_t v = (int64_t)m->dir * x + m->c0 + jitter;
+    return (uint16_t)(((v % 4096) + 4096) % 4096);
+}
+
+static void test_as5311_fine(void)
+{
+    CHECK_EQ_INT(meas_lsb_to_nm(1), 488);     /* 488.28125 */
+    CHECK_EQ_INT(meas_lsb_to_nm(2), 977);     /* 976.5625 */
+    CHECK_EQ_INT(meas_lsb_to_nm(4), 1953);    /* one count, = meas_counts_to_nm(1) */
+    CHECK_EQ_INT(meas_lsb_to_nm(-1), -488);
+    CHECK_EQ_INT(meas_lsb_to_nm(4096), 2000000);         /* one pole pair */
+    CHECK_EQ_INT(meas_lsb_to_nm(307200), 150000000);     /* 150 mm */
+    CHECK_EQ_INT(meas_lsb_to_nm(-307200), -150000000);
+    CHECK_EQ_INT(meas_lsb_to_nm(4 * 76801), meas_counts_to_nm(76801));
+
+    /* not locked, or no usable frame: the count alone */
+    as5311_slip_t s;
+    as5311_slip_init(&s, 1);
+    as5311_fine_t f = as5311_fine_combine(&s, 100, true, 1234);
+    CHECK(f.status == AS5311_FINE_COARSE && f.lsb == 400 && f.residual == 0);
+    as5311_slip_lock(&s, 100, 1234);
+    f = as5311_fine_combine(&s, 100, false, 1236);
+    CHECK(f.status == AS5311_FINE_COARSE && f.lsb == 400);
+    f = as5311_fine_combine(&s, 100, true, 1236);
+    CHECK(f.status == AS5311_FINE_OK && f.lsb == 402 && f.residual == 2);
+    f = as5311_fine_combine(&s, 100, true, 1234 + AS5311_FINE_TOL_LSB);
+    CHECK(f.status == AS5311_FINE_OK && f.lsb == 400 + AS5311_FINE_TOL_LSB);
+    f = as5311_fine_combine(&s, 100, true, 1234 + AS5311_FINE_TOL_LSB + 1); /* > 3 edges */
+    CHECK(f.status == AS5311_FINE_MISMATCH && f.lsb == 400 && f.residual == AS5311_FINE_TOL_LSB + 1);
+    f = as5311_fine_combine(&s, 100, true, (uint16_t)(1234 - AS5311_FINE_TOL_LSB - 1));
+    CHECK(f.status == AS5311_FINE_MISMATCH && f.lsb == 400);
+
+    /* pole-boundary wrap: SSI 4094 -> 1 while the count crosses into the next pole */
+    as5311_slip_init(&s, 1);
+    as5311_slip_lock(&s, 1023, 4092); /* count phase 4092, offset 0 */
+    f = as5311_fine_combine(&s, 1023, true, 4094);
+    CHECK(f.status == AS5311_FINE_OK && f.lsb == 4094);
+    f = as5311_fine_combine(&s, 1023, true, 1); /* count not yet stepped: residual +5 across the wrap */
+    CHECK(f.status == AS5311_FINE_OK && f.lsb == 4097 && f.residual == 5);
+    f = as5311_fine_combine(&s, 1024, true, 1);
+    CHECK(f.status == AS5311_FINE_OK && f.lsb == 4097 && f.residual == 1);
+    f = as5311_fine_combine(&s, 1024, true, 4095); /* back again, count lagging */
+    CHECK(f.status == AS5311_FINE_OK && f.lsb == 4095 && f.residual == -1);
+    /* same with the SSI running against the count (SSI_SIGN = -1) */
+    as5311_slip_init(&s, -1);
+    as5311_slip_lock(&s, 0, 2);
+    f = as5311_fine_combine(&s, 0, true, 4095); /* SSI 2 -> 4095 is +3 LSB for dir -1 */
+    CHECK(f.status == AS5311_FINE_OK && f.lsb == 3);
+    f = as5311_fine_combine(&s, -1, true, 6); /* SSI up 4 = one count down */
+    CHECK(f.status == AS5311_FINE_OK && f.lsb == -4);
+
+    /* full sweep over 3 poles and back, both SSI directions, every hardware phase, 2 counts of
+     * hysteresis and +-1 LSB of SSI jitter: the fine position tracks x - x0 to the jitter, across
+     * every pole boundary, and is never flagged */
+    for (int dir = -1; dir <= 1; dir += 2) {
+        for (int ph = 0; ph < 4; ph++) {
+            mag_model_t m = {.dir = dir, .c0 = 3000 + 37 * ph, .ph = ph, .hyst = 2};
+            int64_t x0 = 4096 * 2 + 4090 - 3 * ph; /* start just below a pole boundary */
+            m.count = floor_div4(x0 - ph);
+            as5311_slip_init(&s, dir);
+            as5311_slip_lock(&s, m.count, model_ssi(&m, x0, 0));
+            int64_t base = as5311_fine_combine(&s, m.count, true, model_ssi(&m, x0, 0)).lsb;
+            int ok = 1, flagged = 0;
+            int64_t max_err = 0;
+            int64_t x = x0;
+            for (int step = 0; step < 2 * 3 * 4096; step++) {
+                x += step < 3 * 4096 ? 1 : -1;
+                model_move(&m, x);
+                int jit = (step % 3) - 1;
+                as5311_fine_t g = as5311_fine_combine(&s, m.count, true, model_ssi(&m, x, jit));
+                flagged += g.status != AS5311_FINE_OK;
+                int64_t err = (g.lsb - base) - (x - x0);
+                if (err < 0) err = -err;
+                if (err > max_err) max_err = err;
+                ok &= err <= 2; /* lock-time jitter (0) + this frame's jitter (1), +1 for rounding */
+            }
+            CHECK(ok);
+            CHECK_EQ_INT(flagged, 0);
+            CHECK(max_err <= 1);
+        }
+    }
+
+    /* recovery after a deep sleep with the stored offset: the fine position carries on */
+    for (int dir = -1; dir <= 1; dir += 2) {
+        mag_model_t m = {.dir = dir, .c0 = 777, .ph = 1, .hyst = 0};
+        int64_t x = 50000;
+        m.count = floor_div4(x - m.ph);
+        as5311_slip_init(&s, dir);
+        as5311_slip_lock(&s, m.count, model_ssi(&m, x, 0));
+        int64_t before = as5311_fine_combine(&s, m.count, true, model_ssi(&m, x, 0)).lsb;
+        uint16_t ssi_stored = model_ssi(&m, x, 0);
+        int ok = 1;
+        for (int d = -2000; d <= 2000; d += 7) { /* < 1 mm while asleep, across pole boundaries */
+            uint16_t ssi_now = model_ssi(&m, x + d, 0);
+            int64_t cnt = as5311_recover_count(m.count, ssi_stored, ssi_now, dir);
+            as5311_slip_t chk = {.locked = true, .offset = s.offset, .dir = dir};
+            as5311_fine_t g = as5311_fine_combine(&chk, cnt, true, ssi_now);
+            ok &= g.status == AS5311_FINE_OK && g.lsb - before == d;
+        }
+        CHECK(ok);
+    }
+}
+
+static void test_as5311_mismatch(void)
+{
+    for (int dir = -1; dir <= 1; dir += 2) {
+        as5311_slip_t s;
+        as5311_slip_init(&s, dir);
+        as5311_slip_lock(&s, 1000, 2000);
+        as5311_mismatch_t mm;
+        as5311_mismatch_init(&mm);
+        /* the counter missed 5 edges: true count 1005 */
+        uint16_t ssi_true = (uint16_t)((2000 + 4 * dir * 5 + 4096) % 4096);
+        as5311_fine_t f = as5311_fine_combine(&s, 1000, true, ssi_true);
+        CHECK(f.status == AS5311_FINE_MISMATCH && f.lsb == 4000); /* count alone */
+        CHECK_EQ_INT(as5311_mismatch_update(&mm, &s, &f), 0);
+        CHECK_EQ_INT(as5311_mismatch_update(&mm, &s, &f), 0);
+        CHECK_EQ_INT(as5311_mismatch_update(&mm, &s, &f), 5); /* confirmed on the 3rd frame */
+        f = as5311_fine_combine(&s, 1005, true, ssi_true);
+        CHECK(f.status == AS5311_FINE_OK && f.lsb == 4020);
+        CHECK_EQ_INT(as5311_mismatch_update(&mm, &s, &f), 0);
+
+        /* one bad (but parity-valid) frame between good ones never shifts the count */
+        as5311_mismatch_init(&mm);
+        as5311_fine_t bad = as5311_fine_combine(&s, 1005, true, (uint16_t)((ssi_true + 400) % 4096));
+        as5311_fine_t good = as5311_fine_combine(&s, 1005, true, ssi_true);
+        CHECK(bad.status == AS5311_FINE_MISMATCH);
+        int total = 0;
+        for (int i = 0; i < 10; i++) {
+            total += as5311_mismatch_update(&mm, &s, &bad);
+            total += as5311_mismatch_update(&mm, &s, &bad);
+            total += as5311_mismatch_update(&mm, &s, &good);
+        }
+        CHECK_EQ_INT(total, 0);
+        /* COARSE frames (moving, no SSI) neither confirm nor reset */
+        as5311_fine_t coarse = {.lsb = 0, .residual = 0, .status = AS5311_FINE_COARSE};
+        as5311_mismatch_init(&mm);
+        CHECK_EQ_INT(as5311_mismatch_update(&mm, &s, &bad), 0);
+        CHECK_EQ_INT(as5311_mismatch_update(&mm, &s, &coarse), 0);
+        CHECK_EQ_INT(as5311_mismatch_update(&mm, &s, &bad), 0);
+        CHECK(as5311_mismatch_update(&mm, &s, &bad) != 0);
+        /* different corrections each time (noise, not a slip) never confirm */
+        as5311_mismatch_init(&mm);
+        total = 0;
+        for (int i = 0; i < 12; i++) {
+            int32_t off = (i % 2) ? 60 : -60;
+            as5311_fine_t n = as5311_fine_combine(&s, 1005, true, (uint16_t)((ssi_true + off + 4096) % 4096));
+            total += as5311_mismatch_update(&mm, &s, &n) != 0;
+        }
+        CHECK_EQ_INT(total, 0);
+    }
+}
+
+static void test_pcnt_jump_filter(void)
+{
+    as5311_jump_t j;
+    as5311_jump_init(&j);
+    int64_t out = -1;
+    CHECK(as5311_jump_filter(&j, 29990, 15000, &out) && out == 29990); /* first read is taken */
+    CHECK(as5311_jump_filter(&j, 29999, 15000, &out) && out == 29999);
+    /* the wrap race: the hardware counter reset to 0 but the ISR has not added 30000 yet */
+    CHECK(!as5311_jump_filter(&j, 1, 15000, &out) && out == 29999);
+    CHECK(as5311_jump_filter(&j, 30001, 15000, &out) && out == 30001); /* the re-read */
+    CHECK(as5311_jump_filter(&j, 30001 + 15000, 15000, &out)); /* exactly max_step is plausible */
+    /* the other way, from below -30000 */
+    as5311_jump_init(&j);
+    CHECK(as5311_jump_filter(&j, -29995, 15000, &out));
+    CHECK(!as5311_jump_filter(&j, -2, 15000, &out) && out == -29995);
+    CHECK(as5311_jump_filter(&j, -30002, 15000, &out) && out == -30002);
+    /* a jump that persists is real (accepted on the AS5311_JUMP_ACCEPT-th read) */
+    as5311_jump_init(&j);
+    CHECK(as5311_jump_filter(&j, 0, 15000, &out));
+    CHECK(!as5311_jump_filter(&j, 40000, 15000, &out) && out == 0);
+    CHECK(!as5311_jump_filter(&j, 40000, 15000, &out) && out == 0);
+    CHECK(as5311_jump_filter(&j, 40000, 15000, &out) && out == 40000);
+    CHECK(as5311_jump_filter(&j, 40010, 15000, &out) && out == 40010);
+    /* a plausible read resets the reject streak */
+    CHECK(!as5311_jump_filter(&j, 0, 15000, &out));
+    CHECK(as5311_jump_filter(&j, 40011, 15000, &out));
+    CHECK(!as5311_jump_filter(&j, 0, 15000, &out));
+    CHECK(!as5311_jump_filter(&j, 0, 15000, &out) && out == 40011);
+
+    /* re-reads inside one sample go through as5311_jump_plausible(), which must not count as
+     * samples: a race that is still there after any number of re-reads is held this sample */
+    as5311_jump_init(&j);
+    CHECK(as5311_jump_plausible(&j, 123456, 15000)); /* nothing accepted yet */
+    CHECK(as5311_jump_filter(&j, 29999, 15000, &out));
+    for (int i = 0; i < 10; i++) {
+        CHECK(!as5311_jump_plausible(&j, 1, 15000));
+    }
+    CHECK(as5311_jump_plausible(&j, 29999 + 15000, 15000));
+    CHECK(as5311_jump_plausible(&j, 29999 - 15000, 15000));
+    CHECK(!as5311_jump_filter(&j, 1, 15000, &out) && out == 29999); /* sample 1 of the stuck race */
+    CHECK(!as5311_jump_filter(&j, 1, 15000, &out) && out == 29999); /* sample 2 */
+    CHECK(as5311_jump_filter(&j, 1, 15000, &out) && out == 1);      /* sample 3: believed */
+}
+
 /* ---- capacitive demod ------------------------------------------------------------------ */
 
 #define CAP_SPS   2 /* ADC samples per drive step */
@@ -916,6 +1240,9 @@ int main(void)
     RUN(test_hid);
     RUN(test_as5311_frame);
     RUN(test_as5311_tracking);
+    RUN(test_as5311_fine);
+    RUN(test_as5311_mismatch);
+    RUN(test_pcnt_jump_filter);
     RUN(test_cap_pattern);
     RUN(test_cap_demod);
     RUN(test_cap_unwrap);

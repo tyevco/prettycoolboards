@@ -11,18 +11,24 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "caliper_gatt.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define SETTINGS_NAME_MAX 20
-#define SETTINGS_SSID_MAX 32
-#define SETTINGS_PASS_MAX 64
-#define SETTINGS_URL_MAX  64
-#define SETTINGS_JSON_MAX 240 /* CALIPER_SETTINGS_MAX_LEN */
+/* The limits are the contract's (caliper_gatt.h CALIPER_SET_*), so the two cannot drift. */
+#define SETTINGS_NAME_MAX     CALIPER_SET_NAME_MAX
+#define SETTINGS_SSID_MAX     CALIPER_SET_SSID_MAX
+#define SETTINGS_PASS_MIN     CALIPER_SET_PASS_MIN
+#define SETTINGS_PASS_MAX     CALIPER_SET_PASS_MAX
+#define SETTINGS_URL_MAX      CALIPER_SET_URL_MAX
+#define SETTINGS_JSON_MAX     CALIPER_SETTINGS_MAX_LEN
 
-#define SETTINGS_AUTO_OFF_MIN 30
-#define SETTINGS_AUTO_OFF_MAX 3600
+#define SETTINGS_AUTO_OFF_MIN CALIPER_SET_AUTO_OFF_MIN
+#define SETTINGS_AUTO_OFF_MAX CALIPER_SET_AUTO_OFF_MAX
+#define SETTINGS_DECIMALS_MIN CALIPER_SET_DECIMALS_MIN
+#define SETTINGS_DECIMALS_MAX CALIPER_SET_DECIMALS_MAX
 
 typedef struct {
     char name[SETTINGS_NAME_MAX + 1];

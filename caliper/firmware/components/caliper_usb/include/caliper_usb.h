@@ -9,6 +9,7 @@
 #pragma once
 
 #include <stdbool.h>
+#include <stddef.h>
 
 #include "esp_err.h"
 
@@ -21,6 +22,10 @@ void caliper_usb_poll(void);   /* ~1 Hz: host attach detection, ILIM, MSC export
 bool caliper_usb_host(void);   /* enumerated by a host */
 
 /* internal */
+/* Writes the whole buffer to the console transport (CDC or USB-Serial-JTAG), waiting for the host to
+ * drain it; gives up after ~1 s without progress (no host reading). For CLI output only: the log
+ * output (ESP_LOG via stdout) stays non-blocking. */
+esp_err_t usb_console_write(const char *buf, size_t len);
 void cli_start(void);
 void cli_feed(const char *buf, size_t len); /* bytes from the console transport */
 esp_err_t msc_init(void);

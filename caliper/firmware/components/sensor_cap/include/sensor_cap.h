@@ -18,7 +18,8 @@ extern "C" {
 
 typedef struct {
     bool valid;
-    int64_t pos_nm;   /* unwrapped, relative to the first valid burst (zeroed by caliper_core) */
+    int64_t pos_nm;   /* unwrapped, relative to the first valid burst of this boot; caliper_core
+                       * aligns it to the magnetic reading (it is not kept across a sleep) */
     float frac;       /* position within the half pitch, 0..1 */
     float amp_fwd;    /* demodulated amplitude, ADC LSB */
     float amp_rev;

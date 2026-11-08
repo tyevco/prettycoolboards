@@ -5,8 +5,9 @@ menu "PrettyCool Caliper"
         range 256 65536
         default 4096
         help
-            Size of the LittleFS ring log. 4096 records = 64 KiB file; the CSV export of a
-            full log is about 130 KiB and must fit the "msc" FAT partition.
+            Size of the LittleFS ring log, kept in 4 KiB segment files of 256 records
+            (4096 records = 16 files, 64 KiB). The CSV export of a full log is about
+            130-160 KiB and must fit the "msc" FAT partition.
 
     config CALIPER_MAG_DIR_INVERT
         bool "Invert the AS5311 counting direction"

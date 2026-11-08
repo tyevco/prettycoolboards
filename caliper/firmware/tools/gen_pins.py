@@ -68,6 +68,17 @@ def render(nets_path: pathlib.Path) -> str:
         "/* CAP_TX0..7 in phase order, for the dedicated-GPIO bundle */",
         "#define PIN_CAP_TX_LIST { " + ", ".join(macro(f"CAP_TX{i}") for i in range(8)) + " }",
         "",
+        "/* every GPIO above, for checks (test/host/test_pin_plan.c: each one is in the pin plan) */",
+        f"#define BOARD_PINS_COUNT {len(gpio)}",
+        "#define BOARD_PINS_ALL { \\",
+    ]
+    nets = [n for n, _ in sorted(gpio.items(), key=lambda kv: kv[1])]
+    for i in range(0, len(nets), 6):
+        chunk = ", ".join(macro(n) for n in nets[i:i + 6])
+        lines.append(f"    {chunk}{',' if i + 6 < len(nets) else ''} \\")
+    lines += [
+        "}",
+        "",
     ]
     return "\n".join(lines)
 

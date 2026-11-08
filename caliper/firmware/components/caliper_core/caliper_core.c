@@ -31,7 +31,18 @@ esp_err_t bus_init(void);
 #define ZH_MAGIC 0xCA11CA11u
 RTC_DATA_ATTR static uint32_t s_zh_magic;
 RTC_DATA_ATTR static meas_zh_t s_zh;
-RTC_DATA_ATTR static int64_t s_cap_zero_nm;
+
+/* EXPERIMENTAL capacitive reading. Its unwrapper (sensor_cap) restarts at every boot, relative to
+ * its first valid burst, so a cap zero kept across a deep sleep pointed into the old origin and the
+ * reading came back off by a multiple of 2.54 mm (2026-11-07 review). The cap zero is therefore not
+ * kept: after a boot, and after a ZERO taken while the cap had no valid burst, the first valid cap
+ * burst is aligned to the magnetic reading ("seeded"); after that it moves on its own. A cap/mag
+ * disagreement of more than a quarter pitch can only be a lost half-pitch in the cap unwrapper
+ * (bursts are 40 ms apart, it tracks < 1.27 mm between them): whole half-pitches are taken back
+ * out, the sub-half-pitch part stays the capacitive scale's own measurement. */
+#define CAP_HALF_PITCH_NM 2540000 /* cap_demod.h CAP_HALF_PITCH_NM */
+static int64_t s_cap_zero_nm;
+static bool s_cap_seeded;
 
 static SemaphoreHandle_t s_lock;
 static cal_live_t s_live;
@@ -48,6 +59,10 @@ static cal_status_t s_status;
 static uint32_t s_last_activity_ms;
 static int32_t s_activity_ref_nm;
 static bool s_auto_held; /* the current hold was set by auto-hold (released by moving) */
+static bool s_zero_from_rtc; /* the zero came from RTC memory: valid only if the count was recovered */
+static bool s_need_zero;     /* CALIPER_FLAG_REZERO: the zero could not be carried over */
+
+static void toast(const char *msg);
 
 #define LOCK()   xSemaphoreTake(s_lock, portMAX_DELAY)
 #define UNLOCK() xSemaphoreGive(s_lock)
@@ -78,7 +93,8 @@ static void refresh_locked(bool mag_ok)
     meas_fmt_t f = fmt_locked();
     s_live.live_nm = meas_zh_value(&s_zh, s_raw_nm);
     s_live.value_nm = meas_zh_shown(&s_zh, s_raw_nm);
-    s_live.cap_nm = s_cap_ok ? meas_sat_i32(s_cap_raw_nm - s_cap_zero_nm) : CALIPER_CAP_INVALID;
+    bool cap_valid = s_cap_ok && s_cap_seeded;
+    s_live.cap_nm = cap_valid ? meas_sat_i32(s_cap_raw_nm - s_cap_zero_nm) : CALIPER_CAP_INVALID;
     s_live.unit = s_state.unit;
     meas_format(s_live.value_nm, &f, s_live.text, sizeof(s_live.text));
 
@@ -98,7 +114,8 @@ static void refresh_locked(bool mag_ok)
     if (meas_tol_is_pass(s_live.tol)) fl |= CALIPER_FLAG_TOL_PASS;
     if (meas_tol_is_fail(s_live.tol)) fl |= CALIPER_FLAG_TOL_FAIL;
     if (!mag_ok) fl |= CALIPER_FLAG_SENSOR_ERR;
-    if (s_cap_ok) fl |= CALIPER_FLAG_CAP_VALID;
+    if (cap_valid) fl |= CALIPER_FLAG_CAP_VALID;
+    if (s_need_zero) fl |= CALIPER_FLAG_REZERO;
     s_live.flags = fl;
 }
 
@@ -110,6 +127,19 @@ void core_sample(int64_t raw_nm, bool mag_ok, int64_t cap_raw_nm, bool cap_ok, u
     s_cap_raw_nm = cap_raw_nm;
     s_cap_ok = cap_ok;
     int32_t live = meas_zh_value(&s_zh, raw_nm);
+    if (cap_ok && mag_ok) {
+        if (!s_cap_seeded) {
+            s_cap_zero_nm = cap_raw_nm - live; /* the cap starts out reading what the magnetic scale reads */
+            s_cap_seeded = true;
+        } else {
+            int64_t diff = (cap_raw_nm - s_cap_zero_nm) - live;
+            if (diff > CAP_HALF_PITCH_NM / 2 || diff < -CAP_HALF_PITCH_NM / 2) {
+                int64_t k = (diff + (diff >= 0 ? CAP_HALF_PITCH_NM / 2 : -CAP_HALF_PITCH_NM / 2)) / CAP_HALF_PITCH_NM;
+                s_cap_zero_nm += k * CAP_HALF_PITCH_NM;
+                ESP_LOGD(TAG, "cap unwrap re-aligned by %lld half-pitch(es)", (long long)k);
+            }
+        }
+    }
     if (s_zh.hold && s_auto_held) {
         /* an automatic hold lets go once the jaws open again */
         int64_t away = (int64_t)live - s_zh.held_nm;
@@ -163,6 +193,28 @@ int64_t core_zero_raw(void)
     return s_zh.zero_raw_nm;
 }
 
+void core_mag_origin(bool recovered, bool lost)
+{
+    LOCK();
+    bool had_zero = s_zero_from_rtc;
+    if (!recovered) {
+        if (had_zero) {
+            meas_zh_init(&s_zh); /* the stored zero belongs to the old origin */
+            s_zh_magic = 0;
+        }
+        s_need_zero = had_zero || lost;
+    }
+    s_zero_from_rtc = false;
+    bool need = s_need_zero;
+    refresh_locked(!(s_live.flags & CALIPER_FLAG_SENSOR_ERR));
+    UNLOCK();
+    if (need) {
+        ESP_LOGW(TAG, "position not recovered after sleep/reset: zero dropped, press ZERO");
+        toast("Position lost: press ZERO");
+        bus_post(CAL_EVT_STATE, NULL, 0);
+    }
+}
+
 /* ---- commands ------------------------------------------------------------------------------ */
 
 static void save_state(void)
@@ -189,7 +241,7 @@ static bool record(logrec_t *rec, cal_send_t *send)
     rec->value_nm = s_live.value_nm;
     rec->unit = s_live.unit;
     rec->flags = s_live.flags & (CALIPER_FLAG_HOLD | CALIPER_FLAG_TOL_PASS | CALIPER_FLAG_TOL_FAIL |
-                                 CALIPER_FLAG_SENSOR_ERR);
+                                 CALIPER_FLAG_SENSOR_ERR | CALIPER_FLAG_REZERO);
     rec->profile_id = s_live.profile_id;
     if (send) {
         snprintf(send->text, sizeof(send->text), "%s%s", s_live.text, s_settings.hid_suffix);
@@ -237,7 +289,9 @@ static void run_command(const core_cmd_msg_t *m)
         LOCK();
         meas_zh_zero(&s_zh, s_raw_nm);
         s_cap_zero_nm = s_cap_raw_nm;
+        s_cap_seeded = s_cap_ok; /* no valid burst now: the next one is seeded from the new zero */
         s_zh_magic = ZH_MAGIC;
+        s_need_zero = false;
         refresh_locked(!(s_live.flags & CALIPER_FLAG_SENSOR_ERR));
         UNLOCK();
         bus_post(CAL_EVT_STATE, NULL, 0);
@@ -521,9 +575,9 @@ esp_err_t core_init(void)
     ESP_ERROR_CHECK(bus_init());
     if (s_zh_magic != ZH_MAGIC) {
         meas_zh_init(&s_zh); /* cold boot: zero = sensor origin until ZERO is pressed */
-        s_cap_zero_nm = 0;
     } else {
         s_zh.hold = false; /* waking up never shows a stale held value */
+        s_zero_from_rtc = true; /* until core_mag_origin() confirms the count was recovered */
     }
     store_settings_load(&s_settings);
     store_state_load(&s_state);

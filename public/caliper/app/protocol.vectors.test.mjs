@@ -10,28 +10,47 @@ import * as P from './protocol.js';
 const fromHex = (h) => Uint8Array.from(h.match(/../g).map((b) => parseInt(b, 16)));
 const toHex = (u8) => Array.from(u8, (b) => b.toString(16).padStart(2, '0')).join('');
 
-test('LIVE: value -1, cap INT32_MIN, inch, every flag bit (firmware gatt_live_pack)', () => {
-  const fw = 'ffffffff00000080013f';
+// LIVE grew to 12 bytes (SPEC §8: u16 active_profile_id appended). The 12-byte vectors below are the
+// firmware's gatt_live_pack() output (CALIPER_LIVE_LEN = 12), regenerated from the C codec on 2026-11-07
+// (gcc 13.3, components/measure/gatt_codec.c). Their first 10 bytes are what pre-extension firmware sent;
+// those stay as decode tests: the page must accept a 10-byte LIVE.
+test('LIVE: value -1, cap INT32_MIN, inch, every flag bit, profile 0xFFFF (firmware gatt_live_pack)', () => {
+  const fw = 'ffffffff00000080013fffff';
+  const fw10 = fw.slice(0, 20);
   const l = P.decodeLive(fromHex(fw));
   assert.equal(l.valueNm, -1);
   assert.equal(l.capRaw, -2147483648);
   assert.equal(l.capNm, null, 'INT32_MIN is invalid even with CAP_VALID set');
   assert.equal(l.unit, 1);
+  assert.equal(l.activeProfileId, 0xffff);
   assert.deepEqual(P.flagNames(l.flags), ['HOLD', 'TOL_PASS', 'TOL_FAIL', 'SENSOR_ERR', 'CAP_VALID', 'CHARGING']);
-  assert.equal(toHex(P.encodeLive({ valueNm: -1, capNm: null, unit: 1, flags: 0x3f })), fw);
+  assert.equal(toHex(P.encodeLive({ valueNm: -1, capNm: null, unit: 1, flags: 0x3f, activeProfileId: 0xffff })), fw);
+  // pre-extension firmware: the same fields, no profile id
+  const old = P.decodeLive(fromHex(fw10));
+  assert.equal(old.valueNm, -1);
+  assert.equal(old.flags, 0x3f);
+  assert.equal(old.activeProfileId, null);
+  assert.equal(toHex(P.encodeLive({ valueNm: -1, capNm: null, unit: 1, flags: 0x3f }, { legacy: true })), fw10);
 });
 
-test('LIVE: INT32_MAX value, cap -25.4 mm, mm, TOL_PASS|CAP_VALID', () => {
-  const fw = 'ffffff7f406d7cfe0012';
+test('LIVE: INT32_MAX value, cap -25.4 mm, mm, TOL_PASS|CAP_VALID, profile 0x1234 (firmware gatt_live_pack)', () => {
+  const fw = 'ffffff7f406d7cfe00123412';
+  const fw10 = fw.slice(0, 20);
   const l = P.decodeLive(fromHex(fw));
   assert.equal(l.valueNm, 2147483647);
   assert.equal(l.capNm, -25_400_000);
-  assert.equal(toHex(P.encodeLive({ valueNm: 2147483647, capNm: -25_400_000, unit: 0, flags: 0x12 })), fw);
+  assert.equal(l.activeProfileId, 0x1234);
+  assert.equal(toHex(P.encodeLive({ valueNm: 2147483647, capNm: -25_400_000, unit: 0, flags: 0x12, activeProfileId: 0x1234 })), fw);
+  assert.equal(P.decodeLive(fromHex(fw10)).capNm, -25_400_000);
 });
 
-test('LIVE: a legitimate cap value of INT32_MIN + 1 is kept', () => {
-  const l = P.decodeLive(fromHex('00000000' + '01000080' + '0010'));
+test('LIVE: a legitimate cap value of INT32_MIN + 1 is kept; no profile is id 0 (firmware gatt_live_pack)', () => {
+  const fw = '000000000100008000100000';
+  const l = P.decodeLive(fromHex(fw));
   assert.equal(l.capNm, -2147483647);
+  assert.equal(l.activeProfileId, 0);
+  assert.equal(toHex(P.encodeLive({ valueNm: 0, capNm: -2147483647, unit: 0, flags: 0x10, activeProfileId: 0 })), fw);
+  assert.equal(P.decodeLive(fromHex(fw.slice(0, 20))).capNm, -2147483647);
 });
 
 test('LOG: high-bit seq, unix_s, value -1, inch, profile 0xBEEF (firmware logrec_pack)', () => {

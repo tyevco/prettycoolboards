@@ -58,3 +58,23 @@ ROOT_NOTES = [
     "Do not hand-edit the .kicad_sch files: change the sheet modules and rebuild.\n"
     "Architecture of record: caliper/hardware/design/SPEC.md",
 ]
+
+# Slider-board geometry the layout and the mechanics share (SPEC §2.1 / §2.2, contract reconciliation D2-D5).
+# Board mm, origin = lower-left of the 62 x 34 body, +Y up, board y = beam y, board x = slider u - 8.
+SLIDER_OUTLINE = {
+    "body": (0.0, 0.0, 62.0, 34.0),                        # x0, y0, x1, y1
+    "tabs": [(-6.0, 2.5, 0.0, 16.5), (62.0, 2.5, 68.0, 16.5)],
+    "flatness_mm": 0.03,                                    # over y 0..20, x -6..68, assembled
+}
+# (ref, x, y, role).  H2-H5 carry SMT M2 standoffs and are the Z datum; H1 is a support (nylon screw).
+SLIDER_HOLES = [
+    ("H1", 18.75, 24.0, "support"),
+    ("H2", -3.5, 5.5, "tab"), ("H3", -3.5, 14.0, "tab"),
+    ("H4", 65.5, 5.5, "tab"), ("H5", 65.5, 14.0, "tab"),
+]
+# Rule areas (x0, y0, x1, y1).
+SLIDER_KEEPOUTS = {
+    "antenna_all_layers": (0.0, 29.0, 21.0, 34.0),         # no copper, no parts, either side
+    "bottom_parts_allowed": (20.0, 2.4, 41.0, 9.6),         # AS5311 + its 2 caps only, <= 1.30 mm
+    "under_glass_max_2p6": (16.15, 1.2, 49.85, 20.15),      # top parts <= 2.6 mm here, <= 4.2 elsewhere
+}

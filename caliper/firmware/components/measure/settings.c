@@ -120,6 +120,8 @@ static bool has_prefix(const char *s, const char *p)
     return strncmp(s, p, strlen(p)) == 0;
 }
 
+static int hexval(char c);
+
 static int set_str(char *dst, size_t max, const char *v)
 {
     if (strlen(v) > max) {
@@ -139,8 +141,16 @@ static int apply_string(settings_t *s, const char *key, const char *v)
     }
     if (strcmp(key, "wifi_pass") == 0) {
         size_t l = strlen(v);
-        if (l != 0 && (l < 8 || l > SETTINGS_PASS_MAX)) { /* WPA2: 8..63 chars or 64 hex */
+        if (l != 0 && (l < SETTINGS_PASS_MIN || l > SETTINGS_PASS_MAX)) { /* WPA2: 8..63 chars or 64 hex */
             return SETTINGS_ERR_VALUE;
+        }
+        for (size_t i = 0; i < l; i++) {
+            /* a passphrase is 8..63 printable ASCII (IEEE 802.11i); 64 characters is the raw PSK in
+             * hex. Anything else is stored fine but can never connect, so refuse it here. */
+            unsigned char ch = (unsigned char)v[i];
+            if (ch < 0x20 || ch > 0x7E || (l == SETTINGS_PASS_MAX && hexval((char)ch) < 0)) {
+                return SETTINGS_ERR_VALUE;
+            }
         }
         return set_str(s->wifi_pass, SETTINGS_PASS_MAX, v);
     }
@@ -181,7 +191,7 @@ static int apply_number(settings_t *s, const char *key, long v)
         return SETTINGS_OK;
     }
     if (strcmp(key, "decimals") == 0) {
-        if (v < 1 || v > 3) {
+        if (v < SETTINGS_DECIMALS_MIN || v > SETTINGS_DECIMALS_MAX) {
             return SETTINGS_ERR_VALUE;
         }
         s->decimals = (uint8_t)v;

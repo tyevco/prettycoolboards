@@ -4,7 +4,7 @@
  */
 #pragma once
 
-#define BOARD_PINS_HASH "51b40ad5981dde5e"
+#define BOARD_PINS_HASH "16f6bf3015e2f33b"
 #define BOARD_REV "A"
 
 /* GPIO number per net (ESP32-S3-MINI-1) */
@@ -54,3 +54,15 @@
 
 /* CAP_TX0..7 in phase order, for the dedicated-GPIO bundle */
 #define PIN_CAP_TX_LIST { PIN_CAP_TX0, PIN_CAP_TX1, PIN_CAP_TX2, PIN_CAP_TX3, PIN_CAP_TX4, PIN_CAP_TX5, PIN_CAP_TX6, PIN_CAP_TX7 }
+
+/* every GPIO above, for checks (test/host/test_pin_plan.c: each one is in the pin plan) */
+#define BOARD_PINS_COUNT 38
+#define BOARD_PINS_ALL { \
+    PIN_BOOT_N, PIN_CAP_RX, PIN_FG_ALRT_N, PIN_CHG_INT_N, PIN_MAG_A, PIN_MAG_B, \
+    PIN_MAG_IDX, PIN_MAG_CLK, PIN_MAG_DO, PIN_MAG_CSN, PIN_MAG_INC_N, PIN_MAG_DEC_N, \
+    PIN_SNS_PWR_EN, PIN_I2C_SDA, PIN_I2C_SCL, PIN_IMU_INT1, PIN_IMU_INT2, PIN_BTN_ZERO_N, \
+    PIN_BTN_HOLD_N, PIN_USB_DM, PIN_USB_DP, PIN_BTN_MODE_N, PIN_LCD_SCK, PIN_LCD_MOSI, \
+    PIN_LCD_CS_N, PIN_LCD_DC, PIN_LCD_RST_N, PIN_LCD_BL, PIN_CAP_TX0, PIN_CAP_TX1, \
+    PIN_CAP_TX2, PIN_CAP_TX3, PIN_CAP_TX6, PIN_CAP_TX7, PIN_BUZZ, PIN_RGB_DIN, \
+    PIN_CAP_TX4, PIN_CAP_TX5 \
+}

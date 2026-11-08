@@ -52,23 +52,42 @@ test('LIVE decode: cap value ignored when CAP_VALID is clear', () => {
 });
 
 test('LIVE decode works on a DataView with an offset (as Web Bluetooth may hand over)', () => {
-  const buf = new Uint8Array([0xaa, 0xbb, ...NM_25_4, ...NM_NEG_25_4, 0x00, 0x10, 0xcc]);
-  const l = P.decodeLive(new DataView(buf.buffer, 2, 10));
+  const buf = new Uint8Array([0xaa, 0xbb, ...NM_25_4, ...NM_NEG_25_4, 0x00, 0x10, 0x03, 0x00, 0xcc]);
+  const l = P.decodeLive(new DataView(buf.buffer, 2, 12));
   assert.equal(l.valueNm, 25_400_000);
   assert.equal(l.capNm, -25_400_000);
+  assert.equal(l.activeProfileId, 3);
+  assert.equal(P.decodeLive(new DataView(buf.buffer, 2, 10)).activeProfileId, null);
 });
 
 test('LIVE decode rejects a short packet', () => {
   assert.throws(() => P.decodeLive([1, 2, 3]), RangeError);
+  assert.throws(() => P.decodeLive(new Uint8Array(9)), RangeError);
+});
+
+test('LIVE decode: 12-byte packet carries active_profile_id; 10-byte (pre-extension) gives null', () => {
+  const v2 = P.decodeLive([...NM_25_4, 0x00, 0x00, 0x00, 0x80, 0x00, 0x02, 0x07, 0x01]);
+  assert.equal(v2.valueNm, 25_400_000);
+  assert.equal(v2.activeProfileId, 0x0107);
+  assert.equal(v2.tolPass, true);
+  assert.equal(P.decodeLive([...NM_25_4, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00]).activeProfileId, 0);
+  assert.equal(P.decodeLive([...NM_25_4, 0x00, 0x00, 0x00, 0x80, 0x00, 0x02]).activeProfileId, null);
+  // 11 bytes: not enough for the id, treated as the 10-byte form; bytes past 12 are ignored
+  assert.equal(P.decodeLive([...NM_25_4, 0, 0, 0, 0x80, 0, 0, 0x05]).activeProfileId, null);
+  assert.equal(P.decodeLive([...NM_25_4, 0, 0, 0, 0x80, 0, 0, 0x05, 0x00, 0xee, 0xff]).activeProfileId, 5);
 });
 
 test('LIVE encode matches the hand-built bytes and round-trips', () => {
   const e = P.encodeLive({ valueNm: 25_400_000, capNm: null, unit: 0, flags: P.FLAG.HOLD | P.FLAG.CHARGING });
-  assert.deepEqual(Array.from(e), [...NM_25_4, 0x00, 0x00, 0x00, 0x80, 0x00, 0x21]);
-  const e2 = P.encodeLive({ valueNm: -25_400_000, capNm: 0x01020304, unit: 1, flags: P.FLAG.CAP_VALID });
-  assert.deepEqual(Array.from(e2), [...NM_NEG_25_4, 0x04, 0x03, 0x02, 0x01, 0x01, 0x10]);
+  assert.deepEqual(Array.from(e), [...NM_25_4, 0x00, 0x00, 0x00, 0x80, 0x00, 0x21, 0x00, 0x00]);
+  const e2 = P.encodeLive({ valueNm: -25_400_000, capNm: 0x01020304, unit: 1, flags: P.FLAG.CAP_VALID, activeProfileId: 0x0102 });
+  assert.deepEqual(Array.from(e2), [...NM_NEG_25_4, 0x04, 0x03, 0x02, 0x01, 0x01, 0x10, 0x02, 0x01]);
   assert.deepEqual(P.decodeLive(e2).capNm, 0x01020304);
+  assert.equal(P.decodeLive(e2).activeProfileId, 0x0102);
+  const legacy = P.encodeLive({ valueNm: 25_400_000, flags: P.FLAG.HOLD | P.FLAG.CHARGING }, { legacy: true });
+  assert.deepEqual(Array.from(legacy), [...NM_25_4, 0x00, 0x00, 0x00, 0x80, 0x00, 0x21]);
   assert.throws(() => P.encodeLive({ valueNm: 2 ** 31 }), RangeError);
+  assert.throws(() => P.encodeLive({ valueNm: 0, activeProfileId: 0x10000 }), RangeError);
 });
 
 test('COMMAND encodings', () => {
@@ -133,13 +152,15 @@ test('LogAssembler: empty log is just the end marker; duplicates are dropped', (
   assert.equal(b.records.length, 1);
 });
 
-test('LOG encode matches the hand-built bytes; encodeLogPackets splits and terminates', () => {
+test('LOG encode matches the hand-built bytes; encodeLogPackets splits, then the end marker alone', () => {
   const r1 = { seq: 1, unixS: 1_700_000_000, valueNm: -25_400_000, unit: 0, flags: 3, profileId: 0x0102 };
   assert.deepEqual(Array.from(P.encodeLogRecord(r1)), LOG_REC_1);
   assert.deepEqual(Array.from(P.encodeLogEnd()), LOG_END);
   const recs = Array.from({ length: 31 }, (_, i) => ({ ...r1, seq: i + 1 }));
   const packets = P.encodeLogPackets(recs, { perPacket: 15 });
-  assert.deepEqual(packets.map((p) => p.length / 16), [15, 15, 2]);
+  assert.deepEqual(packets.map((p) => p.length / 16), [15, 15, 1, 1]);
+  assert.deepEqual(Array.from(packets.at(-1)), LOG_END, 'the end marker is a notification of its own (SPEC §8)');
+  assert.deepEqual(P.encodeLogPackets([]).map((p) => Array.from(p)), [LOG_END]);
   const a = new P.LogAssembler();
   packets.forEach((p) => a.feed(p));
   assert.equal(a.done, true);

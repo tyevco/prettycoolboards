@@ -24,10 +24,19 @@ static const char *TAG = "ui";
 static esp_lcd_panel_io_handle_t s_io;
 static esp_lcd_panel_handle_t s_panel;
 static lv_display_t *s_disp;
+/* LVGL port running and the screens created. lvgl_port_lock() asserts (abort, reboot loop) when
+ * lvgl_port_init() never ran, which is what happened when the panel failed to initialise and the
+ * button task then called ui_lock() (2026-11-07 review). */
+static volatile bool s_ready;
+
+bool ui_ready(void)
+{
+    return s_ready;
+}
 
 bool ui_lock(void)
 {
-    return lvgl_port_lock(100);
+    return s_ready && lvgl_port_lock(100);
 }
 
 void ui_unlock(void)
@@ -84,6 +93,8 @@ esp_err_t ui_init(void)
     lvgl_port_cfg_t lcfg = ESP_LVGL_PORT_INIT_CONFIG();
     lcfg.task_priority = 4;
     lcfg.task_stack = 6144;
+    /* the port default is no affinity: keep rendering off core 1 (sensor task, capacitive burst) */
+    lcfg.task_affinity = 0;
     ESP_RETURN_ON_ERROR(lvgl_port_init(&lcfg), TAG, "lvgl port");
 
     lvgl_port_display_cfg_t dcfg = {
@@ -102,10 +113,14 @@ esp_err_t ui_init(void)
     if (!s_disp) {
         return ESP_FAIL;
     }
-    if (ui_lock()) {
-        ui_screens_create();
-        ui_unlock();
+    /* wait as long as it takes here: with a timeout the screens could be left uncreated while the
+     * LVGL timers and the toast handler assume they exist */
+    if (!lvgl_port_lock(0)) {
+        return ESP_FAIL;
     }
+    ui_screens_create();
+    s_ready = true;
+    lvgl_port_unlock();
     bus_subscribe(CAL_EVT_TOAST, on_toast, NULL);
     ESP_LOGI(TAG, "display up");
     return ESP_OK;
@@ -113,6 +128,16 @@ esp_err_t ui_init(void)
 
 void ui_sleep(void)
 {
+    /* Stop LVGL first: the panel commands below share the SPI device with LVGL's flushes, which run
+     * in the LVGL task, and an SPI device's transactions must not be issued from two tasks at once.
+     * Holding the lock means no flush is being started; esp_lcd's tx_param waits for the queued
+     * colour transfers to finish before it sends a command. (Before: called from the bus or app task
+     * with no lock, possibly in the middle of a frame.) */
+    if (s_ready && lvgl_port_lock(500)) {
+        lvgl_port_stop();
+        s_ready = false;
+        lvgl_port_unlock();
+    }
     if (s_panel) {
         esp_lcd_panel_disp_on_off(s_panel, false);
         esp_lcd_panel_disp_sleep(s_panel, true);

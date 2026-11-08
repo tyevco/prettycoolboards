@@ -89,7 +89,9 @@ class BleTransport {
 // the same decode paths (LIVE/LOG/PROFILES/SETTINGS) as a real connection.
 // ---------------------------------------------------------------------------------------------
 
-const AS5311_COUNT_NM = 2e6 / 4096; // 2 mm pole pair / 4096 counts = 488.28 nm
+// Rev A firmware combines the PCNT quadrature count (2 mm / 1024 edges = 1953.125 nm) with the 12-bit SSI
+// position inside the pole pair, so its internal step is the SSI step: 2 mm / 4096 = 488.28125 nm (SPEC §4.1).
+const AS5311_COUNT_NM = 488.28125;
 
 function gauss() { // Box-Muller
   let u = 0, v = 0;
@@ -192,7 +194,7 @@ class DemoTransport {
     if (this.charging) flags |= P.FLAG.CHARGING;
     const prof = this.profiles.find((p) => p.id === this.activeProfile);
     if (prof) flags |= P.evaluateTolerance(mag, prof) === 'pass' ? P.FLAG.TOL_PASS : P.FLAG.TOL_FAIL;
-    return { valueNm: mag, capNm: cap, unit: this.unit, flags };
+    return { valueNm: mag, capNm: cap, unit: this.unit, flags, activeProfileId: this.activeProfile };
   }
   _tick() {
     const s = this._sample();
@@ -415,6 +417,11 @@ function onLive(dv) {
   S.live = l;
   S.unit = l.unit === P.UNIT.INCH ? P.UNIT.INCH : P.UNIT.MM;
   S.lastLiveAt = performance.now();
+  // A 12-byte LIVE says which profile the caliper is using (it may have been changed on the caliper);
+  // a 10-byte one (older firmware) does not, and the page keeps the profile it last selected.
+  if (l.activeProfileId !== null && l.activeProfileId !== S.activeProfile) {
+    S.activeProfile = l.activeProfileId; savePrefs(); renderProfiles(); S.chartDirty = true;
+  }
   const t = performance.now() / 1000;
   S.samples.push({ t, mag: l.sensorErr ? null : l.valueNm, cap: l.capNm });
   while (S.samples.length && S.samples[0].t < t - CHART_SPAN_S - 1) S.samples.shift();

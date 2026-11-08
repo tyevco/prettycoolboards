@@ -21,6 +21,11 @@ int64_t meas_counts_to_nm(int64_t counts)
     return meas_div_round(counts * MEAS_NM_PER_COUNT_NUM, MEAS_NM_PER_COUNT_DEN);
 }
 
+int64_t meas_lsb_to_nm(int64_t lsb)
+{
+    return meas_div_round(lsb * MEAS_NM_PER_LSB_NUM, MEAS_NM_PER_LSB_DEN);
+}
+
 int32_t meas_sat_i32(int64_t v)
 {
     if (v > INT32_MAX) {

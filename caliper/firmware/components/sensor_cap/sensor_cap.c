@@ -1,11 +1,27 @@
 /*
  * sensor_cap: EXPERIMENTAL capacitive scale driver.
  *
- * One burst: start ADC1 continuous sampling of CAP_RX at 80 kS/s, then step the 8 TX phases
- * (dedicated-GPIO bundle) every 25 us (2 samples per step, 8 steps = one 5 kHz cycle):
+ * One burst: start ADC1 continuous sampling of CAP_RX at ~80.6 kS/s, then step the 8 TX phases
+ * (dedicated-GPIO bundle) every 2 ADC sample periods (24.8 us; 8 steps = one ~5.04 kHz cycle):
  * CAP_K cycles rotating forward, then CAP_K cycles in reverse. The demodulator (cap_demod.c)
  * takes one window from each half; the reverse/forward phase difference is twice the position
  * phase, independent of the unknown start delay between the ADC and the drive loop.
+ *
+ * Timing (2026-11-07 review): the demodulator assumes exactly SPC = 16 ADC samples per drive
+ * cycle. The ESP32-S3 ADC digital controller cannot sample at an arbitrary rate: it runs at
+ * APB (80 MHz) / 16 / 2 / interval with an integer interval (esp_adc, hal/adc_hal.c), so the
+ * 80000 S/s asked for before became interval 31 = 80645 S/s. Driving the phases from a fixed
+ * 25.000 us CPU-cycle clock against that gave 16.13 samples per cycle (0.8 % off): the windows
+ * drifted against the drive by ~2 samples per half and the result carried a phase error. The
+ * step period is now SPS real ADC sample periods (read back from the clock tree the driver
+ * uses), counted in cycles of the CPU clock actually running.
+ *
+ * Other burst hygiene (same review): the driver's pool is emptied before and after each burst
+ * (adc_continuous_stop() leaves unread frames in it, which shifted the next burst's sample
+ * index); a burst whose drive started late (preempted after the ADC start) is discarded instead
+ * of clamping the delay estimate; CONFIG_ADC_CONTINUOUS_ISR_IRAM_SAFE is set in sdkconfig.defaults
+ * so a flash write on core 0 (log, NVS) cannot stall the ADC ISR long enough for the 5-frame DMA
+ * ring to overwrite unread samples.
  */
 #include "sensor_cap.h"
 
@@ -17,9 +33,11 @@
 #include "driver/gpio.h"
 #include "esp_adc/adc_continuous.h"
 #include "esp_check.h"
+#include "esp_clk_tree.h"
 #include "esp_cpu.h"
 #include "esp_log.h"
 #include "esp_pm.h"
+#include "esp_rom_sys.h"
 #include "esp_timer.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -28,7 +46,13 @@
 
 static const char *TAG = "cap";
 
-#define FS_HZ        80000 /* ESP32-S3 ADC continuous limit is about 83.3 kS/s */
+/* ADC digital controller clock: APB / ADC_CLKM_DIV (ADC_LL_CLKM_DIV_NUM_DEFAULT + 1 = 16 on the S3)
+ * / 2 / interval. ADC_INTERVAL 31 = 80645.16 S/s (the S3 limit is 83333). FS_REQ_HZ is the rate
+ * requested from the driver, which computes interval = APB / 16 / 2 / FS_REQ_HZ = 31 (truncated). */
+#define ADC_CLKM_DIV 16
+#define ADC_INTERVAL 31
+#define FS_REQ_HZ    (80000000 / ADC_CLKM_DIV / 2 / ADC_INTERVAL) /* 80645 */
+#define D_EST_MAX    64 /* samples between the ADC start and the drive start; more = preempted */
 #define SPS          2     /* samples per drive step */
 #define SPC          (SPS * CAP_PHASES) /* samples per drive cycle = 16 */
 #define CAP_K        16    /* cycles per direction */
@@ -48,6 +72,9 @@ static uint32_t s_bursts;
 static uint8_t s_raw[MAX_SAMPLES * SOC_ADC_DIGI_RESULT_BYTES];
 static uint16_t s_samples[MAX_SAMPLES];
 static portMUX_TYPE s_mux = portMUX_INITIALIZER_UNLOCKED;
+/* the ADC sample period as the hardware runs it: s_fs_den / s_fs_num seconds */
+static uint32_t s_fs_num = 80000000u;                       /* APB Hz */
+static uint32_t s_fs_den = ADC_CLKM_DIV * 2 * ADC_INTERVAL; /* APB cycles per sample */
 
 esp_err_t sensor_cap_init(void)
 {
@@ -65,6 +92,14 @@ esp_err_t sensor_cap_init(void)
     ESP_RETURN_ON_ERROR(dedic_gpio_new_bundle(&bcfg, &s_bundle), TAG, "bundle");
     dedic_gpio_bundle_write(s_bundle, 0xFF, 0);
 
+    /* the same clock source and precision the driver uses in adc_continuous_config() */
+    uint32_t apb = 0;
+    if (esp_clk_tree_src_get_freq_hz(SOC_MOD_CLK_APB, ESP_CLK_TREE_SRC_FREQ_PRECISION_CACHED, &apb) == ESP_OK &&
+        apb > 0) {
+        uint32_t interval = apb / ADC_CLKM_DIV / 2 / FS_REQ_HZ;
+        s_fs_num = apb;
+        s_fs_den = ADC_CLKM_DIV * 2u * (interval ? interval : 1u);
+    }
     adc_continuous_handle_cfg_t hcfg = {
         .max_store_buf_size = sizeof(s_raw) + 1024,
         .conv_frame_size = 256,
@@ -79,7 +114,7 @@ esp_err_t sensor_cap_init(void)
     adc_continuous_config_t ccfg = {
         .pattern_num = 1,
         .adc_pattern = &patt,
-        .sample_freq_hz = FS_HZ,
+        .sample_freq_hz = FS_REQ_HZ,
         .conv_mode = ADC_CONV_SINGLE_UNIT_1,
         .format = ADC_DIGI_OUTPUT_FORMAT_TYPE2,
     };
@@ -88,7 +123,7 @@ esp_err_t sensor_cap_init(void)
     ESP_RETURN_ON_ERROR(esp_pm_lock_create(ESP_PM_CPU_FREQ_MAX, 0, "cap", &s_pm), TAG, "pm lock");
 #endif
     cap_unwrap_init(&s_unwrap);
-    ESP_LOGW(TAG, "capacitive scale enabled (EXPERIMENTAL)");
+    ESP_LOGW(TAG, "capacitive scale enabled (EXPERIMENTAL), ADC %lu S/s", (unsigned long)(s_fs_num / s_fs_den));
     return ESP_OK;
 }
 
@@ -112,10 +147,12 @@ void sensor_cap_deinit(void)
     }
 }
 
-/* Steps the phases with cycle-counter timing, interrupts masked on this core. */
+/* Steps the phases with cycle-counter timing, interrupts masked on this core. One step = SPS ADC
+ * sample periods, in cycles of the CPU clock actually running (the PM lock holds it at max). */
 static int64_t drive_burst(void)
 {
-    const uint32_t step_cycles = (uint32_t)CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ * 1000000u / (FS_HZ / SPS);
+    const uint64_t cpu_hz = (uint64_t)esp_rom_get_cpu_ticks_per_us() * 1000000u;
+    const uint32_t step_cycles = (uint32_t)((cpu_hz * SPS * s_fs_den + s_fs_num / 2) / s_fs_num);
     const int32_t fwd_steps = CAP_K * CAP_PHASES;
     const int32_t total = 2 * fwd_steps + TAIL_STEPS;
     int64_t t_start;
@@ -162,20 +199,30 @@ esp_err_t sensor_cap_measure(cap_reading_t *out)
 #if CONFIG_PM_ENABLE
     esp_pm_lock_acquire(s_pm);
 #endif
-    int64_t t_adc = esp_timer_get_time();
+    /* Anything still in the driver's pool belongs to an earlier burst (adc_continuous_stop() does
+     * not empty it); left there it would shift every sample index of this burst. */
+    adc_continuous_flush_pool(s_adc);
     esp_err_t err = adc_continuous_start(s_adc);
+    /* start() enables the controller as its last step: the first sample follows closely */
+    int64_t t_adc = esp_timer_get_time();
     if (err != ESP_OK) {
         goto done;
     }
     int64_t t_drive = drive_burst();
     /* samples taken before the drive started */
-    int64_t d_est = (t_drive - t_adc) * FS_HZ / 1000000;
-    if (d_est < 0 || d_est > 64) {
-        d_est = d_est < 0 ? 0 : 64;
-    }
-    size_t want = (size_t)d_est + 2 * CAP_K * SPC + SPC;
-    size_t n = collect(want);
+    int64_t d_est = (t_drive - t_adc) * (int64_t)s_fs_num / ((int64_t)s_fs_den * 1000000);
+    bool late = d_est < 0 || d_est > D_EST_MAX;
+    size_t want = (late ? 0 : (size_t)d_est) + 2 * CAP_K * SPC + SPC;
+    size_t n = late ? 0 : collect(want);
     adc_continuous_stop(s_adc);
+    adc_continuous_flush_pool(s_adc);
+    if (late) {
+        /* preempted between the ADC start and the drive (a higher-priority task on this core):
+         * the windows would not line up with the drive. The old code clamped the estimate and
+         * demodulated the wrong samples without noticing; discard the burst instead. */
+        out->bursts = ++s_bursts;
+        goto done; /* valid = false, err = ESP_OK */
+    }
     if (n < want) {
         err = ESP_ERR_TIMEOUT;
         goto done;

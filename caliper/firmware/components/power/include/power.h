@@ -44,9 +44,15 @@ void power_led(uint8_t r, uint8_t g, uint8_t b);
 /* Configures the IMU wake-up interrupt, ext1 wake on IMU_INT1 + buttons + CHG_INT_N, gates
  * the sensor rail and enters deep sleep. Does not return. */
 void power_deep_sleep(void) __attribute__((noreturn));
-/* Ship mode (BQ25180 disconnects the battery). Rev A has no button on TS/MR: only USB wakes it. */
-void power_ship_mode(void);
-/* Drives the LCD and RGB LED lines low (they feed +3V3_UI, which SNS_PWR_EN switches off). */
+/* Ship mode (BQ25180 disconnects the battery). Rev A has no button on TS/MR: only USB wakes it.
+ * Puts the MAX17048 (which stays on VBAT) into sleep first: in ship mode +3V3 and the I2C pull-ups
+ * are gone and its SDA/SCL float. ESP_ERR_INVALID_STATE without a charger, ESP_FAIL if the BQ25180
+ * write failed. With VBUS present the BQ25180 enters ship mode only once the cable is removed
+ * (SLUSE99C §8.3.11: a pending ship request waits for the adapter removal); the gauge is then left
+ * awake but armed (MODE.EnSleep, forced hibernate) and sleeps once its bus is held low (power.c). */
+esp_err_t power_ship_mode(void);
+/* Drives the LCD and RGB LED lines low with no pull (they feed +3V3_UI, which SNS_PWR_EN switches
+ * off): their SLEEP state from the pin plan. */
 void power_ui_lines_low(void);
 const char *power_wake_cause(void);
 /* Call first thing after boot: releases the pads held through deep sleep. */

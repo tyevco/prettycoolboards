@@ -1,4 +1,7 @@
-/* Line CLI on the USB console. Type "help". */
+/* Line CLI on the USB console. Type "help".
+ * All output goes through out() -> usb_console_write(), which waits for the host: printf to the
+ * console is non-blocking and truncated long output (see usb.c). */
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,14 +17,39 @@
 #include "soc/rtc_cntl_reg.h"
 #include "store.h"
 
-#define LINE_MAX 160
+#define CLI_LINE_MAX 160
 
 typedef struct {
-    char s[LINE_MAX];
+    char s[CLI_LINE_MAX];
 } line_t;
 
 static QueueHandle_t s_q;
-static char s_acc[LINE_MAX];
+
+static void out(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
+static void out(const char *fmt, ...)
+{
+    char b[256];
+    va_list ap;
+    va_start(ap, fmt);
+    int n = vsnprintf(b, sizeof(b), fmt, ap);
+    va_end(ap);
+    if (n <= 0) {
+        return;
+    }
+    size_t len = (size_t)n < sizeof(b) ? (size_t)n : sizeof(b) - 1;
+    /* "\n" -> "\r\n", as the console VFS does for printf */
+    size_t start = 0;
+    for (size_t i = 0; i < len; i++) {
+        if (b[i] == '\n' && (i == 0 || b[i - 1] != '\r')) {
+            usb_console_write(b + start, i - start);
+            usb_console_write("\r\n", 2);
+            start = i + 1;
+        }
+    }
+    usb_console_write(b + start, len - start);
+}
+
+static char s_acc[CLI_LINE_MAX];
 static size_t s_len;
 
 void cli_feed(const char *buf, size_t len)
@@ -46,18 +74,17 @@ void cli_feed(const char *buf, size_t len)
     }
 }
 
-static esp_err_t stdout_writer(void *ctx, const char *buf, size_t len)
+static esp_err_t console_writer(void *ctx, const char *buf, size_t len)
 {
     (void)ctx;
-    fwrite(buf, 1, len, stdout);
-    return ESP_OK;
+    return usb_console_write(buf, len); /* an error (host gone) stops the export */
 }
 
 static void print_live(void)
 {
     cal_live_t lv;
     core_get_live(&lv);
-    printf("%s %s flags=0x%02x%s cap=%ld nm profile=%u\n", lv.text, lv.unit ? "in" : "mm", lv.flags,
+    out("%s %s flags=0x%02x%s cap=%ld nm profile=%u\n", lv.text, lv.unit ? "in" : "mm", lv.flags,
            (lv.flags & 1) ? " HOLD" : "", (long)lv.cap_nm, (unsigned)lv.profile_id);
 }
 
@@ -65,7 +92,7 @@ static void print_status(void)
 {
     cal_status_t st;
     core_get_status(&st);
-    printf("fw %s, battery %u%% %umV%s%s, ble %s, wifi %u %s, log %lu records (next %lu), idle %lu ms\n",
+    out("fw %s, battery %u%% %umV%s%s, ble %s, wifi %u %s, log %lu records (next %lu), idle %lu ms\n",
            esp_app_get_description()->version, st.battery_pct, st.battery_mv, st.charging ? " charging" : "",
            st.vbus ? " vbus" : "", st.ble_connected ? "connected" : "idle", st.wifi, st.ip,
            (unsigned long)store_log_count(), (unsigned long)store_log_next_seq(), (unsigned long)core_idle_ms());
@@ -83,7 +110,7 @@ static void print_log(uint32_t from, uint32_t n)
             break;
         }
         for (size_t i = 0; i < got; i++) {
-            printf("%lu\t%lu\t%ld nm\t%s\tflags 0x%02x\tprofile %u\n", (unsigned long)r[i].seq,
+            out("%lu\t%lu\t%ld nm\t%s\tflags 0x%02x\tprofile %u\n", (unsigned long)r[i].seq,
                    (unsigned long)r[i].unix_s, (long)r[i].value_nm, r[i].unit ? "in" : "mm", r[i].flags,
                    r[i].profile_id);
         }
@@ -97,17 +124,17 @@ static void print_profiles(void)
     meas_profile_t p[16];
     size_t n = core_get_profiles(p, 16);
     for (size_t i = 0; i < n; i++) {
-        printf("%u\t%-16s nominal %ld nm  -%ld / +%ld nm\n", p[i].id, p[i].name, (long)p[i].nominal_nm,
+        out("%u\t%-16s nominal %ld nm  -%ld / +%ld nm\n", p[i].id, p[i].name, (long)p[i].nominal_nm,
                (long)p[i].tol_minus_nm, (long)p[i].tol_plus_nm);
     }
     if (!n) {
-        printf("no profiles\n");
+        out("no profiles\n");
     }
 }
 
 static void help(void)
 {
-    printf("read | status | zero | hold | rec | send | unit mm|in | log [from] [n] | csv | clear yes\n"
+    out("read | status | zero | hold | rec | send | unit mm|in | log [from] [n] | csv | clear yes\n"
            "get | set <key> <value> | profiles | profile <id> | time <unix_s> | wifi on|off|ap\n"
            "export | sleep | reboot | bootloader\n");
 }
@@ -133,34 +160,38 @@ static void run(char *line)
     else if (!strcmp(cmd, "csv")) {
         settings_t s;
         core_get_settings(&s);
-        store_log_export_csv(true, s.decimals, stdout_writer, NULL);
+        store_log_export_csv(true, s.decimals, console_writer, NULL);
     } else if (!strcmp(cmd, "clear") && a1 && !strcmp(a1, "yes")) core_command(CORE_CMD_LOG_CLEAR, 0);
     else if (!strcmp(cmd, "get")) {
         char js[256];
         if (core_settings_read_json(js, sizeof(js)) > 0) {
-            printf("%s\n", js);
+            out("%s\n", js);
         }
     } else if (!strcmp(cmd, "set") && a1) {
         int rc = core_settings_set(a1, a2 ? a2 : "");
-        printf(rc == SETTINGS_OK ? "ok\n" : "rejected (%d)\n", rc);
+        if (rc == SETTINGS_OK) {
+            out("ok\n");
+        } else {
+            out("rejected (%d)\n", rc);
+        }
     } else if (!strcmp(cmd, "profiles")) print_profiles();
     else if (!strcmp(cmd, "profile") && a1) core_command(CORE_CMD_SELECT_PROFILE, (uint32_t)strtoul(a1, NULL, 10));
     else if (!strcmp(cmd, "time") && a1) core_command(CORE_CMD_SET_TIME, (uint32_t)strtoul(a1, NULL, 10));
     else if (!strcmp(cmd, "wifi") && a1) {
         uint32_t w = !strcmp(a1, "on") ? CAL_WIFI_ON : !strcmp(a1, "ap") ? CAL_WIFI_PROVISION : CAL_WIFI_OFF;
         core_command(CORE_CMD_WIFI, w);
-    } else if (!strcmp(cmd, "export")) printf("%s\n", esp_err_to_name(msc_export()));
+    } else if (!strcmp(cmd, "export")) out("%s\n", esp_err_to_name(msc_export()));
     else if (!strcmp(cmd, "sleep")) core_command(CORE_CMD_SLEEP, 0);
     else if (!strcmp(cmd, "reboot")) esp_restart();
     else if (!strcmp(cmd, "bootloader")) {
         /* ROM download mode on the next reset (flash over USB-Serial-JTAG) */
-        printf("rebooting into the ROM bootloader\n");
+        out("rebooting into the ROM bootloader\n");
         fflush(stdout);
         vTaskDelay(pdMS_TO_TICKS(100));
         REG_WRITE(RTC_CNTL_OPTION1_REG, RTC_CNTL_FORCE_DOWNLOAD_BOOT);
         esp_restart();
     } else {
-        printf("? (help)\n");
+        out("? (help)\n");
     }
 }
 

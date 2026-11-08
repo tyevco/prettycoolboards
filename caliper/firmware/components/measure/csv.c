@@ -43,12 +43,13 @@ int csv_line(const logrec_t *r, uint8_t mm_decimals, bool with_utc, char *buf, s
     if (meas_format(r->value_nm, &fmt, val, sizeof(val)) < 0) {
         return -1;
     }
-    char flags[5];
+    char flags[6];
     int fi = 0;
     if (r->flags & CALIPER_FLAG_HOLD) flags[fi++] = 'H';
     if (r->flags & CALIPER_FLAG_TOL_PASS) flags[fi++] = 'P';
     if (r->flags & CALIPER_FLAG_TOL_FAIL) flags[fi++] = 'F';
     if (r->flags & CALIPER_FLAG_SENSOR_ERR) flags[fi++] = 'E';
+    if (r->flags & CALIPER_FLAG_REZERO) flags[fi++] = 'Z';
     flags[fi] = '\0';
 
     char utc[24] = "";
@@ -71,4 +72,23 @@ int csv_line(const logrec_t *r, uint8_t mm_decimals, bool with_utc, char *buf, s
                        flags, (unsigned)r->profile_id);
     }
     return (len < 0 || (size_t)len >= n) ? -1 : len;
+}
+
+size_t csv_pack(const logrec_t *recs, size_t n, uint8_t mm_decimals, bool with_utc, char *buf, size_t n_buf,
+                size_t *used)
+{
+    size_t u = 0, i = 0;
+    if (n_buf) {
+        buf[0] = '\0';
+    }
+    for (; i < n && u < n_buf; i++) {
+        int l = csv_line(&recs[i], mm_decimals, with_utc, buf + u, n_buf - u);
+        if (l < 0) {
+            buf[u] = '\0'; /* this line did not fit: drop the partial text, the caller flushes */
+            break;
+        }
+        u += (size_t)l;
+    }
+    *used = u;
+    return i;
 }

@@ -22,7 +22,8 @@ void ble_store_config_init(void);
 const ble_uuid128_t *ble_gatt_svc_uuid(void);
 void ble_gatt_pack_live(uint8_t out[CALIPER_LIVE_LEN]);
 
-ble_conn_t g_ble_conn[BLE_MAX_CONN];
+static ble_conn_t s_conn[BLE_MAX_CONN];
+static portMUX_TYPE s_conn_mux = portMUX_INITIALIZER_UNLOCKED; /* guards s_conn: short copies only */
 static uint8_t s_own_addr_type;
 static char s_name[SETTINGS_NAME_MAX + 1];
 static uint8_t s_last_live[CALIPER_LIVE_LEN];
@@ -31,23 +32,73 @@ static uint8_t s_last_bat = 0xFF;
 
 static int gap_event(struct ble_gap_event *ev, void *arg);
 
-ble_conn_t *ble_conn_find(uint16_t handle)
+/* caller holds s_conn_mux */
+static ble_conn_t *conn_find_locked(uint16_t handle)
 {
     for (int i = 0; i < BLE_MAX_CONN; i++) {
-        if (g_ble_conn[i].used && g_ble_conn[i].handle == handle) {
-            return &g_ble_conn[i];
+        if (s_conn[i].used && s_conn[i].handle == handle) {
+            return &s_conn[i];
         }
     }
     return NULL;
 }
 
+bool ble_conn_get(uint16_t handle, ble_conn_t *out)
+{
+    taskENTER_CRITICAL(&s_conn_mux);
+    ble_conn_t *c = conn_find_locked(handle);
+    if (c) {
+        *out = *c;
+    }
+    taskEXIT_CRITICAL(&s_conn_mux);
+    return c != NULL;
+}
+
+int ble_conn_snapshot(ble_conn_t out[BLE_MAX_CONN])
+{
+    int n = 0;
+    taskENTER_CRITICAL(&s_conn_mux);
+    for (int i = 0; i < BLE_MAX_CONN; i++) {
+        if (s_conn[i].used) {
+            out[n++] = s_conn[i];
+        }
+    }
+    taskEXIT_CRITICAL(&s_conn_mux);
+    return n;
+}
+
 static int conn_count(void)
 {
     int n = 0;
+    taskENTER_CRITICAL(&s_conn_mux);
     for (int i = 0; i < BLE_MAX_CONN; i++) {
-        n += g_ble_conn[i].used;
+        n += s_conn[i].used;
     }
+    taskEXIT_CRITICAL(&s_conn_mux);
     return n;
+}
+
+/* Applies one GAP update to a connection's entry under the lock. */
+typedef enum { UPD_SUB, UPD_MTU, UPD_ENC, UPD_FREE } conn_upd_t;
+
+static void conn_update(uint16_t handle, conn_upd_t what, uint16_t attr, uint16_t val)
+{
+    taskENTER_CRITICAL(&s_conn_mux);
+    ble_conn_t *c = conn_find_locked(handle);
+    if (c) {
+        switch (what) {
+        case UPD_SUB:
+            if (attr == g_h_live) c->live_sub = val != 0;
+            else if (attr == g_h_log) c->log_sub = val != 0;
+            else if (attr == g_h_hid_input) c->hid_sub = val != 0;
+            else if (attr == g_h_battery) c->bat_sub = val != 0;
+            break;
+        case UPD_MTU: c->mtu = val; break;
+        case UPD_ENC: c->encrypted = val != 0; break;
+        case UPD_FREE: c->used = false; break;
+        }
+    }
+    taskEXIT_CRITICAL(&s_conn_mux);
 }
 
 bool ble_any_connected(void)
@@ -112,15 +163,17 @@ static int gap_event(struct ble_gap_event *ev, void *arg)
     switch (ev->type) {
     case BLE_GAP_EVENT_CONNECT:
         if (ev->connect.status == 0) {
+            taskENTER_CRITICAL(&s_conn_mux);
             for (int i = 0; i < BLE_MAX_CONN; i++) {
-                if (!g_ble_conn[i].used) {
-                    memset(&g_ble_conn[i], 0, sizeof(g_ble_conn[i]));
-                    g_ble_conn[i].used = true;
-                    g_ble_conn[i].handle = ev->connect.conn_handle;
-                    g_ble_conn[i].mtu = BLE_ATT_MTU_DFLT;
+                if (!s_conn[i].used) {
+                    memset(&s_conn[i], 0, sizeof(s_conn[i]));
+                    s_conn[i].used = true;
+                    s_conn[i].handle = ev->connect.conn_handle;
+                    s_conn[i].mtu = BLE_ATT_MTU_DFLT;
                     break;
                 }
             }
+            taskEXIT_CRITICAL(&s_conn_mux);
             ESP_LOGI(TAG, "connected (%d)", ev->connect.conn_handle);
             core_activity();
         }
@@ -128,10 +181,7 @@ static int gap_event(struct ble_gap_event *ev, void *arg)
         start_adv();
         return 0;
     case BLE_GAP_EVENT_DISCONNECT: {
-        ble_conn_t *c = ble_conn_find(ev->disconnect.conn.conn_handle);
-        if (c) {
-            c->used = false;
-        }
+        conn_update(ev->disconnect.conn.conn_handle, UPD_FREE, 0, 0);
         ESP_LOGI(TAG, "disconnected (reason 0x%x)", ev->disconnect.reason);
         update_core_link();
         start_adv();
@@ -140,30 +190,14 @@ static int gap_event(struct ble_gap_event *ev, void *arg)
     case BLE_GAP_EVENT_ADV_COMPLETE:
         start_adv();
         return 0;
-    case BLE_GAP_EVENT_SUBSCRIBE: {
-        ble_conn_t *c = ble_conn_find(ev->subscribe.conn_handle);
-        if (c) {
-            bool on = ev->subscribe.cur_notify;
-            uint16_t a = ev->subscribe.attr_handle;
-            if (a == g_h_live) c->live_sub = on;
-            else if (a == g_h_log) c->log_sub = on;
-            else if (a == g_h_hid_input) c->hid_sub = on;
-            else if (a == g_h_battery) c->bat_sub = on;
-        }
+    case BLE_GAP_EVENT_SUBSCRIBE:
+        conn_update(ev->subscribe.conn_handle, UPD_SUB, ev->subscribe.attr_handle, ev->subscribe.cur_notify);
         return 0;
-    }
-    case BLE_GAP_EVENT_MTU: {
-        ble_conn_t *c = ble_conn_find(ev->mtu.conn_handle);
-        if (c) {
-            c->mtu = ev->mtu.value;
-        }
+    case BLE_GAP_EVENT_MTU:
+        conn_update(ev->mtu.conn_handle, UPD_MTU, 0, ev->mtu.value);
         return 0;
-    }
     case BLE_GAP_EVENT_ENC_CHANGE: {
-        ble_conn_t *c = ble_conn_find(ev->enc_change.conn_handle);
-        if (c) {
-            c->encrypted = ev->enc_change.status == 0;
-        }
+        conn_update(ev->enc_change.conn_handle, UPD_ENC, 0, ev->enc_change.status == 0);
         ESP_LOGI(TAG, "encryption %s", ev->enc_change.status == 0 ? "on" : "failed");
         return 0;
     }
@@ -231,12 +265,14 @@ void ble_tick(void)
     ble_gatt_pack_live(live);
     int64_t now = esp_timer_get_time();
     bool changed = memcmp(live, s_last_live, sizeof(live)) != 0;
+    ble_conn_t conns[BLE_MAX_CONN];
+    int nc = ble_conn_snapshot(conns); /* notify outside the lock */
     if (changed || now - s_last_live_us > 1000000) {
         memcpy(s_last_live, live, sizeof(live));
         s_last_live_us = now;
-        for (int i = 0; i < BLE_MAX_CONN; i++) {
-            if (g_ble_conn[i].used && g_ble_conn[i].live_sub) {
-                ble_notify(g_ble_conn[i].handle, g_h_live, live, sizeof(live));
+        for (int i = 0; i < nc; i++) {
+            if (conns[i].live_sub) {
+                ble_notify(conns[i].handle, g_h_live, live, sizeof(live));
             }
         }
     }
@@ -244,9 +280,9 @@ void ble_tick(void)
     core_get_status(&st);
     if (st.battery_pct != s_last_bat) {
         s_last_bat = st.battery_pct;
-        for (int i = 0; i < BLE_MAX_CONN; i++) {
-            if (g_ble_conn[i].used && g_ble_conn[i].bat_sub) {
-                ble_notify(g_ble_conn[i].handle, g_h_battery, &st.battery_pct, 1);
+        for (int i = 0; i < nc; i++) {
+            if (conns[i].bat_sub) {
+                ble_notify(conns[i].handle, g_h_battery, &st.battery_pct, 1);
             }
         }
     }

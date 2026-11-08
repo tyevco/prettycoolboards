@@ -84,6 +84,82 @@ int32_t as5311_slip_correction(const as5311_slip_t *s, int32_t residual_lsb);
  */
 int64_t as5311_recover_count(int64_t stored_count, uint16_t ssi_stored, uint16_t ssi_now, int dir);
 
+/*
+ * Fine position (SPEC D1): the PCNT count (1953.125 nm) refined by the 12-bit SSI angle within
+ * the pole (488.28125 nm). With the slip tracker locked, ssi = 4*dir*count + offset (mod 4096) up
+ * to the sub-count part, so the residual r = wrap(ssi - expected(count)) is the SSI's correction
+ * to the count and
+ *     fine_lsb = 4 * count + dir * r       (SSI LSB, internal direction, 488.28125 nm each)
+ * which is the SSI position unwrapped around the count: continuous across pole boundaries
+ * (4095 -> 0) because the count supplies the pole and the wrap is taken on the difference.
+ *
+ * Consistency: |r| may legitimately reach the incremental outputs' 2-edge direction hysteresis
+ * (datasheet §7.2, 8 LSB) plus up to one edge of lock phase (the offset is learned at an arbitrary
+ * point inside a count) plus SSI jitter. Beyond AS5311_FINE_TOL_LSB the two disagree by more than
+ * 2 edges (SPEC D1): the reading falls back to the count alone (fine_lsb = 4 * count) and is flagged.
+ */
+#define AS5311_FINE_TOL_LSB 12 /* 3 edges: 2 of hysteresis + 1 of lock phase; TVP */
+
+typedef enum {
+    AS5311_FINE_OK = 0,   /* SSI and count agree: fine_lsb is SSI-refined */
+    AS5311_FINE_COARSE,   /* no usable SSI this sample (none read, bad frame, moving, not locked): count only */
+    AS5311_FINE_MISMATCH, /* SSI and count disagree by more than the tolerance: count only, flag it */
+} as5311_fine_status_t;
+
+typedef struct {
+    int64_t lsb;      /* position in SSI LSB, internal direction (4 per count) */
+    int32_t residual; /* SSI - expected(count), wrapped, in LSB; 0 unless an SSI frame was used */
+    as5311_fine_status_t status;
+} as5311_fine_t;
+
+/* ssi_ok: a valid frame taken while the count did not change (the comparison is meaningful). */
+as5311_fine_t as5311_fine_combine(const as5311_slip_t *s, int64_t count, bool ssi_ok, uint16_t ssi_pos);
+
+/*
+ * Slip confirmation: a mismatch is only corrected (the count re-aligned to the SSI) after the same
+ * correction was seen on AS5311_SLIP_CONFIRM consecutive still frames, so one bad (but parity-valid)
+ * frame cannot shift the reading. Until then each mismatching reading is flagged and uses the count.
+ */
+#define AS5311_SLIP_CONFIRM 3
+
+typedef struct {
+    uint8_t n;  /* consecutive mismatching frames with the same correction */
+    int32_t k;  /* that correction, in counts */
+} as5311_mismatch_t;
+
+void as5311_mismatch_init(as5311_mismatch_t *m);
+/* Feed every combine result that used an SSI frame (status OK or MISMATCH; COARSE is ignored).
+ * Returns the count correction to apply now (0 = none). */
+int32_t as5311_mismatch_update(as5311_mismatch_t *m, const as5311_slip_t *s, const as5311_fine_t *f);
+
+/*
+ * PCNT wrap-race plausibility filter. The driver's count is hardware count + an accumulator that
+ * its ISR bumps by the limit when the hardware counter hits a watch point and resets to 0. A read
+ * that lands between the reset and the ISR (another core, or the ISR delayed) returns a value off
+ * by the limit (here 30000 counts = 58.6 mm). A caliper can't move that far between two samples:
+ * a step larger than max_step is held (the previous count is used); a jump that persists for
+ * AS5311_JUMP_ACCEPT samples is accepted as real.
+ *
+ * Call as5311_jump_filter() once per sample. Re-reads inside one sample (waiting out the ISR) use
+ * as5311_jump_plausible(), which changes nothing: the 2026-11-07 review found the driver calling
+ * the filter on each re-read, so three reads 20 us apart already counted as "3 samples" and a race
+ * that outlasted 40 us (the PCNT ISR held off on core 0, e.g. by a flash write) was accepted as a
+ * 58.6 mm jump.
+ */
+#define AS5311_JUMP_ACCEPT 3
+
+typedef struct {
+    bool have;
+    int64_t last;
+    uint8_t rejects;
+} as5311_jump_t;
+
+void as5311_jump_init(as5311_jump_t *j);
+/* Returns true if raw was accepted (*out = raw); false if it was held (*out = previous). */
+bool as5311_jump_filter(as5311_jump_t *j, int64_t raw, int64_t max_step, int64_t *out);
+/* Whether raw is within max_step of the last accepted count (always true before the first). */
+bool as5311_jump_plausible(const as5311_jump_t *j, int64_t raw, int64_t max_step);
+
 #ifdef __cplusplus
 }
 #endif

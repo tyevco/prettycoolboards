@@ -8,16 +8,33 @@
  *   GET  /log.csv        the whole log as CSV
  *   GET  /settings       settings form;  GET /api/settings  JSON (no wifi_pass)
  *   POST /settings       form-urlencoded; an empty wifi_pass keeps the stored one
+ *
+ * There is no login (anyone on the network, or the setup AP, can use it, as documented). What the
+ * 2026-11-07 review added is protection against *other web pages* driving it through the user's
+ * browser:
+ *  - DNS rebinding: a page on evil.example that re-resolves its own name to the caliper's IP is
+ *    "same origin" for the browser and could read /api/log or post settings. Every request must
+ *    carry a Host header naming the caliper itself (its IP, the AP address, or its DHCP hostname),
+ *    else 403.
+ *  - CSRF: a cross-site <form method=post> (no CORS preflight) could rewrite wifi_ssid/wifi_pass,
+ *    point http_post_url at the attacker (every later reading pushed there) or press ZERO. POSTs
+ *    carrying an Origin that is not this host, or Sec-Fetch-Site other than same-origin/none, get
+ *    403. Clients that send neither (curl, scripts) still work.
+ *  - The pages send X-Frame-Options DENY (no click-jacking of the buttons/form), nosniff, a CSP that
+ *    only allows this origin, and no referrer.
+ * Output: every value the pages show is set with textContent / .value, never parsed as HTML.
  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 
 #include "caliper_core.h"
 #include "caliper_gatt.h"
 #include "caliper_wifi.h"
 #include "esp_http_server.h"
 #include "esp_log.h"
+#include "esp_netif.h"
 #include "esp_timer.h"
 #include "store.h"
 
@@ -42,20 +59,20 @@ static const char PAGE_LIVE[] =
     "<script>function c(x){fetch('/api/cmd?c='+x,{method:'POST'})}"
     "async function p(){try{const r=await fetch('/api/live');const j=await r.json();"
     "document.getElementById('v').textContent=j.text;"
-    "document.getElementById('u').textContent=j.unit+((j.flags&1)?'  HOLD':'')+((j.flags&8)?'  SENSOR ERROR':'')+"
+    "document.getElementById('u').textContent=j.unit+((j.flags&1)?'  HOLD':'')+((j.flags&8)?'  SENSOR ERROR':'')+((j.flags&64)?'  PRESS ZERO':'')+"
     "'  battery '+j.battery+'%';const t=document.getElementById('t');t.className=j.tol;"
     "t.textContent=j.profile?(j.profile+': '+j.tol):''}catch(e){}setTimeout(p,250)}p()</script></body></html>";
 
 static const char PAGE_LOG[] =
     "<h2>Log</h2><table><thead><tr><th>#</th><th>time (UTC)</th><th>value</th><th>unit</th><th>flags</th>"
     "<th>profile</th></tr></thead><tbody id=b></tbody></table><button id=m>more</button>"
-    "<script>let f=0;const F=['H','P','F','E'];async function l(){const r=await fetch('/api/log?from='+f+'&n=200');"
+    "<script>let f=0;const F=['H','P','F','E','','','Z'];async function l(){const r=await fetch('/api/log?from='+f+'&n=200');"
     "const a=await r.json();const b=document.getElementById('b');for(const x of a){const tr=document.createElement('tr');"
     "const d=x.unix_s?new Date(x.unix_s*1000).toISOString().replace('T',' ').slice(0,19):'';"
     "const v=x.unit?(x.value_nm/25.4e6).toFixed(4):(x.value_nm/1e6).toFixed(2);"
     "const fl=F.filter((c,i)=>x.flags&(1<<i)).join('');"
-    "tr.innerHTML='<td>'+x.seq+'</td><td>'+d+'</td><td>'+v+'</td><td>'+(x.unit?'in':'mm')+'</td><td>'+fl+"
-    "'</td><td>'+(x.profile_id||'')+'</td>';b.appendChild(tr);f=x.seq+1}"
+    "for(const t of [x.seq,d,v,x.unit?'in':'mm',fl,x.profile_id||'']){const td=document.createElement('td');"
+    "td.textContent=String(t);tr.appendChild(td)}b.appendChild(tr);f=x.seq+1}"
     "document.getElementById('m').style.display=a.length<200?'none':''}"
     "document.getElementById('m').onclick=l;l()</script></body></html>";
 
@@ -77,8 +94,95 @@ static const char PAGE_SETTINGS[] =
     "const q=new URLSearchParams(location.search);if(q.has('saved'))document.getElementById('s').textContent='Saved.';"
     "if(q.has('err'))document.getElementById('s').textContent='Rejected: '+q.get('err')</script></body></html>";
 
+/* ---- request guard ---------------------------------------------------------------------- */
+
+/* host[:port] -> host (lower-cased in place); false if it does not fit */
+static bool host_part(char *h)
+{
+    for (char *c = h; *c; c++) {
+        if (*c == ':') {
+            *c = '\0';
+            break;
+        }
+        if (*c >= 'A' && *c <= 'Z') {
+            *c = (char)(*c - 'A' + 'a');
+        }
+    }
+    return h[0] != '\0';
+}
+
+/* The Host header must name this device: its station IP, the setup AP address, or its DHCP
+ * hostname (bare or with a domain suffix, e.g. "caliper.lan"). Anything else is DNS rebinding. */
+static bool host_is_us(const char *host)
+{
+    cal_status_t st;
+    core_get_status(&st);
+    if (st.ip[0] && strcmp(host, st.ip) == 0) {
+        return true;
+    }
+    if (st.wifi == 3 && strcmp(host, "192.168.4.1") == 0) {
+        return true;
+    }
+    esp_netif_t *n = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
+    const char *hn = NULL;
+    if (n && esp_netif_get_hostname(n, &hn) == ESP_OK && hn && hn[0]) {
+        size_t l = strlen(hn);
+        if (strncasecmp(host, hn, l) == 0 && (host[l] == '\0' || host[l] == '.')) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static bool request_ok(httpd_req_t *r, bool is_post)
+{
+    char host[64], v[96];
+    if (httpd_req_get_hdr_value_str(r, "Host", host, sizeof(host)) != ESP_OK) {
+        return false;
+    }
+    char raw_host[64];
+    strlcpy(raw_host, host, sizeof(raw_host));
+    if (!host_part(host) || !host_is_us(host)) {
+        return false;
+    }
+    if (!is_post) {
+        return true;
+    }
+    if (httpd_req_get_hdr_value_str(r, "Sec-Fetch-Site", v, sizeof(v)) == ESP_OK && strcmp(v, "same-origin") != 0 &&
+        strcmp(v, "none") != 0) {
+        return false;
+    }
+    esp_err_t oe = httpd_req_get_hdr_value_str(r, "Origin", v, sizeof(v));
+    if (oe == ESP_ERR_HTTPD_RESULT_TRUNC) {
+        return false;
+    }
+    if (oe == ESP_OK) {
+        char want[80];
+        snprintf(want, sizeof(want), "http://%s", raw_host);
+        if (strcasecmp(v, want) != 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+#define GUARD(r, post)                                                         \
+    do {                                                                       \
+        if (!request_ok((r), (post))) {                                        \
+            return httpd_resp_send_err((r), HTTPD_403_FORBIDDEN, "forbidden"); \
+        }                                                                      \
+    } while (0)
+
 static esp_err_t send_page(httpd_req_t *r, const char *body)
 {
+    GUARD(r, false);
+    httpd_resp_set_hdr(r, "X-Frame-Options", "DENY");
+    httpd_resp_set_hdr(r, "X-Content-Type-Options", "nosniff");
+    httpd_resp_set_hdr(r, "Referrer-Policy", "no-referrer");
+    httpd_resp_set_hdr(r, "Content-Security-Policy",
+                       "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; "
+                       "frame-ancestors 'none'; form-action 'self'");
+    httpd_resp_set_hdr(r, "Cache-Control", "no-store");
     httpd_resp_set_type(r, "text/html; charset=utf-8");
     httpd_resp_send_chunk(r, PAGE_HEAD, HTTPD_RESP_USE_STRLEN);
     httpd_resp_send_chunk(r, body, HTTPD_RESP_USE_STRLEN);
@@ -102,6 +206,7 @@ static const char *tol_name(meas_tol_t t)
 
 static esp_err_t h_live(httpd_req_t *r)
 {
+    GUARD(r, false);
     cal_live_t lv;
     cal_status_t st;
     core_get_live(&lv);
@@ -136,6 +241,7 @@ static bool query(httpd_req_t *r, const char *key, char *val, size_t n)
 
 static esp_err_t h_cmd(httpd_req_t *r)
 {
+    GUARD(r, true);
     char c[12];
     if (!query(r, "c", c, sizeof(c))) {
         return httpd_resp_send_err(r, HTTPD_400_BAD_REQUEST, "c missing");
@@ -151,6 +257,7 @@ static esp_err_t h_cmd(httpd_req_t *r)
 
 static esp_err_t h_log_json(httpd_req_t *r)
 {
+    GUARD(r, false);
     char v[12];
     uint32_t from = query(r, "from", v, sizeof(v)) ? (uint32_t)strtoul(v, NULL, 10) : 0;
     uint32_t n = query(r, "n", v, sizeof(v)) ? (uint32_t)strtoul(v, NULL, 10) : 100;
@@ -176,6 +283,9 @@ static esp_err_t h_log_json(httpd_req_t *r)
                              "%s{\"seq\":%lu,\"unix_s\":%lu,\"value_nm\":%ld,\"unit\":%u,\"flags\":%u,\"profile_id\":%u}",
                              first ? "" : ",", (unsigned long)recs[i].seq, (unsigned long)recs[i].unix_s,
                              (long)recs[i].value_nm, recs[i].unit, recs[i].flags, recs[i].profile_id);
+            if (l < 0 || (size_t)l >= sizeof(b) - used) {
+                break; /* cannot happen with 20 x <= 106 bytes; never run past the buffer */
+            }
             first = false;
             used += (size_t)l;
         }
@@ -196,6 +306,7 @@ static esp_err_t csv_chunk(void *ctx, const char *buf, size_t len)
 
 static esp_err_t h_csv(httpd_req_t *r)
 {
+    GUARD(r, false);
     settings_t s;
     core_get_settings(&s);
     httpd_resp_set_type(r, "text/csv");
@@ -209,12 +320,14 @@ static esp_err_t h_csv(httpd_req_t *r)
 
 static esp_err_t h_api_settings(httpd_req_t *r)
 {
+    GUARD(r, false);
     char js[CALIPER_SETTINGS_MAX_LEN + 1];
     int n = core_settings_read_json(js, sizeof(js));
     if (n < 0) {
         return httpd_resp_send_500(r);
     }
     httpd_resp_set_type(r, "application/json");
+    httpd_resp_set_hdr(r, "Cache-Control", "no-store");
     return httpd_resp_send(r, js, n);
 }
 
@@ -226,6 +339,7 @@ static void reconnect_cb(void *arg)
 
 static esp_err_t h_settings_post(httpd_req_t *r)
 {
+    GUARD(r, true);
     char body[768];
     if (r->content_len >= sizeof(body)) {
         return httpd_resp_send_err(r, HTTPD_400_BAD_REQUEST, "too long");
@@ -256,15 +370,29 @@ static esp_err_t h_settings_post(httpd_req_t *r)
         if (strcmp(key, "wifi_pass") == 0 && val[0] == '\0') {
             continue; /* blank = keep */
         }
-        if (core_settings_set(key, val) != SETTINGS_OK && !err_key) {
+        int rc = core_settings_set(key, val);
+        memset(val, 0, sizeof(val)); /* may be the password */
+        if (rc != SETTINGS_OK && !err_key) {
+            /* the key goes into the Location header: keep [a-z_] only (a failed flash write can
+             * reject even an unknown, attacker-chosen key) */
             static char bad[24];
-            strlcpy(bad, key, sizeof(bad));
-            err_key = bad;
+            size_t k = 0;
+            for (size_t i = 0; key[i] && k + 1 < sizeof(bad); i++) {
+                char ch = key[i];
+                if ((ch >= 'a' && ch <= 'z') || ch == '_') {
+                    bad[k++] = ch;
+                }
+            }
+            bad[k] = '\0';
+            err_key = k ? bad : "value";
         }
     }
+    memset(body, 0, sizeof(body));
     settings_t after;
     core_get_settings(&after);
     bool creds_changed = strcmp(before.wifi_ssid, after.wifi_ssid) != 0 || strcmp(before.wifi_pass, after.wifi_pass) != 0;
+    memset(before.wifi_pass, 0, sizeof(before.wifi_pass));
+    memset(after.wifi_pass, 0, sizeof(after.wifi_pass));
 
     char loc[48];
     snprintf(loc, sizeof(loc), err_key ? "/settings?err=%s" : "/settings?saved=1", err_key ? err_key : "");
@@ -294,6 +422,9 @@ esp_err_t web_start(void)
     cfg.max_uri_handlers = 12;
     cfg.stack_size = 6144;
     cfg.lru_purge_enable = true;
+    /* LWIP_MAX_SOCKETS is 12: httpd's default 7 (+3 internal) left 2 for MQTT, the HTTP POST client
+     * and DNS, so a push could fail while a browser held a few keep-alive connections */
+    cfg.max_open_sockets = 4;
     esp_err_t err = httpd_start(&s_srv, &cfg);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "httpd_start: %s", esp_err_to_name(err));

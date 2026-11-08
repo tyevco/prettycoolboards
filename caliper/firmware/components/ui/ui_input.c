@@ -26,7 +26,7 @@ static void menu_select(bool long_press)
         char b[48];
         cal_status_t st;
         core_get_status(&st);
-        snprintf(b, sizeof(b), "fw %s  %s", esp_app_get_description()->version, st.ip[0] ? st.ip : "");
+        snprintf(b, sizeof(b), "fw %.20s  %.15s", esp_app_get_description()->version, st.ip);
         ui_toast(b);
         break;
     }
@@ -39,10 +39,14 @@ void ui_handle_button(btn_event_t ev)
         return;
     }
     core_activity();
-    if (!ui_lock()) {
+    /* Without a working display the buttons still measure: everything acts as on the main screen
+     * (no screen changes, no menu). With one, a press that cannot get the LVGL lock in 100 ms is
+     * dropped rather than acted on against a half-drawn screen. */
+    bool locked = ui_lock();
+    if (!locked && ui_ready()) {
         return;
     }
-    ui_screen_t scr = ui_screens_current();
+    ui_screen_t scr = locked ? ui_screens_current() : UI_SCR_MAIN;
 
     if (ev.type == BTN_EV_COMBO) {
         if (ev.mask == (BTN_ZERO | BTN_MODE)) {
@@ -72,7 +76,9 @@ void ui_handle_button(btn_event_t ev)
             break;
         case BTN_MODE:
             if (ev.type == BTN_EV_SHORT) {
-                ui_screens_show((ui_screen_t)(scr + 1));
+                if (locked) {
+                    ui_screens_show((ui_screen_t)(scr + 1));
+                }
             } else {
                 core_command(CORE_CMD_NEXT_PROFILE, 0);
             }
@@ -81,5 +87,7 @@ void ui_handle_button(btn_event_t ev)
             break;
         }
     }
-    ui_unlock();
+    if (locked) {
+        ui_unlock();
+    }
 }

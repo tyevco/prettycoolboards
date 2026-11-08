@@ -5,20 +5,40 @@
 
 #include "le_bytes.h"
 
+_Static_assert(CALIPER_LIVE_LEN == CALIPER_LIVE_LEN_V2, "LIVE is packed as the 12-byte contract");
+_Static_assert(CALIPER_LIVE_OFF_PROFILE + 2 == CALIPER_LIVE_LEN_V2, "active_profile_id is the last field");
+
+/* strnlen is POSIX, not ISO C11: a local one keeps this file portable under -std=c11. */
+static size_t bounded_strlen(const char *s, size_t max)
+{
+    size_t n = 0;
+    while (n < max && s[n] != '\0') {
+        n++;
+    }
+    return n;
+}
+
 void gatt_live_pack(const gatt_live_t *l, uint8_t out[CALIPER_LIVE_LEN])
 {
     le_put_i32(out + 0, l->value_nm);
     le_put_i32(out + 4, l->cap_nm);
     out[8] = l->unit;
     out[9] = l->flags;
+    le_put_u16(out + CALIPER_LIVE_OFF_PROFILE, l->active_profile_id);
 }
 
-void gatt_live_unpack(const uint8_t in[CALIPER_LIVE_LEN], gatt_live_t *l)
+int gatt_live_unpack(const uint8_t *in, size_t len, gatt_live_t *l)
 {
+    if (len < CALIPER_LIVE_LEN_MIN) {
+        return -1;
+    }
     l->value_nm = le_get_i32(in + 0);
     l->cap_nm = le_get_i32(in + 4);
     l->unit = in[8];
     l->flags = in[9];
+    l->active_profile_id =
+        len >= CALIPER_LIVE_LEN_V2 ? le_get_u16(in + CALIPER_LIVE_OFF_PROFILE) : (uint16_t)CALIPER_PROFILE_ID_NONE;
+    return 0;
 }
 
 static int expected_len(uint8_t op)
@@ -98,7 +118,7 @@ void gatt_profile_pack(const meas_profile_t *p, uint8_t out[CALIPER_PROFILE_LEN]
     le_put_i32(out + 6, p->tol_minus_nm);
     le_put_i32(out + 10, p->tol_plus_nm);
     memset(out + 14, 0, CALIPER_PROFILE_NAME_LEN);
-    size_t nl = strnlen(p->name, CALIPER_PROFILE_NAME_LEN);
+    size_t nl = bounded_strlen(p->name, CALIPER_PROFILE_NAME_LEN);
     memcpy(out + 14, p->name, nl);
 }
 

@@ -2,7 +2,7 @@
  * PrettyCool Caliper rev A firmware: wiring and tasks.
  *
  *   task      core prio  rate     job
- *   sensor    1    10    100 Hz   AS5311 count (+ SSI every 10th) -> core_sample()
+ *   sensor    1    10    100 Hz   AS5311 count + SSI (fine position) -> core_sample()
  *   cap       1    4     25 Hz    EXPERIMENTAL capacitive burst -> shared value
  *   buttons   0    7     100 Hz   debounce + gestures -> ui_handle_button()
  *   app       0    3     10 Hz    BLE notifications; 1 Hz power poll, USB poll, dim/auto-off
@@ -24,10 +24,12 @@
 #include "esp_log.h"
 #include "esp_netif.h"
 #include "esp_pm.h"
+#include "esp_system.h"
 #include "esp_timer.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "nvs_flash.h"
+#include "pin_plan.h"
 #include "power.h"
 #include "sdkconfig.h"
 #include "sensor_cap.h"
@@ -80,10 +82,10 @@ static void sensor_task(void *arg)
 {
     (void)arg;
     TickType_t last = xTaskGetTickCount();
-    uint32_t n = 0;
     for (;;) {
         mag_reading_t m;
-        bool ok = sensor_mag_read(&m, (n++ % 10) == 0) == ESP_OK && m.ok;
+        /* SSI on every sample (~40 us): the count is refined to 488 nm only with a fresh frame */
+        bool ok = sensor_mag_read(&m, true) == ESP_OK && m.ok;
         int64_t cap_nm;
         bool cap_ok = cap_get(&cap_nm);
         core_sample(m.raw_nm, ok, cap_nm, cap_ok, now_ms());
@@ -117,11 +119,8 @@ static void cap_task(void *arg)
 static void buttons_task(void *arg)
 {
     (void)arg;
-    gpio_config_t io = {
-        .pin_bit_mask = (1ULL << PIN_BTN_ZERO_N) | (1ULL << PIN_BTN_HOLD_N) | (1ULL << PIN_BTN_MODE_N),
-        .mode = GPIO_MODE_INPUT, /* 100 k external pull-ups + 100 nF (10 ms RC) */
-    };
-    gpio_config(&io);
+    /* inputs, no pull: 100 k external pull-ups + 100 nF (10 ms RC); the pin plan's RUN state */
+    pin_plan_apply(PP_MODE_RUN, pin_plan_init_mask(PP_INIT_BUTTONS), 0);
     btn_sm_t sm;
     btn_init(&sm);
     TickType_t last = xTaskGetTickCount();
@@ -265,6 +264,9 @@ void app_main(void)
 {
     ESP_LOGI(TAG, "PrettyCool Caliper fw %s, board rev %s (pins %s), wake: %s", esp_app_get_description()->version,
              BOARD_REV, BOARD_PINS_HASH, power_wake_cause());
+    /* the plain GPIOs nobody else owns (BOOT, FG_ALRT_N, CHG_INT_N, IMU_INT1/2) to their RUN state
+     * (inputs, pulls off), written while the pads may still be held, then the holds released */
+    pin_plan_apply(PP_MODE_RUN, pin_plan_init_mask(PP_INIT_BOARD), PP_APPLY_LEVEL);
     power_release_holds();
     init_nvs();
     init_pm();
@@ -287,6 +289,11 @@ void app_main(void)
     if (sensor_mag_init() != ESP_OK) {
         ESP_LOGE(TAG, "magnetic sensor init failed");
     }
+    /* keep the zero across a deep sleep only if the AS5311 count was recovered */
+    mag_origin_t origin = sensor_mag_origin();
+    core_mag_origin(origin == MAG_ORIGIN_RECOVERED,
+                    origin == MAG_ORIGIN_LOST ||
+                        (origin == MAG_ORIGIN_NONE && esp_reset_reason() == ESP_RST_DEEPSLEEP));
     power_outputs_init();
     if (ui_init() != ESP_OK) {
         ESP_LOGE(TAG, "display init failed");
@@ -308,6 +315,11 @@ void app_main(void)
     if (caliper_usb_init() != ESP_OK) {
         ESP_LOGE(TAG, "USB init failed");
     }
+
+    /* the drivers set some pulls themselves (PCNT turns pull-ups on; GPIO45 / 46 keep their reset
+     * pull-downs under LEDC / RMT; MTCK and U0TXD / U0RXD keep their reset pull-ups): the plan's RUN
+     * pulls (none on every driver-owned pad but the USB pair, which is never touched) */
+    pin_plan_apply_pulls(PP_MODE_RUN, pin_plan_init_mask(PP_INIT_DRIVER));
 
     xTaskCreatePinnedToCore(sensor_task, "sensor", 4096, NULL, 10, NULL, 1);
     if (cap) {

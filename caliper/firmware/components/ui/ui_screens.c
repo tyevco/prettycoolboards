@@ -96,10 +96,15 @@ static void refresh_status(lv_obj_t *lbl, const cal_status_t *st)
 static void refresh_main(const cal_live_t *lv, const cal_status_t *st)
 {
     lv_label_set_text(s_value, lv->text);
-    lv_obj_set_style_text_color(s_value, (lv->flags & CALIPER_FLAG_SENSOR_ERR) ? C_RED : C_TEXT, 0);
+    bool rezero = (lv->flags & CALIPER_FLAG_REZERO) != 0; /* the zero was lost in a sleep or reset */
+    lv_obj_set_style_text_color(s_value,
+                                (lv->flags & CALIPER_FLAG_SENSOR_ERR) ? C_RED : rezero ? C_AMBER : C_TEXT, 0);
     lv_label_set_text(s_unit, lv->unit ? "in" : "mm");
-    lv_label_set_text(s_hold, (lv->flags & CALIPER_FLAG_HOLD) ? "HOLD" : (lv->autohold ? "auto" : ""));
-    lv_obj_set_style_text_color(s_hold, (lv->flags & CALIPER_FLAG_HOLD) ? C_AMBER : C_DIM, 0);
+    lv_label_set_text(s_hold, (lv->flags & CALIPER_FLAG_HOLD) ? "HOLD"
+                              : rezero                         ? "ZERO?"
+                              : lv->autohold                   ? "auto"
+                                                               : "");
+    lv_obj_set_style_text_color(s_hold, (lv->flags & CALIPER_FLAG_HOLD) || rezero ? C_AMBER : C_DIM, 0);
     refresh_status(s_status, st);
 
     if (lv->profile_id) {
@@ -377,6 +382,9 @@ int ui_menu_selected(void)
 
 void ui_toast(const char *msg)
 {
+    if (!s_toast) {
+        return;
+    }
     lv_label_set_text(s_toast, msg);
     lv_obj_remove_flag(s_toast, LV_OBJ_FLAG_HIDDEN);
     lv_timer_reset(s_toast_timer);

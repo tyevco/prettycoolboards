@@ -35,7 +35,8 @@ ui_screen_t ui_screens_current(void);
 void ui_menu_move(int delta);
 int ui_menu_selected(void);
 void ui_toast(const char *msg);
-bool ui_lock(void);
+bool ui_ready(void);  /* the display and LVGL are up */
+bool ui_lock(void);   /* false if not ready or busy for 100 ms */
 void ui_unlock(void);
 
 enum {

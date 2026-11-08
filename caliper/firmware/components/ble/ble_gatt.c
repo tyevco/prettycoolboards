@@ -26,10 +26,14 @@ const ble_uuid128_t *ble_gatt_svc_uuid(void)
     return &s_uuid_svc;
 }
 
-/* ATT error codes returned on COMMAND writes */
-#define ERR_LEN    BLE_ATT_ERR_INVALID_ATTR_VALUE_LEN /* 0x0D: wrong length for the opcode */
-#define ERR_OPCODE BLE_ATT_ERR_REQ_NOT_SUPPORTED      /* 0x06: unknown opcode */
-#define ERR_VALUE  0x80                               /* application error: bad argument */
+/* ATT error codes returned on writes (the contract: caliper_gatt.h CALIPER_ATT_ERR_*) */
+#define ERR_LEN    CALIPER_ATT_ERR_LEN    /* 0x0D: wrong length */
+#define ERR_OPCODE CALIPER_ATT_ERR_OPCODE /* 0x06: unknown opcode */
+#define ERR_VALUE  CALIPER_ATT_ERR_VALUE  /* 0x80: application error: bad argument */
+_Static_assert(CALIPER_ATT_ERR_LEN == BLE_ATT_ERR_INVALID_ATTR_VALUE_LEN, "0x0D");
+_Static_assert(CALIPER_ATT_ERR_OPCODE == BLE_ATT_ERR_REQ_NOT_SUPPORTED, "0x06");
+_Static_assert(CALIPER_ATT_ERR_AUTHEN == BLE_ATT_ERR_INSUFFICIENT_AUTHEN, "0x05");
+_Static_assert(CALIPER_ATT_ERR_ENC == BLE_ATT_ERR_INSUFFICIENT_ENC, "0x0F");
 
 static int append(struct ble_gatt_access_ctxt *ctxt, const void *d, size_t n)
 {
@@ -50,7 +54,8 @@ void ble_gatt_pack_live(uint8_t out[CALIPER_LIVE_LEN])
 {
     cal_live_t lv;
     core_get_live(&lv);
-    gatt_live_t g = {.value_nm = lv.value_nm, .cap_nm = lv.cap_nm, .unit = lv.unit, .flags = lv.flags};
+    gatt_live_t g = {.value_nm = lv.value_nm, .cap_nm = lv.cap_nm, .unit = lv.unit, .flags = lv.flags,
+                     .active_profile_id = lv.profile_id};
     gatt_live_pack(&g, out);
 }
 

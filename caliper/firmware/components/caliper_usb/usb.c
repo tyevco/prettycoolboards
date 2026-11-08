@@ -1,5 +1,6 @@
 /* TinyUSB composite (CDC + MSC) or the USB-Serial-JTAG fallback. */
 #include <stdio.h>
+#include <string.h>
 
 #include "caliper_core.h"
 #include "caliper_usb.h"
@@ -27,6 +28,29 @@ bool caliper_usb_host(void)
 }
 
 #if CONFIG_CALIPER_USB_TINYUSB
+
+/* The TinyUSB console VFS (esp_tusb_init_console) is non-blocking: when the CDC TX FIFO is full it
+ * drops the rest, and newlib's fwrite() gives up at the first 0-byte write. That is right for log
+ * lines, but the CLI's "csv" (100+ KiB) and "log" output came out truncated (2026-11-07 review).
+ * CLI output goes through here instead and waits for the host. */
+esp_err_t usb_console_write(const char *buf, size_t len)
+{
+    fflush(stdout); /* keep the order with anything printf'ed before */
+    int stalls = 0;
+    while (len > 0) {
+        size_t n = tinyusb_cdcacm_write_queue(TINYUSB_CDC_ACM_0, (const uint8_t *)buf, len);
+        buf += n;
+        len -= n;
+        if (n == 0 && ++stalls > 20) {
+            return ESP_ERR_TIMEOUT; /* ~1 s and the host took nothing */
+        }
+        if (n) {
+            stalls = 0;
+        }
+        tinyusb_cdcacm_write_flush(TINYUSB_CDC_ACM_0, pdMS_TO_TICKS(50));
+    }
+    return ESP_OK;
+}
 
 static void cdc_rx(int itf, cdcacm_event_t *event)
 {
@@ -93,6 +117,20 @@ void caliper_usb_poll(void)
 }
 
 #else /* USB-Serial-JTAG */
+
+esp_err_t usb_console_write(const char *buf, size_t len)
+{
+    fflush(stdout);
+    while (len > 0) {
+        int n = usb_serial_jtag_write_bytes(buf, len, pdMS_TO_TICKS(1000));
+        if (n <= 0) {
+            return ESP_ERR_TIMEOUT;
+        }
+        buf += n;
+        len -= (size_t)n;
+    }
+    return ESP_OK;
+}
 
 static void usj_task(void *arg)
 {

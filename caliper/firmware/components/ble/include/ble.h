@@ -30,12 +30,14 @@ typedef struct {
     bool live_sub, log_sub, hid_sub, bat_sub;
 } ble_conn_t;
 
-extern ble_conn_t g_ble_conn[BLE_MAX_CONN];
+/* The connection table lives in ble.c behind a spinlock: the NimBLE host task writes it (GAP
+ * events) while the app task (ble_tick) and ble_wrk read it. Readers get copies. */
 extern uint16_t g_h_live, g_h_log, g_h_hid_input, g_h_battery;
 
 int ble_gatt_register(void);     /* custom service */
 int ble_std_register(void);      /* BAS, DIS, HID */
-ble_conn_t *ble_conn_find(uint16_t handle);
+bool ble_conn_get(uint16_t handle, ble_conn_t *out);  /* false if not connected */
+int ble_conn_snapshot(ble_conn_t out[BLE_MAX_CONN]); /* copies the used entries, returns how many */
 int ble_notify(uint16_t conn, uint16_t attr, const void *data, uint16_t len); /* retries on ENOMEM */
 void ble_worker_start(void);
 void ble_worker_log_read(uint16_t conn, uint32_t from_seq);

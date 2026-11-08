@@ -1,0 +1,1541 @@
+{
+ "pinstate_version": 0,
+ "board": "PrettyCool Caliper slider board rev A",
+ "firmware": "caliper pin_plan.py@e3b39228636d6b60",
+ "provenance": "assumed: exported from caliper/firmware/tools/pin_plan.py (design intent, not measured)",
+ "modes": {
+  "RESET": {
+   "U10": {
+    "IO0": {
+     "dir": "in",
+     "out": null,
+     "pull": "up",
+     "pull_ohm": [
+      30000,
+      60000
+     ],
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: WPU, IE; strap GPIO0 = 1: SPI boot",
+     "net": "BOOT_N"
+    },
+    "IO1": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: IE",
+     "net": "CAP_RX"
+    },
+    "IO2": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: IE",
+     "net": "FG_ALRT_N"
+    },
+    "IO3": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: IE; strap GPIO3 (JTAG source), ignored while EFUSE_STRAP_JTAG_SEL = 0",
+     "net": "CHG_INT_N"
+    },
+    "IO4": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: no setting (IE / OE / pulls off)",
+     "net": "MAG_A"
+    },
+    "IO5": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: no setting (IE / OE / pulls off)",
+     "net": "MAG_B"
+    },
+    "IO6": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: no setting (IE / OE / pulls off)",
+     "net": "MAG_IDX"
+    },
+    "IO7": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: no setting (IE / OE / pulls off)",
+     "net": "MAG_CLK"
+    },
+    "IO8": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: no setting (IE / OE / pulls off)",
+     "net": "MAG_DO"
+    },
+    "IO9": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: IE",
+     "net": "MAG_CSN"
+    },
+    "IO10": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: IE",
+     "net": "MAG_INC_N"
+    },
+    "IO11": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: IE",
+     "net": "MAG_DEC_N"
+    },
+    "IO12": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: IE",
+     "net": "SNS_PWR_EN"
+    },
+    "IO13": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: IE",
+     "net": "I2C_SDA"
+    },
+    "IO14": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: IE",
+     "net": "I2C_SCL"
+    },
+    "IO15": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: no setting (IE / OE / pulls off)",
+     "net": "IMU_INT1"
+    },
+    "IO16": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: no setting (IE / OE / pulls off)",
+     "net": "IMU_INT2"
+    },
+    "IO17": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: IE",
+     "net": "BTN_ZERO_N"
+    },
+    "IO18": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: IE",
+     "net": "BTN_HOLD_N"
+    },
+    "23": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: no setting (IE / OE / pulls off)",
+     "net": "USB_DM"
+    },
+    "24": {
+     "dir": "in",
+     "out": null,
+     "pull": "up",
+     "pull_ohm": [
+      1200,
+      1800
+     ],
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: USB_PU (the USB D+ pull-up)",
+     "net": "USB_DP"
+    },
+    "IO21": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: no setting (IE / OE / pulls off)",
+     "net": "BTN_MODE_N"
+    },
+    "IO33": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: IE",
+     "net": "LCD_SCK"
+    },
+    "IO34": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: IE",
+     "net": "LCD_MOSI"
+    },
+    "IO35": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: IE",
+     "net": "LCD_CS_N"
+    },
+    "IO36": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: IE",
+     "net": "LCD_DC"
+    },
+    "IO37": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: IE",
+     "net": "LCD_RST_N"
+    },
+    "IO38": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: IE",
+     "net": "LCD_BL"
+    },
+    "IO39": {
+     "dir": "in",
+     "out": null,
+     "pull": "up",
+     "pull_ohm": [
+      30000,
+      60000
+     ],
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: IE, WPU (MTCK, note 7: EFUSE_DIS_PAD_JTAG = 0)",
+     "net": "CAP_TX0"
+    },
+    "IO40": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: IE",
+     "net": "CAP_TX1"
+    },
+    "IO41": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: IE",
+     "net": "CAP_TX2"
+    },
+    "IO42": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: IE",
+     "net": "CAP_TX3"
+    },
+    "TXD0": {
+     "dir": "out",
+     "out": 1,
+     "pull": "up",
+     "pull_ohm": [
+      30000,
+      60000
+     ],
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; sensor_cap: dedicated-GPIO bundle; U0TXD: ROM boot log (DS Table 2-1: WPU, IE)",
+     "net": "CAP_TX6"
+    },
+    "RXD0": {
+     "dir": "in",
+     "out": null,
+     "pull": "up",
+     "pull_ohm": [
+      30000,
+      60000
+     ],
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: WPU, IE",
+     "net": "CAP_TX7"
+    },
+    "IO45": {
+     "dir": "in",
+     "out": null,
+     "pull": "down",
+     "pull_ohm": [
+      30000,
+      60000
+     ],
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: WPD, IE; strap GPIO45 = 0: VDD_SPI 3.3 V",
+     "net": "BUZZ"
+    },
+    "IO46": {
+     "dir": "in",
+     "out": null,
+     "pull": "down",
+     "pull_ohm": [
+      30000,
+      60000
+     ],
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: WPD, IE; strap GPIO46 = 0 / float",
+     "net": "RGB_DIN"
+    },
+    "IO47": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: IE",
+     "net": "CAP_TX4"
+    },
+    "IO48": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 DS v2.2 Table 2-1 'After Reset'; DS Table 2-1: IE",
+     "net": "CAP_TX5"
+    },
+    "EN": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: CHIP_PU input, no internal pull (DS v2.2 Table 2-1)",
+     "net": "MCU_EN"
+    }
+   }
+  },
+  "RUN": {
+   "U10": {
+    "IO0": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it); strap only; reset WPU switched off (R21 holds it high)",
+     "net": "BOOT_N"
+    },
+    "IO1": {
+     "dir": "analog",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it); sensor_cap: ADC1_CH0 (adc_continuous)",
+     "net": "CAP_RX"
+    },
+    "IO2": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it)",
+     "net": "FG_ALRT_N"
+    },
+    "IO3": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it)",
+     "net": "CHG_INT_N"
+    },
+    "IO4": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it); sensor_mag: PCNT (the driver enables the pad pull-up; pin_plan_apply_pulls removes it)",
+     "net": "MAG_A"
+    },
+    "IO5": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it); sensor_mag: PCNT (the driver enables the pad pull-up; pin_plan_apply_pulls removes it)",
+     "net": "MAG_B"
+    },
+    "IO6": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it); rising-edge interrupt",
+     "net": "MAG_IDX"
+    },
+    "IO7": {
+     "dir": "out",
+     "out": 1,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it); SSI clock, idles high",
+     "net": "MAG_CLK"
+    },
+    "IO8": {
+     "dir": "in",
+     "out": null,
+     "pull": "up",
+     "pull_ohm": [
+      30000,
+      60000
+     ],
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it); DO is tri-state between frames (CSn high): the pad pull-up keeps it from floating; DO drives only during a 40 us SSI read",
+     "net": "MAG_DO"
+    },
+    "IO9": {
+     "dir": "out",
+     "out": 1,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it); SSI chip select, idles high (A/B/Index stay unlocked once enabled)",
+     "net": "MAG_CSN"
+    },
+    "IO10": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it)",
+     "net": "MAG_INC_N"
+    },
+    "IO11": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it)",
+     "net": "MAG_DEC_N"
+    },
+    "IO12": {
+     "dir": "out",
+     "out": 1,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it); both switched rails on (R5 costs 33 uA while awake, by design)",
+     "net": "SNS_PWR_EN"
+    },
+    "IO13": {
+     "dir": "out",
+     "od": true,
+     "out": 1,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it); power: I2C0 master (open drain, internal pull-up off)",
+     "net": "I2C_SDA"
+    },
+    "IO14": {
+     "dir": "out",
+     "od": true,
+     "out": 1,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it); power: I2C0 master (open drain, internal pull-up off)",
+     "net": "I2C_SCL"
+    },
+    "IO15": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it)",
+     "net": "IMU_INT1"
+    },
+    "IO16": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it)",
+     "net": "IMU_INT2"
+    },
+    "IO17": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it)",
+     "net": "BTN_ZERO_N"
+    },
+    "IO18": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it)",
+     "net": "BTN_HOLD_N"
+    },
+    "23": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it); USB PHY (TinyUSB / USB-Serial-JTAG)",
+     "net": "USB_DM"
+    },
+    "24": {
+     "dir": "in",
+     "out": null,
+     "pull": "up",
+     "pull_ohm": [
+      1200,
+      1800
+     ],
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it); USB PHY (TinyUSB / USB-Serial-JTAG); the PHY's 1.5k D+ pull-up while the device stack is attached",
+     "net": "USB_DP"
+    },
+    "IO21": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it)",
+     "net": "BTN_MODE_N"
+    },
+    "IO33": {
+     "dir": "out",
+     "out": 0,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it); ui: SPI2 (esp_lcd)",
+     "net": "LCD_SCK"
+    },
+    "IO34": {
+     "dir": "out",
+     "out": 0,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it); ui: SPI2 (esp_lcd)",
+     "net": "LCD_MOSI"
+    },
+    "IO35": {
+     "dir": "out",
+     "out": 1,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it); ui: SPI2 (esp_lcd)",
+     "net": "LCD_CS_N"
+    },
+    "IO36": {
+     "dir": "out",
+     "out": 0,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it); ui: esp_lcd D/C GPIO",
+     "net": "LCD_DC"
+    },
+    "IO37": {
+     "dir": "out",
+     "out": 1,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it); ui: esp_lcd reset GPIO",
+     "net": "LCD_RST_N"
+    },
+    "IO38": {
+     "dir": "out",
+     "out": 1,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it); power: LEDC channel 0 (backlight PWM); PWM; 1 = on part of the cycle (R51 33 uA while high)",
+     "net": "LCD_BL"
+    },
+    "IO39": {
+     "dir": "out",
+     "out": 0,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it); sensor_cap: dedicated-GPIO bundle; 0 between bursts",
+     "net": "CAP_TX0"
+    },
+    "IO40": {
+     "dir": "out",
+     "out": 0,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it); sensor_cap: dedicated-GPIO bundle; 0 between bursts",
+     "net": "CAP_TX1"
+    },
+    "IO41": {
+     "dir": "out",
+     "out": 0,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it); sensor_cap: dedicated-GPIO bundle; 0 between bursts",
+     "net": "CAP_TX2"
+    },
+    "IO42": {
+     "dir": "out",
+     "out": 0,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it); sensor_cap: dedicated-GPIO bundle; 0 between bursts",
+     "net": "CAP_TX3"
+    },
+    "TXD0": {
+     "dir": "out",
+     "out": 0,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it); sensor_cap: dedicated-GPIO bundle; 0 between bursts",
+     "net": "CAP_TX6"
+    },
+    "RXD0": {
+     "dir": "out",
+     "out": 0,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it); sensor_cap: dedicated-GPIO bundle; 0 between bursts",
+     "net": "CAP_TX7"
+    },
+    "IO45": {
+     "dir": "out",
+     "out": 0,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it); power: LEDC channel 1 (piezo); square wave while beeping; the reset WPD is switched off",
+     "net": "BUZZ"
+    },
+    "IO46": {
+     "dir": "out",
+     "out": 0,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it); power: RMT (led_strip); WS2812 data, idles low; the reset WPD is switched off",
+     "net": "RGB_DIN"
+    },
+    "IO47": {
+     "dir": "out",
+     "out": 0,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it); sensor_cap: dedicated-GPIO bundle; 0 between bursts",
+     "net": "CAP_TX4"
+    },
+    "IO48": {
+     "dir": "out",
+     "out": 0,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan RUN (firmware applies it); sensor_cap: dedicated-GPIO bundle; 0 between bursts",
+     "net": "CAP_TX5"
+    },
+    "EN": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: CHIP_PU input, no internal pull (DS v2.2 Table 2-1)",
+     "net": "MCU_EN"
+    }
+   },
+   "U2": {
+    "SDA": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: BQ25180 I2C target, bus idle (released; SDA / SCL are inputs between transactions)"
+    },
+    "SCL": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: BQ25180 I2C target, bus idle (released; SDA / SCL are inputs between transactions)"
+    },
+    "~{INT}": {
+     "dir": "out",
+     "od": true,
+     "out": 1,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: BQ25180 /INT open drain, released (no event pending)"
+    }
+   },
+   "U4": {
+    "SDA": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: MAX17048 I2C target, bus idle (released; SDA / SCL are inputs between transactions)"
+    },
+    "SCL": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: MAX17048 I2C target, bus idle (released; SDA / SCL are inputs between transactions)"
+    },
+    "~{ALRT}": {
+     "dir": "out",
+     "od": true,
+     "out": 1,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: MAX17048 ALRT open drain, released (no alert)"
+    }
+   },
+   "U60": {
+    "SDA/SDI/SDO": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: LIS2DW12 I2C target, bus idle (released; SDA / SCL are inputs between transactions)"
+    },
+    "SCL/SPC": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: LIS2DW12 I2C target, bus idle (released; SDA / SCL are inputs between transactions)"
+    },
+    "INT1": {
+     "dir": "out",
+     "out": 1,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: LIS2DW12 INT1 push-pull active low (CTRL3 0x18), idle high"
+    },
+    "INT2": {
+     "dir": "out",
+     "out": 1,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: LIS2DW12 INT2 push-pull active low, nothing routed: high"
+    }
+   },
+   "U30": {
+    "A": {
+     "dir": "out",
+     "out": 1,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: AS5311 A push-pull (level follows the position)"
+    },
+    "B": {
+     "dir": "out",
+     "out": 1,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: AS5311 B push-pull (level follows the position)"
+    },
+    "Index": {
+     "dir": "out",
+     "out": 0,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: AS5311 Index push-pull, low between index pulses"
+    },
+    "DO": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: AS5311 DO tri-state while CSn is high (between SSI frames)"
+    },
+    "MagINCn": {
+     "dir": "out",
+     "od": true,
+     "out": 1,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: AS5311 MagINCn open drain, released (field in range)"
+    },
+    "MagDECn": {
+     "dir": "out",
+     "od": true,
+     "out": 1,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: AS5311 MagDECn open drain, released (field in range)"
+    }
+   },
+   "U1": {
+    "I/O1": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: USBLC6 ESD clamp, no DC path"
+    },
+    "I/O2": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: USBLC6 ESD clamp"
+    }
+   }
+  },
+  "SLEEP": {
+   "U10": {
+    "IO0": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": true,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); isolated (IE / OE / pulls off) and held",
+     "net": "BOOT_N"
+    },
+    "IO1": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": true,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); isolated (IE / OE / pulls off) and held",
+     "net": "CAP_RX"
+    },
+    "IO2": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": true,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); isolated (IE / OE / pulls off) and held",
+     "net": "FG_ALRT_N"
+    },
+    "IO3": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); ext1 ANY_LOW wake input, pulls (pad and RTC) off",
+     "net": "CHG_INT_N",
+     "wake": "ext1 any-low"
+    },
+    "IO4": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": true,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); isolated (IE / OE / pulls off) and held",
+     "net": "MAG_A"
+    },
+    "IO5": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": true,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); isolated (IE / OE / pulls off) and held",
+     "net": "MAG_B"
+    },
+    "IO6": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": true,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); isolated (IE / OE / pulls off) and held",
+     "net": "MAG_IDX"
+    },
+    "IO7": {
+     "dir": "out",
+     "out": 0,
+     "pull": "none",
+     "latched": true,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); driven low, pulls off, held",
+     "net": "MAG_CLK"
+    },
+    "IO8": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": true,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); isolated (IE / OE / pulls off) and held",
+     "net": "MAG_DO"
+    },
+    "IO9": {
+     "dir": "out",
+     "out": 0,
+     "pull": "none",
+     "latched": true,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); driven low, pulls off, held",
+     "net": "MAG_CSN"
+    },
+    "IO10": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": true,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); isolated (IE / OE / pulls off) and held",
+     "net": "MAG_INC_N"
+    },
+    "IO11": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": true,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); isolated (IE / OE / pulls off) and held",
+     "net": "MAG_DEC_N"
+    },
+    "IO12": {
+     "dir": "out",
+     "out": 0,
+     "pull": "none",
+     "latched": true,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); driven low, pulls off, held",
+     "net": "SNS_PWR_EN"
+    },
+    "IO13": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": true,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); isolated (IE / OE / pulls off) and held",
+     "net": "I2C_SDA"
+    },
+    "IO14": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": true,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); isolated (IE / OE / pulls off) and held",
+     "net": "I2C_SCL"
+    },
+    "IO15": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); ext1 ANY_LOW wake input, pulls (pad and RTC) off",
+     "net": "IMU_INT1",
+     "wake": "ext1 any-low"
+    },
+    "IO16": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": true,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); isolated (IE / OE / pulls off) and held",
+     "net": "IMU_INT2"
+    },
+    "IO17": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); ext1 ANY_LOW wake input, pulls (pad and RTC) off",
+     "net": "BTN_ZERO_N",
+     "wake": "ext1 any-low"
+    },
+    "IO18": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); ext1 ANY_LOW wake input, pulls (pad and RTC) off",
+     "net": "BTN_HOLD_N",
+     "wake": "ext1 any-low"
+    },
+    "23": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); USB PHY (TinyUSB / USB-Serial-JTAG); USB PHY pad, not touched",
+     "net": "USB_DM"
+    },
+    "24": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); USB PHY (TinyUSB / USB-Serial-JTAG); USB PHY pad, not touched; the D+ pull-up is assumed off with the digital domain (not verified)",
+     "net": "USB_DP"
+    },
+    "IO21": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); ext1 ANY_LOW wake input, pulls (pad and RTC) off",
+     "net": "BTN_MODE_N",
+     "wake": "ext1 any-low"
+    },
+    "IO33": {
+     "dir": "out",
+     "out": 0,
+     "pull": "none",
+     "latched": true,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); driven low, pulls off, held",
+     "net": "LCD_SCK"
+    },
+    "IO34": {
+     "dir": "out",
+     "out": 0,
+     "pull": "none",
+     "latched": true,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); driven low, pulls off, held",
+     "net": "LCD_MOSI"
+    },
+    "IO35": {
+     "dir": "out",
+     "out": 0,
+     "pull": "none",
+     "latched": true,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); driven low, pulls off, held",
+     "net": "LCD_CS_N"
+    },
+    "IO36": {
+     "dir": "out",
+     "out": 0,
+     "pull": "none",
+     "latched": true,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); driven low, pulls off, held",
+     "net": "LCD_DC"
+    },
+    "IO37": {
+     "dir": "out",
+     "out": 0,
+     "pull": "none",
+     "latched": true,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); driven low, pulls off, held",
+     "net": "LCD_RST_N"
+    },
+    "IO38": {
+     "dir": "out",
+     "out": 0,
+     "pull": "none",
+     "latched": true,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); driven low, pulls off, held",
+     "net": "LCD_BL"
+    },
+    "IO39": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); isolated; not held: ESP-IDF isolates it at sleep entry",
+     "net": "CAP_TX0"
+    },
+    "IO40": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); isolated; not held: ESP-IDF isolates it at sleep entry",
+     "net": "CAP_TX1"
+    },
+    "IO41": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); isolated; not held: ESP-IDF isolates it at sleep entry",
+     "net": "CAP_TX2"
+    },
+    "IO42": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); isolated; not held: ESP-IDF isolates it at sleep entry",
+     "net": "CAP_TX3"
+    },
+    "TXD0": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); isolated; not held: ESP-IDF isolates it at sleep entry",
+     "net": "CAP_TX6"
+    },
+    "RXD0": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); isolated; not held: ESP-IDF isolates it at sleep entry",
+     "net": "CAP_TX7"
+    },
+    "IO45": {
+     "dir": "out",
+     "out": 0,
+     "pull": "none",
+     "latched": true,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); driven low, pulls off, held",
+     "net": "BUZZ"
+    },
+    "IO46": {
+     "dir": "out",
+     "out": 0,
+     "pull": "none",
+     "latched": true,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); driven low, pulls off, held",
+     "net": "RGB_DIN"
+    },
+    "IO47": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); isolated; not held: ESP-IDF isolates it at sleep entry",
+     "net": "CAP_TX4"
+    },
+    "IO48": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: pin plan SLEEP (applied at deep-sleep entry); isolated; not held: ESP-IDF isolates it at sleep entry",
+     "net": "CAP_TX5"
+    },
+    "EN": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: CHIP_PU input, no internal pull (DS v2.2 Table 2-1)",
+     "net": "MCU_EN"
+    }
+   },
+   "U2": {
+    "SDA": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: BQ25180 I2C target, bus idle (released; SDA / SCL are inputs between transactions)"
+    },
+    "SCL": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: BQ25180 I2C target, bus idle (released; SDA / SCL are inputs between transactions)"
+    },
+    "~{INT}": {
+     "dir": "out",
+     "od": true,
+     "out": 1,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: BQ25180 /INT open drain, released (no event pending)"
+    }
+   },
+   "U4": {
+    "SDA": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: MAX17048 I2C target, bus idle (released; SDA / SCL are inputs between transactions)"
+    },
+    "SCL": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: MAX17048 I2C target, bus idle (released; SDA / SCL are inputs between transactions)"
+    },
+    "~{ALRT}": {
+     "dir": "out",
+     "od": true,
+     "out": 1,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: MAX17048 ALRT open drain, released (no alert)"
+    }
+   },
+   "U60": {
+    "SDA/SDI/SDO": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: LIS2DW12 I2C target, bus idle (released; SDA / SCL are inputs between transactions)"
+    },
+    "SCL/SPC": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: LIS2DW12 I2C target, bus idle (released; SDA / SCL are inputs between transactions)"
+    },
+    "INT1": {
+     "dir": "out",
+     "out": 1,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: LIS2DW12 INT1 push-pull active low, cleared before sleep: high"
+    },
+    "INT2": {
+     "dir": "out",
+     "out": 1,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: LIS2DW12 INT2 push-pull active low, nothing routed: high"
+    }
+   },
+   "U1": {
+    "I/O1": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: USBLC6 ESD clamp, no DC path"
+    },
+    "I/O2": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: USBLC6 ESD clamp"
+    }
+   }
+  },
+  "SHIP": {
+   "U10": {
+    "IO0": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "BOOT_N"
+    },
+    "IO1": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "CAP_RX"
+    },
+    "IO2": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "FG_ALRT_N"
+    },
+    "IO3": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "CHG_INT_N"
+    },
+    "IO4": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "MAG_A"
+    },
+    "IO5": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "MAG_B"
+    },
+    "IO6": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "MAG_IDX"
+    },
+    "IO7": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "MAG_CLK"
+    },
+    "IO8": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "MAG_DO"
+    },
+    "IO9": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "MAG_CSN"
+    },
+    "IO10": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "MAG_INC_N"
+    },
+    "IO11": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "MAG_DEC_N"
+    },
+    "IO12": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "SNS_PWR_EN"
+    },
+    "IO13": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "I2C_SDA"
+    },
+    "IO14": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "I2C_SCL"
+    },
+    "IO15": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "IMU_INT1"
+    },
+    "IO16": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "IMU_INT2"
+    },
+    "IO17": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "BTN_ZERO_N"
+    },
+    "IO18": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "BTN_HOLD_N"
+    },
+    "23": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "USB_DM"
+    },
+    "24": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "USB_DP"
+    },
+    "IO21": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "BTN_MODE_N"
+    },
+    "IO33": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "LCD_SCK"
+    },
+    "IO34": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "LCD_MOSI"
+    },
+    "IO35": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "LCD_CS_N"
+    },
+    "IO36": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "LCD_DC"
+    },
+    "IO37": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "LCD_RST_N"
+    },
+    "IO38": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "LCD_BL"
+    },
+    "IO39": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "CAP_TX0"
+    },
+    "IO40": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "CAP_TX1"
+    },
+    "IO41": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "CAP_TX2"
+    },
+    "IO42": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "CAP_TX3"
+    },
+    "TXD0": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "CAP_TX6"
+    },
+    "RXD0": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "CAP_TX7"
+    },
+    "IO45": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "BUZZ"
+    },
+    "IO46": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "RGB_DIN"
+    },
+    "IO47": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "CAP_TX4"
+    },
+    "IO48": {
+     "dir": "hiz",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: ESP32-S3 unpowered; ESP32-S3 unpowered (+3V3 off in ship mode)",
+     "net": "CAP_TX5"
+    }
+   }
+  }
+ }
+}

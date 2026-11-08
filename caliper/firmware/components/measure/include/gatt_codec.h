@@ -20,10 +20,14 @@ typedef struct {
     int32_t cap_nm; /* CALIPER_CAP_INVALID if invalid */
     uint8_t unit;
     uint8_t flags;
+    uint16_t active_profile_id; /* CALIPER_PROFILE_ID_NONE (0) = none */
 } gatt_live_t;
 
 void gatt_live_pack(const gatt_live_t *l, uint8_t out[CALIPER_LIVE_LEN]);
-void gatt_live_unpack(const uint8_t in[CALIPER_LIVE_LEN], gatt_live_t *l);
+/* Decodes a LIVE value of len bytes (>= CALIPER_LIVE_LEN_MIN; bytes past 12 are ignored). A 10-byte
+ * value has no profile id: active_profile_id is then CALIPER_PROFILE_ID_NONE. Returns 0, or -1 if
+ * len is too short. */
+int gatt_live_unpack(const uint8_t *in, size_t len, gatt_live_t *l);
 
 typedef struct {
     uint8_t op;

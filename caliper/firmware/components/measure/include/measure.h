@@ -24,6 +24,10 @@ extern "C" {
  * Table 8 "RESinc 10 bit") = 1953.125 nm per count = 15625/8 nm. (The 12-bit SSI is 4x finer.) */
 #define MEAS_NM_PER_COUNT_NUM 15625
 #define MEAS_NM_PER_COUNT_DEN 8
+/* The 12-bit SSI step that the firmware interpolates the count with (SPEC D1): 2.0 mm / 4096 =
+ * 488.28125 nm = 15625/32 nm, a quarter count. */
+#define MEAS_NM_PER_LSB_NUM 15625
+#define MEAS_NM_PER_LSB_DEN 32
 
 typedef enum { MEAS_UNIT_MM = 0, MEAS_UNIT_INCH = 1 } meas_unit_t;
 
@@ -34,6 +38,9 @@ int64_t meas_div_round(int64_t num, int64_t den);
 
 /* Quadrature counts to nm, rounded to the nearest nm. */
 int64_t meas_counts_to_nm(int64_t counts);
+
+/* SSI-interpolated position (quarter counts, 488.28125 nm) to nm, rounded to the nearest nm. */
+int64_t meas_lsb_to_nm(int64_t lsb);
 
 /* Saturate to int32 (the GATT and log fields are i32). */
 int32_t meas_sat_i32(int64_t v);

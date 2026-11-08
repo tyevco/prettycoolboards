@@ -4,8 +4,8 @@
 dependencies:
   idf: ">=5.4.0"
   lvgl/lvgl: "~9.2.2"
-  espressif/esp_lvgl_port: "^2.4.0"
+  espressif/esp_lvgl_port: "~2.7.2" # 2.8+ needs LVGL 9.3 (LV_COLOR_FORMAT_RGB565_SWAPPED)
   espressif/esp_tinyusb: "^1.5.0"
-  joltwatt/esp_littlefs: "^1.14.0"
+  joltwallet/littlefs: "^1.14.0"
   espressif/led_strip: "^2.5.3"
   # NimBLE, esp_http_server, esp_http_client, esp-mqtt and esp_lcd (ST7789) are part of ESP-IDF 5.4.

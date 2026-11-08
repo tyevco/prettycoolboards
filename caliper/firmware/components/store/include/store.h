@@ -1,6 +1,7 @@
 /*
  * store: persistent data.
- *   - reading log: a LittleFS file holding a ring of 16-byte records (logrec.h)
+ *   - reading log: a ring of 16-byte records (logrec.h) in LittleFS segment files of 256 records
+ *     (one 4 KiB block each) plus a 16-byte header file; see store.c for why
  *   - tolerance profiles: a LittleFS file of 30-byte records (the GATT PROFILES layout)
  *   - settings and small state (unit, active profile, auto-hold): NVS
  * All functions are thread-safe (one internal mutex).
@@ -20,9 +21,14 @@
 extern "C" {
 #endif
 
+#ifndef STORE_BASE_PATH
 #define STORE_BASE_PATH "/fs"
+#endif
 
 esp_err_t store_init(void);
+#ifdef STORE_HOST_TEST
+esp_err_t store_test_reboot(uint32_t capacity); /* host tests: reopen the log as after a reboot */
+#endif
 
 /* ---- log ---- */
 esp_err_t store_log_append(logrec_t *rec); /* assigns rec->seq */
