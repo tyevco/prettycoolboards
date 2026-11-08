@@ -1,0 +1,28 @@
+__pycache__/
+*.pyc
+# KiCad temporary / backup files
+*-backups/
+*.kicad_prl
+*.lck
+fp-info-cache
+_autosave-*
+\#auto_saved_files#
+# Freerouting intermediates
+*.dsn
+*.ses
+*.rules
+*.freerouting.log
+**/hardware/build/
+**/hardware/sim/results/
+**/hardware/mechanical/drawings/*.svg
+**/hardware/mechanical/drawings/*.dxf
+.pytest_cache/
+node_modules/
+.vitepress/dist/
+.vitepress/cache/
+# firmware
+**/firmware/build/
+**/firmware/managed_components/
+**/firmware/sdkconfig
+**/firmware/sdkconfig.old
+**/firmware/test/host/build/
