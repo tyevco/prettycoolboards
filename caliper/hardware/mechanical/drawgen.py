@@ -148,12 +148,12 @@ def sheet_slider_body(solid):
     ac, ka = (75, 85), 2.0
     S = mapper(ac, ka, (23.2, 0.0))
     views.append(place(sa, ac, ka, (23.2, 0.0)))
-    faces += ExtensionLine(border=[S(P.CH_Y0, P.Z_COVER_IN), S(P.CH_Y1, P.Z_COVER_IN)], offset=below(10),
+    faces += ExtensionLine(border=[S(P.CH_Y0, P.Z_BACK), S(P.CH_Y1, P.Z_BACK)], offset=below(10),
                            draft=DRAFT, label=dim(P.CH_Y1 - P.CH_Y0, tol=(0.02, 0.00), suffix="CHANNEL"))
-    faces += ExtensionLine(border=[S(P.H_Y0, P.Z_COVER_IN), S(P.H_Y1, P.Z_COVER_IN)], offset=below(20),
+    faces += ExtensionLine(border=[S(P.H_Y0, P.Z_BACK), S(P.H_Y1, P.Z_BACK)], offset=below(20),
                            draft=DRAFT, label=dim(P.H_Y1 - P.H_Y0))
-    faces += ExtensionLine(border=[S(P.H_Y1, P.Z_COVER_IN), S(P.H_Y1, P.Z_LID_IN)], offset=10, draft=DRAFT,
-                           label=dim(P.Z_LID_IN - P.Z_COVER_IN))
+    faces += ExtensionLine(border=[S(P.H_Y1, P.Z_BACK), S(P.H_Y1, P.Z_LID_IN)], offset=10, draft=DRAFT,
+                           label=dim(P.Z_LID_IN - P.Z_BACK))
     faces += _vlabel(f"SECTION A-A  (u = {P.BOARD_U0 + P.AS_X:g})  2:1", ac[0], ac[1] + 22)
 
     # Section B-B through the left tower's front pads
@@ -163,8 +163,8 @@ def sheet_slider_body(solid):
     views.append(place(sb, bc, ka, (10.0, 0.0)))
     faces += ExtensionLine(border=[T(P.FPADS[0][3], P.Z_LID_IN), T(P.FPADS[1][3], P.Z_LID_IN)],
                            offset=above(8), draft=DRAFT, label=dim(P.FPADS[1][3] - P.FPADS[0][3], tol=(0.02, -0.02)))
-    faces += ExtensionLine(border=[T(P.CH_Y1, P.Z_COVER_IN), T(P.CH_Y1, P.CH_Z1)], offset=30, draft=DRAFT,
-                           label=dim(P.CH_Z1 - P.Z_COVER_IN, tol=(0.02, 0.00)))
+    faces += ExtensionLine(border=[T(P.CH_Y1, P.Z_BACK), T(P.CH_Y1, P.CH_Z1)], offset=30, draft=DRAFT,
+                           label=dim(P.CH_Z1 - P.Z_BACK, tol=(0.02, 0.00)))
     faces += _vlabel(f"SECTION B-B  (u = {P.FPADS[0][0]:g}, FRONT-PAD SET SCREWS)  2:1", bc[0], bc[1] + 24)
 
     notes = ["MATERIAL 6061-T6, STRESS-RELIEVED PLATE. CLEAR ANODISE 10 um AFTER MACHINING;",
@@ -173,9 +173,14 @@ def sheet_slider_body(solid):
              "DATUM C: CHANNEL FRONT FACE (TOWER UNDERSIDE).",
              "JAW MEASURING FACE: FLAT 0.005, PERPENDICULAR TO B WITHIN 0.01 -- AFTER LAPPING",
              "  WITH THE FIXED JAW CLOSED ON IT (PARALLEL 0.01 BETWEEN THE TWO JAWS), SEE MECHANICAL 9.",
-             "GIB AND LOCK BORE POSITIONS (u 16.00 / 58.50 / 63.00) ±0.02 FROM A;",
+             "GIB AND LOCK BORE POSITIONS (u " + " / ".join(f"{u:.2f}" for u in P.YGIB_PLUNGERS_U + [P.LOCK_U])
+             + ") ±0.02 FROM A, AXIS z " + f"{P.GIB_Z:.2f}" + ";",
              "FRONT-PAD SET-SCREW HOLES ±0.02 FROM B. ALL M2 HOLES TAPPED M2x0.4 6H, 4 DEEP;",
-             "LOCK HOLE M3x0.5 6H. CHANNEL 22.20 +0.02/0 x 5.50 +0.02/0, FLOOR Ra 0.8.",
+             "LOCK HOLE M3x0.5 6H. CHANNEL (TUNNEL) 22.20 +0.02/0 x 5.50 +0.02/0, FLOOR Ra 0.8.",
+             "TAB CLAMPS: 4x POCKET " + DIA + f"{P.STANDOFF_POCKET_D:.1f} TO z {P.CLAMP_CEIL_Z:.2f}, M2 THRU, FACE THE"
+             " CLAMP FACES COPLANAR 0.02 (NO EPOXY BEDDING IN REV B).",
+             "RF (SPEC D4): NO METAL WITHIN 5 MM OF THE ANTENNA (u 3.1..29, y 24.5..39): MACHINE THAT REGION",
+             "  OPEN AND BOND IN A PRINTED / POM INSERT.",
              "OPTIONAL: POCKET 2.0 DEEP IN THE JAW FACE FOR A HARDENED, GROUND JAW INSERT",
              "  (1.2379 / D2 60 HRC OR CARBIDE, 2.0 x 6 x 34), BONDED + 2 PINS, GROUND IN PLACE."]
     faces += _lines(COMMON + [""] + notes, -200, -88)
@@ -209,7 +214,7 @@ def sheet_beam(solid):
     faces += ExtensionLine(border=[Pp(P.SCALE_X0 - 0.5, P.BEAM_W), Pp(P.SCALE_X0 + P.SCALE_L + 0.5, P.BEAM_W)],
                            offset=above(30), draft=DRAFT, label=dim(P.SCALE_L + 1))
     faces += ExtensionLine(border=[Pp(P.BEAM_X0, 0), Pp(MD.stop_x(), 0)], offset=below(22),
-                           draft=DRAFT, label=dim(MD.stop_x() - P.BEAM_X0, tol=(0.05, -0.05), suffix=f"STOP {DIA}2 H7"))
+                           draft=DRAFT, label=dim(MD.stop_x() - P.BEAM_X0, tol=(0.05, -0.05), suffix="STOP M2"))
     faces += _vlabel("VIEW ON THE FRONT FACE (DATUM D); LOWER EDGE y = 0 IS REFERENCE EDGE E  1.5:1", pc[0], pc[1] - 15 - 36)
 
     # Section C-C, 6:1, through both pockets at x = 100
@@ -240,7 +245,8 @@ def sheet_beam(solid):
              "EDGE E (y = 0): STRAIGHT 0.01 OVER ANY 150, 0.015 OVER THE LENGTH. FACE D FLAT 0.01 / 150.",
              "POCKET FLOORS PARALLEL TO D WITHIN 0.01; Ra 0.8.",
              f"JAW-JOINT HOLES: 2x {DIA}3.4 THRU AT x -12 (y 5, 15); 2x {DIA}3 H7 THRU AT x -5 (y 4, 16), ±0.02.",
-             f"STOP PIN {DIA}2 H7 THRU AT y {P.STOP_Y:g}; PRESS A {DIA}2 m6 DOWEL, {P.STOP_PROUD:g} PROUD OF D.",
+             f"STOP: M2x0.4 6H THRU AT y {P.STOP_Y:g} (TAP BEFORE HARDENING); M2x6 ISO 4762 + LOCTITE 222,",
+             f"  HEAD {P.STOP_PROUD:g} PROUD OF D.  REMOVE IT TO TAKE THE SLIDER OFF THE BEAM.",
              "DEBURR POCKET EDGES WITHOUT ROUNDING FACE D (STONE FLAT)."]
     faces += _lines(COMMON + [""] + notes, -200, -50)
     return faces, views

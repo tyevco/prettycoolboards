@@ -66,6 +66,29 @@ def export_netlist(sch_path, out_path):
     return out_path
 
 
+def set_field_hidden(fp, name, text):
+    """Copy a symbol field into the footprint's field of that name, hidden, as KiCad's "Update PCB from Schematic"
+    does (KiCad 10's schematic parity reports a difference as footprint_symbol_field_mismatch). Returns True if it
+    changed."""
+    if not text:
+        return False
+    fld = fp.GetFieldByName(name) if fp.HasFieldByName(name) else None
+    if fld is not None and fld.GetText() == text:
+        return False
+    if fld is not None:
+        fld.SetText(text)
+    else:
+        fp.SetField(name, text)
+        fld = fp.GetFieldByName(name)
+    if fld:
+        fld.SetVisible(False)
+    return True
+
+
+def set_description(fp, text):
+    return set_field_hidden(fp, "Description", text)
+
+
 class BoardBuilder:
     def __init__(self, copper_layers=4, extra_fp_libs: dict | None = None, board=None):
         if board is None:
@@ -288,6 +311,8 @@ class BoardBuilder:
                     fld = fp.GetFieldByName(k)
                     if fld:
                         fld.SetVisible(False)
+            for k in ("Description", "Datasheet"):
+                set_field_hidden(fp, k, c["fields"].get(k))
             if c["props"].get("dnp") is not None or c["fields"].get("DNP"):
                 fp.SetDNP(True)
             if "exclude_from_bom" in c["props"]:
@@ -412,7 +437,12 @@ def trim_dangling(b, tol=2000):
                          ((o.GetStart() - p).EuclideanNorm() < tol or (o.GetEnd() - p).EuclideanNorm() < tol)
                          for o in segs)
             joined = joined or any(v.GetNetCode() == net and (v.GetStart() - p).EuclideanNorm() < tol for v in vias)
-            joined = joined or any(pad.GetNetCode() == net and pad.IsOnLayer(layer) and pad.HitTest(p)
+            # an end that lands on the body of another same-net segment is a T-junction, connected (the caliper's
+            # inner electrode guard ends on the guard ring's sides and was being cut back to the nearest via)
+            joined = joined or any(o is not t and o.GetNetCode() == net and o.GetLayer() == layer and
+                                   pcbnew.SEG(o.GetStart(), o.GetEnd()).Distance(p) <= o.GetWidth() // 2
+                                   for o in segs)
+            joined = joined or any(pad.GetNetCode() == net and pad.IsOnLayer(layer) and pad.HitTest(p, t.GetWidth() // 2)
                                    for fp in b.GetFootprints() for pad in fp.Pads())
             if joined:
                 continue
@@ -451,7 +481,9 @@ def _end_connected(b, t, p, segs, vias, tol=2000):
         return True
     if any(v.GetNetCode() == net and (v.GetStart() - p).EuclideanNorm() < tol for v in vias):
         return True
-    if any(pad.GetNetCode() == net and pad.IsOnLayer(layer) and pad.HitTest(p)
+    # the end cap counts: KiCad joins a track to a pad when the track's round end overlaps it, and a grid router
+    # leaves ends up to half a width outside the pad edge
+    if any(pad.GetNetCode() == net and pad.IsOnLayer(layer) and pad.HitTest(p, t.GetWidth() // 2)
            for fp in b.GetFootprints() for pad in fp.Pads()):
         return True
     return _zone_has(b, net, layer, p)

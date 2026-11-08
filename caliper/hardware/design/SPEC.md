@@ -45,38 +45,43 @@ copper under solder mask, nothing proud of it. Bottom in y 22…34: flat test pa
 
 **Placement table (D4).** Centre coordinates in board mm; rotation in degrees as seen from the top, 0 = the
 footprint's own orientation; the layout script may move a part ≤ 1 mm without a SPEC change if every rule here
-still holds (the mechanics re-run `clash_check.py` on the extracted envelope).
+still holds (the mechanics re-run `clash_check.py` on the extracted envelope). **The positions below are the routed
+rev A board (2026-11-08, §11)**; where layout moved a part more than 1 mm from the first-draft table, the old value
+is given in the notes.
 
 | Ref | Part | Side | x | y | Rot / orientation | Envelope, notes |
 |---|---|---|---|---|---|---|
-| U10 | ESP32-S3-MINI-1-N4R2 | top | 8.3 | 24.25 | 0: antenna end toward +y | footprint origin; outline x 0.6…16.0, y 14.0…34.0 (antenna area y 29.5…34.0 flush with the top edge, the top-left corner); h 2.55. Not under the glass |
-| — | Antenna keep-out | all 4 layers | | | | **x 0…21.0, y 29.0…34.0: no copper (pads, tracks, vias, zones), no parts, either side.** The footprint has none: layout draws it as a rule area. See "Antenna" below |
-| J50 | 13p 0.5 mm FPC, 2.0 tall | top | 21.5 | 8.5 | contact row along y, opening toward −x | under the glass's −x end: the panel tail leaves the glass at x 17.5 and folds back under it into J50 (TVP: tail length of the bought panel) |
+| U10 | ESP32-S3-MINI-1-N4R2 | top | 7.85 | 24.25 | 0: antenna end toward +y | footprint origin (draft 8.3); outline x 0.15…15.55, y 14.0…34.0 (antenna area y 29.5…34.0 flush with the top edge, the top-left corner); h 2.55. Not under the glass |
+| — | Antenna keep-out | all 4 layers | | | | **x 0…21.0, y 29.0…34.0: no copper (pads, tracks, vias, zones), no parts, either side.** The footprint has none: layout draws it as a rule area. As routed, the rule area starts at y 29.2: a pour edge in y 29.0…29.2 and the module's own pads are the only copper in x 0…21, y 29.0…34 (§11). See "Antenna" below |
+| J50 | 13p 0.5 mm FPC, 2.0 tall | top | 21.5 | 7.5 | contact row along y, opening toward −x | under the glass's −x end: the panel tail leaves the glass at x 17.5 and folds back under it into J50 (TVP: tail length of the bought panel) |
 | — | Display glass (on the lid, not the board) | — | 33.0 | 10.0 | landscape, FPC at the −x end | glass 31.0 × 17.6 × 1.6: x 17.5…48.5, y 1.2…18.8; active area 24.91 × 14.86, centre (34.45, 10.0) (shifted 1.45 away from the FPC end, TVP); lid end ribs x 16.15…17.5 and 48.5…49.85 |
 | J1 | USB-C HRO TYPE-C-31-M-12, top-mount | top | 59.3 | 26.5 | opening toward +x | shell x 55.65…63.0 (1.0 mm past the edge), y 22.03…30.97, h 3.26 (mechanics DEV-4: y 26.5) |
-| U1, D1 | USBLC6-2SC6, SMF5.0A | top | 53.0 | 24.0 | | within 5 mm of J1's pads, x 50.5…55.0, y 21.0…27.0 |
+| U1, D1 | USBLC6-2SC6, SMF5.0A | top | 50.2 / 51.3 | 26.3 / 22.0 | | within 5 mm of J1's pads (draft: both at (53.0, 24.0) in x 50.5…55.0, y 21.0…27.0). U1 sits on the USB pair, which runs on B.Cu along y 19.2…19.6 over an In2 GND strip |
 | SW50 | ZERO, TS-1088 3.9 × 2.9 × 2.0 | top | 31.0 | 31.0 | 0 | cap stem Ø3.5 at slider u 39 |
 | SW51 | HOLD/SEND | top | 38.5 | 31.0 | 0 | u 46.5. The mechanics' x 18.5 (DEV-5) only kept the cap off the old portrait glass; with the landscape glass that x is inside the antenna clearance, so it moves here (the cap still clears the glass rib, y ≥ 28 vs ≤ 20.15) |
 | SW52 | MODE | top | 46.0 | 31.0 | 0 | u 54; courtyard x ≤ 49, clear of J1 (x ≥ 53.7) and the antenna |
 | D50 | WS2812B-2020 RGB LED | top | 51.5 | 32.0 | 0 | light pipe in the lid at u 59.5 |
-| J2 | JST-SH SM02B-SRSS-TB, 2.95 tall | top | 24.5 | 31.4 | mating face toward +y (the top edge) | courtyard x 21.6…27.4: 0.6 clear of the antenna keep-out. The cell's leads come up past the top edge from the cell's −x end (the mechanics add a lead channel and a plug relief beyond y 34) |
+| J2 | JST-SH SM02B-SRSS-TB, 2.95 tall | top | 24.5 | 30.6 | mating face toward +y (the top edge) | courtyard x 21.6…27.4: 0.6 clear of the antenna keep-out. The cell's leads come up past the top edge from the cell's −x end (the mechanics add a lead channel and a plug relief beyond y 34) |
 | RT1 | 10 k NTC (TS) | top | 24.5 | 26.5 | | next to J2, over the cell |
 | BZ50 | PKMCS0909E piezo, 1.9 tall | top | 40.0 | 24.3 | 0 | courtyard x 34.75…45.25, y 19.55…29.05; sound port in the lid at u 48 |
 | U60 | LIS2DW12 | top | 30.0 | 23.5 | | ≥ 15 mm from L1 |
-| U2, U3, L1, U4, U5, U6, C1–C12, R3–R9 | charger / buck-boost / gauge / rail-switch cluster | top | 56.0 | 11.0 | | inside x 50.5…61.5, y 2.5…20.5 (not under the glass; ≤ 4.2). L1 and the U3 switch nodes ≥ 10 mm from U40 and the RX feed |
+| U2, U3, L1, U5, U6, C1–C6, C8–C12, R3–R5 | charger / buck-boost / rail-switch cluster | top | 56.0 | 11.0 | | inside x 50.5…61.5, y 2.5…20.5 (not under the glass; ≤ 4.2), except C8 (51.3, 1.55) and C10 (49.75, 5.5), held ≤ 2 mm from U5 and up to 0.95 outside the box. L1 and the U3 switch nodes ≥ 10 mm from U40 and the RX feed |
+| U4, C7 | MAX17048 fuel gauge + its VBAT cap | top | 29.6 / 27.0 | 27.2 / 25.9 | | beside J2 (draft: in the cluster above) |
+| R6–R9 | I2C pull-ups (R6, R7) and the CHG_INT_N / FG_ALRT_N pull-ups (R8, R9) | top | 5.1…9.0 | 3.7…5.8 | | below the module, left of the glass (draft: in the cluster) |
+| C20, C21 | module 22 µF / 100 nF | top | 2.75 / 3.28 | 5.5 / 3.7 | | about 20 mm from the module's 3V3 pad, fed through the In2 +3V3 pour: an open item (§11) |
 | U30 | AS5311 TSSOP-20 | **bottom** | 31.0 | 6.0 | long axis along X | body x 27.75…34.25, leads y 2.8…9.2, A ≤ 1.20 |
-| C (AS5311 100 nF, 1 µF) | 0402 | **bottom** | 25.5 / 36.5 | 6.0 | | inside the channel window above; the MagINC/MagDEC pull-ups and TP30–32 go on top |
+| C30, C31 (AS5311 100 nF, 1 µF) | 0402 | **bottom** | 35.45 / 36.5 | 8.6 / 6.0 | (C30 draft: 25.5, 6.0, 8.1 mm from the VDD pins) | inside the channel window above; the MagINC/MagDEC pull-ups and TP30–32 go on top |
 | E40 + comb | electrodes | **bottom copper** | 31.0 | 14.2 | | §2.2 table: x 10.68…51.32, y 10.35…18.05 incl. guard |
 | U40, R80, AFE passives | TLV9062 charge amplifier | top | 42.0 | 5.0 | | under the glass (1.1 tall); RX feed via into the RX strip at x ≈ 42 |
-| R60–R67, R70–R77 | TX jumpers + series R | top | 9.5 | 7.0 | | inside x 3.5…16, y 2.5…12 (left of the glass, below U10); TX phases feed the comb at its −x end |
-| SW20 | BOOT, TS-1088 | top | 27.0 | 15.5 | | under the glass, no cap: used with the lid (and glass) off |
-| R50, Q50, R51 | backlight | top | 25.5 | 4.0 | | under the glass, beside J50 |
-| Q51, R56, R57 | piezo driver | top | 40.0 | 18.0 | | |
-| TP1–7, TP20–23, TP30–32, TP40–42, TP50–51 | 19 × Ø1.0 test pads | **bottom** | 22.5…47.9 | 22.6 / 25.14 | 2.54 grid, two rows | bench bring-up with the board out of the housing; nothing in the antenna keep-out or on the H1 pad |
+| R60–R67, R70–R77 | TX jumpers + series R | top | 2.3…9.65 | 8.0 / 10.4 | 90 | two rows at 1.05 pitch, x 1.8…10.2, y 7…11.2 (draft: x 3.5…16, y 2.5…12), left of the glass, below U10; TX phases feed the comb at its −x end |
+| SW20 | BOOT, TS-1088 | top | 27.0 | 15.7 | 90 | under the glass, no cap: used with the lid (and glass) off |
+| R50, Q50, R51 | backlight | top | 27.0 / 28.1 / 28.7 | 7.4 / 3.6 / 7.0 | | under the glass, beside J50 (draft: 25.5, 4.0) |
+| Q51, R56, R57 | piezo driver | top | 47.35 / 46.2 / 33.7 | 20.4 / 23.7 / 19.5 | | Q51 and R56 right of BZ50, R57 at its left (draft: 40.0, 18.0) |
+| TP1–7, TP20–23, TP30–32, TP40–42, TP50–51 | 19 × Ø1.0 test pads | **bottom** | 22.5…47.9 | 22.6 / 25.14 | 2.54 grid, two rows | bench bring-up with the board out of the housing; nothing in the antenna keep-out or on the H1 pad. TP22 / TP23 (USB) at x 42.82 / 47.9 in the y 22.6 row |
 | H1 | M2 plated hole, Ø4.4 pad | both | 18.75 | 24.0 | | **nylon** M2 × 4 screw (5 mm from the antenna corner) into a body boss (u 26.75). Support only, see "Board support" |
 | H2, H3 | tab clamp holes | tab | −3.5 | 5.5 / 14.0 | | Ø2.2 plated (GND), top pad Ø4.4 for an SMT M2 standoff; bottom: no exposed copper (0.15 above the beam) |
-| H4, H5 | tab clamp holes | tab | 65.5 | 5.5 / 14.0 | | as H2/H3 |
-| FID1–3 | fiducials, Ø1 / mask Ø2 | top | (2.0, 1.5), (60.5, 1.2), (60.5, 32.8) | | | outside the antenna keep-out and every courtyard |
+| H4, H5 | tab clamp holes | tab | 65.5 | 5.5 / 14.0 | | as H2/H3. **H5 is on the board only**: the schematic has H1–H4 (§11) |
+| FID1–3 | fiducials, Ø1 / mask Ø2 | top | (2.0, 1.5), (60.5, 1.2), (33.0, 27.6) | | | outside the antenna keep-out and every courtyard (FID3 draft (60.5, 32.8) was inside J1's courtyard) |
 
 **Antenna (D4).** The ESP32-S3-MINI-1's PCB antenna is the module's top 4.5 mm (the footprint's Fab "Keepout
 Area"). Espressif's guideline (ESP32-S3-MINI-1 datasheet land pattern and the ESP32-S3 hardware design
@@ -92,13 +97,13 @@ H1 screw (nylon), the SMT standoffs. The beam's upper edge is 9.5 mm below the a
 **Board support (D3).** The **Z datum is the four tab clamps H2–H5**: each carries an SMT M2 threaded standoff
 (2.0 mm tall, OD ≤ 4.0 mm, reflow-soldered on the top pad; PEM SMTSO-M2-2ET class, the LCSC/JLC part to be chosen
 by the schematics track), and an M2 screw from the tower's top face pulls the standoff's top face up against a
-clamp face in the tower (the left tower spans u 0.5…7.6, the right u 70.4…78; the tabs sit at u 2…8 and
+clamp face in the tower (the left tower spans u 0.5…7.6, the right u 70.4…77.4 (the roller rim reaches u 78.0); the tabs sit at u 2…8 and
 70…76, y 2.5…16.5, which keeps them 0.65 mm clear of the front-pad pockets and the pad set-screw inserts).
 These four points sit at the ends of the sensor band, 3.5 mm and 12 mm from the AS5311 and electrode rows.
 The four clamp faces must be coplanar within 0.03 mm (the mechanics choose how: faced brass washers, insert
 faces, or the rev B machined tower). **H1** in the upper band is a support against button and cable loads, not a
 datum: it is tightened last and must not pull the board out of the tab plane by more than 0.01 mm (dial
-indicator, docs/mechanical.md §6 step 4; the boss is printed low and shimmed). The mechanics' upper-band holes
+indicator, docs/mechanical.md §7 step 6; the boss is printed low and shimmed). The mechanics' upper-band holes
 (3, 24.5) and (3, 31) are now under the MINI-1, and (59, 32.6) has its Ø4.4 pad crossing the top edge and its
 screw head over the USB-C, so all three are replaced by H1 and the tabs. No other upper-band hole fits: the
 battery pocket has no body under the board, and the USB-C fills the right end above y 22.
@@ -191,7 +196,10 @@ USB-C VBUS ─ ESD/TVS ─ BQ25180 (VIN) ─┬─ SYS → VSYS ─┬─ TPS638
   the pole pair; the SSI word, read in the sensor loop, gives the position inside it. Position =
   pole pair × 2 mm + SSI × 2 mm / 4096, with the pole pair taken from the count (the firmware learns the fixed
   offset between the count's position in the pole pair and the SSI's top 10 bits at power-up, and flags
-  SENSOR_ERR and falls back to the count alone if they drift apart by more than ±2 edges). Internal resolution is therefore **0.488 µm** (488.28125 nm); the display shows 0.01 mm. The
+  SENSOR_ERR and falls back to the count alone for that reading if they disagree by more than **12 SSI LSB = 3
+  edges**: the 2-edge hysteresis plus up to 1 edge of lock phase, `AS5311_FINE_TOL_LSB`, TVP; a literal 2-edge limit
+  would flag correct readings at direction reversals. A slip is corrected only after the same correction on 3
+  still frames in a row; the SSI is read on every 100 Hz sample). Internal resolution is therefore **0.488 µm** (488.28125 nm); the display shows 0.01 mm. The
   firmware track implements it (`meas_counts_to_nm` + SSI fine part). This is resolution, not accuracy: the tape
   pitch error and the mechanics set the accuracy (§1).
 - MagINCn / MagDECn are open-drain: pulled up to +3V3_SNS, then read on MAG_INC_N / MAG_DEC_N.
@@ -212,7 +220,8 @@ USB-C VBUS ─ ESD/TVS ─ BQ25180 (VIN) ─┬─ SYS → VSYS ─┬─ TPS638
   CAP_VREF = +3V3_SNS/2 (100 k/100 k + 1 µF, buffered by U40B) → 2nd-order RC low-pass 390 Ω/1 nF + 3.9 kΩ/100 pF
   (both poles ≈ 408 kHz) → **CAP_RX** (ESP32 ADC1_CH0, GPIO1).
 - **Drive (D5):** the firmware drives the 8 phases (a dedicated-GPIO bundle) as a rotating square pattern (phase n
-  high while (n − step) mod 8 < 4) at **5 kHz rotation**: one step every 25 µs, 2 ADC samples per step at 80 kS/s.
+  high while (n − step) mod 8 < 4) at **≈ 5 kHz rotation**: the S3 ADC samples at APB/32/integer, so 80 kS/s asked
+  for is really 80 645 S/s; the firmware steps every 2 sample periods (24.8 µs, 5.04 kHz) at the rate it reads back.
   The ESP32-S3 ADC1 in continuous mode tops out near 83 kS/s, so the earlier 25–100 kHz cannot be sampled. The
   charge amplifier (10 pF ‖ 10 MΩ, corner 1.6 kHz) and the ≈ 408 kHz RC filter pass 5 kHz (TVP: the amplifier's
   gain at 5 kHz on the prototype).
@@ -273,11 +282,12 @@ The authoritative copy is `nets.py: MCU_PINS`. The constraints behind it:
 - **Board support (D3):** the housing clamps the slider board at the two end tabs (§2.1): each tower carries two
   clamp faces (coplanar within 0.03 mm) and two M2 screws from its top face into the SMT standoffs on H2–H5. Tab
   pockets in the towers: x u 2…8 and 70…76, y 2.5…16.5, open to the bottom, clear of the front-pad pockets.
-- **Battery pocket (D4):** u 29.5…65.5 (board x 21.5…57.5), y 22.4…48: ≥ 5.5 mm from the antenna. The right Y-gib
-  plunger (u 58.5) and the locking screw (u 63) move out of that span (mechanics' choice).
-- **RF (D4):** within 5 mm of the antenna area (board x 0.6…16, y 29.5…34; slider u 8.6…24) nothing metal and
+- **Battery pocket (D4):** u 29.5…65.5 (board x 21.5…57.5), y 22.4…48: ≥ 5.5 mm from the antenna. Both Y-gib
+  plungers (u 14, 24) and the lock (u 19) sit left of that span and push through Ø2 GFRP rods under the antenna
+  (metal at y ≥ 41); a battery door replaces the back cover (§11).
+- **RF (D4):** within 5 mm of the antenna area (board x 0.15…15.55, y 29.5…34 with the module as placed; slider u 8.15…23.55) nothing metal and
   nothing carbon-filled: in rev A that means the PA-CF body is opened under and beside the antenna (or the body
-  is printed in unfilled PA/PETG), and the PA-CF moving inside jaw (2.2 mm from the antenna's −x end) is noted as an
+  is printed in unfilled PA/PETG), and the PA-CF moving inside jaw (4.70 mm in plan from the antenna area, clash check RISK) is noted as an
   RF risk to check. In rev B the 6061 body needs a non-metal window there and the front shell must be printed.
 - The slider housing straddles the beam: printed PETG/PA-CF in rev A, CNC 6061 in rev B. Brass gibs with
   M2 set screws + springs set the 0.3 mm (magnetic) and 0.15 mm (capacitive) gaps. The fixed jaw is
@@ -345,7 +355,8 @@ The authoritative copy is `nets.py: MCU_PINS`. The constraints behind it:
   SELECT_PROFILE 0 clears the selection. **Tolerances are magnitudes**: band = nominal − |tol_minus| …
   nominal + |tol_plus|, inclusive; writers send them positive, readers ignore a sign.
 - **SETTINGS:** UTF-8 JSON object ≤ 240 bytes. A **write needs an encrypted link** (it can carry `wifi_pass`): an
-  unpaired write is refused by the stack (NimBLE: 0x05 Insufficient Authentication; 0x0F from some stacks) and the
+  unpaired write is refused by the stack (ESP-IDF v5.4.2 NimBLE source: 0x05 Insufficient Authentication with no
+  bond, 0x0F Insufficient Encryption when bonded but not yet re-encrypted; not yet seen on air) and the
   client pairs and retries. A write is a **partial update**: an absent key keeps its stored value (an absent
   `wifi_pass` keeps the stored password; `""` clears it); unknown keys are ignored; one bad value rejects the whole
   write. **Limits:** `name` ≤ 20 B; `wifi_ssid` ≤ 32 B; `wifi_pass` 8…64 B or `""` (write-only, never in a read);
@@ -383,3 +394,30 @@ detailed in the section named; this list gives the decision and its reason.
 | D7 | The app lives in `public/caliper/app/` | the empty `caliper/app/` was removed | §8 |
 | D8 | RT1 (10 k NTC on TS) **populated**, firmware **TS enabled**; IMU_INT1 is push-pull, active-low, latched with **no pull** on the net | Checked in the netlist and the firmware defaults; a pull on a push-pull line would only waste current, and ext1 ANY_LOW needs every wake line active low | §3, §5 |
 | D9 | Sleep target **≤ 35 µA** everywhere | the buck-boost's Iq and divider alone exceed the first-draft figure | §3, docs |
+
+## 11. As-built reconciliation (2026-11-08, after layout, mechanics and firmware phase 3)
+Designed, not built: nothing below has been fabricated or measured. This records what the routed boards, the
+mechanics and the firmware now do where they differ from the first-draft sections above (which are updated in place).
+
+* **Placement (§2.1).** The table now gives the routed positions. Moves over 1 mm: U1/D1 (USB pair re-route), U4 + C7
+  beside J2, R6–R9 below the module, the TX ladder R60–R77 to x 1.8…10.2, C30 next to the AS5311's VDD pins (still in
+  the D2 window), C8/C10 held ≤ 2 mm from U5, R50/Q50/R51, Q51/R56/R57, FID3 out of J1's courtyard, TP22/TP23 to the
+  y 22.6 row. Moves ≤ 1 mm: U10 origin x 7.85, J50 y 7.5, J2 y 30.6, SW20 rotated 90 at y 15.7.
+* **Antenna.** With U10 at x 7.85 the antenna area is x 0.15…15.55; the mechanics' `params.ANTENNA` follows it. The
+  PA-CF moving inside jaw is then 4.70 mm in plan from it (clash check RISK; it was 5.02 against the draft position).
+  The keep-out rule area on the board starts at y 29.2, not 29.0.
+* **Open layout items:** the module's 22 µF / 100 nF (C20, C21) are about 20 mm from its 3V3 pad (a bottom-side 0402
+  under the pad needs a decision against the 0.75 mm housing-floor gap); USB D+/D- are a B.Cu pair, 62.3 / 64.4 mm,
+  with about 17 mm not directly over a plane (full-speed only); **H5 is on the board only** (the schematic has
+  H1–H4); the SMT M2 standoff has no LCSC part yet; J50's JLC part (C2911931) does not match the FH12 land, so the
+  slider fab package is **review-only**.
+* **Mechanics (§7):** closed back web over the beam with the back plungers (u 14 and 64, y 5, 2.5 N each); Y plungers
+  u 14 / 24 (4 N each) and the lock u 19 left of the battery pocket; housing end face u 77.4, roller rim u 78.0; the
+  end stop is an M2×6 socket screw in a tapped hole; tab clamps use 0.3 mm shim washers bedded in epoxy on 0.150 mm
+  foil; a shimmed ledge under the board's top edge at board x 29…57.5, y 32.6…34 (keep it free of bottom parts, test
+  pads and exposed copper); inside jaws in z: moving −8.6…−6.2, fixed −6.0…+2.5. Detail in docs/mechanical.md.
+* **Firmware (§4, §8):** D1 tolerance 12 LSB / 3 edges (§4.1); cap drive 5.04 kHz at 80 645 S/s (§4.2); the cap
+  reading is aligned to the magnetic reading at its first valid burst after boot and whole 2.54 mm slips are
+  corrected against it (no cap zero is kept across sleep); LIVE flag bit 6 REZERO; CSV flags `H P F E Z`; on-flash
+  log layout v2 (`log.hdr` + 4 KB `logNNN.bin` segments, docs/firmware.md). These are design choices the owner may
+  revisit after bring-up.

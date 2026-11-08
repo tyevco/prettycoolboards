@@ -11,7 +11,7 @@ Geometry comes from params.py (outside_jaw_pts in models.py, re-typed here so th
 script does not need build123d).  FEA frame: X' = assembly z (jaw thickness),
 Y' = assembly u (measuring direction), Z' = assembly y (along the jaw).
 Boundary: the lower rail's channel face (y = -1.0, where the rail meets the rest of
-the body) is fixed; the jaw root and 20 mm of rail are modelled.  The rail's own
+the body and its back web) is fixed; the jaw root and 20 mm of rail are modelled.  The rail's own
 attachment to the towers is taken as rigid -- see calcs.py for the analytic check.
 Load: 5 N in +u (the workpiece pushing the jaw open), spread over the measuring
 face from 2 to 8 mm above the tip (the worst usual contact).
@@ -33,20 +33,21 @@ size = float(sys.argv[1]) if len(sys.argv) > 1 else 1.0
 fine = float(sys.argv[2]) if len(sys.argv) > 2 else 0.4
 
 rx, ry = P.JAW_RELIEF
-y_root = P.H_Y0 + 0.1
+y_root = P.H_Y0 + 0.1          # 0.1 overlap into the rail so the two solids fuse
 jaw = [(P.H_U0, y_root), (P.H_U0, P.H_Y0 - ry), (0, P.H_Y0 - ry), (0, -P.JAW_L),
        (P.JAW_TIP_W, -P.JAW_L), (P.JAW_ROOT_W, -8.0), (P.JAW_ROOT_W, y_root)]
 z0, z1 = P.JAW_Z0, P.JAW_Z1
 M = Model()
 # profile_yz(pts, x0, x1): pts in (Y', Z') = (u, y), extruded along X' = z
 j = M.profile_yz(jaw, z0, z1)
-rail = M.box(P.Z_COVER_IN, P.H_U0, P.H_Y0, P.Z_LID_IN - P.Z_COVER_IN, 20.0 - P.H_U0, -1.0 - P.H_Y0)
+rail = M.box(P.Z_BACK, P.H_U0, P.H_Y0, P.Z_LID_IN - P.Z_BACK, 20.0 - P.H_U0, -1.0 - P.H_Y0)
 s = M.fuse([j, rail])
 p, t = M.mesh(size=size, fine=[((z0 - 1, -1, -12, z1 + 1, P.JAW_ROOT_W + 1, 0), fine),
                                ((z0 - 1, -1, -P.JAW_L - 1, z1 + 1, 4, -P.JAW_L + 10), fine)])
 print(f"mesh: {len(t)} tets, {len(p)} nodes (size {size}/{fine})")
 
 LOAD = P.JAW_FORCE
+NPY = os.path.join(os.environ.get("TEMP", "/tmp"), "fea_jaw_petg.npy")
 res = {}
 for mat, E, nu in (("PETG", 1700.0, 0.38), ("PA-CF (PAHT-CF)", 4200.0, 0.36), ("6061-T6", 68900.0, 0.33)):
     Pt = Part(None, mesh=(p, t))
@@ -62,7 +63,9 @@ for mat, E, nu in (("PETG", 1700.0, 0.38), ("PA-CF (PAHT-CF)", 4200.0, 0.36), ("
     rep = Pt.report(layer_normal=(1, 0, 0), s_inter=20.0, s_in=45.0)
     res[mat] = (d_load, d_tip, rep, nfix, nl, area)
     if mat == "PETG":
-        np.save(os.path.join(os.environ.get("TEMP", "/tmp"), "fea_jaw_petg.npy"), dict(p=Pt.p, t=Pt.t, sig=Pt.sig, u=Pt.u), allow_pickle=True)
+        # figs.exploded_map wants the contactfea layout: element body index, names, layer normals
+        np.save(NPY, dict(p=Pt.p, t=Pt.t, eb=np.zeros(len(Pt.t), int), sig=Pt.sig, u=Pt.u,
+                          names=["moving jaw"], layers=[(1.0, 0.0, 0.0)]), allow_pickle=True)
 
 lines = [__doc__.strip().splitlines()[0], "",
          f"mesh {len(t)} tets / {len(p)} nodes, global {size} mm, fine {fine} mm at the root and the tip",
@@ -79,9 +82,8 @@ lines += ["", "Strength numbers are the skill's PETG book values (45 in-layer, 2
 txt = "\n".join(lines) + "\n"
 open(os.path.join(HERE, "fea_jaw_output.txt"), "w").write(txt)
 print(txt)
-try:
-    import figs
-    os.makedirs(os.path.join(HERE, "renders"), exist_ok=True)
-    figs.exploded_map(os.path.join(os.environ.get("TEMP", "/tmp"), "fea_jaw_petg.npy"), os.path.join(HERE, "renders", "fea_jaw.png"))
-except Exception as e:          # noqa: BLE001
-    print("figure skipped:", e)
+import figs                    # noqa: E402  (no try/except: a broken figure must fail the run)
+os.makedirs(os.path.join(HERE, "renders"), exist_ok=True)
+png = figs.exploded_map(NPY, os.path.join(HERE, "renders", "fea_jaw.png"),
+                        title=f"Moving outside jaw, PETG, {LOAD:g} N at the tip: utilisation", az=-60, el=25)
+print("figure:", os.path.relpath(png, HERE))

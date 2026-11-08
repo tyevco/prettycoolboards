@@ -1,0 +1,58 @@
+FEA of the slider body under its gib preloads, and of the slider board under a button press.
+
+A. body mesh: 87969 tets, 22881 nodes (global 1.6, fine 0.7 at the towers and back plungers)
+   supports: pad ceilings 212 facets (z), reference-strip seat 1394 facets (x, y)
+   back plunger u 14: 2.5 N -z on 162 facets (30.1 mm2)
+   back plunger u 64: 2.5 N -z on 166 facets (30.1 mm2)
+   Y plunger u 14: 4.0 N +y on 44 facets (29.5 mm2)
+   Y plunger u 24: 4.0 N +y on 42 facets (29.5 mm2)
+   reaction [-0.0, 8.0, -5.0] N (applied 5 N z, 8 N y); von Mises 0.23 MPa, interlayer 0.12/0.08 MPa, SF in-layer 197.8, interlayer 144.6
+RESULT body_reaction_N = 9.434
+   back plunger u 14: seat moves -0.96 um in z
+   back plunger u 64: seat moves -1.74 um in z
+RESULT web_plunger_um = 1.742
+   clamp ceiling (-3.5, 5.5): 50 nodes, dz -0.09 um
+   clamp ceiling (-3.5, 14): 50 nodes, dz -0.06 um
+   clamp ceiling (65.5, 5.5): 50 nodes, dz -0.01 um
+   clamp ceiling (65.5, 14): 50 nodes, dz -0.01 um
+RESULT clamp_dz_um = 0.08537
+   calibration: cantilever 40 x 6 x 1, 10237 tets: FEA 1217.9 um, theory 2134.3 um -> correction x1.75
+RESULT tet_correction = 1.752
+B. board mesh: 95929 tets, 27174 nodes (size 0.5, outline from board_parts.json)
+   -- without the button-band ledge
+   ZERO  (31, 31) 3 N on 105 facets (11.4 mm2), fixed 483 + H1 147: button   46.5 um, electrode band max |w|  19.4 um, AS5311 max |w|   6.2 um (reaction [0.0, -0.0, -3.0] N)
+RESULT press_noledge_ZERO_button_um = 46.48
+RESULT press_noledge_ZERO_band_um = 19.41
+RESULT press_noledge_ZERO_as_um = 6.235
+   HOLD  (38.5, 31) 3 N on 108 facets (11.7 mm2), fixed 483 + H1 147: button   92.3 um, electrode band max |w|  35.1 um, AS5311 max |w|   8.2 um (reaction [0.0, -0.0, -3.0] N)
+RESULT press_noledge_HOLD_button_um = 92.27
+RESULT press_noledge_HOLD_band_um = 35.12
+RESULT press_noledge_HOLD_as_um = 8.168
+   MODE  (46, 31) 3 N on 101 facets (11.0 mm2), fixed 483 + H1 147: button  129.1 um, electrode band max |w|  41.5 um, AS5311 max |w|  11.8 um (reaction [-0.0, 0.0, -3.0] N)
+RESULT press_noledge_MODE_button_um = 129.1
+RESULT press_noledge_MODE_band_um = 41.54
+RESULT press_noledge_MODE_as_um = 11.79
+RESULT press_N = 3
+RESULT press_noledge_button_um = 129.1
+RESULT press_noledge_band_um = 41.54
+RESULT press_noledge_as_um = 11.79
+   -- with the button-band ledge (board x 29..57.5, y 32.6..34)
+   ZERO  (31, 31) 3 N on 105 facets (11.4 mm2), fixed 483 + H1 534: button    0.5 um, electrode band max |w|   0.7 um, AS5311 max |w|   0.5 um (reaction [0.0, 0.0, -3.0] N)
+RESULT press_ZERO_button_um = 0.472
+RESULT press_ZERO_band_um = 0.7226
+RESULT press_ZERO_as_um = 0.5171
+   HOLD  (38.5, 31) 3 N on 108 facets (11.7 mm2), fixed 483 + H1 534: button    0.5 um, electrode band max |w|   1.0 um, AS5311 max |w|   0.8 um (reaction [0.0, 0.0, -3.0] N)
+RESULT press_HOLD_button_um = 0.4831
+RESULT press_HOLD_band_um = 1.01
+RESULT press_HOLD_as_um = 0.7566
+   MODE  (46, 31) 3 N on 101 facets (11.0 mm2), fixed 483 + H1 534: button    0.5 um, electrode band max |w|   1.0 um, AS5311 max |w|   0.6 um (reaction [0.0, 0.0, -3.0] N)
+RESULT press_MODE_button_um = 0.4787
+RESULT press_MODE_band_um = 0.9506
+RESULT press_MODE_as_um = 0.5625
+RESULT press_N = 3
+RESULT press_button_um = 0.4831
+RESULT press_band_um = 1.01
+RESULT press_as_um = 0.7566
+
+Linear-elastic, isotropic; printed parts solid (6 walls).  Body strengths are the skill's PETG book values
+(PA-CF is stronger), so the safety factors are conservative.  FR4 treated as isotropic E 20 GPa.

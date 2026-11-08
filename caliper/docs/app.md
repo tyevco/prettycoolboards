@@ -119,7 +119,7 @@ The simulator:
 - makes the capacitive reading the magnetic one plus a 4 µm sinusoidal error at the 5.08 mm
   scale pitch, a 2.5 µm offset and 1.5 µm of noise, and marks it invalid while the jaw moves faster
   than 60 mm/s and on 2 % of samples at random. These are illustrative numbers, not predictions;
-  the real error budget is in [simulation](simulation.md) and has to be measured at [bring-up](bringup.md);
+  the real error budget is not worked out yet (the [simulation](simulation.md) page is a placeholder) and has to be measured at [bring-up](bringup.md);
 - starts with three profiles and 42 past log records, reports the active profile in the LIVE, and lets the
   battery run down and charge;
 - models the capture modes roughly (not the firmware's algorithm, enough to drive the page): it starts in
@@ -202,7 +202,7 @@ contract, so `protocol.js`, the firmware and `caliper_gatt.h` now agree on them:
 - **LOG**: the record flags use the LIVE bit meanings. A notification whose length is not a
   multiple of 16 is rejected; duplicate `seq` values are dropped. The end marker comes in its own
   notification; one inside a packet would still end the stream, and anything after it is ignored.
-- **The active profile** comes in the 12-byte LIVE (`active_profile_id`), and the page follows it, so
+- **The active profile** comes in LIVE bytes 10–11 (`active_profile_id`, in every LIVE of 12 bytes or more), and the page follows it, so
   a profile chosen on the caliper shows up. From a 10-byte LIVE (firmware from before the extension)
   the page keeps the profile it last selected (remembered in the browser), which may be stale.
 - **Advertising**: the page filters the device chooser on the custom service UUID, which the

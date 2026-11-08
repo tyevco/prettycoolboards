@@ -7,14 +7,16 @@
     (bending + shear), printed PETG / PA-CF vs machined 6061, cross-checked
     against the FEA in fea_jaw.py (print-stress solver) when its output exists.
  2. Slider yaw under the measuring force: the Y-gib preload needed to keep the
-    reference strip seated.
+    reference strip seated (plungers left of the battery pocket).
  3. Slider roll under a button / grip press: the back-gib preload needed to keep
-    the front pads seated (that is what holds both sensor gaps), and the
-    sliding force that preload costs.
- 4. Thermal error: steel beam vs printed body vs workpiece.
- 5. Gap stack-up: the 0.15 mm capacitive gap and the 0.30 mm AS5311 gap, before
-    and after the per-unit set-screw adjustment.
+    the front pads seated, the back web that carries it, and the sliding force
+    the preloads cost (the trade-off table).
+ 4. Thermal error: steel beam vs printed body vs workpiece, board clamped at both tabs.
+ 5. Gap stack-up: the 0.15 mm capacitive gap and the 0.30 mm AS5311 gap, open loop
+    and after the tab-clamp bedding (the new bow / clamp terms).
  6. AS5311 gap budget against SPEC 0.3 +/- 0.1.
+ 7. Envelope.
+ 8. Board under a button press (from fea_slider.py when its output exists).
 
 Material data are typical datasheet values, cited inline; printed-part moduli
 are knocked down 15 % for FDM (solid, 6 walls) -- TVP.
@@ -121,11 +123,24 @@ for mat in ("PETG", "PA-CF", "6061-T6"):
 say("Fixed jaw (printed PA-CF in rev A) has the same outline: add the same again for the closed loop.")
 say("Mitigation in rev A: PA-CF body; measure near the jaw root; a constant-force (slip-clutch) roller is a rev B item.")
 
+
+
+def fea_slider():
+    """RESULT lines of fea_slider.py (body under the preloads, board under a button press)."""
+    path = os.path.join(HERE, "fea_slider_output.txt")
+    if not os.path.exists(path):
+        return {}
+    return {m.group(1): float(m.group(2)) for m in re.finditer(r"^RESULT (\S+) = ([-\d.eE+]+)", open(path).read(), re.M)}
+
+
+FS = fea_slider()
+
 # 2. Yaw ------------------------------------------------------------------
 head(2, "Slider yaw under the measuring force -> Y-gib preload")
 arm = 37.0
-lever = sum(P.H_U1 - u for u in P.YGIB_PLUNGERS_U)
-P_Y = 6.0                                  # design Y-plunger force, N each (review fix: was 4)
+lever = sum(P.H_U1 - u for u in P.YGIB_PLUNGERS_U)          # strip lifts at its left end, pivots at u H_U1
+lever_rev = sum(u - P.H_U0 for u in P.YGIB_PLUNGERS_U)      # the other sense: pivot at the left end
+P_Y = P.P_Y
 say(f"The workpiece pushes the moving jaw with F = {F} N (+x) at y -{arm:.0f}.  The equal and opposite drive")
 say("force acts ABOVE the reference edge, so the two form a couple (the drive arm is not zero):")
 say(f"{'drive applied at':<48}{'drive y':>8}{'M N.mm':>8}{'P min N':>9}")
@@ -138,111 +153,153 @@ for what, yd in (("thumb roller (friction drive at the beam edge)", P.BEAM_W),
     say(f"{what:<48}{yd:>8.1f}{M_yaw:>8.0f}{PMIN[what]:>9.2f}")
 say(f"(plunger levers about the strip's far end, u {P.H_U1}: sum {lever:.1f} mm; the strip lifts at its LEFT end.)")
 p_roll = PMIN["thumb roller (friction drive at the beam edge)"]
-say(f"Design: {P_Y:.0f} N each -> margin {P_Y / p_roll:.2f}x for the roller drive, "
-    f"{P_Y / PMIN['thumb on the right end face, mid-height']:.2f}x for an end-face push.")
-say("  (Review fix: the first version sized this on the jaw force alone, 2.27 N minimum, and set 4 N;")
-say(f"   with the drive couple 4 N is only {4.0 / p_roll:.2f}x and below the end-face case.  Spring rate TVP.)")
+p_end = PMIN["thumb on the right end face, mid-height"]
+say(f"Design: {P_Y:.1f} N each at u {', '.join(f'{u:g}' for u in P.YGIB_PLUNGERS_U)} -> margin {P_Y / p_roll:.2f}x for "
+    f"the roller drive, {P_Y / p_end:.2f}x for an end-face push.")
+say("Review fix (D4 + sliding force): both plungers moved LEFT of the battery pocket (were u 16 / 58.5, sum")
+say(f"  lever 81.5 mm, 6 N each).  The lever grows to {lever:.1f} mm, so {P_Y:.1f} N each keeps about the same")
+say(f"  margin as 6 N did ({6.0 / (F * (arm + P.BEAM_W) / 81.5):.2f}x then, {P_Y / p_roll:.2f}x now) for a third less load.")
+say("The other sense (strip lifting at its RIGHT end, pivot at the left end) has the short lever:")
+F_lift = 2 * P_Y * (lever_rev / 2) / (P.H_U1 - P.H_U0)
+say(f"  sum (u - {P.H_U0}) = {lever_rev:.1f} mm.  No measuring load makes that moment (outside and inside")
+say("  measurements both lift the LEFT end), but a -y push on the slider's right end lifts the strip there")
+say(f"  above F = 2 P (mean lever) / {P.H_U1 - P.H_U0:.1f} = {F_lift:.2f} N.  Trade-off accepted: a grip that")
+say("  squeezes the slider's right end toward the jaws side (-y) with more than that tilts it while it lasts.")
 say("While seated, the yaw stiffness is the strip on the rail (brass on 1.8 mm printed rail): "
     "elastic-foundation estimate < 0.1 um at the jaw tip -- negligible next to section 1.")
 
 # 3. Roll / Z ---------------------------------------------------------------
-head(3, "Slider roll under a press on the housing -> back-gib preload and sliding force")
+head(3, "Slider roll under a press on the housing -> back-gib preload, back web, sliding force")
 y_lo, y_hi = P.FPADS[0][3], P.FPADS[1][3]
 y_sp = P.BGIB_PLUNGERS[0][1]
+P_back = P.P_BACK
+say(f"Back plungers at y {y_sp:g} (review fix: were y 10), lever {y_hi - y_sp:.1f} mm to the upper pad line y {y_hi}.")
+NEED = {}
 for what, fy, Fp in (("ZERO/HOLD/MODE press (tact 1.6 N + finger)", 31.0, 2.5), ("grip on the battery bay", 40.0, 5.0)):
     m = Fp * (fy - y_hi)
     need = m / (2 * (y_hi - y_sp))
-    say(f"{what}: {Fp} N at y {fy:.0f} -> {m:.0f} N.mm about the upper pad line (y {y_hi}); the back plungers at "
-        f"y {y_sp} hold the lower pads down if P >= {need:.2f} N each")
-P_back = 4.0
-mu = 0.20
-N_tot = 2 * P_back + 2 * P_Y
-say(f"Design: back plungers {P_back} N each.  A press beyond {2 * P_back * (y_hi - y_sp) / (40 - y_hi):.1f} N at the top "
-    f"edge (y 40) lifts the lower pads -- the reading is then wrong only while pressed (the gaps open, they do not close).")
-say(f"Sliding force: normal loads {2 * P_back:.0f} N (back) + {2 * P_Y:.0f} N (Y) on brass/steel, mu ~{mu} (lightly oiled "
-    f"0.12-0.2) -> 2 x {N_tot:.0f} x {mu} = {2 * N_tot * mu:.1f} N to push the slider.  Typical caliper: 2-5 N.")
-say("(each preload acts on two faces, the plunger side and the reaction side, hence the factor 2.)")
-
+    NEED[what] = need
+    say(f"{what}: {Fp} N at y {fy:.0f} -> {m:.1f} N.mm about the upper pad line; the back plungers hold the lower "
+        f"pads down if P >= {need:.2f} N each")
+say(f"Design: back plungers {P_back} N each (was 4 N at y 10): margin {P_back / NEED['ZERO/HOLD/MODE press (tact 1.6 N + finger)']:.2f}x "
+    f"for a button press.  A press beyond {2 * P_back * (y_hi - y_sp) / (40 - y_hi):.1f} N at the top edge (y 40)")
+say("lifts the lower pads -- the reading is then wrong only while pressed (the gaps open, they do not close).")
 say()
-say("Back-cover check (review addition).  The back plungers sit in the back cover; their reaction")
-say(f"({2 * P_back:.0f} N total) pushes the cover AWAY from the body.  Over the beam channel (y -1 .. 21.2) there is")
-say("no body material behind the beam, and the cover's only screws are at y 44, so the cover carries the")
-say("load as a cantilever from the screw line to the plungers:")
-L_c = P.COVER_SCREWS[0][1] - P.BGIB_PLUNGERS[0][1]
-t_c = P.COVER_T
-COVER_DEFL = {}
+say("Sliding force: every preload acts on two faces (the plunger side and the reaction side), brass on ground")
+say("steel.  F = 2 x (2 P_back + 2 P_Y) x mu:")
+N_tot = 2 * P_back + 2 * P_Y
+N_old = 2 * 4.0 + 2 * 6.0
+say(f"{'preloads':<34}{'N total':>8}{'mu 0.12':>9}{'mu 0.15':>9}{'mu 0.20':>9}")
+for what, n in (("first model: back 4 N, Y 6 N", N_old), (f"now: back {P_back} N, Y {P_Y} N", N_tot)):
+    say(f"{what:<34}{n:>8.1f}" + "".join(f"{2 * n * mu:>9.1f}" for mu in (0.12, 0.15, 0.20)))
+say("Target 2-5 N (commercial calipers).  mu 0.12-0.15 is brass on ground steel with a light oil film, 0.20 the")
+say("conservative value the first model used; dry brass on steel is 0.3-0.35 (keep the beam oiled).")
+say(f"  -> {2 * N_tot * 0.15:.1f} N at mu 0.15 ({2 * N_tot * 0.20:.1f} N at 0.20), against {2 * N_old * 0.20:.1f} N before.")
+say("  Trade-off: the lower back preload accepts a pad lift above 3.3 N at the top edge (was 3.3 N too, because")
+say("  the lever grew), and the Y preload's margin stays above 1.3x; the sliding force can be trimmed further on")
+say("  the bench with the plunger set screws (0.4 mm per turn).")
+say("  O-ring roller rolling resistance is not included (TVP: measure; NBR at 0.15 squeeze is well under 0.5 N).")
+say()
+say("Back web (review fix a).  The back plungers now sit in the BODY's 3.2 back web, which closes the beam")
+say("tunnel behind the beam and joins the lower rail to the upper body (the first model put them in a back cover")
+say("screwed only at y 44: a 34 mm cantilever that bent 0.6-1.1 mm in PA-CF and lost the preload).")
+t_w, L_w = P.WEB_T, P.CH_Y1 - P.CH_Y0
+a_w = y_sp - P.CH_Y0
+b_w = L_w - a_w
+WEB = {}
 for mat in ("PETG", "PA-CF"):
     E = MAT[mat][0]
-    for b, n, note in ((P.H_U1 - P.H_U0, 2, "whole width carries both plungers (lower bound)"),
-                       (20.0, 1, "a 20 mm strip per plunger (closer to real)")):
-        I = b * t_c ** 3 / 12
-        d = (n * P_back) * L_c ** 3 / (3 * E * I)
-        COVER_DEFL[(mat, n)] = d
-        say(f"  {mat:<6} t {t_c:.1f}, L {L_c:.0f}, b {b:4.1f}: deflection {d:5.2f} mm   {note}")
-say("  -> the plungers' ~1 mm working travel goes into bending the cover: the back-gib preload (and so the")
-say("     pad seating of section 3) is NOT held as designed.  Needs a cover fastener near y 0..20 (doc section 4).")
+    I = 20.0 * t_w ** 3 / 12
+    d = P_back * a_w ** 3 * b_w ** 3 / (3 * E * I * L_w ** 3)       # fixed-fixed beam, point load
+    WEB[mat] = d
+    say(f"  {mat:<6} web {t_w:.1f} thick, span {L_w:.1f} (rail to upper body), load {P_back} N at {a_w:.1f} from the "
+        f"rail, 20 mm strip: {d * 1e3:6.2f} um under the plunger")
+if FS:
+    say(f"  FEA (fea_slider.py, whole body from step/slider_body.step, PA-CF, both preloads): plunger seat moves "
+        f"{FS.get('web_plunger_um', float('nan')):.2f} um relative to the pads; reaction check "
+        f"{FS.get('body_reaction_N', float('nan')):.2f} N")
+say("  -> the plunger travel (about 1 mm) is no longer used up by the housing: the preload is held as set.")
 
 # 4. Thermal ---------------------------------------------------------------
 head(4, "Thermal error (zeroed at T0, read at T0 + dT)")
 u_as = P.BOARD_U0 + P.AS_X
-u_boss = P.BOARD_U0 + P.BOARD_HOLES[0][0]
-say(f"Chain from the moving-jaw face to the AS5311: {u_boss:.0f} mm of body (jaw face -> board boss at u {u_boss:.0f}) "
-    f"+ {u_as - u_boss:.0f} mm of FR4 (boss -> AS5311 at u {u_as:.0f}).")
+u_cl = P.BOARD_U0 + P.TAB_HOLES[0][0]
+u_cr = P.BOARD_U0 + P.TAB_HOLES[2][0]
+say(f"The board is clamped at both end tabs (u {u_cl:g} and {u_cr:g}); the AS5311 sits at u {u_as:g}, "
+    f"{'exactly' if abs(u_as - (u_cl + u_cr) / 2) < 0.01 else 'about'} midway.  FR4 (E 20 GPa, 34 mm2) is far stiffer")
+say("than the printed towers in shear, so two bounds bracket the AS5311's position relative to the jaw face:")
+say(f"  A: the board follows the left clamp:  {u_cl:g} mm of body + {u_as - u_cl:g} mm of FR4")
+say(f"  B: the board stays centred between the clamps: {u_as:g} mm of body (the midpoint moves with the body)")
 say("Fixed jaw: 5 mm of body from the dowels (x -5) to the face.  The tape is bonded to the beam (follows the steel).")
-say(f"{'body':<9}{'beam':<8}{'slider um/K':>12}{'fixed um/K':>11}{'scale um/K @150':>17}{'total 10 K um':>14}")
+say(f"{'body':<9}{'beam':<8}{'A um/K':>8}{'B um/K':>8}{'fixed um/K':>11}{'scale um/K @150':>17}{'worst 10 K um':>14}")
 for body in ("PETG", "PA-CF", "6061-T6"):
     a_b = MAT[body][2]
     fj = "PA-CF" if body != "6061-T6" else "6061-T6"
     for beam in ("O1", "1.4301"):
         a_s = ALPHA[beam]
-        sl = (a_b * u_boss + ALPHA["FR4 (in-plane)"] * (u_as - u_boss) - a_s * u_as) * 1e3
+        slA = (a_b * u_cl + ALPHA["FR4 (in-plane)"] * (u_as - u_cl) - a_s * u_as) * 1e3
+        slB = (a_b * u_as - a_s * u_as) * 1e3
         fx = (MAT[fj][2] - a_s) * 5 * 1e3
         sc = (a_s - ALPHA["steel workpiece"]) * 150 * 1e3
-        say(f"{body:<9}{beam:<8}{sl:>12.3f}{fx:>11.3f}{sc:>17.3f}{(abs(sl) + abs(fx) + abs(sc)) * 10:>14.1f}")
+        worst = (max(abs(slA), abs(slB)) + abs(fx) + abs(sc)) * 10
+        say(f"{body:<9}{beam:<8}{slA:>8.3f}{slB:>8.3f}{fx:>11.3f}{sc:>17.3f}{worst:>14.1f}")
 say("Hand heat warms the slider 5-10 K within minutes (TVP); re-zero after handling.  The scale term is the classic")
 say("one: a 1.4301 beam reads a steel part short by 0.7 um/K at 150 mm -- O1 matches steel workpieces.")
-say("A printed body also creeps: PETG under the gib springs relaxes over days, which changes preload, not position")
-say("(the gaps are set by brass pads on set screws), but a creeping boss moves the board: use PA-CF for the body.")
+say("Bound B is the realistic one for a stiff board in soft towers; the first model's chain (body to a boss at")
+say("u 11, then FR4) no longer applies.  The difference between A and B is a reason to zero after warm-up.")
 
 # 5. Gap stack-up ------------------------------------------------------------
 head(5, "Gap stack-up (z, mm)")
 say("Nominal chain (beam front face = 0):")
-say(f"  board bottom (electrode face)        {P.BOARD_Z0:+.3f}   set by the 4 front-pad set screws")
+say(f"  board bottom (electrode face)        {P.BOARD_Z0:+.3f}   set by the tab clamps (bedded on 0.15 foil, section 6)")
 say(f"  scale face                           {0.0:+.3f}   pocket {P.SCALE_POCKET_DEPTH:.2f} = PCB {P.SCALE_T} + adhesive {P.SCALE_ADH}")
 say(f"  AS5311 face                          {P.BOARD_Z0 - P.AS_H_NOM:+.3f}   A nominal {P.AS_H_NOM}")
 say(f"  tape face                            {P.TAPE_TOP:+.3f}   channel {P.TAPE_CH_DEPTH:.2f} deep - shim {P.TAPE_SHIM_NOM:.2f} (nominal A) - adhesive {P.TAPE_ADH} - tape {P.TAPE_T}")
 say(f"  -> capacitive gap {P.BOARD_Z0:.3f}, magnetic gap {P.BOARD_Z0 - P.AS_H_NOM - P.TAPE_TOP:.3f}")
+say(f"Board support (review fix b, SPEC D3): the board hangs from four SMT standoffs on its end tabs (u {u_cl:g} /"
+    f" {u_cr:g}, y 5.5 / 14), 3.5-12 mm from the AS5311 and electrode rows, instead of bosses at y >= 24.5.")
 
 
 def stack(rows):
     wc = sum(abs(r[1]) for r in rows)
     rss = math.sqrt(sum(r[1] ** 2 for r in rows))
     for name, tol, note in rows:
-        say(f"    {name:<50} +/-{tol:.3f}  {note}")
-    say(f"    {'worst case':<50} +/-{wc:.3f}")
-    say(f"    {'RSS':<50} +/-{rss:.3f}")
+        say(f"    {name:<52} +/-{tol:.3f}  {note}")
+    say(f"    {'worst case':<52} +/-{wc:.3f}")
+    say(f"    {'RSS':<52} +/-{rss:.3f}")
     return wc, rss
 
 
-say("\n(a) Capacitive gap, NOT adjusted per unit (pads set to a fixed screw depth):")
+# thermal of the clamp chain: pad (brass) + printed tower (pad pocket ceiling -> clamp ceiling) up,
+# epoxy + washer + standoff (steel) down, FR4 thickness (z CTE ~60 ppm/K) down
+tower = P.CLAMP_CEIL_Z - (P.FPAD_T + 0.2)
+th = {}
+for mat in ("PETG", "PA-CF"):
+    th[mat] = 10 * abs(19e-6 * P.FPAD_T + MAT[mat][2] * tower - 60e-6 * P.EPOXY_GAP
+                       - 12e-6 * (P.CLAMP_WASHER_T + P.STANDOFF_H) - 60e-6 * P.BOARD_T)
+d_tower = FS.get("clamp_dz_um", 17.0) / 1000.0
+say("\n(a) Capacitive gap, open loop (no per-unit work: printed clamp faces, no bedding):")
 cap_raw = stack([
     ("scale PCB thickness (FR4 0.8 +/-10 %)", P.SCALE_T_TOL, "JLC standard; 'tight' option +/-0.05"),
     ("scale adhesive 467MP", 0.01, "3M datasheet 0.05 nominal"),
     ("scale pocket depth", 0.02, "machined"),
-    ("board bow over the 40 x 5 mm electrode area", 0.03, "0.075 % of 40 mm, a tenth of the IPC limit (TVP)"),
-    ("printed boss height / pad pocket depth", 0.10, "FDM +/-0.1"),
+    ("board flatness over y 0..20 (inspected <= 0.03)", P.BOARD_FLATNESS / 2, "SPEC D3 fab note, half the band"),
+    ("printed clamp face height (bridged, downward)", 0.10, "FDM +/-0.1"),
+    ("front-pad pocket depth / tower height", 0.10, "FDM +/-0.1"),
     ("beam face flatness along travel", 0.01, "ground stock, drawing PCC-M-02"),
 ])
-say("  -> the 0.15 gap cannot be built open-loop: worst case is larger than the gap itself.")
-say("  (board thickness is not in this chain: the board bottom seats on the bosses.)")
-say("\n(b) Capacitive gap AFTER the per-unit setting (dial indicator on the board top, 2 um, beam face as datum):")
-BOARD_SET = [   # board-bottom height over the beam face after the setting (common to both gaps)
-    ("indicator + board-thickness micrometer", 0.005, ""),
-    ("board bow over the electrode area (unmeasured)", 0.03, "TVP: 0.075 %/40 mm; IPC-6012 limit = 0.30"),
-    ("beam face flatness along travel", 0.01, ""),
-    ("set-screw setting resolution (M2 x 0.4, 10 deg)", 0.011, "0.4 x 10/360"),
-    ("thermal: 5.4 mm PETG tower, +/-10 K", 5.4 * 68e-6 * 10, ""),
-    ("pad / body creep and wear (PETG, first months)", 0.02, "TVP; PA-CF ~half"),
+say("  -> the 0.15 gap cannot be built open-loop: the worst case is larger than the gap itself.")
+say("\n(b) After the bedding (section 6: the board lies on 0.150 shim foil on the beam while the clamp washers")
+say("    are bedded in epoxy; the clamp faces then copy the beam face, not the print):")
+BOARD_SET = [   # board-bottom height over the beam face after the bedding (common to both gaps)
+    ("shim foil thickness (steel shim stock 0.150)", 0.005, "+/-0.005 (TVP: measure the foil)"),
+    ("beam face flatness along travel", 0.01, "drawing PCC-M-02"),
+    ("board flatness residual (inspected <= 0.03)", P.BOARD_FLATNESS / 2, "SPEC D3; the foil holds the mean"),
+    ("epoxy cure shrinkage (2 % of the 0.2 bed)", 0.02 * P.EPOXY_GAP, ""),
+    ("thermal, clamp chain +/-10 K (PA-CF)", th["PA-CF"], f"pad + {tower:.2f} printed - washer/standoff/epoxy; PETG {th['PETG']:.4f}"),
+    ("clamp-seat creep / relaxation (PA-CF)", 0.01, "TVP; PETG ~2x"),
+    ("tower front under a +/-20 % preload drift", 0.2 * d_tower, f"{d_tower * 1e3:.1f} um at the clamp under the "
+                                                                  f"design preload ({'FEA' if 'clamp_dz_um' in FS else 'estimate'})"),
 ]
 say("  board-height terms (shared with the AS5311 gap):")
 board_set = stack(BOARD_SET)
@@ -250,23 +307,25 @@ say("  plus the scale face:")
 cap_set = stack(BOARD_SET + [
     ("scale thickness / flushness along its length", 0.02, "one PCB: thickness varies less than lot-to-lot (TVP)"),
 ])
-say(f"  -> 0.15 +/- {cap_set[1]:.3f} RSS ({cap_set[0]:.3f} worst): the electrodes never touch at RSS, but the")
-say("     signal swings ~+/-30 % with gap along the travel -- fine for the experimental phase-ratio readout.")
-say("  CAUTION: the board is held only by bosses at y >= 24.5; its lower band (electrodes y 10.6-17.5, AS5311")
-say("  at y 6) overhangs 7-24 mm with no support.  The +/-0.03 bow term is a tenth of the IPC-6012 class 2")
-say("  limit (0.75 %, i.e. 0.30 over the 40 mm electrode length, twice the gap): flatness-check every slider")
-say("  board over its lower band and reject boards worse than 0.03 mm, or the electrodes can touch the scale.")
+say(f"  -> 0.15 +/- {cap_set[1]:.3f} RSS ({cap_set[0]:.3f} worst): the electrodes never touch, worst case included.")
+say("     The first model (board on bosses at y >= 24.5, set by four set screws) had +/-0.044 RSS / 0.10 worst, with")
+say("     an unsupported 7-24 mm overhang behind the 0.03 bow term.")
+if "press_band_um" in FS:
+    say(f"  Transient, not in the stack: a {FS.get('press_N', 3):.0f} N button press bends the board; with the button-band ledge")
+    say(f"  the electrode band moves {FS['press_band_um']:.1f} um and the AS5311 {FS['press_as_um']:.1f} um (FEA, rigid ledge) plus the")
+    say("  ledge's own few um (section 8); without the ledge it was "
+        f"{FS.get('press_noledge_band_um', float('nan')):.0f} um.  It recovers when the button is released.")
 
 # 6. AS5311 gap budget ---------------------------------------------------------
 head(6, "AS5311 gap budget (SPEC 4.1: 0.30 +/- 0.10)")
-say("(a) Open-loop (no measurement of the package or the tape):")
+say("(a) Open-loop (no measurement of the package or the tape; board height as bedded, 5b):")
 mag_raw = stack([
     ("AS5311 seated height A (0.85..1.20, JEDEC MO-153)", (P.AS_H_MAX - P.AS_H_MIN) / 2, "centre 1.025 vs model 1.10"),
     ("solder standoff", P.SOLDER_STANDOFF_TOL, ""),
     ("tape thickness", P.TAPE_T_TOL, "TVP; Dexter quotes +/-0.15 on its strips"),
     ("tape adhesive", P.TAPE_ADH_TOL, ""),
     ("channel depth", 0.02, "machined, from face D"),
-    ("board height as set (5b board terms, RSS)", board_set[1], "the board height is set for the cap gap"),
+    ("board height as bedded (5b board terms, RSS)", board_set[1], ""),
 ])
 say(f"  -> +/-{mag_raw[1]:.3f} RSS is {'inside' if mag_raw[1] <= P.MAG_GAP_TOL else 'OUTSIDE'} the +/-0.10 window.")
 say("(b) With the per-unit measurement in assembly (mechanical 6): micrometer the board + AS5311 stack before")
@@ -275,33 +334,62 @@ say(f"    and lay 0-{P.TAPE_SHIM_MAX:.2f} mm of Kapton shim (0.025 steps) under 
 say(f"    The channel ({P.TAPE_CH_DEPTH:.2f} deep) gives 0.30 with NO shim at A max 1.20; a shim raises the tape,")
 say(f"    so every shorter package can be corrected (A nominal 1.10 -> {P.TAPE_SHIM_NOM:.2f} shim, A min 0.85 -> "
     f"{P.TAPE_SHIM_MAX:.2f}).")
-say("    [Review fix: the first channel (1.90) gave 0.20 unshimmed at A max, which a shim can only make smaller.]")
 mag_rows = [
     ("A measured", 0.005, ""), ("tape face measured", 0.005, ""),
     ("shim step / 2", 0.0125, "0.025 steps"),
     ("tape thickness along the length", 0.02, "TVP"),
     ("channel depth along the length", 0.01, ""),
 ]
-mag_set = stack(mag_rows + [("board height as set (5b board terms, RSS)", board_set[1], "")])
+mag_set = stack(mag_rows + [("board height as bedded (5b board terms, RSS)", board_set[1], "")])
 mag_wc = sum(r[1] for r in mag_rows) + board_set[0]
-say(f"    {'true worst case (board terms worst case too)':<50} +/-{mag_wc:.3f}")
+say(f"    {'true worst case (board terms worst case too)':<52} +/-{mag_wc:.3f}")
 say(f"  -> 0.30 +/- {mag_set[1]:.3f} RSS: inside 0.2-0.4 ({P.MAG_GAP_TOL / mag_set[1]:.1f}x the RSS).")
-say(f"     The true worst case, +/-{mag_wc:.3f}, is {'inside' if mag_wc <= P.MAG_GAP_TOL else 'OUTSIDE'} the window, "
-    "so tolerancing does not")
-say("     guarantee the gap; the firmware field check below accepts or rejects each unit.")
-say("     [Review fix: the first version put the 5b RSS into this worst-case sum and reported 0.003 margin.]")
+say(f"     The true worst case, +/-{mag_wc:.3f}, is {'inside' if mag_wc <= P.MAG_GAP_TOL else 'OUTSIDE'} the window "
+    "(the first model: +/-0.048 RSS, +/-0.13 worst, outside).")
 say("Field check in firmware: AS5311 MagINCn / MagDECn both high = field in range; the SSI status bits")
 say("(OCF, COF, LIN) flag an out-of-range gap.  Bring-up records them at R = 0, 75, 150.")
 
-# Summary numbers --------------------------------------------------------------
+# 7. Envelope ------------------------------------------------------------------
 head(7, "Envelope")
 say(f"Housing envelope (u, y, z): {P.HOUSING_SIZE[0]:.1f} x {P.HOUSING_SIZE[1]:.1f} x {P.HOUSING_SIZE[2]:.1f} mm "
-    f"(SPEC 7: <= 78 x 52 x 16); thumb roller rim at u {P.ROLLER_U + P.ROLLER_D / 2:.1f} (0.6 proud of the end face).")
-say(f"SPEC 7 counts the roller in the 78 mm: the rim reaches u {P.ROLLER_U + P.ROLLER_D / 2:.1f}, "
-    f"{P.ROLLER_U + P.ROLLER_D / 2 - 78.0:.1f} mm over (measured from the jaw face u 0).")
+    f"(SPEC 7: <= 78 x 52 x 16, roller included).")
+say(f"Thumb roller rim at u {P.ROLLER_RIM_U:.1f} from the jaw face, {P.ROLLER_RIM_U - P.H_U1:.1f} proud of the end face "
+    f"(review fix e: the end face moved 78.0 -> {P.H_U1}; the rim was at 78.6).")
+say(f"The lock's knurled head stands {4.0:.0f} mm above the top face (like the jaws, an appendage outside the box).")
 say(f"Tape channel {P.TAPE_CH_DEPTH:.2f} deep leaves {P.BEAM_T - P.TAPE_CH_DEPTH:.2f} mm of steel under it "
     f"(cross-section area drops to {(1 - (P.TAPE_CH_W * P.TAPE_CH_DEPTH) / (P.BEAM_W * P.BEAM_T)) * 100:.0f} %; "
     "bending is not loaded in use).")
 
-with open(os.path.join(HERE, "calcs_output.txt"), "w") as f:
+# 8. Board under a button press -------------------------------------------------
+head(8, "Board under a button press (board support check, SPEC D3 open item)")
+say("The upper band is held only by H1 (18.75, 24); HOLD and MODE sit over the battery pocket, with no body under")
+say("the board.  fea_slider.py solves the board (FR4, E 20 GPa, outline + tabs from board_parts.json) clamped at")
+say("the four standoffs and resting on the H1 boss, 3 N on one switch footprint at a time; linear tets corrected")
+say(f"x{FS.get('tet_correction', float('nan')):.2f} for bending (cantilever calibration in the same run):")
+L = P.BTN_LEDGE
+if FS:
+    for tag, what in (("noledge_", "without a support under the button band"),
+                      ("", f"with the button-band ledge (u {L['u0']:g}..{L['u1']:g}, y {L['y0']:g}..34.4, shimmed to contact; rigid in the FEA)")):
+        say(f"  {what}:")
+        for k in ("ZERO", "HOLD", "MODE"):
+            if f"press_{tag}{k}_button_um" in FS:
+                say(f"    {k:<5} at the button {FS[f'press_{tag}{k}_button_um']:6.1f} um, electrode band max "
+                    f"{FS[f'press_{tag}{k}_band_um']:5.1f} um, AS5311 {FS[f'press_{tag}{k}_as_um']:5.1f} um")
+    # the ledge is a printed cantilever, not rigid: add its own compliance
+    E = MAT["PA-CF"][0]
+    t_l, L_l, w_eff = P.BOARD_Z0 - L["low"] - P.CAV_FLOOR, P.BOARD_W + 0.4 - L["y0"], 10.0
+    k_l = 3 * E * (w_eff * t_l ** 3 / 12) / L_l ** 3
+    d_l = 3.0 / k_l
+    say(f"  ledge compliance: {L_l:.1f} mm cantilever, {t_l:.2f} thick, ~{w_eff:g} mm engaged, PA-CF: {k_l:.0f} N/mm,"
+        f" {d_l * 1e3:.1f} um under the full 3 N")
+    say(f"  -> without the ledge the worst press (MODE) moved the electrode band {FS.get('press_noledge_band_um', float('nan')):.1f} um"
+        f" toward the scale ({FS.get('press_noledge_band_um', 0) / 1.5:.0f} % of the 0.15 gap) and the button")
+    say(f"     {FS.get('press_noledge_button_um', float('nan')):.0f} um; with it, about {FS.get('press_band_um', float('nan')):.1f} um + the ledge's"
+        f" own {d_l * 1e3:.1f} um.  The ledge is kept.")
+    say(f"  battery: cell top z {P.Z_WEB_IN + P.BAT_T:+.2f}, {P.CAV_FLOOR - (P.Z_WEB_IN + P.BAT_T):.2f} below the ledge underside; the"
+        " board never reaches the cell.")
+else:
+    say("  (fea_slider_output.txt missing: run `py fea_slider.py`)")
+
+with open(os.path.join(HERE, "calcs_output.txt"), "w", newline="\n") as f:
     f.write("\n".join(OUT).lstrip() + "\n")

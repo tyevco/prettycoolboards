@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """PNG renders of the caliper from the B-rep model (matplotlib, no OpenSCAD / GPU).
 
-    python3 render.py          # renders/{assembly,assembly_back,exploded,slider,section,section_gaps,parts}.png
+    python3 render.py          # renders/{assembly,assembly_back,exploded,slider_open,board_fit,section,
+                               #          section_gaps,section_clamp,jaws_closed,parts}.png
 
 Each solid is tessellated by OpenCascade and drawn as a flat-shaded triangle
 mesh (Lambert shading from one light).  matplotlib sorts triangles by mean depth,
@@ -121,10 +122,10 @@ def view(items, path, elev, azim, size=(12, 6), title=None, tol=0.15):
 
 def exploded_items():
     """Slider exploded along z (front up, back down), fixed parts in place."""
-    dz = {"front_shell": 26, "button_cap": 34, "display": 16, "board": 9, "board_parts": 9,
-          "back_cover": -26, "battery": -16, "back_gib": -12, "y_gib": 0, "ref_strip": 0,
-          "front_pad": 4, "thumb_roller": 0, "oring": 0, "lock_screw": 0, "slider_body": 0}
-    dy = {"y_gib": 8, "ref_strip": -8, "thumb_roller": 14, "oring": 14, "lock_screw": 10}
+    dz = {"front_shell": 26, "button_cap": 34, "display": 16, "board": 9, "board_parts": 9, "tab_clamp": 12,
+          "battery_door": -26, "battery": -16, "back_gib": -12, "y_gib": 0, "ref_strip": 0, "plunger_hw": -20,
+          "front_pad": 4, "thumb_roller": 0, "oring": 0, "lock_screw": 0, "pusher": 0, "slider_body": 0}
+    dy = {"y_gib": 8, "ref_strip": -8, "thumb_roller": 14, "oring": 14, "lock_screw": 10, "pusher": 30}
     out = []
     for n, s, c in M.slider_group(60.0, with_hardware=True):
         key = next((k for k in dz if n.startswith(k)), None)
@@ -195,8 +196,14 @@ def main():
     view(asm, os.path.join(OUT, "assembly_back.png"), -50, 108, (13, 8), "back")
     view(exploded_items(), os.path.join(OUT, "exploded.png"), 30, -62, (13, 10), "exploded (slider along z)")
     sl = [i for i in M.slider_group(0, with_hardware=True) if not i[0].startswith(("front_shell",))]
+    import board_envelope as BE
+    src = BE.load_parts()[1].split(" (")[0]
     view(sl + [("beam", M.box(-5, 90, 0, 20, -4, 0), "steel")], os.path.join(OUT, "slider_open.png"),
-         50, -70, (11, 8), "slider with the front shell removed (board envelope = placeholder)")
+         50, -70, (11, 8), f"slider with the front shell removed (board envelope from {src})")
+    # the routed board in its cavity, seen from the front: tabs in the towers, parts, glass outline
+    fit = [i for i in sl if not i[0].startswith(("button_cap", "display", "lock_screw"))]
+    view(fit, os.path.join(OUT, "board_fit.png"), 90, -90, (11, 8),
+         f"front view, lid off: board (from {src}) with its end tabs clamped in the towers")
     # stack-up section through the AS5311 (u = 8 + 31 = 39) at R = 0
     items = [(n, s, c) for n, s, c in M.assembly(0.0, with_hardware=True)]
     u_as = P.BOARD_U0 + P.AS_X
@@ -209,6 +216,13 @@ def main():
                         (14, 0.0, f"scale face z 0, gap {P.CAP_GAP} to the electrodes"),
                         (10, -P.BEAM_T - P.BGIB_T, "back gib"),
                         (20.5, -2.0, "Y gib"), (-0.5, -2.0, "ref strip")], size=(11, 4.6))
+    # section through the left tab clamp (u = 4.5): standoff, bedded washer, clamp screw, front pads, back web
+    u_cl = P.BOARD_U0 + P.TAB_HOLES[0][0]
+    section_plot(items, u_cl, os.path.join(OUT, "section_clamp.png"), xlim=(-4, 25), ylim=(-9.5, 7.6),
+                 title=f"Section x = {u_cl:g} (left tower, tab clamps H2 / H3), reading 0",
+                 notes=[(5.5, P.CLAMP_CEIL_Z, "bedded washer + clamp face"), (14.0, P.BOARD_Z1 + 1.0, "SMT standoff"),
+                        (9.75, P.BOARD_Z0, "board end tab"), (10.0, P.Z_BACK + 1.0, "back web (3.2)"),
+                        (0.95, 0.5, "front pad"), (18.8, 4.0, "pad set screw")], size=(11, 6))
     # end-stop and inside jaws at the closed position, front view
     view(M.assembly(0.0, with_hardware=True), os.path.join(OUT, "jaws_closed.png"), 90, -90, (8, 9),
          "jaws closed (front view, z toward the viewer)")

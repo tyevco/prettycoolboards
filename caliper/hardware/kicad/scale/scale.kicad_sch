@@ -399,7 +399,7 @@
 	)
 	(text "Mounting (plated M2, back-copper ground)"
 		(exclude_from_sim no)
-		(at 15.24 20.32 0)
+		(at 15.24 15.24 0)
 		(effects
 			(font
 				(size 2 2)
@@ -411,7 +411,7 @@
 	)
 	(text "One hole at each end, clear of the 150 mm measuring range. The pads tie the back ground plane to the\nbeam through the screws, so the scale's reference is the beam potential, as the slider's guard ground is."
 		(exclude_from_sim no)
-		(at 15.24 24.13 0)
+		(at 15.24 19.05 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -419,11 +419,11 @@
 			)
 			(justify left top)
 		)
-		(uuid "9cd24f0e-a555-53fa-a3fd-d3d2aa13bb00")
+		(uuid "3de4c3d1-7958-5ceb-8a6e-4b7980c3b39d")
 	)
 	(rectangle
-		(start 12.7 17.78)
-		(end 123.19 54.61)
+		(start 12.7 12.7)
+		(end 135.89 40.64)
 		(stroke
 			(width 0.1)
 			(type dash)
@@ -431,83 +431,11 @@
 		(fill
 			(type none)
 		)
-		(uuid "f946ba70-8c5b-51d7-aae4-13b47a2d35e8")
-	)
-	(text "Fiducials"
-		(exclude_from_sim no)
-		(at 130.81 20.32 0)
-		(effects
-			(font
-				(size 2 2)
-				(bold yes)
-			)
-			(justify left top)
-		)
-		(uuid "b5c198c1-29c0-5e47-816d-2dc2f42abab5")
-	)
-	(text "One per end (front side), for the reflector-pattern inspection and any later assembly"
-		(exclude_from_sim no)
-		(at 130.81 24.13 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-				(italic yes)
-			)
-			(justify left top)
-		)
-		(uuid "e99cc421-8fa8-550e-b1c2-29ce5eab1393")
-	)
-	(rectangle
-		(start 128.27 17.78)
-		(end 218.44 39.37)
-		(stroke
-			(width 0.1)
-			(type dash)
-		)
-		(fill
-			(type none)
-		)
-		(uuid "bdad8cb7-8e41-5a04-add2-986661c562bf")
-	)
-	(text "Power flag"
-		(exclude_from_sim no)
-		(at 226.06 20.32 0)
-		(effects
-			(font
-				(size 2 2)
-				(bold yes)
-			)
-			(justify left top)
-		)
-		(uuid "1dffc615-17b3-5ae6-9a70-1da53b5d7950")
-	)
-	(text "GND has no driver on a passive board"
-		(exclude_from_sim no)
-		(at 226.06 24.13 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-				(italic yes)
-			)
-			(justify left top)
-		)
-		(uuid "26690468-c2a9-5443-9aac-b781f0848d57")
-	)
-	(rectangle
-		(start 223.52 17.78)
-		(end 264.16 40.64)
-		(stroke
-			(width 0.1)
-			(type dash)
-		)
-		(fill
-			(type none)
-		)
-		(uuid "cc9a8a00-4c06-5beb-81d8-e0ffc896b33f")
+		(uuid "4ba48f8c-8488-5a14-b84b-193a1fceaa88")
 	)
 	(symbol
 		(lib_id "Mechanical:MountingHole_Pad")
-		(at 17.78 38.1 0)
+		(at 17.78 30.48 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -515,7 +443,7 @@
 		(dnp no)
 		(uuid "dffbfa9f-9138-56e4-a137-23b88a64f6a9")
 		(property "Reference" "H1"
-			(at 19.05 36.83 0)
+			(at 19.95 28.21 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -524,7 +452,7 @@
 			)
 		)
 		(property "Value" "M2"
-			(at 19.05 39.37 0)
+			(at 19.95 30.21 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -533,7 +461,7 @@
 			)
 		)
 		(property "Footprint" "MountingHole:MountingHole_2.2mm_M2_Pad_Via"
-			(at 17.78 38.1 0)
+			(at 17.78 30.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -542,7 +470,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 17.78 38.1 0)
+			(at 17.78 30.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -551,7 +479,7 @@
 			)
 		)
 		(property "Description" "Mounting Hole with connection"
-			(at 17.78 38.1 0)
+			(at 17.78 30.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -571,25 +499,17 @@
 			)
 		)
 	)
-	(wire
-		(pts (xy 17.78 40.64) (xy 17.78 43.18))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "c77811e9-2e37-5af4-bf78-0559d6ace92f")
-	)
 	(symbol
 		(lib_id "power:GND")
-		(at 17.78 43.18 0)
+		(at 17.78 33.02 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "06dd25b5-a866-5789-8ef0-7fd774c1db5e")
+		(uuid "874718ca-2093-586b-988a-cb9f99214ec7")
 		(property "Reference" "#PWR02001"
-			(at 17.78 43.18 0)
+			(at 17.78 33.02 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -598,7 +518,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 17.78 46.48 0)
+			(at 17.78 36.32 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -607,7 +527,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 17.78 43.18 0)
+			(at 17.78 33.02 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -616,7 +536,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 17.78 43.18 0)
+			(at 17.78 33.02 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -625,7 +545,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 17.78 43.18 0)
+			(at 17.78 33.02 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -634,7 +554,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "7d500965-d6fa-5a81-919f-eb123d605e9d")
+			(uuid "6dadda58-6fc6-559e-b196-852673967801")
 		)
 		(instances
 			(project "prettycool-caliper-scale"
@@ -647,7 +567,7 @@
 	)
 	(symbol
 		(lib_id "Mechanical:MountingHole_Pad")
-		(at 25.4 38.1 0)
+		(at 27.94 30.48 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -655,7 +575,7 @@
 		(dnp no)
 		(uuid "a2e54bf8-427a-50d1-9f20-317963fd25e7")
 		(property "Reference" "H2"
-			(at 26.67 36.83 0)
+			(at 30.11 28.21 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -664,7 +584,7 @@
 			)
 		)
 		(property "Value" "M2"
-			(at 26.67 39.37 0)
+			(at 30.11 30.21 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -673,7 +593,7 @@
 			)
 		)
 		(property "Footprint" "MountingHole:MountingHole_2.2mm_M2_Pad_Via"
-			(at 25.4 38.1 0)
+			(at 27.94 30.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -682,7 +602,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 25.4 38.1 0)
+			(at 27.94 30.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -691,7 +611,7 @@
 			)
 		)
 		(property "Description" "Mounting Hole with connection"
-			(at 25.4 38.1 0)
+			(at 27.94 30.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -711,25 +631,17 @@
 			)
 		)
 	)
-	(wire
-		(pts (xy 25.4 40.64) (xy 25.4 43.18))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e53fe0a7-1c24-5b68-8970-a2892ce3dbd4")
-	)
 	(symbol
 		(lib_id "power:GND")
-		(at 25.4 43.18 0)
+		(at 27.94 33.02 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "f22c81ea-6785-5d1e-8dab-ea37af24327c")
+		(uuid "4f170d3f-d1a8-50d3-9a54-cb8d47a17255")
 		(property "Reference" "#PWR02002"
-			(at 25.4 43.18 0)
+			(at 27.94 33.02 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -738,7 +650,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 25.4 46.48 0)
+			(at 27.94 36.32 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -747,7 +659,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 25.4 43.18 0)
+			(at 27.94 33.02 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -756,7 +668,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 25.4 43.18 0)
+			(at 27.94 33.02 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -765,7 +677,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 25.4 43.18 0)
+			(at 27.94 33.02 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -774,7 +686,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "ff53404e-63b0-55af-b298-1b2640914459")
+			(uuid "2c1446ae-c5c7-53ca-bca0-5d7bf7d712be")
 		)
 		(instances
 			(project "prettycool-caliper-scale"
@@ -785,9 +697,45 @@
 			)
 		)
 	)
+	(text "Fiducials"
+		(exclude_from_sim no)
+		(at 143.51 15.24 0)
+		(effects
+			(font
+				(size 2 2)
+				(bold yes)
+			)
+			(justify left top)
+		)
+		(uuid "b5c198c1-29c0-5e47-816d-2dc2f42abab5")
+	)
+	(text "One per end (front side), for the reflector-pattern inspection and any later assembly"
+		(exclude_from_sim no)
+		(at 143.51 19.05 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+				(italic yes)
+			)
+			(justify left top)
+		)
+		(uuid "51f7761e-6725-510a-99cf-dd0e05c70b13")
+	)
+	(rectangle
+		(start 140.97 12.7)
+		(end 241.3 31.75)
+		(stroke
+			(width 0.1)
+			(type dash)
+		)
+		(fill
+			(type none)
+		)
+		(uuid "86147168-51b4-5247-8e03-6d9718f57d49")
+	)
 	(symbol
 		(lib_id "Mechanical:Fiducial")
-		(at 129.54 33.02 0)
+		(at 144.78 26.67 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -795,23 +743,25 @@
 		(dnp no)
 		(uuid "bb618bf5-cd58-56a5-a569-e6c78b5a2eb6")
 		(property "Reference" "FID1"
-			(at 129.54 31.42 0)
+			(at 146.95 25.67 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left)
 			)
 		)
 		(property "Value" "Fiducial"
-			(at 129.54 34.62 0)
+			(at 146.95 27.67 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left)
 			)
 		)
 		(property "Footprint" "Fiducial:Fiducial_1mm_Mask2mm"
-			(at 129.54 33.02 0)
+			(at 144.78 26.67 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -820,7 +770,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 129.54 33.02 0)
+			(at 144.78 26.67 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -829,7 +779,7 @@
 			)
 		)
 		(property "Description" "Fiducial Marker"
-			(at 129.54 33.02 0)
+			(at 144.78 26.67 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -848,7 +798,7 @@
 	)
 	(symbol
 		(lib_id "Mechanical:Fiducial")
-		(at 134.62 33.02 0)
+		(at 162.56 26.67 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -856,23 +806,25 @@
 		(dnp no)
 		(uuid "c572f9e2-c1e6-5dbb-97a6-0005e4bb08b3")
 		(property "Reference" "FID2"
-			(at 134.62 31.42 0)
+			(at 164.73 25.67 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left)
 			)
 		)
 		(property "Value" "Fiducial"
-			(at 134.62 34.62 0)
+			(at 164.73 27.67 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left)
 			)
 		)
 		(property "Footprint" "Fiducial:Fiducial_1mm_Mask2mm"
-			(at 134.62 33.02 0)
+			(at 162.56 26.67 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -881,7 +833,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 134.62 33.02 0)
+			(at 162.56 26.67 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -890,7 +842,7 @@
 			)
 		)
 		(property "Description" "Fiducial Marker"
-			(at 134.62 33.02 0)
+			(at 162.56 26.67 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -907,9 +859,45 @@
 			)
 		)
 	)
+	(text "Power flag"
+		(exclude_from_sim no)
+		(at 248.92 15.24 0)
+		(effects
+			(font
+				(size 2 2)
+				(bold yes)
+			)
+			(justify left top)
+		)
+		(uuid "1dffc615-17b3-5ae6-9a70-1da53b5d7950")
+	)
+	(text "GND has no driver on a passive board"
+		(exclude_from_sim no)
+		(at 248.92 19.05 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+				(italic yes)
+			)
+			(justify left top)
+		)
+		(uuid "ef5a47a3-9179-5a35-abbf-9c468f79bfb9")
+	)
+	(rectangle
+		(start 246.38 12.7)
+		(end 292.1 35.56)
+		(stroke
+			(width 0.1)
+			(type dash)
+		)
+		(fill
+			(type none)
+		)
+		(uuid "99856708-b8f0-5a61-a0bf-f8093137df7c")
+	)
 	(symbol
 		(lib_id "power:PWR_FLAG")
-		(at 228.6 35.56 90)
+		(at 251.46 27.94 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -917,23 +905,25 @@
 		(dnp no)
 		(uuid "0eda9355-c69b-5fb2-9c3a-c16861e50dbc")
 		(property "Reference" "#FLG01"
-			(at 228.6 32.944 90)
+			(at 253.376 25.67 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left)
 			)
 		)
 		(property "Value" "PWR_FLAG"
-			(at 228.6 38.176 90)
+			(at 253.376 27.67 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left)
 			)
 		)
 		(property "Footprint" ""
-			(at 228.6 35.56 0)
+			(at 251.46 27.94 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -942,7 +932,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 228.6 35.56 0)
+			(at 251.46 27.94 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -951,7 +941,7 @@
 			)
 		)
 		(property "Description" "Special symbol for telling ERC where power comes from"
-			(at 228.6 35.56 0)
+			(at 251.46 27.94 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -971,25 +961,17 @@
 			)
 		)
 	)
-	(wire
-		(pts (xy 228.6 35.56) (xy 231.14 35.56))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "19bc511f-47ce-59eb-aed9-cd4dda45a35a")
-	)
 	(symbol
 		(lib_id "power:GND")
-		(at 231.14 35.56 90)
+		(at 251.46 27.94 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "86f8b046-1274-5251-a22c-d75fba5ac6e5")
+		(uuid "820a2d16-71d4-587c-b2bc-becde65db6d6")
 		(property "Reference" "#PWR02003"
-			(at 231.14 35.56 0)
+			(at 251.46 27.94 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -998,16 +980,16 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 234.44 35.56 90)
+			(at 251.46 31.24 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify right)
+				(justify top)
 			)
 		)
 		(property "Footprint" ""
-			(at 231.14 35.56 0)
+			(at 251.46 27.94 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1016,7 +998,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 231.14 35.56 0)
+			(at 251.46 27.94 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1025,7 +1007,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 231.14 35.56 0)
+			(at 251.46 27.94 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1034,7 +1016,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "c8f6dd75-6b6c-517c-ad3c-ec93cfbb80a7")
+			(uuid "0f6a5501-2bad-504e-9a93-7dff2c222596")
 		)
 		(instances
 			(project "prettycool-caliper-scale"

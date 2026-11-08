@@ -1,0 +1,43 @@
+%TF.GenerationSoftware,KiCad,Pcbnew,9.0.9-9.0.9~ubuntu24.04.1*%
+%TF.CreationDate,2026-11-08T07:42:52-08:00*%
+%TF.ProjectId,prettycool-caliper-scale,70726574-7479-4636-9f6f-6c2d63616c69,rev?*%
+%TF.SameCoordinates,Original*%
+%TF.FileFunction,Soldermask,Top*%
+%TF.FilePolarity,Negative*%
+%FSLAX46Y46*%
+G04 Gerber Fmt 4.6, Leading zero omitted, Abs format (unit mm)*
+G04 Created by KiCad (PCBNEW 9.0.9-9.0.9~ubuntu24.04.1) date 2026-11-08 07:42:52*
+%MOMM*%
+%LPD*%
+G01*
+G04 APERTURE LIST*
+%ADD10C,0.000000*%
+%ADD11C,2.000000*%
+%ADD12C,1.000000*%
+G04 APERTURE END LIST*
+D10*
+G36*
+X200000000Y10500000D02*
+G01*
+X0Y10500000D01*
+X0Y17500000D01*
+X200000000Y17500000D01*
+X200000000Y10500000D01*
+G37*
+D11*
+%TO.C,FID1*%
+X1500000Y11800000D03*
+%TD*%
+D12*
+%TO.C,H1*%
+X1500000Y14000000D03*
+%TD*%
+D11*
+%TO.C,FID2*%
+X198500000Y16200000D03*
+%TD*%
+D12*
+%TO.C,H2*%
+X198500000Y14000000D03*
+%TD*%
+M02*

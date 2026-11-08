@@ -10,6 +10,10 @@ an STL too, but only as a viewing mesh: order them from step/ and drawings/.
 
 STEP: exact B-rep in assembly coordinates (so the parts open already placed), with
 the assembly at reading R = 0 as one STEP with a named solid per part.
+
+stl/slider_body_rf_modifier.stl is a slicer modifier in the slider body's print frame:
+load it as a modifier on slider_body.stl and give it unfilled PA (PAHT), so nothing
+carbon-filled lies within 5 mm of the antenna (SPEC D4).
 """
 import argparse
 import os
@@ -25,7 +29,7 @@ COLOURS = {"steel": (0.62, 0.64, 0.67), "jaw": (0.25, 0.25, 0.28), "body": (0.16
            "shell": (0.20, 0.45, 0.72), "cover": (0.14, 0.30, 0.50), "cap": (0.92, 0.55, 0.15),
            "brass": (0.80, 0.65, 0.25), "rubber": (0.10, 0.10, 0.10), "pcb": (0.10, 0.45, 0.20),
            "parts": (0.35, 0.35, 0.38), "glass": (0.05, 0.05, 0.08), "battery": (0.70, 0.70, 0.75),
-           "tape": (0.35, 0.20, 0.15)}
+           "tape": (0.35, 0.20, 0.15), "gfrp": (0.85, 0.82, 0.55)}
 
 
 def main(argv=None):
@@ -42,6 +46,12 @@ def main(argv=None):
         step = os.path.join(HERE, "step", f"{name}.step")
         export_step(s, step)
         print(f"{name:<15} {os.path.getsize(stl) / 1024:7.0f} kB stl   {os.path.getsize(step) / 1024:7.0f} kB step")
+        if name == "slider_body":
+            bb = s.bounding_box()           # print pose of the body = shift by -bb.min (orient 0, 0, 0)
+            mod = M.Pos(-bb.min.X, -bb.min.Y, -bb.min.Z) * M.rf_modifier()
+            path = os.path.join(HERE, "stl", "slider_body_rf_modifier.stl")
+            export_stl(mod, path, tolerance=0.01, angular_tolerance=0.1)
+            print(f"{'  rf modifier':<15} {os.path.getsize(path) / 1024:7.0f} kB stl   (slicer modifier, unfilled PA)")
     if not a.no_assembly and not a.only:
         kids = []
         for n, s, c in M.assembly(0.0, with_hardware=True):

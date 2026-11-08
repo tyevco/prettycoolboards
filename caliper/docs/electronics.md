@@ -1,7 +1,8 @@
 # Schematics and boards
 
 > **Status: rev A schematics captured, ERC clean (2 waived, listed below). Designed, not built or tested.**
-> The boards are not laid out in this page's revision; layout, DRC and the fab outputs are added by the layout track.
+> **Layout (§7):** both boards laid out and routed; KiCad 9 and 10 DRC + schematic parity: 0 errors, 0 unconnected.
+> The slider's fab package is review-only (a J50 part/footprint mismatch, §7.7); the scale's is released.
 > Every current, voltage and part choice here is a datasheet or catalogue figure, not a measurement.
 
 The architecture of record is [SPEC](../hardware/design/SPEC.md); the net names, the ESP32 pin map and the I2C
@@ -24,8 +25,33 @@ python3 caliper/hardware/design/check_contract.py      # ESP32 pins in the netli
 python3 tools/lcsc_check.py caliper/hardware/kicad/slider/prettycool-caliper-slider.net   # LCSC stock/type check
 ```
 
-Every pin gets a short wire stub that ends in a label or a power symbol, and parts are auto-placed in titled,
-annotated groups. Do not hand-edit the `.kicad_sch` files: change the sheet module and rebuild.
+The sheets are **drawn with wires**, the way a person draws a schematic, so you can follow a connection by eye
+(the toolchain's hard wiring rule, R1–R6 in [`tools/README.md`](https://github.com/tyevco/prettycoolboards/blob/main/tools/README.md#wiring-rule)):
+
+- Each annotated group is a cluster around its anchor IC. Every satellite part sits next to the pin it serves and
+  faces it: pull-ups and pull-downs, dividers, RC filters, the TX jumper + series-resistor chains, the CC
+  resistors, the ESD part.
+- Every connection on a sheet is an orthogonal wire, with a junction dot on every T. No junction joins four
+  wires: a pull-up and a pull-down on the same net sit one grid step apart, so they make two T's.
+- A pin's wire runs straight out on the pin's own row where it can. A test point or pull-up that would reach into
+  the next row moves further out along its wire, and a test point may hang below the wire instead of above it
+  (the ESP32's USB_D-/USB_D+ test points, the fuel gauge's ALRT pull-up). Only where a column is too crowded for
+  that do the wires jog to fan the rows out: the AS5311 outputs (MAG_DO/A/IDX/INC_N/DEC_N) and the LCD
+  connector's backlight pins, where R50 sits about 45 mm below J50 pin 12.
+- Decoupling caps hang off the wire of the pin they decouple, and the power symbol sits at the end of that wire.
+- A net that leaves the sheet has one global label per cluster, wired to all of that cluster's pins.
+- A local net carries one local label as a name tag on its wire, so the net names in the netlist are unchanged.
+
+`build.py` fails if the drawing breaks the rule. The check traces the drawn wires, not the labels, and names the
+sheet, net and pins. Do not hand-edit the `.kicad_sch` files: change the sheet module and rebuild.
+
+When the generator moved from "stub + label on every pin" to drawn wires (2026-11-07), `tools/netlist_diff.py`
+showed the netlists before and after are **identical**: slider 96 nets, 125 components, 390 net members; scale
+1 net, 4 components; same net names, same component fields, same symbol UUIDs. The ERC result did not change.
+A second, independent review pass the same day traced the rendered sheets by eye. It fixed a power symbol drawn
+over the buzzer's pin, six 4-way junctions, the half-row jogs on the I2C and LCD labels, and the label jumps
+around test points on the ESP32 and the fuel gauge. The netlists were again identical to the pre-rework ones.
+This is a check of the drawing only: nothing was built or measured.
 
 | Board | KiCad project | Sheets | Rendered schematic |
 |---|---|---|---|
@@ -74,7 +100,7 @@ Reference designators are grouped by sheet: power 1–19, mcu 20s, sensor_mag 30
 | U6 | TPS22917DBVR → +3V3_UI | C2681320 | **Added during capture**: LCD logic VDD + RGB LED, also on SNS_PWR_EN (no GPIO is free) |
 | R6, R7 | 4.7 k I2C pull-ups to +3V3 | C25900 | Always-on rail: the MAX17048's SCL/SDA have internal pull-downs and read a low bus as "disconnected" |
 | R8, R9 | 10 k pull-ups on CHG_INT_N, FG_ALRT_N | C25744 | Open-drain interrupts |
-| H1–H4, FID1–3 | M2 plated holes (GND), fiducials | – | Footprints only |
+| H1–H4, FID1–3 | M2 plated holes (GND), fiducials | – | Footprints only. H1 is the support hole, H2–H4 tab clamp holes; the fourth tab hole H5 is on the board only (§7.4) |
 | TP1–TP7 | VBUS, VBAT, VSYS, +3V3, +3V3_SNS, +3V3_UI, GND | – | Bring-up |
 
 Pinouts: BQ25180 from TI SLUSE99C Table 6-1 (and the YBG0008 land pattern, the footprint is copied from
@@ -176,7 +202,8 @@ it as a bring-up fault signature). That alone would be several times the sleep b
 
 ## 4. Scale board
 
-No electronics: two plated M2 holes on GND (H1, H2), two fiducials and a PWR_FLAG. The reflector pattern and the
+No electronics: two plated M2 holes on GND (H1, H2) in the schematic, which the layout turns into the SPEC's Ø1.0
+non-plated alignment holes (§7.6), two fiducials and a PWR_FLAG. The reflector pattern and the
 back-copper ground plane are drawn by the layout script as copper/graphics (SPEC §2.2). The netlist exists so the
 layout can import the holes and fiducials the same way as the slider.
 
@@ -214,8 +241,14 @@ itself is not a PCBA part: it plugs into J50 by hand.
   datasheet could not be downloaded during capture.
 * **Backlight headroom**: 3.31 V − 3.0 V VF leaves 0.3 V across 15 Ω + the FET; a 3.1 V LED gets ~14 mA, a 2.9 V
   one ≤ 27 mA. The panel's maximum LED current is not in the cited datasheet: check it on the bought panel.
-* **Sleep current** is ≈ 33 µA (estimate), above SPEC's original 25 µA; SPEC is revised to ≤ 35 µA
+* **Sleep current** is ≈ 33 µA (estimate) against SPEC's target of ≤ 35 µA
   ([Architecture §5](architecture.md#_5-power-budget-and-battery-life)).
+* **Contract reconciliation (SPEC §10, 2026-11-07).** The layout has the clamp tabs (74 × 34 overall), the
+  single upper-band hole H1, the module in the top-left corner with an all-layer antenna keep-out, the D5 electrode
+  geometry and the scale's Ø1.0 alignment holes (§7). **Not yet in the schematics** (the board carries them as
+  board-side edits, §7.9): the fourth tab hole H5, the SMT M2 standoffs (no part chosen), the E40 seed-pad change
+  (fingers 0.30 × 3.80, RX 5.08 × 1.30) and the scale holes as NPTH. In the schematics already: RT1 populated and
+  TS enabled; IMU_INT1 has no pull (checked in the netlist).
 * **Ship mode** can only be left by plugging in USB (TS/MR is not wired to a button).
 * **RX electrode ESD**: the receive strip is exposed copper under an open mask, connected through R80 straight to a
   high-impedance op-amp input. It faces the scale, not the user, but a discharge into the beam could reach it.
@@ -223,3 +256,277 @@ itself is not a PCBA part: it plugs into J50 by hand.
 * **Back-powering**: the MAG_*, LCD_* and RGB_DIN lines go into switched rails; the firmware must drive them low
   before SNS_PWR_EN goes low.
 * Nothing here has been simulated (the simulation track owns SPICE) or built.
+
+## 7. Layout
+
+> **Status (2026-11-08): both boards laid out, routed and through the DRC + schematic-parity gate (KiCad 9.0.9:
+> 0 errors, 0 unconnected, 0 parity errors on both; KiCad 10.0.8 agrees). The slider's fab package is
+> REVIEW-ONLY**: JLC's placement check found J50's part (C2911931) does not fit its footprint (§7.7). Designed,
+> not built: nothing has been fabricated or measured, and no signal-integrity, RF or thermal analysis was run on
+> the layout. An adversarial layout review on 2026-11-08 found and fixed five defects (the USB pair, three
+> decoupling placements, a truncated electrode guard) and corrected several claims here; its findings, fixed and
+> open, are in §7.10.
+
+The boards are generated from the netlists by
+[`layout.py`](https://github.com/tyevco/prettycoolboards/blob/main/caliper/hardware/design/layout.py) (adapted from
+dial-me-spinner's) and released by
+[`release.py`](https://github.com/tyevco/prettycoolboards/blob/main/caliper/hardware/design/release.py):
+
+```sh
+# in WSL (Ubuntu 24.04, KiCad 9.0.9, Freerouting 2.1.0, FREEROUTING_JAR=/opt/freerouting/freerouting.jar)
+python3 caliper/hardware/design/layout.py --board scale                                  # place, pour, DRC
+python3 caliper/hardware/design/layout.py --board slider --route --minutes 8 --attempts 1 # place, route, pour, DRC
+python3 caliper/hardware/design/layout.py --board slider --complete                      # only if any stay open
+python3 caliper/hardware/design/release.py [--update-offsets] [--force]                  # gate, fab package
+```
+
+Coordinates below are SPEC's: board mm, origin at the lower-left of the 62 × 34 body, +y up (the beam's jaw-side
+edge is y = 0). The drill/place origin is the same point, so the CPL is in these coordinates too.
+
+### 7.1 Stack-up and rules (slider)
+
+| Layer | Use |
+|---|---|
+| F.Cu | parts, signals, GND pour |
+| In1.Cu | **solid GND plane** (layer type *power*; every GND SMD pad has its own via to it) |
+| In2.Cu | **+3V3 pour**, signals, the 8 electrode **phase buses**, and a **GND** pour inside the electrode ring |
+| B.Cu | U30 (AS5311) + C30/C31, the electrode comb and guards, 19 test pads, the MAG bus, signals; GND pour |
+
+1.0 mm, 4 layers, symmetric; JLC's standard 1.0 mm impedance stack is assumed (~0.1 mm L1–L2 prepreg). ENIG.
+Net classes: default 0.12 / 0.10 mm, vias 0.40/0.20; Power (VBUS, VSYS, VBAT, the buck-boost switch nodes)
+0.30 mm, vias 0.50/0.25; Rail3V3 (+3V3) 0.20 mm (≈ 0.7 A on 1 oz outer copper, with the In2 +3V3 pour in parallel;
+the module peaks at ≈ 0.36 A); Supply (+3V3_SNS, +3V3_UI, backlight) 0.20 mm; GND 0.30 mm; **USB 0.14 mm / 0.15 mm
+clearance**, the 90 Ω differential estimate for that prepreg (edge-coupled microstrip, εr ≈ 4.1, 35 µm copper,
+IPC-2141 approximation; it only holds on F.Cu, and the pair now runs mostly on B.Cu, §7.5). Copper to edge 0.25 mm.
+Copper is poured on all four layers over the beam band (y 0–20) where the routing leaves room. Measured in the review
+(copper incl. tracks and pads, share of the board area in y 0–20): F.Cu 67 %, In1 93 %, In2 63 %, B.Cu 65 %. The
+outer pair is balanced; the inner pair is not (93 / 63 %), a small warp bias against the 0.03 mm flatness callout.
+
+**In1 under the electrode via field.** Each phase's finger vias step 0.635 mm in x and 0.45 mm in y, 0.78 mm apart,
+and their 0.8 mm In1 antipads merge, so In1 has eight diagonal slots ≈ 5.5 mm long under y 13.5–17.1. F.Cu tracks
+that cross the via field cross those slots (a few mm per net, measured). Harmless for the slow nets; the LCD SPI lines
+cross it for ≈ 1 mm each. Not changed in rev A (smaller finger vias would only shrink the slots to 0.08 mm webs).
+
+### 7.2 Slider placement
+
+Everything in SPEC §2.1's table is placed and locked by the script. The rest is placed next to the IC pin it serves
+(decoupling, pull-ups, filters) or inside its cluster region. Where the layout differs from the table (SPEC allows
+≤ 1 mm when every rule still holds; **bold** = more than that). The SPEC §2.1 table was updated to these
+positions on 2026-11-08 (SPEC §11):
+
+| Part | SPEC §2.1 | Layout | Why |
+|---|---|---|---|
+| U10 module | origin (8.3, 24.25) | (7.85, 24.25) | the electrode comb's left end runs under the module (SPEC places both there). With the module 0.45 mm left, finger 8's via clears the module's right pad column. Antenna still flush with the top edge; body x 0.1–15.6 |
+| J50 FPC | (21.5, 8.5) | (21.5, 7.5) | at 8.5 its upper fitting-nail pad sits on the electrode via rows |
+| J2 battery | (24.5, 31.4) | (24.5, 30.6), 180° | at 31.4 the front fitting-nail pads cross the top edge (mouth toward +y as SPEC asks) |
+| SW20 BOOT | (27, 15.5) | (27, 15.7), 90° | rotated so its pads fall between the finger via rows |
+| U1 USB ESD | (53.0, 24.0) | **(50.2, 26.3)** | at 53 its VBUS pin sits under the locked D+/D− crossover behind J1's pads; still 5 mm from J1 |
+| D1 TVS, R1/R2 CC | near J1 | (51.3, 22.0) 90°; (53.4, 23.7 / 29.0) | beside J1's pads, clear of its courtyard |
+| **C30** (AS5311 100 nF) | (25.5, 6.0) bottom | **(35.45, 8.6)** bottom | review 2026-11-08: at 25.5 it was 8.1 mm from the VDD pins 18/19 (14.9 mm of track); now 1.7 mm, still inside the D2 window x 20–41, y 2.4–9.6. C31 (1 µF) stays at (36.5, 6.0). **SPEC table to update** |
+| C8 / C10 (U5 in / out) | in the cluster | (51.3, 1.55) / (49.75, 5.5) | review 2026-11-08: the pin-anchored placer found no room inside the SPEC cluster box (y ≥ 2.5, x ≥ 50.5) and left them 6.5 / 7.0 mm from U5; now 1.9 / 1.6 mm. Both sit up to 0.95 mm outside the box (the 4.2 mm height rule still holds) |
+| **U4 fuel gauge** | in the charger cluster | **(29.6, 27.2)**, beside J2 | its CELL/VDD pins then sense VBAT at the cell's connector, its I2C/ALRT lines stay short, and the cluster could not let them out (the electrode ring blocks In2/B.Cu up to x 52.4). **SPEC cluster list to update** |
+| **R60–R67, R70–R77** | x 3.5–16, y 2.5–12 | **x 1.8–10.2, y 7.0–11.2** (a ladder of 8 columns, R7n over R6n) | §7.3: with the ladder there, the TX lines reach it down the left side instead of through the corner where the module meets the electrode via field |
+| R6–R9 (I2C/alert pull-ups), C20/C21 (module 22 µ + 100 n) | – / at pad 3, < 2 mm | below the TX ladder, x 0.4–9.9, y 2.7–6.8 | the module's 3V3 pad is in its left column, 0.45 mm from the edge, and the bottom is not allowed there. **Deviation from the module datasheet's cap placement** (the module has its own decoupling). Measured in the review: C20 is **20.5 mm** (straight line) from pad 3 and C21 22.4 mm, 21.8 / 24.3 mm of track (a 0.3 mm In2 track down the left edge, the In2 +3V3 pour is broken there by the module's escapes). No top-side spot is closer than ≈ 12 mm (the antenna keep-out is above the pad, the board edge left of it). The fix is a SPEC call: a 0402 100 nF on the **bottom** under pad 3 (0.55 mm tall against the 0.75 mm housing floor gap there) |
+| **R50 / Q50 / R51** (backlight) | (25.5, 4.0) | **(27.0, 7.4) / (28.1, 3.6) / (28.7, 7.0)** | beside J50, under the glass, around the electrode feed |
+| **Q51 / R56 / R57** (piezo driver) | (40.0, 18.0) | **(47.35, 20.4) / (46.2, 23.7) / (33.7, 19.5)** | around BZ50 instead of under the glass edge; R57 (BUZZ_D pull-up) at BZ50's left |
+| **FID3** | (60.5, 32.8) | **(33.0, 27.6)** | SPEC's spot is inside J1's courtyard (it reaches y 31.9 over x 54–63) |
+| Charger / buck-boost | x 50.5–61.5, y 2.5–20.5 | U3 (55, 9), L1 (58, 9), U2 (57.2, 16.4), U5 (52.2, 4.6), U6 (53, 12.9) | TPS63802: CIN at VIN, COUT at VOUT, L1 right beside L1/L2, the FB divider R3/R4 at FB on the side away from L1; BQ25180: a locked DSBGA fan-out and its caps around the array; a locked 0.30 mm VBUS run from J1 to C1 and D1. L1 is 16 mm from U40 (SPEC ≥ 10), U60 31 mm from L1 (SPEC ≥ 15) |
+
+**Antenna.** The module's library footprint carries Espressif's 15 mm clearance as a 45 × 19.5 mm rule area and a
+matching courtyard. SPEC D4 records a 5 mm deviation, so on this instance both are replaced by the module-body
+courtyard, and the SPEC keep-out is a board rule area on all four layers: no tracks, vias, pads or pours in x 0–21,
+**y 29.2**–34 (SPEC says 29.0; the module's own top GND pad row reaches 29.1, and the antenna starts at 29.5).
+
+**Escapes.** Before routing, the module's left column (0.45 mm from the edge, so it can only escape inward) and bottom
+row, its right column, J50's five LCD pads, U60, U4 and U1's VBUS pin get a locked stub and via. The routers then leave
+those pins on In2/B.Cu instead of walling them in on F.Cu; a via the router does not use is pruned afterwards. Five
+AS5311 lines (MAG_A/B/IDX/CLK/DO) are a locked B.Cu bus from the module's left column down the left edge to U30,
+planned so that no two cross.
+
+### 7.3 Capacitive electrodes (SPEC §2.2)
+
+All of the comb is real copper on the E40 nets, so DRC and parity check it like any other copper:
+
+* **Fingers and RX are E40 pads.** The E40 instance on B.Cu holds 64 finger pads (0.30 × 3.80 at 0.635 mm,
+  x 10.68 + 0.635 k, y 13.55–17.35). Pads 1–8 are the library's seed pads resized; 56 more carry the same numbers, so
+  the phase is k mod 8. Pad 9 becomes the whole RX strip (40.64 × 1.30, y 11.05–12.35). As pads they get one mask
+  aperture each (no aperture spans two nets) and no paste. The library seed still has the pre-D5 geometry, which is
+  why DRC reports E40 as differing from its library copy.
+* **Vias and buses.** One 0.40/0.20 via per finger. The eight seed fingers (k = 0–7) have theirs in a row at y 13.75,
+  just below the module's bottom pad row; every other finger's via is at its phase's bus height. Phase p's In2 bus
+  starts at its seed via, climbs at 45° to y = 13.75 + 0.45 (7 − p) and runs under the comb to finger 56 + p. Phase 7
+  is the lowest bus and phase 0 the highest, so each new seed, one pitch to the right, finds the earlier buses already
+  above it: no crossings, one layer. The buses under the fingers are the SPEC table's "phase bus" exception to the
+  solid In2 guard.
+* **Feed.** Each seed via drops on F.Cu to y 13.3 − 0.25 n and runs left to its ladder column (x 2.3 + 1.05 n): R7n
+  (100 Ω) then R6n (0 Ω). Seed n turns lower the further right it is, so the eight stubs do not cross. The RX feed is a
+  via at (42, 11.7) with R80 right under it.
+* **Guards.** The inner guard (0.60, y 12.65–13.25, x 9.78–52.22 between the ring's sides) and the closed outer
+  ring (0.40) are GND tracks on B.Cu, stitched to In1/In2 every 2.54 mm (not under the module). The routed board
+  before the review had the inner guard cut back to x 17.4–50.42 by the clean-up (`pcbgen.trim_dangling` took its
+  ends on the ring's sides for open ends), so the first ten fingers had no guard between them and the RX strip.
+  Restored, and `trim_dangling` now treats an end on another segment's body as connected. In2 inside the ring is a GND pour around the buses.
+  Freerouting gets In2 and B.Cu inside the ring as keep-outs (written into its DSN), the grid router as a temporary
+  rule area, so no other net is routed under the electrodes (checked: no foreign track or via inside the ring).
+* The finger vias sit inside the finger mask apertures and are open there (ORDER-NOTES says so).
+
+**Bottom side** (SPEC D2): only U30 (AS5311, (31, 6), long axis along x, pads inside y 2.4–9.6) and C30/C31
+(C30 at (35.45, 8.6) beside the VDD pins, C31 at (36.5, 6.0)) over the beam band; the 19 test pads on a 2.54 grid
+at y 22.6 / 25.14, x 22.5–47.9, assigned by proximity (MCU next to the module, the rails at the charger end; TP22 /
+TP23 (D+ / D−) at the east end of the lower row, on the two sides of the USB pair, §7.5); the tab holes H2–H5 have no exposed bottom
+copper (B.Mask dropped on the instance pads).
+
+### 7.4 Outline, holes, tabs
+
+74 × 34 overall: the 62 × 34 body with 1 mm corners plus the two 6 × 14 mm end tabs (x −6…0 and 62…68, y 2.5…16.5),
+with 0.5 mm fillets at the tab roots (a router bit leaves those anyway). H1 (18.75, 24) is the support hole; H2–H5 are
+the tab clamp holes at (−3.5 / 65.5, 5.5 / 14.0), plated GND, Ø4.4 top pads for the SMT standoffs. **H5 is
+board-only**: the schematic still has H1–H4. Its footprint is the same and its pad is on GND.
+
+### 7.5 Routing result (slider)
+
+The slider is fully routed: **0 unconnected** in KiCad 9 and KiCad 10. After the review: 2955 mm of track (F.Cu
+1054, In2 933, B.Cu 968 mm) and 481 vias, 234 of them locked (electrode comb, escapes, the USB pair, GND fan-out,
+stitching). The review's changes were made by moving the parts, ripping up the copper they disturbed and closing it
+again with `layout.py --complete`, not by a fresh Freerouting run; `layout.py` carries the same placement and
+pre-routes, so a fresh run starts from them (checked with `--place-only`: no pad conflicts, no clearance errors).
+
+How it got there: Freerouting 2.1 (8 min) leaves ≈ 90 connections open on this board, mostly around the module.
+Its passes stall, and in some runs it hung after an internal error. The grid router (`tools/finish_route.py`)
+connects the rest, with rip-up, then the pours, the clean-up and the GND stitching are added and the loop repeats
+until DRC shows nothing open (the logged run needed 15 finisher rounds). Freerouting has some randomness, so a
+re-run gives a different but equivalent board. The run also found and fixed three generic toolchain bugs:
+
+* `finish_route`: obstacles were grown by the new net's clearance only; KiCad uses the larger of the two nets'
+  (the 0.15 mm USB class), so its new copper failed DRC and was thrown away again. It now also keeps the best round,
+  and gives every failing net its turn at rip-up.
+* `pcbgen.remove_debris` / `trim_dangling`: a track whose round end overlaps a pad, but whose end point lies just
+  outside it, was treated as a floating spur and deleted, re-opening connections after every routing pass.
+* `pcbgen` / `release.sync_fields` now copy the symbols' Description and Datasheet into the footprints (KiCad 10's
+  parity compares them).
+
+**USB D+/D−.** Before the review they were two independently routed tracks, 85 % on B.Cu: D+ above the test-pad
+rows (y 28.6), D− between them (y 23.9), up to 4.7 mm apart, with no adjacent plane under 50 mm (D+) / 47 mm (D−)
+of them (In2 there was signal routing, not pour) and about 25 In2 nets crossing broadside 0.1 mm below (LCD_MOSI,
+LCD_SCK, LCD_BL and CAP_TX4 among them). The 0.14 mm "90 Ω" class width described none of it. Now
+(`preroute_usb_pair`) they are **one locked pair**, 0.14 mm tracks 0.30 mm apart, on B.Cu from the module's escape
+vias along y 19.2–19.6 (just above the electrode ring) and up a 45° leg to U1, over an **In2 GND strip**
+(`USB_REF_IN2`, 0.6 mm wider than the pair each side, x 15–46.6, tied to In1 by 10 GND vias along its edges; the
+routers are kept off it). D+ climbs to F.Cu west of U1 and enters pin 1, so the ESD array is in the line (J1 →
+pin 6 → pin 1 → module; before, U1 hung off D+ as a stub); TP22 is a 2.7 mm stub, D− runs through TP23. U1's GND
+pin 2 has a locked via of its own beside the D+ climb. Measured: D+ 62.3 mm, D− 64.4 mm (2.1 mm mismatch); length
+with no plane directly under it 17.6 / 15.8 mm (the stretch under the module's escape-via field, x 8–15, plus the
+short F.Cu ends); In2 nets still under the pair: BTN_ZERO_N 3.6 mm, BTN_HOLD_N 3.1 mm and a few ≤ 1.4 mm. The pair
+is an L4-over-L3 structure, not the L1-over-L2 microstrip the class width was estimated for, so ORDER-NOTES no
+longer asks for impedance control. Full-speed USB (≥ 4 ns edges) is electrically short at these lengths either
+way; the change is about common-mode loop area and crosstalk.
+
+Not optimised by hand: the routing is what the two routers produced. It is dense and in places indirect (look at
+the copper PDFs in `fab/slider/`). A hand clean-up pass in KiCad before an order would be worth it, especially
+around the module and the charger.
+
+### 7.6 DRC and schematic parity
+
+| Board | KiCad | Errors | Unconnected | Parity errors | Warnings |
+|---|---|---|---|---|---|
+| slider | 9.0.9 (WSL, the gate) | **0** | **0** | **0** | 10: `lib_footprint_mismatch` ×6 (E40, U10, H2–H5), `silk_edge_clearance` ×4 |
+| slider | 10.0.8 (Windows, scratch copy) | **0** | **0** | **0** | 14: the same 10, plus `lib_footprint_mismatch` on FID1–3 and J1 (KiCad 10's own library versions of those footprints differ from 9's) |
+| scale | 9.0.9 | **0** | **0** | **0** | 5: `lib_footprint_mismatch` ×2 (H1, H2), `isolated_copper` ×1, `net_conflict` ×2 (parity warning) |
+| scale | 10.0.8 | **0** | **0** | **0** | 7: the same 5 plus `lib_footprint_mismatch` on FID1/FID2 (KiCad 10 library) |
+
+Why each warning is intended:
+
+* **E40**: the instance carries the SPEC D5 electrode geometry (64 fingers + the full RX strip as pads); the library
+  seed is pre-D5. Fix in `sheets/sensor_cap.py` (below), not on the board.
+* **U10**: the library's 15 mm antenna rule area and courtyard are removed on purpose (SPEC D4 deviation, §7.2).
+* **H2–H5**: B.Mask removed from the tab-hole pads (no exposed copper 0.15 mm over the beam, SPEC §2.1).
+* **silk_edge_clearance**: J1 overhangs the right edge by 1 mm by design, and the module sits 0.1 mm from the left
+  edge; the fab clips that silk.
+* **Scale H1/H2** (`lib_footprint_mismatch`, `net_conflict` "no pad for pin 1 (GND)"): the netlist still has plated
+  M2 holes; the instances are the SPEC Ø1.0 NPTH alignment holes, which have no copper pad for the GND pin.
+* **Scale `isolated_copper`**: the back GND plane connects to nothing once the holes are NPTH (the scale is bonded
+  with no fastener). Intentional for now; whether to tie it to the beam is an open question (§7.9).
+
+The full reports: `caliper/hardware/kicad/<board>/*-drc.rpt` (KiCad 9, `--severity-all`), `caliper/hardware/fab/<board>/drc-parity.rpt`
+(the release gate, errors only) and `fab/<board>/drc-kicad10-second-opinion.rpt`.
+
+### 7.7 Release (fab package)
+
+`release.py` writes, per board: gerbers + drill (zip), PDFs per side and per copper layer, the schematic PDF, 3D
+renders and `ORDER-NOTES.md`; for the slider also the JLCPCB BOM and CPL. Order settings: [Assembly](assembly.md).
+
+* **Scale: released** (gate passed; no BOM/CPL: no parts).
+* **Slider: REVIEW-ONLY** (`REVIEW-ONLY.txt` in the folder). The DRC/parity gate passed, but the JLC placement
+  check (every EasyEDA pad put down at its CPL point must land on copper) failed for **J50**: the C2911931
+  (0.5K-AX-13PWB) part's two fitting nails sit 1.95 mm from its contact row, the Hirose FH12 footprint's 3.25 mm, so
+  with the contacts aligned the nails land 1.3 mm off their pads. Either the footprint or the part must change
+  (schematic track). Every other row passes.
+* `jlc_offsets.json`: 42 LCSC parts. 33 fitted from the EasyEDA API on 2026-11-08; 9 copied from dial-me-spinner's
+  table (same LCSC code and same KiCad footprint), after EasyEDA rate-limited the first pass with HTTP 403 (each
+  entry says where it came from).
+
+### 7.8 Renders
+
+| | Top | Bottom |
+|---|---|---|
+| Slider (KiCad 9, `release.py`) | ![slider top, KiCad 9](../hardware/fab/slider/prettycool-caliper-slider-3d-top.png) | ![slider bottom, KiCad 9](../hardware/fab/slider/prettycool-caliper-slider-3d-bottom.png) |
+| Slider (KiCad 10) | ![slider top, KiCad 10](../hardware/fab/slider/prettycool-caliper-slider-3d-top-kicad10.png) | ![slider bottom, KiCad 10](../hardware/fab/slider/prettycool-caliper-slider-3d-bottom-kicad10.png) |
+
+![scale top, KiCad 9](../hardware/fab/scale/prettycool-caliper-scale-3d-top.png)
+
+The module has no 3D body in the render (no model is installed for the KiCad footprint); the display glass, the
+battery and the standoffs are not on the board. The KiCad 10 renders are copied into `fab/` by hand after a release
+(`release.py` regenerates the folder and runs KiCad 9 only).
+
+### 7.9 Open layout items
+
+* **J50 part vs footprint** (above): the slider package stays review-only until it is fixed.
+* **SPEC table updates** for the moves above: done 2026-11-08 (SPEC §2.1 and §11). The mechanics re-extracted the
+  envelope from this board and re-ran `clash_check.py`: 0 clashes ([Mechanics](mechanical.md) §12). With the module
+  at x 7.85 the PA-CF moving inside jaw is 4.70 mm in plan from the antenna, inside SPEC D4's 5 mm (an RF risk).
+* **Schematic-track items the board carries as layout edits**: H5 (board-only), the E40 footprint (should become
+  the 64-finger + RX geometry; for a bottom placement at rotation 0 its RX pad must sit at local y −3.75), the scale's
+  Ø1.0 NPTH holes, and the SMT M2 standoffs (no part yet).
+* **Module 3V3 decoupling**: C20/C21 are 20.5 / 22.4 mm from pad 3 (§7.2); a SPEC call (a bottom-side 0402 under the
+  pad) would fix the 100 nF. **USB**: the first 7 mm of the pair, under the module's escape-via field, has no plane
+  directly under it (§7.5).
+* **Antenna**: 5 mm clearance, not 15 (SPEC D4); BLE/Wi-Fi range test at bring-up.
+* **Electrode buses under the fingers** (In2, 0.1 mm under B.Cu): ≈ 17 fF per bus/finger crossing. Every finger and
+  every bus is driven through 100 Ω, so this crosstalk between driven nodes does not move a finger's potential; the
+  coupling that matters is into the RX strip, and the In2 GND guard sits between the buses and the strip. Worth a
+  look at bring-up, not expected to be a fixed offset source.
+* **Scale back plane** floats (no fastener); decide whether to tie it to the beam.
+* **Freerouting** stalls on this board; the grid router does most of the closing (§7.5). Re-runs differ.
+* **Hand review** of the routing in KiCad before ordering (density around the module and the charger).
+
+### 7.10 Layout review (2026-11-08)
+
+An adversarial review of the routed slider and the scale, measured with pcbnew scripts on the board files (KiCad
+9.0.9 in WSL) and by looking at per-layer plots and the renders. **Fixed** = changed in `layout.py` / the tools and
+on the board, then the DRC/parity gate and `release.py` re-run.
+
+| Check | Finding | Result |
+|---|---|---|
+| USB pair, ESD, reference plane | two separate tracks up to 4.7 mm apart, no adjacent plane under ≈ 50 mm, In2 signals crossing 0.1 mm below, U1 a stub on D+ | **Fixed** (§7.5): locked coupled pair over an In2 GND strip, U1 in line |
+| Decoupling distance (straight line, cap pad to IC pin) | C8 / C10 (U5 in/out) 6.5 / 7.0 mm (the placer's cluster box had no room; the layout run's WARN was not acted on); C30 (AS5311 100 nF) 8.1 mm, 14.9 mm of track | **Fixed**: 1.96 / 1.66 / 1.71 mm |
+| | C20 / C21 (module 22 µ / 100 n) 20.5 / 22.4 mm (§7.2 said 13) | open: SPEC call (§7.2) |
+| | the rest: BQ25180 C1–C3 2.3–2.6 mm, TPS63802 C4/C5 1.65 mm and C6 3.45 mm, U60 C60–C62 1.65–2.3 mm, U40 C42 1.9 mm, C55 1.5 mm, C12 3.2 mm, C31 4.0 mm, C50/C51 2.1/3.4 mm | acceptable |
+| BQ25180 / TPS63802 loops | CIN / COUT 1.65 mm from VIN / VOUT on F.Cu, L1 2.3 mm from the switch pins with short F.Cu leads; the CIN/COUT GND returns reach the IC GND through vias to In1 (0.1 mm below), not on top, because L1 and the VSYS feed sit between them; L1 16 mm from U40, U60 31 mm from L1 | acceptable (not TI's top-layer GND loop; In1 is right under it) |
+| Electrode inner guard | cut back to x 17.4–50.42 by the clean-up | **Fixed** (§7.3) |
+| Electrode comb vs SPEC §2.2 | 64 fingers 0.30 × 3.80 at 10.68 + 0.635 k, phase k mod 8, mask open, no paste; RX 10.68–51.32 × 11.05–12.35; ring 9.58–52.42 / 10.35–18.05, 0.40 wide; no foreign copper inside the ring on B.Cu or In2; In2 guard pour 189 mm² in one piece; comb and buses identical to a fresh generation | matches |
+| Scale vs slider | 38 cells, coupler 4.58 wide at 5.08 pitch from scale x 3.73 (beam 18.23), y 10.85–17.15; Ø1.0 NPTH at scale x 1.5 / 198.5; the front is one mask opening | matches SPEC §2.2 (beam = scale + 14.5; slider electrodes beam 18.68–59.32 at R = 0) |
+| Finger vias | 0.40 vias in 0.30 fingers: the annulus is 0.05 wider than the finger each side (under mask), the drill is open in the electrode; their In1 antipads merge into 8 slots (§7.1) | accepted, noted |
+| Bottom side, beam band | parts only U30, C30, C31 (inside x 20–41, y 2.4–9.6) and E40; exposed copper in y < 20.5 only on those; every via tented on both sides (no via aperture in either mask gerber) | matches D2 |
+| AS5311 vs tape | U30 centre (31.0, 6.0) = tape centre y 6.0, long axis along x, pads y 2.8–9.2, inside the channel window | matches SPEC; the Hall-array position inside the package was not checked against the datasheet drawing |
+| Antenna | module body x 0.1–15.6, y 13.95–34.05 (flush with the top edge, top-left corner); no pad, track, via or pour on any layer in x 0–21, y 29.2–34; the pours reach y 29.0–29.2 (0.3 mm short of the antenna area at 29.5; the module's own GND pad row reaches 29.1) | matches the recorded D4 deviation |
+| In1 plane under fast lines | solid (one fill outline, 92 % of the beam band) apart from via antipads and the finger-via slots; the USB pair is on B.Cu over its In2 strip; LCD SPI lines cross the slots for ≈ 1 mm each | acceptable |
+| Thermal reliefs | all pours thermal (0.3 gap / 0.3 spoke); no starved-thermal or unconnected pad in DRC | acceptable |
+| Copper balance (y 0–20) | F 67 %, In1 92 %, In2 65 %, B 66 % | outer pair balanced, inner not (§7.1) |
+| Silk | 0.8 mm / 0.15 mm text (JLC's minimum), 34 references hidden where there is no room | legible at the limit |
+| CPL rotations | JLC placement simulation on every row: all land on copper except J50 (the known part/footprint mismatch); the moved C8 / C10 / C30 pass | unchanged: review-only |
+| Fab notes | asked for impedance control on a structure that did not exist; said vias were tented "on top" (they are tented on both sides) | **Fixed** in `release.py` (ORDER-NOTES) and [Assembly](assembly.md) |
+| KiCad 10 | a zero-length track left by the clean-up was a `tracks_crossing` error in KiCad 10 only | **Fixed**: `finish()` drops zero-length segments |
+
+Not checked: no field solver, SI, RF or thermal simulation; the routing outside the areas above was not
+hand-reviewed. The mechanical clash check was not part of this review; the mechanics track ran it afterwards on the
+reviewed board (C8 / C10 / C30 at their new positions): 0 clashes ([Mechanics](mechanical.md) §12).

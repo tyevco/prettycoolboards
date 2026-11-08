@@ -4,6 +4,11 @@ Status: desk research and hand calculations only. Nothing here has been built or
 **[UNVERIFIED]** marks values I could not confirm from a primary datasheet. **[EST]** marks my own
 estimates or models. **(TVP)** follows the project's convention: to verify on the prototype.
 
+> **Superseded context (2026-11-08).** This note was written against the 2026-11-07 mechanics. Since then the
+> manual lock moved to u 19 (left of the battery pocket, pushing through a GFRP rod), the back cover became a closed
+> back web plus a battery door, and the sliding force is 3.9 N oiled ([Mechanics](../mechanical.md)). The
+> mounting positions and loads below were not re-checked against that layout.
+
 Context used (read only): `caliper/hardware/design/SPEC.md` §1, §2.1, §3, §5, §7; `caliper/docs/mechanical.md`
 §2 and §4 (the Y loop, the M3 lock screw at u 63 that clamps the brass Y gib, the 8 N sliding force, the back-cover
 defect); `hardware/mechanical/params.py` (housing u 0.5…78, y −2.8…49.2, z −8.6…+7.4; roller at u 74.6);

@@ -1,0 +1,26 @@
+** Drc report for prettycool-caliper-scale.kicad_pcb **
+** Created on 2026-11-08T07:42:33-0800 **
+** Report includes: Errors, Warnings, Exclusions **
+
+** Found 3 DRC violations **
+[lib_footprint_mismatch]: Footprint 'MountingHole_2.2mm_M2_Pad_Via' does not match copy in library 'MountingHole'.
+    Local override; warning
+    @(101.5000 mm, 86.0000 mm): Footprint H1
+[lib_footprint_mismatch]: Footprint 'MountingHole_2.2mm_M2_Pad_Via' does not match copy in library 'MountingHole'.
+    Local override; warning
+    @(298.5000 mm, 86.0000 mm): Footprint H2
+[isolated_copper]: Isolated copper fill
+    Local override; warning
+    @(100.3000 mm, 89.2000 mm): Zone 'GND_BACK' [GND] on B.Cu, priority 0
+
+** Found 0 unconnected pads **
+
+** Found 2 Footprint errors **
+[net_conflict]: No pad found for pin 1 (GND) in schematic.
+    Local override; warning
+    @(101.5000 mm, 86.0000 mm): Footprint H1
+[net_conflict]: No pad found for pin 1 (GND) in schematic.
+    Local override; warning
+    @(298.5000 mm, 86.0000 mm): Footprint H2
+
+** End of Report **

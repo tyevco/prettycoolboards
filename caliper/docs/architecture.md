@@ -10,7 +10,7 @@ numbers are in [Schematics and boards](electronics.md).
 
 ## 1. Overview
 
-A 150 mm caliper whose slider carries one 62 × 34 mm, 4-layer board. The slider reads its position from an
+A 150 mm caliper whose slider carries one 4-layer board, 74 × 34 mm (a 62 × 34 body plus two end tabs that the housing clamps next to the sensors). The slider reads its position from an
 **AS5311 magnetic linear encoder** over 2 mm-pole magnetic tape glued into the beam, and, as an experiment that can
 be cut out with jumpers, from an **8-phase capacitive scale** (a passive 200 × 7 mm PCB bonded into the beam). An
 **ESP32-S3-MINI-1** runs everything: the reading on a **1.14 in colour IPS** display, three buttons, an RGB LED and a
@@ -50,7 +50,7 @@ flowchart LR
 | | ESP32-S3-MINI-1-N4R2 (chosen) | nRF52840 module + nRF7002 Wi-Fi companion |
 |---|---|---|
 | Radios | BLE 5 + 2.4 GHz Wi-Fi in one module, PCB antenna, certified | BLE from the nRF52840, Wi-Fi 6 from a second chip with its own antenna, RF layout and certification |
-| Parts / area | One 15.4 × 20.5 mm module | Two modules (or a module + a QFN with RF matching) on a 62 × 34 mm board that already carries a display, a sensor and a comb |
+| Parts / area | One 15.4 × 20.5 mm module | Two modules (or a module + a QFN with RF matching) on a 74 × 34 mm board that already carries a display, a sensor and a comb |
 | USB | Native USB 2.0 FS (CDC + MSC + HID in TinyUSB) | Native USB on the nRF52840 |
 | Deep sleep | 7–8 µA (module datasheet v1.7 Table 6-7) | ~1.5–3 µA System ON idle (nRF) |
 | Active current | 13–33 mA CPU (modem sleep, 40–80 MHz), 189 mA peak BLE TX at 0 dBm, 355 mA Wi-Fi TX peak | Much lower: nRF BLE TX ~5 mA |
@@ -67,14 +67,15 @@ stocked at LCSC; 4 MB of flash holds the firmware plus a LittleFS log of thousan
 
 | | AS5311 magnetic (primary) | Capacitive 8-phase (experimental) | Optical (incremental strip + quadrature sensor) |
 |---|---|---|---|
-| Resolution | 0.488 µm/count (4× quadrature), 12-bit absolute within each 2 mm pole pair | Set by the ADC/demodulation: ~1/500 of 5.08 mm ≈ 10 µm expected | 10–25 µm with hobby-grade strips (e.g. 150–180 LPI) |
+| Resolution | 0.488 µm internal: the 4× quadrature count (1024 edges per 2 mm pole pair = 1.953 µm/count) interpolated with the 12-bit SSI position inside the pole pair (2 mm / 4096 = 0.488 µm) | Set by the ADC/demodulation: ~1/250 of the 2.54 mm half pitch ≈ 10 µm expected | 10–25 µm with hobby-grade strips (e.g. 150–180 LPI) |
 | Robustness | Insensitive to coolant, dust, oil, light; 0.3 ± 0.1 mm gap | Sensitive to moisture and contamination in the 0.15 mm gap, and to the slider's tilt | Needs a clean, sealed path; dust and scratches drop counts |
-| Absolute? | Within 2 mm (SSI) plus counting; zero on ZERO | Within 5.08 mm | No |
+| Absolute? | Within 2 mm (SSI) plus counting; zero on ZERO | Within 2.54 mm (half pitch: the forward/reverse burst that cancels the ADC delay halves the range), then tracked, up to ≈ 25 mm/s | No |
 | Parts | One IC + magnetic tape ($12.63 IC, tape extra) | One op-amp + copper (cheap) but a second PCB in the beam and much firmware | Emitter/detector + a strip + optics alignment |
 | Risk | Supply: 80 pcs at LCSC; 16 mA while on | Unproven here: it is what commercial calipers use, but their ASICs do the hard part | Mechanical alignment in a printed housing |
 
-The AS5311 is the low-risk route to "electronics are not the limit" (SPEC §1): its resolution is ~20× finer than
-the 0.01 mm display and it is insensitive to the shop environment. The capacitive scale is built alongside it as an
+The AS5311 is the low-risk route to "electronics are not the limit" (SPEC §1): with the SSI interpolation
+(SPEC §4.1, decision D1) its resolution is ~20× finer than the 0.01 mm display (the bare quadrature count, 1.95 µm,
+would be ~5× finer) and it is insensitive to the shop environment. The capacitive scale is built alongside it as an
 experiment because it is the low-power route (the commercial calipers run for years on a coin cell), and it costs
 only an op-amp, 18 jumpers/resistors and copper. With R60–R67 and R80 left off it is electrically absent. Optical
 lost on contamination and alignment in a printed slider.
@@ -91,7 +92,8 @@ loses regulation for the bottom ~25–35 % of the cell's capacity, exactly when 
 datasheet Table 6-4) pull the cell lower still; the S3 needs 3.0–3.6 V. The **TPS63802** buck-boost keeps +3V3
 regulated from 1.3 V to 5.5 V in, with 2 A out. The price is quiescent current: 11 µA Iq plus 5.5 µA in its
 feedback divider (the datasheet limits the lower resistor to 100 kΩ), against ~2 µA for an LDO. That is the largest
-single line in the sleep budget below, and the reason SPEC's sleep target moved from 25 µA to 35 µA.
+single line in the sleep budget below, and the reason SPEC's sleep target is ≤ 35 µA (the first-draft figure was
+below what the buck-boost alone draws).
 
 ### 3.4 Smaller decisions made during capture
 
@@ -102,7 +104,22 @@ single line in the sleep budget below, and the reason SPEC's sleep target moved 
   shares SNS_PWR_EN with the sensor rail.
 * **WS2812B-2020-V6 (3.3–5.3 V)** on 3.3 V: no level shifter and no 5 V rail.
 * **Buttons with 100 k pull-ups + 100 nF:** no static current, hardware debounce, and they work as ext1 wake sources
-  without keeping the RTC pull-ups powered.
+  without keeping the RTC pull-ups powered. IMU_INT1 joins them in the same ext1 ANY_LOW mask: the LIS2DW12 drives it
+  push-pull, active low, latched, and the net has no pull at all (SPEC §5).
+
+### 3.5 Decisions made in the contract reconciliation (SPEC §10)
+
+* **Landscape display, module in the top-left corner (D4).** The portrait glass filled the board's height, which left
+  the MINI-1, MODE and the USB-C fighting for the same 23 mm at the right end, and put the antenna over the LiPo
+  and 1 mm from the USB-C shell. Now the glass (31 mm along the beam) sits over the beam band, the module's antenna
+  is flush with the top edge in the top-left corner with an all-layer keep-out, the battery pocket moves 9.5 mm
+  right, and the buttons and USB-C share the upper band. The reading gets the 240 px axis, so the digits are about
+  1.8× wider. Espressif's 15 mm side clearance does not fit; 5 mm does, and range is a bring-up test.
+* **Clamp tabs (D3).** Nothing can sit under the board over the beam (0.15 mm), so the board grows two end tabs that
+  the housing towers pull up against clamp faces with SMT M2 standoffs. They are the board's Z datum, a few mm from
+  the AS5311 and the electrodes; the flatness callout (≤ 0.03 mm over the sensor band) covers the span between.
+* **LIVE carries the active profile (D6).** 12 bytes instead of 10, then 20 with the capture modes (SPEC §8); the app
+  accepts all three, so old firmware still works.
 
 ## 4. Power tree
 

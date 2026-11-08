@@ -1036,7 +1036,7 @@
 	)
 	(text "AS5311 linear encoder (BOTTOM side, over the magnetic tape)"
 		(exclude_from_sim no)
-		(at 15.24 20.32 0)
+		(at 15.24 15.24 0)
 		(effects
 			(font
 				(size 2 2)
@@ -1048,7 +1048,7 @@
 	)
 	(text "Centred at (31, 6.0) on the bottom, long axis along X (beam axis), SPEC §2.1. Air gap 0.3 +/-0.1 mm to the tape.\n3.3 V operation: VDD5V and VDD3V3 both on +3V3_SNS (datasheet §7.7), 100n + 1u at pin 19.\nA/B -> PCNT (4x: 0.488 um/count), Index once per 2 mm pole pair, SSI (CSn/CLK/DO) for the 12-bit absolute\nposition + OCF/COF/LIN/MagINC/MagDEC. CSn must be low for A/B/Index. Prog to VSS (no OTP in rev A). PWM unused.\nNo copper pour, vias or magnetic parts in the tape window under the IC beyond what the bottom layer rules allow."
 		(exclude_from_sim no)
-		(at 15.24 24.13 0)
+		(at 15.24 19.05 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1056,23 +1056,11 @@
 			)
 			(justify left top)
 		)
-		(uuid "f83538c0-54ab-5159-863f-86ef90102a07")
-	)
-	(rectangle
-		(start 12.7 17.78)
-		(end 143.51 101.6)
-		(stroke
-			(width 0.1)
-			(type dash)
-		)
-		(fill
-			(type none)
-		)
-		(uuid "de61e286-328a-5d35-9201-4af81635e3fc")
+		(uuid "450bb9a2-fa65-5722-8613-e5e6d3418f6a")
 	)
 	(text "Magnetic-field indicator pull-ups"
 		(exclude_from_sim no)
-		(at 151.13 20.32 0)
+		(at 15.24 31.75 0)
 		(effects
 			(font
 				(size 2 2)
@@ -1084,7 +1072,7 @@
 	)
 	(text "MagINCn / MagDECn are open drain (datasheet Table 1, §4.1): 10k to +3V3_SNS, so they read low (= 'alarm')\nwhen the sensor rail is off; the firmware only reads them with SNS_PWR_EN high."
 		(exclude_from_sim no)
-		(at 151.13 24.13 0)
+		(at 15.24 35.56 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1092,23 +1080,11 @@
 			)
 			(justify left top)
 		)
-		(uuid "05861c00-f215-5e56-b273-378c0b6804b5")
-	)
-	(rectangle
-		(start 148.59 17.78)
-		(end 257.81 43.18)
-		(stroke
-			(width 0.1)
-			(type dash)
-		)
-		(fill
-			(type none)
-		)
-		(uuid "27e1e53d-c6ad-51b1-9564-08a45695d448")
+		(uuid "f119d155-b4c2-580f-9118-39fe027b1df2")
 	)
 	(text "Test points"
 		(exclude_from_sim no)
-		(at 265.43 20.32 0)
+		(at 15.24 40.64 0)
 		(effects
 			(font
 				(size 2 2)
@@ -1120,7 +1096,7 @@
 	)
 	(text "Quadrature + index for a scope / logic analyser during bring-up"
 		(exclude_from_sim no)
-		(at 265.43 24.13 0)
+		(at 15.24 44.45 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1128,11 +1104,11 @@
 			)
 			(justify left top)
 		)
-		(uuid "1092a922-ac1f-5596-b5d8-d77b1251661c")
+		(uuid "42f8a4f1-6597-5454-baa6-cc28b4d28936")
 	)
 	(rectangle
-		(start 262.89 17.78)
-		(end 331.47 55.88)
+		(start 12.7 12.7)
+		(end 143.51 125.73)
 		(stroke
 			(width 0.1)
 			(type dash)
@@ -1140,495 +1116,11 @@
 		(fill
 			(type none)
 		)
-		(uuid "40b280a3-dda7-5dff-ab54-8ffaf83ff767")
-	)
-	(symbol
-		(lib_id "Device:C")
-		(at 33.02 43.18 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "b33b965f-ac4a-55f1-9dde-451efa9bd2f6")
-		(property "Reference" "C30"
-			(at 33.02 39.548 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "100n"
-			(at 33.02 46.812 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-			(at 33.02 43.18 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 33.02 43.18 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Unpolarized capacitor"
-			(at 33.02 43.18 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "MPN" "CL05B104KO5NNNC"
-			(at 33.02 43.18 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Manufacturer" "Samsung Electro-Mechanics"
-			(at 33.02 43.18 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C1525"
-			(at 33.02 43.18 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "7c753713-7415-5e19-8d28-63b94f97d3f5")
-		)
-		(pin "2"
-			(uuid "a900d750-88c3-56d6-8131-8f6fbd626ba2")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/e4404b34-3f55-50db-8321-51b9507445ac"
-					(reference "C30")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 29.21 43.18) (xy 26.67 43.18))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "7663e2d0-ffb7-5010-b0aa-b7191d32f33f")
-	)
-	(symbol
-		(lib_id "power:VCC")
-		(at 26.67 43.18 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "069003ac-a045-54f8-b096-100def90ed1f")
-		(property "Reference" "#PWR04001"
-			(at 26.67 43.18 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "+3V3_SNS"
-			(at 23.37 43.18 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" ""
-			(at 26.67 43.18 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 26.67 43.18 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 26.67 43.18 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "9de15b24-585b-595e-8d40-c3536214362e")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/e4404b34-3f55-50db-8321-51b9507445ac"
-					(reference "#PWR04001")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 36.83 43.18) (xy 39.37 43.18))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "9bd06882-01e7-5331-9ffd-a750b9c14f17")
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 39.37 43.18 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "619c7c60-4946-5a14-816d-59fdd693976b")
-		(property "Reference" "#PWR04002"
-			(at 39.37 43.18 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "GND"
-			(at 42.67 43.18 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Footprint" ""
-			(at 39.37 43.18 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 39.37 43.18 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 39.37 43.18 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "b6a7d77e-5171-533b-9388-2402fd3a9aec")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/e4404b34-3f55-50db-8321-51b9507445ac"
-					(reference "#PWR04002")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:C")
-		(at 68.58 43.18 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "81d1229d-9a0a-5eb8-a0e9-1b8007aa5190")
-		(property "Reference" "C31"
-			(at 68.58 39.548 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "1u"
-			(at 68.58 46.812 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-			(at 68.58 43.18 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 68.58 43.18 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Unpolarized capacitor"
-			(at 68.58 43.18 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "MPN" "CL05A105KA5NQNC"
-			(at 68.58 43.18 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Manufacturer" "Samsung Electro-Mechanics"
-			(at 68.58 43.18 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C52923"
-			(at 68.58 43.18 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "9bea6d57-98f8-57c4-8112-6f960aee1af6")
-		)
-		(pin "2"
-			(uuid "5322aa3f-5300-5ede-a609-912277b451dc")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/e4404b34-3f55-50db-8321-51b9507445ac"
-					(reference "C31")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 64.77 43.18) (xy 62.23 43.18))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "9eaefba7-dcc9-5e08-9213-3f51022d4104")
-	)
-	(symbol
-		(lib_id "power:VCC")
-		(at 62.23 43.18 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "57d7837c-f632-5beb-9c1f-2fc28cd2d7ac")
-		(property "Reference" "#PWR04003"
-			(at 62.23 43.18 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "+3V3_SNS"
-			(at 58.93 43.18 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" ""
-			(at 62.23 43.18 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 62.23 43.18 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 62.23 43.18 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "1214ea00-f159-58fc-bf40-42e9154ec23d")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/e4404b34-3f55-50db-8321-51b9507445ac"
-					(reference "#PWR04003")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 72.39 43.18) (xy 74.93 43.18))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "93b0637f-7494-50b4-a1d2-c64be9f5bd76")
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 74.93 43.18 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "e8699747-8ffa-5867-920c-f97b8d8bbf9a")
-		(property "Reference" "#PWR04004"
-			(at 74.93 43.18 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "GND"
-			(at 78.23 43.18 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Footprint" ""
-			(at 74.93 43.18 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 74.93 43.18 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 74.93 43.18 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "3cfd9157-d383-5e12-8e89-0e7ea10ebb8a")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/e4404b34-3f55-50db-8321-51b9507445ac"
-					(reference "#PWR04004")
-					(unit 1)
-				)
-			)
-		)
+		(uuid "97e302c6-d667-5d48-af47-485d0045fa7a")
 	)
 	(symbol
 		(lib_id "caliper:AS5311")
-		(at 111.76 68.58 0)
+		(at 48.26 88.9 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -1636,25 +1128,25 @@
 		(dnp no)
 		(uuid "468d5d2f-617c-5076-8168-77590d5f1f95")
 		(property "Reference" "U30"
-			(at 99.06 47.5 0)
+			(at 36.8 70.66 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify right bottom)
+				(justify right)
 			)
 		)
 		(property "Value" "AS5311-ATST"
-			(at 99.06 49.8 0)
+			(at 36.8 72.41 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify right bottom)
+				(justify right)
 			)
 		)
 		(property "Footprint" "Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm"
-			(at 111.76 68.58 0)
+			(at 48.26 88.9 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1663,7 +1155,7 @@
 			)
 		)
 		(property "Datasheet" "https://ams-osram.com/products/sensor-solutions/position-sensors/ams-as5311-linear-position-sensor"
-			(at 111.76 68.58 0)
+			(at 48.26 88.9 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1672,7 +1164,7 @@
 			)
 		)
 		(property "Description" "High-resolution magnetic linear encoder, 2.0 mm pole pair, 12-bit SSI + A/B/Index, TSSOP-20"
-			(at 111.76 68.58 0)
+			(at 48.26 88.9 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1681,7 +1173,7 @@
 			)
 		)
 		(property "MPN" "AS5311-ATST"
-			(at 111.76 68.58 0)
+			(at 48.26 88.9 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1690,7 +1182,7 @@
 			)
 		)
 		(property "Manufacturer" "ams OSRAM"
-			(at 111.76 68.58 0)
+			(at 48.26 88.9 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1699,7 +1191,7 @@
 			)
 		)
 		(property "LCSC" "C22459687"
-			(at 111.76 68.58 0)
+			(at 48.26 88.9 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1708,7 +1200,7 @@
 			)
 		)
 		(property "JLC" "LCSC stock was 80 pcs (2026-11): order early, else consign/hand-place"
-			(at 111.76 68.58 0)
+			(at 48.26 88.9 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1785,85 +1277,17 @@
 			)
 		)
 	)
-	(wire
-		(pts (xy 99.06 57.15) (xy 96.52 57.15))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "39469da4-45a4-5a4b-88dd-69e5b7422bd6")
-	)
-	(global_label "MAG_CSN"
-		(shape input)
-		(at 96.52 57.15 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "a989e4c2-6429-526f-95b5-4416c6a97b27")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 96.52 57.15 180)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-				(hide yes)
-			)
-		)
-	)
-	(wire
-		(pts (xy 99.06 59.69) (xy 96.52 59.69))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "855aad18-3790-58ac-941b-f068cd197cca")
-	)
-	(global_label "MAG_CLK"
-		(shape input)
-		(at 96.52 59.69 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "272dd27b-830e-5d2c-a18b-7b265b4d8ac6")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 96.52 59.69 180)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-				(hide yes)
-			)
-		)
-	)
-	(wire
-		(pts (xy 99.06 62.23) (xy 96.52 62.23))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "29f9fb7a-2d61-5581-9e34-ba2036c4d624")
-	)
 	(symbol
 		(lib_id "power:GND")
-		(at 96.52 62.23 270)
+		(at 33.02 82.55 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "e0977100-9a99-54c7-8542-17eb5f2862e0")
-		(property "Reference" "#PWR04005"
-			(at 96.52 62.23 0)
+		(uuid "2dcf8262-f5cb-56fd-952f-38f931bafb59")
+		(property "Reference" "#PWR04001"
+			(at 33.02 82.55 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1872,441 +1296,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 93.22 62.23 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Footprint" ""
-			(at 96.52 62.23 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 96.52 62.23 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 96.52 62.23 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "a600d012-9905-5bc5-b28f-51abf80c44aa")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/e4404b34-3f55-50db-8321-51b9507445ac"
-					(reference "#PWR04005")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(no_connect
-		(at 99.06 64.77)
-		(uuid "c2c024dc-dc4c-5a82-ae77-f5e276368689")
-	)
-	(no_connect
-		(at 99.06 67.31)
-		(uuid "c6e0107f-afea-5646-80cd-e540138d5018")
-	)
-	(no_connect
-		(at 99.06 69.85)
-		(uuid "c07c9051-786a-50b1-820d-1d96082fda4b")
-	)
-	(no_connect
-		(at 99.06 72.39)
-		(uuid "3c014eec-bd06-55a4-bc7b-812a89c7b3bb")
-	)
-	(no_connect
-		(at 99.06 74.93)
-		(uuid "4b97af4e-2b64-5403-864e-19f0d184ca40")
-	)
-	(no_connect
-		(at 99.06 77.47)
-		(uuid "b0447a3b-5f44-5bcb-a0cd-840d26803e5a")
-	)
-	(no_connect
-		(at 99.06 80.01)
-		(uuid "ed472fba-8d00-5903-a022-6b1e2fd1e8f6")
-	)
-	(wire
-		(pts (xy 124.46 60.96) (xy 127 60.96))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "0ea26c8a-1fc3-5293-96fb-2fbddc1e8457")
-	)
-	(global_label "MAG_DO"
-		(shape tri_state)
-		(at 127 60.96 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "2869c0be-0558-57fa-a46c-360ecae46431")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 127 60.96 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-				(hide yes)
-			)
-		)
-	)
-	(wire
-		(pts (xy 124.46 63.5) (xy 127 63.5))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "c0fa90ca-dfcb-5844-99ff-2ac222367341")
-	)
-	(global_label "MAG_A"
-		(shape output)
-		(at 127 63.5 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "15a0a5f7-b63b-5028-b1a1-d5b70033a402")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 127 63.5 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-				(hide yes)
-			)
-		)
-	)
-	(wire
-		(pts (xy 124.46 66.04) (xy 127 66.04))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "b06dcd19-604b-5dea-8ae5-1a6051099523")
-	)
-	(global_label "MAG_B"
-		(shape output)
-		(at 127 66.04 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "f30b889f-97c7-5a9f-ae8c-046d5a070b43")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 127 66.04 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-				(hide yes)
-			)
-		)
-	)
-	(wire
-		(pts (xy 124.46 68.58) (xy 127 68.58))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "da7e4548-1d56-56a0-9fe4-7289f61201de")
-	)
-	(global_label "MAG_IDX"
-		(shape output)
-		(at 127 68.58 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "fc344455-8c87-54d0-9819-51ccaf434170")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 127 68.58 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-				(hide yes)
-			)
-		)
-	)
-	(wire
-		(pts (xy 124.46 71.12) (xy 127 71.12))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "04cf5cf6-5848-5cfe-825e-1b7a70694527")
-	)
-	(global_label "MAG_INC_N"
-		(shape passive)
-		(at 127 71.12 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "59306a2f-ca05-5dad-91e6-6d8675e57f25")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 127 71.12 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-				(hide yes)
-			)
-		)
-	)
-	(wire
-		(pts (xy 124.46 73.66) (xy 127 73.66))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "4371e55d-8242-5f52-98d2-94036276e781")
-	)
-	(global_label "MAG_DEC_N"
-		(shape passive)
-		(at 127 73.66 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "9cec66c5-f731-571c-8b12-4e886c4a8f8b")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 127 73.66 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-				(hide yes)
-			)
-		)
-	)
-	(no_connect
-		(at 124.46 76.2)
-		(uuid "e0b3be24-f2c7-50cf-8443-275bf482854e")
-	)
-	(wire
-		(pts (xy 110.49 50.8) (xy 110.49 48.26))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "7798260e-efd7-51fa-ae70-c615b0d559e2")
-	)
-	(symbol
-		(lib_id "power:VCC")
-		(at 110.49 48.26 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "556bc007-ece4-54b7-9d02-8b10f6b0d8ad")
-		(property "Reference" "#PWR04006"
-			(at 110.49 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "+3V3_SNS"
-			(at 110.49 44.96 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify bottom)
-			)
-		)
-		(property "Footprint" ""
-			(at 110.49 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 110.49 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 110.49 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "f7b7da7c-d988-5e57-a75d-08d2d7e48eda")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/e4404b34-3f55-50db-8321-51b9507445ac"
-					(reference "#PWR04006")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 113.03 50.8) (xy 113.03 48.26))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "011e0777-0cf7-5c29-b226-e6cf0de24648")
-	)
-	(symbol
-		(lib_id "power:VCC")
-		(at 113.03 48.26 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "496dd0b9-f1b0-54dc-b9f0-8c3a9135be6f")
-		(property "Reference" "#PWR04007"
-			(at 113.03 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "+3V3_SNS"
-			(at 113.03 44.96 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify bottom)
-			)
-		)
-		(property "Footprint" ""
-			(at 113.03 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 113.03 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 113.03 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "cf52aa8f-cccf-5062-a99d-5f25666d4b6c")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/e4404b34-3f55-50db-8321-51b9507445ac"
-					(reference "#PWR04007")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 111.76 86.36) (xy 111.76 88.9))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "10ff957a-7a46-5ef3-a083-0d113bb931f7")
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 111.76 88.9 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "2f5249f2-d5e4-5457-bccc-2482c8ea4bc3")
-		(property "Reference" "#PWR04008"
-			(at 111.76 88.9 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "GND"
-			(at 111.76 92.2 0)
+			(at 33.02 85.85 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2315,7 +1305,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 111.76 88.9 0)
+			(at 33.02 82.55 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2324,7 +1314,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 111.76 88.9 0)
+			(at 33.02 82.55 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2333,7 +1323,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 111.76 88.9 0)
+			(at 33.02 82.55 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2342,44 +1332,210 @@
 			)
 		)
 		(pin "1"
-			(uuid "ec62d851-a7b3-56f6-9c58-d003d037163c")
+			(uuid "ceb346d3-668f-563c-83b7-8c5103fc8ec1")
 		)
 		(instances
 			(project "prettycool-caliper-slider"
 				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/e4404b34-3f55-50db-8321-51b9507445ac"
-					(reference "#PWR04008")
+					(reference "#PWR04001")
 					(unit 1)
 				)
 			)
 		)
 	)
+	(no_connect
+		(at 35.56 85.09)
+		(uuid "368f6fee-6148-5b75-8e8c-29dc5591cedf")
+	)
+	(no_connect
+		(at 35.56 87.63)
+		(uuid "fc75b3e6-6df7-5a15-8880-c8b982ebab88")
+	)
+	(no_connect
+		(at 35.56 90.17)
+		(uuid "62b03355-d68f-5c3f-b506-0dd46c84145b")
+	)
+	(no_connect
+		(at 35.56 92.71)
+		(uuid "5e473113-3ec1-56ae-8d3f-ffd55a017ec9")
+	)
+	(no_connect
+		(at 35.56 95.25)
+		(uuid "c4cbf164-79d4-5748-8b20-8f6544ff453c")
+	)
+	(no_connect
+		(at 35.56 97.79)
+		(uuid "c6dff147-ccd9-50c4-bc0c-2116323bd182")
+	)
+	(no_connect
+		(at 35.56 100.33)
+		(uuid "75793bba-0b2f-50bf-8998-10a6d004dd13")
+	)
+	(no_connect
+		(at 60.96 96.52)
+		(uuid "a984a7e7-780a-5ea2-ad4d-b734bb96f923")
+	)
 	(symbol
-		(lib_id "Device:R")
-		(at 167.64 35.56 90)
+		(lib_id "power:GND")
+		(at 48.26 106.68 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "5af92970-c0c4-5790-97f4-72e150f3bc14")
-		(property "Reference" "R30"
-			(at 167.64 32.944 90)
+		(uuid "902cbcc0-b986-53b0-ac47-08ff0337b3b3")
+		(property "Reference" "#PWR04002"
+			(at 48.26 106.68 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(hide yes)
 			)
 		)
-		(property "Value" "10k"
-			(at 167.64 38.176 90)
+		(property "Value" "GND"
+			(at 48.26 109.98 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify top)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
-			(at 167.64 35.56 0)
+		(property "Footprint" ""
+			(at 48.26 106.68 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 48.26 106.68 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 48.26 106.68 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "2bfbd7cc-2c0b-595e-8062-78ae1a86685d")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/e4404b34-3f55-50db-8321-51b9507445ac"
+					(reference "#PWR04002")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label "MAG_CSN"
+		(shape input)
+		(at 30.48 77.47 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "3b9c041d-1dc6-5792-be10-a7e8ee806563")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 30.48 77.47 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "MAG_CLK"
+		(shape input)
+		(at 30.48 80.01 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "ddeb191b-a4e3-5036-a4a0-c7a053bbcaec")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 30.48 80.01 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "MAG_DO"
+		(shape tri_state)
+		(at 78.74 71.12 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "5e232254-9f84-5969-b349-577004940ad6")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 78.74 71.12 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:TestPoint")
+		(at 78.74 78.74 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(dnp no)
+		(uuid "cb094d16-58ce-5996-a338-7d22c22d6c29")
+		(property "Reference" "TP30"
+			(at 80.402 74.438 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "MAG_A"
+			(at 80.402 76.438 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
+			(at 78.74 78.74 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2388,7 +1544,271 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 167.64 35.56 0)
+			(at 78.74 78.74 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "test point"
+			(at 78.74 78.74 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "d9ac152c-9377-5f18-91cf-15d521479bad")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/e4404b34-3f55-50db-8321-51b9507445ac"
+					(reference "TP30")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label "MAG_A"
+		(shape output)
+		(at 90.17 78.74 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "4a0f4264-5853-51e1-89be-eb1153467c4b")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 90.17 78.74 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:TestPoint")
+		(at 78.74 86.36 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(dnp no)
+		(uuid "3bd61ec7-e8bd-5801-a84b-917f663ffc0d")
+		(property "Reference" "TP31"
+			(at 80.402 82.058 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "MAG_B"
+			(at 80.402 84.058 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
+			(at 78.74 86.36 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 78.74 86.36 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "test point"
+			(at 78.74 86.36 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "b0a89e13-3f11-516b-b7d6-a653c2ca37e8")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/e4404b34-3f55-50db-8321-51b9507445ac"
+					(reference "TP31")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label "MAG_B"
+		(shape output)
+		(at 90.17 86.36 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "2849beb0-4467-5757-be5c-14f4a8b8d409")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 90.17 86.36 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:TestPoint")
+		(at 78.74 93.98 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(dnp no)
+		(uuid "0c70cd8e-2c44-5247-ae65-8e2fd255dd2d")
+		(property "Reference" "TP32"
+			(at 80.402 89.678 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "MAG_IDX"
+			(at 80.402 91.678 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
+			(at 78.74 93.98 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 78.74 93.98 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "test point"
+			(at 78.74 93.98 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "987dd1bd-95d3-57e8-aa75-f9b1546fbd14")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/e4404b34-3f55-50db-8321-51b9507445ac"
+					(reference "TP32")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label "MAG_IDX"
+		(shape output)
+		(at 92.71 93.98 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "b0f0955b-83c6-519d-a0be-8a870721377f")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 92.71 93.98 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 82.55 104.14 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "5af92970-c0c4-5790-97f4-72e150f3bc14")
+		(property "Reference" "R30"
+			(at 84.466 103.14 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "10k"
+			(at 84.466 105.14 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 82.55 104.14 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 82.55 104.14 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2397,7 +1817,7 @@
 			)
 		)
 		(property "Description" "Resistor"
-			(at 167.64 35.56 0)
+			(at 82.55 104.14 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2406,7 +1826,7 @@
 			)
 		)
 		(property "MPN" "0402WGF1002TCE"
-			(at 167.64 35.56 0)
+			(at 82.55 104.14 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2415,7 +1835,7 @@
 			)
 		)
 		(property "Manufacturer" "UNI-ROYAL"
-			(at 167.64 35.56 0)
+			(at 82.55 104.14 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2424,7 +1844,7 @@
 			)
 		)
 		(property "LCSC" "C25744"
-			(at 167.64 35.56 0)
+			(at 82.55 104.14 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2447,25 +1867,17 @@
 			)
 		)
 	)
-	(wire
-		(pts (xy 163.83 35.56) (xy 161.29 35.56))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "dcd09523-c2f9-56f0-925c-027da7e00c7c")
-	)
 	(symbol
 		(lib_id "power:VCC")
-		(at 161.29 35.56 90)
+		(at 82.55 100.33 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "072615e7-e263-5655-a2d0-22318d509b51")
-		(property "Reference" "#PWR04009"
-			(at 161.29 35.56 0)
+		(uuid "5e60611d-ad5b-5109-a597-ac911f2e85b6")
+		(property "Reference" "#PWR04003"
+			(at 82.55 100.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2474,16 +1886,16 @@
 			)
 		)
 		(property "Value" "+3V3_SNS"
-			(at 157.99 35.56 90)
+			(at 82.55 97.03 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
+				(justify bottom)
 			)
 		)
 		(property "Footprint" ""
-			(at 161.29 35.56 0)
+			(at 82.55 100.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2492,7 +1904,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 161.29 35.56 0)
+			(at 82.55 100.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2501,7 +1913,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 161.29 35.56 0)
+			(at 82.55 100.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2510,28 +1922,20 @@
 			)
 		)
 		(pin "1"
-			(uuid "c30673a8-31d2-5349-820a-858600f5471d")
+			(uuid "6bdc6fd1-dc5e-5d4a-b497-0669727672f8")
 		)
 		(instances
 			(project "prettycool-caliper-slider"
 				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/e4404b34-3f55-50db-8321-51b9507445ac"
-					(reference "#PWR04009")
+					(reference "#PWR04003")
 					(unit 1)
 				)
 			)
 		)
 	)
-	(wire
-		(pts (xy 171.45 35.56) (xy 173.99 35.56))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "01eb53f2-db78-5c57-8310-6a6f7751bec6")
-	)
 	(global_label "MAG_INC_N"
 		(shape passive)
-		(at 173.99 35.56 0)
+		(at 91.44 107.95 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -2539,9 +1943,9 @@
 			)
 			(justify left)
 		)
-		(uuid "2d1000dc-070f-5ce9-96c8-e04ca5773e1f")
+		(uuid "522a115c-26dd-5180-ace9-4e13897a3e04")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 173.99 35.56 0)
+			(at 91.44 107.95 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2553,7 +1957,7 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 210.82 35.56 90)
+		(at 82.55 118.11 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -2561,23 +1965,25 @@
 		(dnp no)
 		(uuid "c90b3085-6064-5174-baa3-93465c8ecd53")
 		(property "Reference" "R31"
-			(at 210.82 32.944 90)
+			(at 84.466 117.11 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left)
 			)
 		)
 		(property "Value" "10k"
-			(at 210.82 38.176 90)
+			(at 84.466 119.11 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left)
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
-			(at 210.82 35.56 0)
+			(at 82.55 118.11 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2586,7 +1992,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 210.82 35.56 0)
+			(at 82.55 118.11 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2595,7 +2001,7 @@
 			)
 		)
 		(property "Description" "Resistor"
-			(at 210.82 35.56 0)
+			(at 82.55 118.11 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2604,7 +2010,7 @@
 			)
 		)
 		(property "MPN" "0402WGF1002TCE"
-			(at 210.82 35.56 0)
+			(at 82.55 118.11 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2613,7 +2019,7 @@
 			)
 		)
 		(property "Manufacturer" "UNI-ROYAL"
-			(at 210.82 35.56 0)
+			(at 82.55 118.11 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2622,7 +2028,7 @@
 			)
 		)
 		(property "LCSC" "C25744"
-			(at 210.82 35.56 0)
+			(at 82.55 118.11 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2645,25 +2051,17 @@
 			)
 		)
 	)
-	(wire
-		(pts (xy 207.01 35.56) (xy 204.47 35.56))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "9e4a5389-6c83-50b1-a504-c178663bd26c")
-	)
 	(symbol
 		(lib_id "power:VCC")
-		(at 204.47 35.56 90)
+		(at 82.55 114.3 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "8e3ddf55-6031-5ada-9b20-1de373c44592")
-		(property "Reference" "#PWR04010"
-			(at 204.47 35.56 0)
+		(uuid "93654ba0-6753-5bb1-a302-cec3436388aa")
+		(property "Reference" "#PWR04004"
+			(at 82.55 114.3 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2672,16 +2070,16 @@
 			)
 		)
 		(property "Value" "+3V3_SNS"
-			(at 201.17 35.56 90)
+			(at 82.55 111 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
+				(justify bottom)
 			)
 		)
 		(property "Footprint" ""
-			(at 204.47 35.56 0)
+			(at 82.55 114.3 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2690,7 +2088,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 204.47 35.56 0)
+			(at 82.55 114.3 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2699,7 +2097,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 204.47 35.56 0)
+			(at 82.55 114.3 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2708,28 +2106,20 @@
 			)
 		)
 		(pin "1"
-			(uuid "8c533513-840d-5ebd-b721-e0fcb4e6aabc")
+			(uuid "3ba40841-3959-595d-9e8a-8fbc1fdb2c98")
 		)
 		(instances
 			(project "prettycool-caliper-slider"
 				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/e4404b34-3f55-50db-8321-51b9507445ac"
-					(reference "#PWR04010")
+					(reference "#PWR04004")
 					(unit 1)
 				)
 			)
 		)
 	)
-	(wire
-		(pts (xy 214.63 35.56) (xy 217.17 35.56))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "1d609573-c3a3-5e6a-95fe-804bd0d2473f")
-	)
 	(global_label "MAG_DEC_N"
 		(shape passive)
-		(at 217.17 35.56 0)
+		(at 91.44 121.92 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -2737,9 +2127,9 @@
 			)
 			(justify left)
 		)
-		(uuid "d9400ff5-823c-5387-bf0a-55da020d01ae")
+		(uuid "a7d4ed29-87d2-5dca-b7bd-fa3dd242bd03")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 217.17 35.56 0)
+			(at 91.44 121.92 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2750,34 +2140,34 @@
 		)
 	)
 	(symbol
-		(lib_id "Connector:TestPoint")
-		(at 266.7 35.56 0)
+		(lib_id "Device:C")
+		(at 43.18 59.69 0)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom no)
+		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "cb094d16-58ce-5996-a338-7d22c22d6c29")
-		(property "Reference" "TP30"
-			(at 267.97 34.29 0)
+		(uuid "b33b965f-ac4a-55f1-9dde-451efa9bd2f6")
+		(property "Reference" "C30"
+			(at 40.248 58.69 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
+				(justify right)
 			)
 		)
-		(property "Value" "MAG_A"
-			(at 267.97 36.83 0)
+		(property "Value" "100n"
+			(at 40.248 60.69 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
+				(justify right)
 			)
 		)
-		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
-			(at 266.7 35.56 0)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+			(at 43.18 59.69 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2786,7 +2176,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 266.7 35.56 0)
+			(at 43.18 59.69 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2794,8 +2184,35 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "test point"
-			(at 266.7 35.56 0)
+		(property "Description" "Unpolarized capacitor"
+			(at 43.18 59.69 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "CL05B104KO5NNNC"
+			(at 43.18 59.69 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "Samsung Electro-Mechanics"
+			(at 43.18 59.69 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C1525"
+			(at 43.18 59.69 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2804,76 +2221,31 @@
 			)
 		)
 		(pin "1"
-			(uuid "d9ac152c-9377-5f18-91cf-15d521479bad")
+			(uuid "7c753713-7415-5e19-8d28-63b94f97d3f5")
+		)
+		(pin "2"
+			(uuid "a900d750-88c3-56d6-8131-8f6fbd626ba2")
 		)
 		(instances
 			(project "prettycool-caliper-slider"
 				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/e4404b34-3f55-50db-8321-51b9507445ac"
-					(reference "TP30")
+					(reference "C30")
 					(unit 1)
 				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 266.7 35.56) (xy 266.7 38.1))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "aba90730-6d66-5406-ba1f-523aa9b554ee")
-	)
-	(global_label "MAG_A"
-		(shape passive)
-		(at 266.7 38.1 270)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "57d95cdf-9d50-5595-86fa-c86d020f7cd6")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 266.7 38.1 270)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-				(hide yes)
 			)
 		)
 	)
 	(symbol
-		(lib_id "Connector:TestPoint")
-		(at 274.32 35.56 0)
+		(lib_id "power:GND")
+		(at 43.18 63.5 0)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom no)
+		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "3bd61ec7-e8bd-5801-a84b-917f663ffc0d")
-		(property "Reference" "TP31"
-			(at 275.59 34.29 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "MAG_B"
-			(at 275.59 36.83 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
-			(at 274.32 35.56 0)
+		(uuid "2fea99b1-9962-5a85-8ea5-c3ed83acfe46")
+		(property "Reference" "#PWR04005"
+			(at 43.18 63.5 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2881,8 +2253,17 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
-			(at 274.32 35.56 0)
+		(property "Value" "GND"
+			(at 43.18 66.8 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Footprint" ""
+			(at 43.18 63.5 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2890,8 +2271,17 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "test point"
-			(at 274.32 35.56 0)
+		(property "Datasheet" ""
+			(at 43.18 63.5 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 43.18 63.5 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2900,76 +2290,46 @@
 			)
 		)
 		(pin "1"
-			(uuid "b0a89e13-3f11-516b-b7d6-a653c2ca37e8")
+			(uuid "826fbc38-a799-522e-9ad5-101d219a5bdd")
 		)
 		(instances
 			(project "prettycool-caliper-slider"
 				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/e4404b34-3f55-50db-8321-51b9507445ac"
-					(reference "TP31")
+					(reference "#PWR04005")
 					(unit 1)
 				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 274.32 35.56) (xy 274.32 38.1))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "edba8684-4dcb-5975-ac69-41c38fdfec37")
-	)
-	(global_label "MAG_B"
-		(shape passive)
-		(at 274.32 38.1 270)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "6a995c08-41af-507e-ba90-1f138c453049")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 274.32 38.1 270)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-				(hide yes)
 			)
 		)
 	)
 	(symbol
-		(lib_id "Connector:TestPoint")
-		(at 284.48 35.56 0)
+		(lib_id "Device:C")
+		(at 30.48 59.69 0)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom no)
+		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "0c70cd8e-2c44-5247-ae65-8e2fd255dd2d")
-		(property "Reference" "TP32"
-			(at 285.75 34.29 0)
+		(uuid "81d1229d-9a0a-5eb8-a0e9-1b8007aa5190")
+		(property "Reference" "C31"
+			(at 27.548 58.69 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
+				(justify right)
 			)
 		)
-		(property "Value" "MAG_IDX"
-			(at 285.75 36.83 0)
+		(property "Value" "1u"
+			(at 27.548 60.69 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
+				(justify right)
 			)
 		)
-		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
-			(at 284.48 35.56 0)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+			(at 30.48 59.69 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2978,7 +2338,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 284.48 35.56 0)
+			(at 30.48 59.69 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2986,8 +2346,35 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "test point"
-			(at 284.48 35.56 0)
+		(property "Description" "Unpolarized capacitor"
+			(at 30.48 59.69 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "CL05A105KA5NQNC"
+			(at 30.48 59.69 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "Samsung Electro-Mechanics"
+			(at 30.48 59.69 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C52923"
+			(at 30.48 59.69 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2996,46 +2383,447 @@
 			)
 		)
 		(pin "1"
-			(uuid "987dd1bd-95d3-57e8-aa75-f9b1546fbd14")
+			(uuid "9bea6d57-98f8-57c4-8112-6f960aee1af6")
+		)
+		(pin "2"
+			(uuid "5322aa3f-5300-5ede-a609-912277b451dc")
 		)
 		(instances
 			(project "prettycool-caliper-slider"
 				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/e4404b34-3f55-50db-8321-51b9507445ac"
-					(reference "TP32")
+					(reference "C31")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 30.48 63.5 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "b9bde826-bacd-53cc-b79f-16361da33a22")
+		(property "Reference" "#PWR04006"
+			(at 30.48 63.5 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 30.48 66.8 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Footprint" ""
+			(at 30.48 63.5 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 30.48 63.5 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 30.48 63.5 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "27cff06a-5a8d-5f01-8624-b120e50b98b8")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/e4404b34-3f55-50db-8321-51b9507445ac"
+					(reference "#PWR04006")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:VCC")
+		(at 20.32 55.88 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "5ef020e8-77df-5926-a781-dd1c08d26baf")
+		(property "Reference" "#PWR04007"
+			(at 20.32 55.88 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "+3V3_SNS"
+			(at 20.32 52.58 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+			)
+		)
+		(property "Footprint" ""
+			(at 20.32 55.88 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 20.32 55.88 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 20.32 55.88 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "f7e2ff88-a148-53d0-afc9-d564e4fc65ff")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/e4404b34-3f55-50db-8321-51b9507445ac"
+					(reference "#PWR04007")
 					(unit 1)
 				)
 			)
 		)
 	)
 	(wire
-		(pts (xy 284.48 35.56) (xy 284.48 38.1))
+		(pts (xy 20.32 55.88) (xy 30.48 55.88))
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "1f8e1a07-1b47-5116-9e8b-03acb17a05c4")
+		(uuid "014bfa17-8a54-53ab-a9ec-60f56dc34abf")
 	)
-	(global_label "MAG_IDX"
-		(shape passive)
-		(at 284.48 38.1 270)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
+	(wire
+		(pts (xy 30.48 55.88) (xy 43.18 55.88))
+		(stroke
+			(width 0)
+			(type default)
 		)
-		(uuid "c2ae471f-2fb4-5a87-ad91-6321e4099f03")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 284.48 38.1 270)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-				(hide yes)
-			)
+		(uuid "d7b764ff-0c1d-504a-a60e-c6a3c4e690a5")
+	)
+	(wire
+		(pts (xy 43.18 55.88) (xy 46.99 55.88))
+		(stroke
+			(width 0)
+			(type default)
 		)
+		(uuid "c0ecc6d6-34f1-5d19-8053-25842d46ea9d")
+	)
+	(wire
+		(pts (xy 46.99 55.88) (xy 46.99 69.85))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "81100943-8817-5cc4-a740-5510b7eaa7a5")
+	)
+	(wire
+		(pts (xy 46.99 69.85) (xy 46.99 71.12))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "55b53aef-5d7e-5675-bd3e-eea5a55fa7cc")
+	)
+	(wire
+		(pts (xy 46.99 69.85) (xy 49.53 69.85))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2921e2a5-1c10-5cf1-8a26-73ed547e9b45")
+	)
+	(wire
+		(pts (xy 49.53 69.85) (xy 49.53 71.12))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "dfa404a3-3822-523f-8f91-c0bb6fd5aa35")
+	)
+	(wire
+		(pts (xy 33.02 82.55) (xy 35.56 82.55))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "210a91ae-fbdc-544e-94ad-4b6ca0f0c936")
+	)
+	(wire
+		(pts (xy 60.96 83.82) (xy 77.47 83.82))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "cddb066d-5233-5f13-b380-77d44b6e2279")
+	)
+	(wire
+		(pts (xy 77.47 78.74) (xy 77.47 83.82))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c6afd6c3-1577-5d47-a54c-e4c4786bc439")
+	)
+	(wire
+		(pts (xy 77.47 78.74) (xy 78.74 78.74))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c87c4567-04ff-5932-b039-9d0369925753")
+	)
+	(wire
+		(pts (xy 78.74 78.74) (xy 90.17 78.74))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c00c1835-d0fd-5d3a-89bb-4726166eaacb")
+	)
+	(wire
+		(pts (xy 60.96 86.36) (xy 78.74 86.36))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6e8bf218-c052-51b3-8af6-ef6edaf1a102")
+	)
+	(wire
+		(pts (xy 78.74 86.36) (xy 90.17 86.36))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "17e7fedb-665b-5d0a-8eb9-05d7e8e0b6d1")
+	)
+	(wire
+		(pts (xy 30.48 80.01) (xy 35.56 80.01))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "eb957d3c-c438-52c7-8f85-6f24d1a49147")
+	)
+	(wire
+		(pts (xy 30.48 77.47) (xy 35.56 77.47))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e648f198-139f-5e35-88aa-763fe824d860")
+	)
+	(wire
+		(pts (xy 60.96 93.98) (xy 72.39 93.98))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "548726fe-221a-5cbe-87a0-d9bc12693459")
+	)
+	(wire
+		(pts (xy 72.39 93.98) (xy 72.39 121.92))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b2255485-41b0-5c80-852e-34189adcaa4f")
+	)
+	(wire
+		(pts (xy 72.39 121.92) (xy 82.55 121.92))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "327350b8-32b8-5ce3-9624-aa0572d3c105")
+	)
+	(wire
+		(pts (xy 82.55 121.92) (xy 91.44 121.92))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "43939f13-96d7-5eff-be87-077e91eac9d3")
+	)
+	(wire
+		(pts (xy 60.96 81.28) (xy 74.93 81.28))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9696eebe-b05c-52de-ad5b-290fe9851cba")
+	)
+	(wire
+		(pts (xy 74.93 71.12) (xy 74.93 81.28))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "14225582-bbdb-5228-b502-7254bca60943")
+	)
+	(wire
+		(pts (xy 74.93 71.12) (xy 78.74 71.12))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e0f4121b-25ce-590f-84b7-dfc41b7259b1")
+	)
+	(wire
+		(pts (xy 60.96 88.9) (xy 77.47 88.9))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b64e3544-5054-5502-bece-91a9526377df")
+	)
+	(wire
+		(pts (xy 77.47 88.9) (xy 77.47 93.98))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0a791c6e-f04f-55d3-b74c-9924084c5bb1")
+	)
+	(wire
+		(pts (xy 77.47 93.98) (xy 78.74 93.98))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3c3d5a8d-ea64-58b1-9771-61ccef996419")
+	)
+	(wire
+		(pts (xy 78.74 93.98) (xy 92.71 93.98))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ca5e7e56-464f-5530-a202-29baf3078148")
+	)
+	(wire
+		(pts (xy 60.96 91.44) (xy 74.93 91.44))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f6459032-5a54-5888-935d-9c08777a924f")
+	)
+	(wire
+		(pts (xy 74.93 91.44) (xy 74.93 107.95))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "16685201-a298-5ec9-a031-2169d5dd8bb9")
+	)
+	(wire
+		(pts (xy 74.93 107.95) (xy 82.55 107.95))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b337abb8-60fb-5975-ad0f-294d9d04e6d1")
+	)
+	(wire
+		(pts (xy 82.55 107.95) (xy 91.44 107.95))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6d029ec3-a328-53d7-854d-f9cae93ed8f5")
+	)
+	(junction
+		(at 30.48 55.88)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "d51d624e-af65-5ae1-b1bc-6bd68714ceeb")
+	)
+	(junction
+		(at 43.18 55.88)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "bbb75850-9224-5b4a-a5a0-d8ff252e0391")
+	)
+	(junction
+		(at 46.99 69.85)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "a9e1e009-7739-568f-8213-a8984b44c710")
+	)
+	(junction
+		(at 78.74 78.74)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "f9aefaa7-315b-535d-b423-6a8fac03b81b")
+	)
+	(junction
+		(at 78.74 86.36)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "fd643a59-b9da-5b14-9eff-4160676da1f1")
+	)
+	(junction
+		(at 78.74 93.98)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "3d1fe742-2968-57a5-9a8f-25bbbb281865")
+	)
+	(junction
+		(at 82.55 107.95)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "c16e3335-d198-5c6a-b9a4-8427037d4f13")
+	)
+	(junction
+		(at 82.55 121.92)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "54c32a3b-e204-5487-b9a8-107e6552dc2b")
 	)
 	(embedded_fonts no)
 )

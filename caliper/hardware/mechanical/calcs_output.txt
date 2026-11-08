@@ -1,29 +1,29 @@
 1. Outside-jaw deflection under the measuring force (beam theory)
 ------------------------------------------------------------------
-Jaw: 7.8 thick (z), 20.0 wide (u) to y -8, tapering to 3.5 at the tip y -40; root at the rail face y -2.8.  F = 5.0 N in u.
+Jaw: 11.0 thick (z), 20.0 wide (u) to y -8, tapering to 3.5 at the tip y -40; root at the rail face y -2.8.  F = 5.0 N in u.
 Printed bodies lie back face down, so the jaw bends in the layer plane (in-layer stiffness).
 material  contact y  bending um  shear um  total um  um per N
-PETG            -37        17.0       4.3      21.4      4.27
-PETG            -20         1.2       1.4       2.7      0.54
-PETG             -6         0.0       0.2       0.2      0.05
-PA-CF           -37         6.9       1.7       8.6      1.72
-PA-CF           -20         0.5       0.6       1.1      0.22
-PA-CF            -6         0.0       0.1       0.1      0.02
-6061-T6         -37         0.4       0.1       0.4      0.09
-6061-T6         -20         0.0       0.0       0.1      0.01
+PETG            -37        12.1       3.1      15.1      3.03
+PETG            -20         0.9       1.0       1.9      0.38
+PETG             -6         0.0       0.2       0.2      0.03
+PA-CF           -37         4.9       1.2       6.1      1.22
+PA-CF           -20         0.4       0.4       0.8      0.15
+PA-CF            -6         0.0       0.1       0.1      0.01
+6061-T6         -37         0.3       0.1       0.3      0.06
+6061-T6         -20         0.0       0.0       0.0      0.01
 6061-T6          -6         0.0       0.0       0.0      0.00
   PETG: PETG E ~1.6-2.0 GPa, CTE 60-70 ppm/K (Bambu PETG HF / generic TDS)
   PA-CF: Bambu PAHT-CF E(XY) 4.2 GPa; CTE XY ~25-40 ppm/K (fibre-aligned, TVP)
   6061-T6: ASM: E 68.9 GPa, G 26 GPa, CTE 23.6 ppm/K
-FEA cross-check (fea_jaw.py, print-stress solver, linear tets; jaw 7.8 thick, root 20.0; load spread over y -38..-32, so compare with y -37 / -35):
-  PETG     at the load   15.7 um, tip   20.2 um
-  PA-CF    at the load    6.3 um, tip    8.2 um
-  6061-T6  at the load    0.4 um, tip    0.5 um
+FEA cross-check (fea_jaw.py, print-stress solver, linear tets; jaw 11.0 thick, root 20.0; load spread over y -38..-32, so compare with y -37 / -35):
+  PETG     at the load   11.1 um, tip   14.3 um
+  PA-CF    at the load    4.5 um, tip    5.8 um
+  6061-T6  at the load    0.3 um, tip    0.4 um
   (the FEA uses the datasheet E without the 0.85 FDM knock-down: scale it by 1/0.85 to compare)
 What matters for accuracy is the force *variation*: a thumb gives 2-8 N, so the error band is
-  PETG       4.3 um/N x 6 N spread =  25.6 um at the tip (NOT inside a 10 um share of the 30 um budget)
-  PA-CF      1.7 um/N x 6 N spread =  10.3 um at the tip (NOT inside a 10 um share of the 30 um budget)
-  6061-T6    0.1 um/N x 6 N spread =   0.5 um at the tip (inside a 10 um share of the 30 um budget)
+  PETG       3.0 um/N x 6 N spread =  18.2 um at the tip (NOT inside a 10 um share of the 30 um budget)
+  PA-CF      1.2 um/N x 6 N spread =   7.3 um at the tip (inside a 10 um share of the 30 um budget)
+  6061-T6    0.1 um/N x 6 N spread =   0.4 um at the tip (inside a 10 um share of the 30 um budget)
 Fixed jaw (printed PA-CF in rev A) has the same outline: add the same again for the closed loop.
 Mitigation in rev A: PA-CF body; measure near the jaw root; a constant-force (slip-clutch) roller is a rev B item.
 
@@ -32,134 +32,174 @@ Mitigation in rev A: PA-CF body; measure near the jaw root; a constant-force (sl
 The workpiece pushes the moving jaw with F = 5.0 N (+x) at y -37.  The equal and opposite drive
 force acts ABOVE the reference edge, so the two form a couple (the drive arm is not zero):
 drive applied at                                 drive y  M N.mm  P min N
-thumb roller (friction drive at the beam edge)      20.0     285     3.50
-thumb on the roller hub / axle                      23.9     304     3.73
-thumb on the right end face, mid-height             35.0     360     4.42
-(plunger levers about the strip's far end, u 78.0: sum 81.5 mm; the strip lifts at its LEFT end.)
-Design: 6 N each -> margin 1.72x for the roller drive, 1.36x for an end-face push.
-  (Review fix: the first version sized this on the jaw force alone, 2.27 N minimum, and set 4 N;
-   with the drive couple 4 N is only 1.14x and below the end-face case.  Spring rate TVP.)
+thumb roller (friction drive at the beam edge)      20.0     285     2.44
+thumb on the roller hub / axle                      23.9     304     2.60
+thumb on the right end face, mid-height             35.0     360     3.08
+(plunger levers about the strip's far end, u 77.4: sum 116.8 mm; the strip lifts at its LEFT end.)
+Design: 4.0 N each at u 14, 24 -> margin 1.64x for the roller drive, 1.30x for an end-face push.
+Review fix (D4 + sliding force): both plungers moved LEFT of the battery pocket (were u 16 / 58.5, sum
+  lever 81.5 mm, 6 N each).  The lever grows to 116.8 mm, so 4.0 N each keeps about the same
+  margin as 6 N did (1.72x then, 1.64x now) for a third less load.
+The other sense (strip lifting at its RIGHT end, pivot at the left end) has the short lever:
+  sum (u - 0.5) = 37.0 mm.  No measuring load makes that moment (outside and inside
+  measurements both lift the LEFT end), but a -y push on the slider's right end lifts the strip there
+  above F = 2 P (mean lever) / 76.9 = 1.92 N.  Trade-off accepted: a grip that
+  squeezes the slider's right end toward the jaws side (-y) with more than that tilts it while it lasts.
 While seated, the yaw stiffness is the strip on the rail (brass on 1.8 mm printed rail): elastic-foundation estimate < 0.1 um at the jaw tip -- negligible next to section 1.
 
-3. Slider roll under a press on the housing -> back-gib preload and sliding force
-----------------------------------------------------------------------------------
-ZERO/HOLD/MODE press (tact 1.6 N + finger): 2.5 N at y 31 -> 30 N.mm about the upper pad line (y 18.8); the back plungers at y 10.0 hold the lower pads down if P >= 1.73 N each
-grip on the battery bay: 5.0 N at y 40 -> 106 N.mm about the upper pad line (y 18.8); the back plungers at y 10.0 hold the lower pads down if P >= 6.02 N each
-Design: back plungers 4.0 N each.  A press beyond 3.3 N at the top edge (y 40) lifts the lower pads -- the reading is then wrong only while pressed (the gaps open, they do not close).
-Sliding force: normal loads 8 N (back) + 12 N (Y) on brass/steel, mu ~0.2 (lightly oiled 0.12-0.2) -> 2 x 20 x 0.2 = 8.0 N to push the slider.  Typical caliper: 2-5 N.
-(each preload acts on two faces, the plunger side and the reaction side, hence the factor 2.)
+3. Slider roll under a press on the housing -> back-gib preload, back web, sliding force
+-----------------------------------------------------------------------------------------
+Back plungers at y 5 (review fix: were y 10), lever 13.8 mm to the upper pad line y 18.8.
+ZERO/HOLD/MODE press (tact 1.6 N + finger): 2.5 N at y 31 -> 30.5 N.mm about the upper pad line; the back plungers hold the lower pads down if P >= 1.11 N each
+grip on the battery bay: 5.0 N at y 40 -> 106.0 N.mm about the upper pad line; the back plungers hold the lower pads down if P >= 3.84 N each
+Design: back plungers 2.5 N each (was 4 N at y 10): margin 2.26x for a button press.  A press beyond 3.3 N at the top edge (y 40)
+lifts the lower pads -- the reading is then wrong only while pressed (the gaps open, they do not close).
 
-Back-cover check (review addition).  The back plungers sit in the back cover; their reaction
-(8 N total) pushes the cover AWAY from the body.  Over the beam channel (y -1 .. 21.2) there is
-no body material behind the beam, and the cover's only screws are at y 44, so the cover carries the
-load as a cantilever from the screw line to the plungers:
-  PETG   t 2.0, L 34, b 77.5: deflection  1.40 mm   whole width carries both plungers (lower bound)
-  PETG   t 2.0, L 34, b 20.0: deflection  2.72 mm   a 20 mm strip per plunger (closer to real)
-  PA-CF  t 2.0, L 34, b 77.5: deflection  0.57 mm   whole width carries both plungers (lower bound)
-  PA-CF  t 2.0, L 34, b 20.0: deflection  1.10 mm   a 20 mm strip per plunger (closer to real)
-  -> the plungers' ~1 mm working travel goes into bending the cover: the back-gib preload (and so the
-     pad seating of section 3) is NOT held as designed.  Needs a cover fastener near y 0..20 (doc section 4).
+Sliding force: every preload acts on two faces (the plunger side and the reaction side), brass on ground
+steel.  F = 2 x (2 P_back + 2 P_Y) x mu:
+preloads                           N total  mu 0.12  mu 0.15  mu 0.20
+first model: back 4 N, Y 6 N          20.0      4.8      6.0      8.0
+now: back 2.5 N, Y 4.0 N              13.0      3.1      3.9      5.2
+Target 2-5 N (commercial calipers).  mu 0.12-0.15 is brass on ground steel with a light oil film, 0.20 the
+conservative value the first model used; dry brass on steel is 0.3-0.35 (keep the beam oiled).
+  -> 3.9 N at mu 0.15 (5.2 N at 0.20), against 8.0 N before.
+  Trade-off: the lower back preload accepts a pad lift above 3.3 N at the top edge (was 3.3 N too, because
+  the lever grew), and the Y preload's margin stays above 1.3x; the sliding force can be trimmed further on
+  the bench with the plunger set screws (0.4 mm per turn).
+  O-ring roller rolling resistance is not included (TVP: measure; NBR at 0.15 squeeze is well under 0.5 N).
+
+Back web (review fix a).  The back plungers now sit in the BODY's 3.2 back web, which closes the beam
+tunnel behind the beam and joins the lower rail to the upper body (the first model put them in a back cover
+screwed only at y 44: a 34 mm cantilever that bent 0.6-1.1 mm in PA-CF and lost the preload).
+  PETG   web 3.2 thick, span 22.2 (rail to upper body), load 2.5 N at 6.0 from the rail, 20 mm strip:   0.89 um under the plunger
+  PA-CF  web 3.2 thick, span 22.2 (rail to upper body), load 2.5 N at 6.0 from the rail, 20 mm strip:   0.36 um under the plunger
+  FEA (fea_slider.py, whole body from step/slider_body.step, PA-CF, both preloads): plunger seat moves 1.74 um relative to the pads; reaction check 9.43 N
+  -> the plunger travel (about 1 mm) is no longer used up by the housing: the preload is held as set.
 
 4. Thermal error (zeroed at T0, read at T0 + dT)
 -------------------------------------------------
-Chain from the moving-jaw face to the AS5311: 11 mm of body (jaw face -> board boss at u 11) + 28 mm of FR4 (boss -> AS5311 at u 39).
+The board is clamped at both end tabs (u 4.5 and 73.5); the AS5311 sits at u 39, exactly midway.  FR4 (E 20 GPa, 34 mm2) is far stiffer
+than the printed towers in shear, so two bounds bracket the AS5311's position relative to the jaw face:
+  A: the board follows the left clamp:  4.5 mm of body + 34.5 mm of FR4
+  B: the board stays centred between the clamps: 39 mm of body (the midpoint moves with the body)
 Fixed jaw: 5 mm of body from the dowels (x -5) to the face.  The tape is bonded to the beam (follows the steel).
-body     beam     slider um/K fixed um/K  scale um/K @150 total 10 K um
-PETG     O1             0.767      0.095           -0.075           9.4
-PETG     1.4301         0.572      0.070            0.675          13.2
-PA-CF    O1             0.349      0.095           -0.075           5.2
-PA-CF    1.4301         0.154      0.070            0.675           9.0
-6061-T6  O1             0.279      0.063           -0.075           4.2
-6061-T6  1.4301         0.084      0.038            0.675           8.0
+body     beam      A um/K  B um/K fixed um/K  scale um/K @150 worst 10 K um
+PETG     O1         0.429   2.223      0.095           -0.075          23.9
+PETG     1.4301     0.234   2.028      0.070            0.675          27.7
+PA-CF    O1         0.258   0.741      0.095           -0.075           9.1
+PA-CF    1.4301     0.063   0.546      0.070            0.675          12.9
+6061-T6  O1         0.229   0.491      0.063           -0.075           6.3
+6061-T6  1.4301     0.034   0.296      0.038            0.675          10.1
 Hand heat warms the slider 5-10 K within minutes (TVP); re-zero after handling.  The scale term is the classic
 one: a 1.4301 beam reads a steel part short by 0.7 um/K at 150 mm -- O1 matches steel workpieces.
-A printed body also creeps: PETG under the gib springs relaxes over days, which changes preload, not position
-(the gaps are set by brass pads on set screws), but a creeping boss moves the board: use PA-CF for the body.
+Bound B is the realistic one for a stiff board in soft towers; the first model's chain (body to a boss at
+u 11, then FR4) no longer applies.  The difference between A and B is a reason to zero after warm-up.
 
 5. Gap stack-up (z, mm)
 ------------------------
 Nominal chain (beam front face = 0):
-  board bottom (electrode face)        +0.150   set by the 4 front-pad set screws
+  board bottom (electrode face)        +0.150   set by the tab clamps (bedded on 0.15 foil, section 6)
   scale face                           +0.000   pocket 0.85 = PCB 0.8 + adhesive 0.05
   AS5311 face                          -0.950   A nominal 1.1
   tape face                            -1.250   channel 2.00 deep - shim 0.10 (nominal A) - adhesive 0.05 - tape 0.6
   -> capacitive gap 0.150, magnetic gap 0.300
+Board support (review fix b, SPEC D3): the board hangs from four SMT standoffs on its end tabs (u 4.5 / 73.5, y 5.5 / 14), 3.5-12 mm from the AS5311 and electrode rows, instead of bosses at y >= 24.5.
 
-(a) Capacitive gap, NOT adjusted per unit (pads set to a fixed screw depth):
-    scale PCB thickness (FR4 0.8 +/-10 %)              +/-0.080  JLC standard; 'tight' option +/-0.05
-    scale adhesive 467MP                               +/-0.010  3M datasheet 0.05 nominal
-    scale pocket depth                                 +/-0.020  machined
-    board bow over the 40 x 5 mm electrode area        +/-0.030  0.075 % of 40 mm, a tenth of the IPC limit (TVP)
-    printed boss height / pad pocket depth             +/-0.100  FDM +/-0.1
-    beam face flatness along travel                    +/-0.010  ground stock, drawing PCC-M-02
-    worst case                                         +/-0.250
-    RSS                                                +/-0.134
-  -> the 0.15 gap cannot be built open-loop: worst case is larger than the gap itself.
-  (board thickness is not in this chain: the board bottom seats on the bosses.)
+(a) Capacitive gap, open loop (no per-unit work: printed clamp faces, no bedding):
+    scale PCB thickness (FR4 0.8 +/-10 %)                +/-0.080  JLC standard; 'tight' option +/-0.05
+    scale adhesive 467MP                                 +/-0.010  3M datasheet 0.05 nominal
+    scale pocket depth                                   +/-0.020  machined
+    board flatness over y 0..20 (inspected <= 0.03)      +/-0.015  SPEC D3 fab note, half the band
+    printed clamp face height (bridged, downward)        +/-0.100  FDM +/-0.1
+    front-pad pocket depth / tower height                +/-0.100  FDM +/-0.1
+    beam face flatness along travel                      +/-0.010  ground stock, drawing PCC-M-02
+    worst case                                           +/-0.335
+    RSS                                                  +/-0.165
+  -> the 0.15 gap cannot be built open-loop: the worst case is larger than the gap itself.
 
-(b) Capacitive gap AFTER the per-unit setting (dial indicator on the board top, 2 um, beam face as datum):
+(b) After the bedding (section 6: the board lies on 0.150 shim foil on the beam while the clamp washers
+    are bedded in epoxy; the clamp faces then copy the beam face, not the print):
   board-height terms (shared with the AS5311 gap):
-    indicator + board-thickness micrometer             +/-0.005  
-    board bow over the electrode area (unmeasured)     +/-0.030  TVP: 0.075 %/40 mm; IPC-6012 limit = 0.30
-    beam face flatness along travel                    +/-0.010  
-    set-screw setting resolution (M2 x 0.4, 10 deg)    +/-0.011  0.4 x 10/360
-    thermal: 5.4 mm PETG tower, +/-10 K                +/-0.004  
-    pad / body creep and wear (PETG, first months)     +/-0.020  TVP; PA-CF ~half
-    worst case                                         +/-0.080
-    RSS                                                +/-0.039
+    shim foil thickness (steel shim stock 0.150)         +/-0.005  +/-0.005 (TVP: measure the foil)
+    beam face flatness along travel                      +/-0.010  drawing PCC-M-02
+    board flatness residual (inspected <= 0.03)          +/-0.015  SPEC D3; the foil holds the mean
+    epoxy cure shrinkage (2 % of the 0.2 bed)            +/-0.004  
+    thermal, clamp chain +/-10 K (PA-CF)                 +/-0.000  pad + 2.45 printed - washer/standoff/epoxy; PETG 0.0009
+    clamp-seat creep / relaxation (PA-CF)                +/-0.010  TVP; PETG ~2x
+    tower front under a +/-20 % preload drift            +/-0.000  0.1 um at the clamp under the design preload (FEA)
+    worst case                                           +/-0.044
+    RSS                                                  +/-0.022
   plus the scale face:
-    indicator + board-thickness micrometer             +/-0.005  
-    board bow over the electrode area (unmeasured)     +/-0.030  TVP: 0.075 %/40 mm; IPC-6012 limit = 0.30
-    beam face flatness along travel                    +/-0.010  
-    set-screw setting resolution (M2 x 0.4, 10 deg)    +/-0.011  0.4 x 10/360
-    thermal: 5.4 mm PETG tower, +/-10 K                +/-0.004  
-    pad / body creep and wear (PETG, first months)     +/-0.020  TVP; PA-CF ~half
-    scale thickness / flushness along its length       +/-0.020  one PCB: thickness varies less than lot-to-lot (TVP)
-    worst case                                         +/-0.100
-    RSS                                                +/-0.044
-  -> 0.15 +/- 0.044 RSS (0.100 worst): the electrodes never touch at RSS, but the
-     signal swings ~+/-30 % with gap along the travel -- fine for the experimental phase-ratio readout.
-  CAUTION: the board is held only by bosses at y >= 24.5; its lower band (electrodes y 10.6-17.5, AS5311
-  at y 6) overhangs 7-24 mm with no support.  The +/-0.03 bow term is a tenth of the IPC-6012 class 2
-  limit (0.75 %, i.e. 0.30 over the 40 mm electrode length, twice the gap): flatness-check every slider
-  board over its lower band and reject boards worse than 0.03 mm, or the electrodes can touch the scale.
+    shim foil thickness (steel shim stock 0.150)         +/-0.005  +/-0.005 (TVP: measure the foil)
+    beam face flatness along travel                      +/-0.010  drawing PCC-M-02
+    board flatness residual (inspected <= 0.03)          +/-0.015  SPEC D3; the foil holds the mean
+    epoxy cure shrinkage (2 % of the 0.2 bed)            +/-0.004  
+    thermal, clamp chain +/-10 K (PA-CF)                 +/-0.000  pad + 2.45 printed - washer/standoff/epoxy; PETG 0.0009
+    clamp-seat creep / relaxation (PA-CF)                +/-0.010  TVP; PETG ~2x
+    tower front under a +/-20 % preload drift            +/-0.000  0.1 um at the clamp under the design preload (FEA)
+    scale thickness / flushness along its length         +/-0.020  one PCB: thickness varies less than lot-to-lot (TVP)
+    worst case                                           +/-0.064
+    RSS                                                  +/-0.029
+  -> 0.15 +/- 0.029 RSS (0.064 worst): the electrodes never touch, worst case included.
+     The first model (board on bosses at y >= 24.5, set by four set screws) had +/-0.044 RSS / 0.10 worst, with
+     an unsupported 7-24 mm overhang behind the 0.03 bow term.
+  Transient, not in the stack: a 3 N button press bends the board; with the button-band ledge
+  the electrode band moves 1.0 um and the AS5311 0.8 um (FEA, rigid ledge) plus the
+  ledge's own few um (section 8); without the ledge it was 42 um.  It recovers when the button is released.
 
 6. AS5311 gap budget (SPEC 4.1: 0.30 +/- 0.10)
 -----------------------------------------------
-(a) Open-loop (no measurement of the package or the tape):
-    AS5311 seated height A (0.85..1.20, JEDEC MO-153)  +/-0.175  centre 1.025 vs model 1.10
-    solder standoff                                    +/-0.030  
-    tape thickness                                     +/-0.050  TVP; Dexter quotes +/-0.15 on its strips
-    tape adhesive                                      +/-0.010  
-    channel depth                                      +/-0.020  machined, from face D
-    board height as set (5b board terms, RSS)          +/-0.039  the board height is set for the cap gap
-    worst case                                         +/-0.324
-    RSS                                                +/-0.190
-  -> +/-0.190 RSS is OUTSIDE the +/-0.10 window.
+(a) Open-loop (no measurement of the package or the tape; board height as bedded, 5b):
+    AS5311 seated height A (0.85..1.20, JEDEC MO-153)    +/-0.175  centre 1.025 vs model 1.10
+    solder standoff                                      +/-0.030  
+    tape thickness                                       +/-0.050  TVP; Dexter quotes +/-0.15 on its strips
+    tape adhesive                                        +/-0.010  
+    channel depth                                        +/-0.020  machined, from face D
+    board height as bedded (5b board terms, RSS)         +/-0.022  
+    worst case                                           +/-0.307
+    RSS                                                  +/-0.187
+  -> +/-0.187 RSS is OUTSIDE the +/-0.10 window.
 (b) With the per-unit measurement in assembly (mechanical 6): micrometer the board + AS5311 stack before
     fitting (gives A to +/-0.005), depth-gauge the tape face below the beam face after bonding (+/-0.005),
     and lay 0-0.35 mm of Kapton shim (0.025 steps) under the tape so the predicted gap is 0.30.
     The channel (2.00 deep) gives 0.30 with NO shim at A max 1.20; a shim raises the tape,
     so every shorter package can be corrected (A nominal 1.10 -> 0.10 shim, A min 0.85 -> 0.35).
-    [Review fix: the first channel (1.90) gave 0.20 unshimmed at A max, which a shim can only make smaller.]
-    A measured                                         +/-0.005  
-    tape face measured                                 +/-0.005  
-    shim step / 2                                      +/-0.013  0.025 steps
-    tape thickness along the length                    +/-0.020  TVP
-    channel depth along the length                     +/-0.010  
-    board height as set (5b board terms, RSS)          +/-0.039  
-    worst case                                         +/-0.092
-    RSS                                                +/-0.048
-    true worst case (board terms worst case too)       +/-0.132
-  -> 0.30 +/- 0.048 RSS: inside 0.2-0.4 (2.1x the RSS).
-     The true worst case, +/-0.132, is OUTSIDE the window, so tolerancing does not
-     guarantee the gap; the firmware field check below accepts or rejects each unit.
-     [Review fix: the first version put the 5b RSS into this worst-case sum and reported 0.003 margin.]
+    A measured                                           +/-0.005  
+    tape face measured                                   +/-0.005  
+    shim step / 2                                        +/-0.013  0.025 steps
+    tape thickness along the length                      +/-0.020  TVP
+    channel depth along the length                       +/-0.010  
+    board height as bedded (5b board terms, RSS)         +/-0.022  
+    worst case                                           +/-0.074
+    RSS                                                  +/-0.034
+    true worst case (board terms worst case too)         +/-0.097
+  -> 0.30 +/- 0.034 RSS: inside 0.2-0.4 (2.9x the RSS).
+     The true worst case, +/-0.097, is inside the window (the first model: +/-0.048 RSS, +/-0.13 worst, outside).
 Field check in firmware: AS5311 MagINCn / MagDECn both high = field in range; the SSI status bits
 (OCF, COF, LIN) flag an out-of-range gap.  Bring-up records them at R = 0, 75, 150.
 
 7. Envelope
 ------------
-Housing envelope (u, y, z): 77.5 x 52.0 x 16.0 mm (SPEC 7: <= 78 x 52 x 16); thumb roller rim at u 78.6 (0.6 proud of the end face).
-SPEC 7 counts the roller in the 78 mm: the rim reaches u 78.6, 0.6 mm over (measured from the jaw face u 0).
+Housing envelope (u, y, z): 76.9 x 52.0 x 16.0 mm (SPEC 7: <= 78 x 52 x 16, roller included).
+Thumb roller rim at u 78.0 from the jaw face, 0.6 proud of the end face (review fix e: the end face moved 78.0 -> 77.4; the rim was at 78.6).
+The lock's knurled head stands 4 mm above the top face (like the jaws, an appendage outside the box).
 Tape channel 2.00 deep leaves 2.00 mm of steel under it (cross-section area drops to 80 %; bending is not loaded in use).
+
+8. Board under a button press (board support check, SPEC D3 open item)
+-----------------------------------------------------------------------
+The upper band is held only by H1 (18.75, 24); HOLD and MODE sit over the battery pocket, with no body under
+the board.  fea_slider.py solves the board (FR4, E 20 GPa, outline + tabs from board_parts.json) clamped at
+the four standoffs and resting on the H1 boss, 3 N on one switch footprint at a time; linear tets corrected
+x1.75 for bending (cantilever calibration in the same run):
+  without a support under the button band:
+    ZERO  at the button   46.5 um, electrode band max  19.4 um, AS5311   6.2 um
+    HOLD  at the button   92.3 um, electrode band max  35.1 um, AS5311   8.2 um
+    MODE  at the button  129.1 um, electrode band max  41.5 um, AS5311  11.8 um
+  with the button-band ledge (u 37..65.5, y 32.6..34.4, shimmed to contact; rigid in the FEA):
+    ZERO  at the button    0.5 um, electrode band max   0.7 um, AS5311   0.5 um
+    HOLD  at the button    0.5 um, electrode band max   1.0 um, AS5311   0.8 um
+    MODE  at the button    0.5 um, electrode band max   1.0 um, AS5311   0.6 um
+  ledge compliance: 1.8 mm cantilever, 0.70 thick, ~10 mm engaged, PA-CF: 525 N/mm, 5.7 um under the full 3 N
+  -> without the ledge the worst press (MODE) moved the electrode band 41.5 um toward the scale (28 % of the 0.15 gap) and the button
+     129 um; with it, about 1.0 um + the ledge's own 5.7 um.  The ledge is kept.
+  battery: cell top z -1.40, 0.80 below the ledge underside; the board never reaches the cell.

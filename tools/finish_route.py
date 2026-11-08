@@ -21,6 +21,7 @@ import heapq
 import json
 import math
 import os
+import shutil
 import subprocess
 import tempfile
 
@@ -221,6 +222,15 @@ class Router:
         nc = ns.GetNetClassByName(net.GetNetClassName())
         return TO_MM(nc.GetTrackWidth()), TO_MM(nc.GetClearance()), TO_MM(nc.GetViaDiameter()), TO_MM(nc.GetViaDrill())
 
+    def item_clearance(self, it):
+        """Class clearance (mm) of a copper item's net, cached per class name."""
+        cache = self.__dict__.setdefault("_clr_cache", {})
+        name = it.GetNetClassName()
+        if name not in cache:
+            ns = self.b.GetDesignSettings().m_NetSettings
+            cache[name] = TO_MM(ns.GetNetClassByName(name).GetClearance())
+        return cache[name]
+
     # ---- obstacle rasters
     def rippable(self, it):
         """Other-net copper the rip-up pass may remove: unlocked signal tracks and vias (not pads, not GND, not the
@@ -277,13 +287,17 @@ class Router:
                 tb, vb = soft_nets[it.GetNetname()]
             else:
                 tb, vb = blk, vblk
+            # KiCad applies the larger of the two nets' class clearances (e.g. a 0.15 mm USB class against a
+            # 0.10 mm default): grow the obstacle by the other net's clearance where it is the larger one
+            oc = self.item_clearance(it)
+            rt, rv = (Rt, Rv) if oc <= clr else (oc + w / 2 + m, oc + via_d / 2 + m)
             for k, lay in enumerate(self.layers):
                 if it.IsOnLayer(lay):
                     polys = _item_polys(it, lay)
-                    grid.mark_polys(tb[k], polys, Rt)
+                    grid.mark_polys(tb[k], polys, rt)
             for lay in self.via_layers:
                 if it.IsOnLayer(lay) and not (isinstance(it, pcbnew.PAD) and lay in self.plane_layers):
-                    grid.mark_polys(vb, _item_polys(it, lay), Rv)
+                    grid.mark_polys(vb, _item_polys(it, lay), rv)
         # other-net zones on the routing layers (pours); planes of other nets on via layers
         for z in self.b.Zones():
             if z.GetIsRuleArea():
@@ -781,6 +795,9 @@ def finish(path, log=print, grid=0.025, margin=0.6, skip=(), max_rounds=30, max_
     net_margin = {}
     rip_history = {}
     ripups = 0
+    best = None
+    rip_tries = {}  # net name -> rip-up attempts: each failing net gets its turn instead of the first one forever
+    fail_age = {}   # net name -> rounds it has been failing (a fresh rip-up victim must not jump the queue)
     _, remaining, open_nets = drc_uuids(path)
     for rnd in range(max_rounds):
         b = pcbnew.LoadBoard(path)
@@ -809,8 +826,12 @@ def finish(path, log=print, grid=0.025, margin=0.6, skip=(), max_rounds=30, max_
         if not routed and failed and ripups < max_ripups:
             # spare test pads rip others up only after every other open connection has tried and failed
             low = lambda n: n.GetNetname().split("/")[-1].startswith(r.low_priority)  # noqa: E731
-            for net, ca, cb in sorted(failed, key=lambda f: low(f[0])):
+            for f in failed:
+                fail_age[f[0].GetNetname()] = fail_age.get(f[0].GetNetname(), 0) + 1
+            for net, ca, cb in sorted(failed, key=lambda f: (low(f[0]), rip_tries.get(f[0].GetNetname(), 0),
+                                                             -fail_age.get(f[0].GetNetname(), 0))):
                 name = net.GetNetname()
+                rip_tries[name] = rip_tries.get(name, 0) + 1
                 items = r.route_pair(net, ca, cb, margin=net_margin.get(name, margin), ripup=True)
                 if items:
                     ripups += 1
@@ -835,6 +856,16 @@ def finish(path, log=print, grid=0.025, margin=0.6, skip=(), max_rounds=30, max_
         _, remaining, open_nets = drc_uuids(path)
         log(f"finish_route round {rnd + 1}: {remaining} unconnected ({routed} routed, {rejected} rejected"
             f"{', rip-up' if ripped else ''})")
+        if best is None or remaining < best:
+            best = remaining
+            shutil.copyfile(path, path + ".best")
         if remaining == 0 or (not routed and not ripped and not rejected):
             break
+    # a rip-up round can end worse than an earlier round: hand back the best board seen
+    if best is not None and remaining > best and os.path.exists(path + ".best"):
+        shutil.copyfile(path + ".best", path)
+        log(f"finish_route: restored the best round ({best} unconnected instead of {remaining})")
+        remaining = best
+    if os.path.exists(path + ".best"):
+        os.remove(path + ".best")
     return remaining

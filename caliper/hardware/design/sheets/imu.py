@@ -49,9 +49,9 @@ def build(d):
             "CS high = I2C. SA0 high (never ground it: internal pull-up, see module docstring). RES to GND.\n"
             "INT1 -> IMU_INT1 (GPIO15, RTC: deep-sleep wake on pickup), INT2 -> IMU_INT2 (GPIO16). Push-pull, no pull-ups.\n"
             "100n + 10u at VDD (pin 9), 100n at VDD_IO (pin 10). Keep away from the buck-boost inductor.")
-    cap(d, "C60", "100n", "GND", "+3V3")
-    cap(d, "C61", "10u", "GND", "+3V3")
-    cap(d, "C62", "100n", "GND", "+3V3")
+    cap(d, "C60", "100n", "GND", "+3V3", near="U60.9")      # near= is a placer hint only
+    cap(d, "C61", "10u", "GND", "+3V3", near="U60.9")
+    cap(d, "C62", "100n", "GND", "+3V3", near="U60.10")
     d.add("U60", "caliper:LIS2DW12", "LIS2DW12TR", "Package_LGA:LGA-12_2x2mm_P0.5mm",
           pins={"1": "I2C_SCL", "4": "I2C_SDA", "2": "+3V3", "3": "+3V3",
                 "12": "IMU_INT1", "11": "IMU_INT2", "5": None,

@@ -1088,7 +1088,7 @@
 	)
 	(text "TX phase isolation jumpers (0R, DNP to disconnect the experiment)"
 		(exclude_from_sim no)
-		(at 15.24 20.32 0)
+		(at 15.24 15.24 0)
 		(effects
 			(font
 				(size 2 2)
@@ -1100,7 +1100,7 @@
 	)
 	(text "Fit R60-R67 to drive the electrodes; leave them off and the eight GPIOs are free test pads."
 		(exclude_from_sim no)
-		(at 15.24 24.13 0)
+		(at 15.24 19.05 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1108,23 +1108,11 @@
 			)
 			(justify left top)
 		)
-		(uuid "c835da12-7b9f-5a66-8844-e36322e9c688")
-	)
-	(rectangle
-		(start 12.7 17.78)
-		(end 175.26 54.61)
-		(stroke
-			(width 0.1)
-			(type dash)
-		)
-		(fill
-			(type none)
-		)
-		(uuid "0f17a36f-c28f-5e79-acd6-4a1d840819e5")
+		(uuid "8a104b9e-24a9-5b84-9424-34655bf74a66")
 	)
 	(text "TX series resistors (100R: edge-rate limit, EMI, GPIO protection)"
 		(exclude_from_sim no)
-		(at 182.88 20.32 0)
+		(at 15.24 22.86 0)
 		(effects
 			(font
 				(size 2 2)
@@ -1136,7 +1124,7 @@
 	)
 	(text "Next to the comb, on the electrode side of the jumpers. Phase n drives every 8th finger (pitch 0.635 mm)."
 		(exclude_from_sim no)
-		(at 182.88 24.13 0)
+		(at 15.24 26.67 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1144,23 +1132,11 @@
 			)
 			(justify left top)
 		)
-		(uuid "31e46f12-563f-52e6-93a1-8a415315f320")
-	)
-	(rectangle
-		(start 180.34 17.78)
-		(end 355.6 54.61)
-		(stroke
-			(width 0.1)
-			(type dash)
-		)
-		(fill
-			(type none)
-		)
-		(uuid "4876ab1d-4382-5c86-904e-d563e455b21c")
+		(uuid "01c38b2f-202e-52a3-b228-064392ac8d5e")
 	)
 	(text "Electrodes (bottom copper, E40 = seed pads; not a BOM part)"
 		(exclude_from_sim no)
-		(at 15.24 62.23 0)
+		(at 15.24 29.21 0)
 		(effects
 			(font
 				(size 2 2)
@@ -1172,7 +1148,7 @@
 	)
 	(text "Comb x = 11...51, y = 12.5...17.5; RX strip y = 10.6...11.8 (SPEC §2.1). Bottom mask open over both.\nGuard GND around the RX strip and the CAP_EL_RX trace on all layers; nothing else on the bottom in y = 9...19."
 		(exclude_from_sim no)
-		(at 15.24 66.04 0)
+		(at 15.24 34.29 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1180,23 +1156,11 @@
 			)
 			(justify left top)
 		)
-		(uuid "33a88f81-7d4e-54ba-a3a5-c11f5e36d7a6")
-	)
-	(rectangle
-		(start 12.7 59.69)
-		(end 128.27 113.03)
-		(stroke
-			(width 0.1)
-			(type dash)
-		)
-		(fill
-			(type none)
-		)
-		(uuid "e2f62a2c-cd37-53ee-bd3d-f52d1a4241f6")
+		(uuid "fd1055f0-9674-5b43-9cd0-b70f65906b98")
 	)
 	(text "RX jumper + charge amplifier (U40A)"
 		(exclude_from_sim no)
-		(at 135.89 62.23 0)
+		(at 15.24 39.37 0)
 		(effects
 			(font
 				(size 2 2)
@@ -1208,7 +1172,7 @@
 	)
 	(text "Q = C*V: Cf 10p C0G || Rf 10M (HPF corner 1.6 kHz, far below the 25-100 kHz drive). Output centred on VREF.\nKeep the CAP_RX_IN node tiny, guarded, no mask opening on it except at the electrode."
 		(exclude_from_sim no)
-		(at 135.89 66.04 0)
+		(at 15.24 43.18 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1216,23 +1180,11 @@
 			)
 			(justify left top)
 		)
-		(uuid "2a03344e-019e-5484-993b-287f0bf028f3")
-	)
-	(rectangle
-		(start 133.35 59.69)
-		(end 265.43 113.03)
-		(stroke
-			(width 0.1)
-			(type dash)
-		)
-		(fill
-			(type none)
-		)
-		(uuid "463eaa29-02d1-5f6f-87f9-ed6b1db62260")
+		(uuid "20327f21-da40-5222-8d60-acd04955cdbb")
 	)
 	(text "VREF = +3V3_SNS / 2, buffered (U40B)"
 		(exclude_from_sim no)
-		(at 15.24 120.65 0)
+		(at 15.24 48.26 0)
 		(effects
 			(font
 				(size 2 2)
@@ -1244,7 +1196,7 @@
 	)
 	(text "100k/100k divider (16.5 uA, only while +3V3_SNS is on) filtered by C41 1u, unity-gain buffer U40B.\nThe buffer output drives only U40A's + input (no capacitive load on the op-amp output)."
 		(exclude_from_sim no)
-		(at 15.24 124.46 0)
+		(at 15.24 53.34 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1252,59 +1204,11 @@
 			)
 			(justify left top)
 		)
-		(uuid "c1b3a8ca-7b4b-5c72-8d7f-33f99862a88c")
-	)
-	(rectangle
-		(start 12.7 118.11)
-		(end 172.72 157.48)
-		(stroke
-			(width 0.1)
-			(type dash)
-		)
-		(fill
-			(type none)
-		)
-		(uuid "9a2b066a-7335-53e6-a7f3-3fcc693be2df")
-	)
-	(text "Op-amp supply"
-		(exclude_from_sim no)
-		(at 180.34 120.65 0)
-		(effects
-			(font
-				(size 2 2)
-				(bold yes)
-			)
-			(justify left top)
-		)
-		(uuid "a64bef66-b96d-5147-82a3-7375ecd20e7e")
-	)
-	(text "100n at pin 8"
-		(exclude_from_sim no)
-		(at 180.34 124.46 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-				(italic yes)
-			)
-			(justify left top)
-		)
-		(uuid "a3991e6d-3986-598b-97ed-f35ceff118ca")
-	)
-	(rectangle
-		(start 177.8 118.11)
-		(end 257.81 143.51)
-		(stroke
-			(width 0.1)
-			(type dash)
-		)
-		(fill
-			(type none)
-		)
-		(uuid "242cab41-9596-57d8-aa3c-0fb701b1cbc9")
+		(uuid "0881e3c1-fa60-51e4-ab8a-9829bed87742")
 	)
 	(text "2nd-order RC low-pass (~408 kHz per pole) -> CAP_RX (ADC1_CH0)"
 		(exclude_from_sim no)
-		(at 15.24 165.1 0)
+		(at 15.24 58.42 0)
 		(effects
 			(font
 				(size 2 2)
@@ -1316,7 +1220,7 @@
 	)
 	(text "390R/1n then 3.9k/100p C0G (second stage 10x the impedance, so it barely loads the first).\nAnti-alias + kills the op-amp's HF noise; the synchronous demodulation is done in firmware."
 		(exclude_from_sim no)
-		(at 15.24 168.91 0)
+		(at 15.24 62.23 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1324,23 +1228,11 @@
 			)
 			(justify left top)
 		)
-		(uuid "7f750e1e-47b8-5327-8522-faae343c9a89")
-	)
-	(rectangle
-		(start 12.7 162.56)
-		(end 161.29 189.23)
-		(stroke
-			(width 0.1)
-			(type dash)
-		)
-		(fill
-			(type none)
-		)
-		(uuid "0648a73e-c0b7-5fdc-ac8d-e211bf60fb1d")
+		(uuid "47ba4af2-24d3-5b03-b548-35aa7fec3221")
 	)
 	(text "Test points"
 		(exclude_from_sim no)
-		(at 168.91 165.1 0)
+		(at 15.24 67.31 0)
 		(effects
 			(font
 				(size 2 2)
@@ -1352,7 +1244,7 @@
 	)
 	(text "Charge-amp output and VREF for scope probing"
 		(exclude_from_sim no)
-		(at 168.91 168.91 0)
+		(at 15.24 71.12 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1360,11 +1252,11 @@
 			)
 			(justify left top)
 		)
-		(uuid "c1e2630d-5936-5f16-8210-6e864c4ea223")
+		(uuid "11262e5d-1635-5011-8b4b-efedbbe62a61")
 	)
 	(rectangle
-		(start 166.37 162.56)
-		(end 214.63 203.2)
+		(start 12.7 12.7)
+		(end 355.6 140.97)
 		(stroke
 			(width 0.1)
 			(type dash)
@@ -1372,2187 +1264,11 @@
 		(fill
 			(type none)
 		)
-		(uuid "abdb095e-a0e4-5f0d-ac46-928ccecc8f83")
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 33.02 35.56 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "ae2cc9e9-38fc-5d1b-9a47-90a252f23f6e")
-		(property "Reference" "R60"
-			(at 33.02 32.944 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "0R"
-			(at 33.02 38.176 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
-			(at 33.02 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 33.02 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 33.02 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "MPN" "0402WGF0000TCE"
-			(at 33.02 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Manufacturer" "UNI-ROYAL"
-			(at 33.02 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C17168"
-			(at 33.02 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "2574bbc6-ad4a-5ad9-9075-de4a496f741a")
-		)
-		(pin "2"
-			(uuid "267c5369-662f-5606-b058-0b6aa409c873")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
-					(reference "R60")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 29.21 35.56) (xy 26.67 35.56))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "72ebb946-ce24-5c72-b4fa-c3111130df35")
-	)
-	(global_label "CAP_TX0"
-		(shape passive)
-		(at 26.67 35.56 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "30bd558e-ed59-5626-869c-f1e5351fd99a")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 26.67 35.56 180)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-				(hide yes)
-			)
-		)
-	)
-	(wire
-		(pts (xy 36.83 35.56) (xy 39.37 35.56))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "2dfb8fcf-006a-5c4c-ae06-54370540fade")
-	)
-	(label "CAP_TX0_J"
-		(at 39.37 35.56 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "9cc47f1a-18ff-5cba-92c4-33cbf6f20fdf")
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 73.66 35.56 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "6e79e3c8-a3db-59a4-bc36-7c117a7760de")
-		(property "Reference" "R61"
-			(at 73.66 32.944 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "0R"
-			(at 73.66 38.176 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
-			(at 73.66 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 73.66 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 73.66 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "MPN" "0402WGF0000TCE"
-			(at 73.66 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Manufacturer" "UNI-ROYAL"
-			(at 73.66 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C17168"
-			(at 73.66 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "e88dd61b-88ec-596a-b7c5-d568b6d11c20")
-		)
-		(pin "2"
-			(uuid "8d8a7a67-1ea7-55dd-bd27-91bd33ef1da8")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
-					(reference "R61")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 69.85 35.56) (xy 67.31 35.56))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "396db1c7-8163-50d8-9dc8-8dd92b6481e8")
-	)
-	(global_label "CAP_TX1"
-		(shape passive)
-		(at 67.31 35.56 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "67756bd5-9aac-5bfa-80aa-115fc5c44a1c")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 67.31 35.56 180)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-				(hide yes)
-			)
-		)
-	)
-	(wire
-		(pts (xy 77.47 35.56) (xy 80.01 35.56))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "dbb5d754-e9c8-5ff4-8b50-9aa197303187")
-	)
-	(label "CAP_TX1_J"
-		(at 80.01 35.56 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "1985edc6-7bac-5a48-9808-66ae097d9780")
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 114.3 35.56 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "11f0ce3a-6d30-5d51-86cb-92c2dbd24db2")
-		(property "Reference" "R62"
-			(at 114.3 32.944 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "0R"
-			(at 114.3 38.176 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
-			(at 114.3 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 114.3 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 114.3 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "MPN" "0402WGF0000TCE"
-			(at 114.3 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Manufacturer" "UNI-ROYAL"
-			(at 114.3 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C17168"
-			(at 114.3 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "c9716cec-40f1-549b-928a-54f0c07bcac9")
-		)
-		(pin "2"
-			(uuid "52f09a5a-89c2-57c9-b227-0ce780d96342")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
-					(reference "R62")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 110.49 35.56) (xy 107.95 35.56))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e4de4778-6df0-570e-a535-32b905852ad8")
-	)
-	(global_label "CAP_TX2"
-		(shape passive)
-		(at 107.95 35.56 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "3dc70852-8737-5c49-9832-7b643a78f0ce")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 107.95 35.56 180)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-				(hide yes)
-			)
-		)
-	)
-	(wire
-		(pts (xy 118.11 35.56) (xy 120.65 35.56))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e18d32b6-69c0-54a7-8f16-9739707eabcd")
-	)
-	(label "CAP_TX2_J"
-		(at 120.65 35.56 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "0e443eb2-e3d6-583d-ab76-dd480648a123")
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 154.94 35.56 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "857f796d-02e5-53a6-b095-1f309f9669b3")
-		(property "Reference" "R63"
-			(at 154.94 32.944 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "0R"
-			(at 154.94 38.176 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
-			(at 154.94 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 154.94 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 154.94 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "MPN" "0402WGF0000TCE"
-			(at 154.94 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Manufacturer" "UNI-ROYAL"
-			(at 154.94 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C17168"
-			(at 154.94 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "9ff946f7-1889-529f-8c2e-e2db599d514d")
-		)
-		(pin "2"
-			(uuid "3bf52dee-ff01-5476-acd4-a39f58b9ec89")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
-					(reference "R63")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 151.13 35.56) (xy 148.59 35.56))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e1813723-bd5f-51f0-9b35-b952df62c21b")
-	)
-	(global_label "CAP_TX3"
-		(shape passive)
-		(at 148.59 35.56 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "845a33ca-8fc0-532a-961c-2058d7429c9c")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 148.59 35.56 180)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-				(hide yes)
-			)
-		)
-	)
-	(wire
-		(pts (xy 158.75 35.56) (xy 161.29 35.56))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "8d12b0bd-6133-5880-b333-e7ead2b29e94")
-	)
-	(label "CAP_TX3_J"
-		(at 161.29 35.56 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "4451652d-c6af-5ae3-b861-d083a99d49e4")
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 33.02 48.26 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "b405de2c-00a4-52c9-802a-995cba905a7a")
-		(property "Reference" "R64"
-			(at 33.02 45.644 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "0R"
-			(at 33.02 50.876 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
-			(at 33.02 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 33.02 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 33.02 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "MPN" "0402WGF0000TCE"
-			(at 33.02 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Manufacturer" "UNI-ROYAL"
-			(at 33.02 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C17168"
-			(at 33.02 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "d35c131a-298a-56da-a180-3d9a4726d573")
-		)
-		(pin "2"
-			(uuid "6da2b8c2-112b-5977-85e8-d8f457de6480")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
-					(reference "R64")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 29.21 48.26) (xy 26.67 48.26))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "dce3749e-3544-5d26-804f-de6b175cb4fd")
-	)
-	(global_label "CAP_TX4"
-		(shape passive)
-		(at 26.67 48.26 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "caba8ed6-d1a0-545d-a397-19c3ab7bb466")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 26.67 48.26 180)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-				(hide yes)
-			)
-		)
-	)
-	(wire
-		(pts (xy 36.83 48.26) (xy 39.37 48.26))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "9de24c1c-913b-5e31-8654-3d65020ff568")
-	)
-	(label "CAP_TX4_J"
-		(at 39.37 48.26 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "756bed68-0b6f-5b42-89df-59f569a371b8")
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 73.66 48.26 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "074d506e-3c38-5512-bc50-45163fda18f2")
-		(property "Reference" "R65"
-			(at 73.66 45.644 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "0R"
-			(at 73.66 50.876 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
-			(at 73.66 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 73.66 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 73.66 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "MPN" "0402WGF0000TCE"
-			(at 73.66 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Manufacturer" "UNI-ROYAL"
-			(at 73.66 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C17168"
-			(at 73.66 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "6b75a35d-f731-5871-ae59-33a5aa12994e")
-		)
-		(pin "2"
-			(uuid "458626a3-633d-5ea9-a861-9ccf5448ad5a")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
-					(reference "R65")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 69.85 48.26) (xy 67.31 48.26))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "49ed26bc-1ec4-5ce0-8bbd-a9d8108ac756")
-	)
-	(global_label "CAP_TX5"
-		(shape passive)
-		(at 67.31 48.26 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "d01ee260-a79e-54d4-9c28-92533300f178")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 67.31 48.26 180)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-				(hide yes)
-			)
-		)
-	)
-	(wire
-		(pts (xy 77.47 48.26) (xy 80.01 48.26))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "2b569a72-48dc-5465-b345-317a23479424")
-	)
-	(label "CAP_TX5_J"
-		(at 80.01 48.26 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "4747d0d4-5112-54a0-b5c7-4400168a278f")
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 114.3 48.26 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "7714b337-cc7e-53d7-bfbd-6b1a5be548c9")
-		(property "Reference" "R66"
-			(at 114.3 45.644 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "0R"
-			(at 114.3 50.876 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
-			(at 114.3 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 114.3 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 114.3 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "MPN" "0402WGF0000TCE"
-			(at 114.3 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Manufacturer" "UNI-ROYAL"
-			(at 114.3 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C17168"
-			(at 114.3 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "aaa0089d-91ca-503d-b8e0-9019398de776")
-		)
-		(pin "2"
-			(uuid "6e571d97-28c1-5a77-a1a5-5cd34347542f")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
-					(reference "R66")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 110.49 48.26) (xy 107.95 48.26))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e350998e-2dd3-5c14-b9be-5ba113e0a874")
-	)
-	(global_label "CAP_TX6"
-		(shape passive)
-		(at 107.95 48.26 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "f05898d3-0f34-5da4-9969-be807ca1ff7a")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 107.95 48.26 180)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-				(hide yes)
-			)
-		)
-	)
-	(wire
-		(pts (xy 118.11 48.26) (xy 120.65 48.26))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "be1e4cc3-37d3-5687-b636-f14b289795d0")
-	)
-	(label "CAP_TX6_J"
-		(at 120.65 48.26 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "9d81d562-f398-5c2b-b50c-f3d6fafece07")
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 154.94 48.26 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "1632728c-d5de-5d00-8cd0-69557f6be894")
-		(property "Reference" "R67"
-			(at 154.94 45.644 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "0R"
-			(at 154.94 50.876 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
-			(at 154.94 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 154.94 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 154.94 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "MPN" "0402WGF0000TCE"
-			(at 154.94 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Manufacturer" "UNI-ROYAL"
-			(at 154.94 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C17168"
-			(at 154.94 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "a0ea3eaf-e0c1-5d95-8996-536bb335280a")
-		)
-		(pin "2"
-			(uuid "62bf4992-8721-51bf-ad0a-f449bbdcd286")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
-					(reference "R67")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 151.13 48.26) (xy 148.59 48.26))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "49c6bf20-9445-5964-bdf4-8f13d026aa5c")
-	)
-	(global_label "CAP_TX7"
-		(shape passive)
-		(at 148.59 48.26 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "5d1f8077-e629-5b37-b5e0-17690f7ce8b4")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 148.59 48.26 180)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-				(hide yes)
-			)
-		)
-	)
-	(wire
-		(pts (xy 158.75 48.26) (xy 161.29 48.26))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a99e0007-1c1b-581e-b791-934646e91499")
-	)
-	(label "CAP_TX7_J"
-		(at 161.29 48.26 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "8ab7ee6a-9f16-598a-add2-c522f505dc62")
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 200.66 35.56 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "4ff9c121-4ef0-59b7-a885-3851155ea5b5")
-		(property "Reference" "R70"
-			(at 200.66 32.944 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "100"
-			(at 200.66 38.176 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
-			(at 200.66 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 200.66 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 200.66 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "MPN" "0402WGF1000TCE"
-			(at 200.66 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Manufacturer" "UNI-ROYAL"
-			(at 200.66 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C25076"
-			(at 200.66 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "9135036f-c2f6-5477-ac03-3347d4984782")
-		)
-		(pin "2"
-			(uuid "522da126-2d97-5283-9798-c865f39013bb")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
-					(reference "R70")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 196.85 35.56) (xy 194.31 35.56))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "8f56d8ca-6c66-56e5-be20-f73a5091b19d")
-	)
-	(label "CAP_TX0_J"
-		(at 194.31 35.56 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "e0100771-e4d2-5741-8680-51bf7f806be1")
-	)
-	(wire
-		(pts (xy 204.47 35.56) (xy 207.01 35.56))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "504b47fe-d61e-53ee-a045-06eb6f223a85")
-	)
-	(label "CAP_EL_TX0"
-		(at 207.01 35.56 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "ef796857-0850-5d29-8290-33fcd829066e")
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 246.38 35.56 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "942599a0-2baf-5073-a46a-38a740fe32a8")
-		(property "Reference" "R71"
-			(at 246.38 32.944 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "100"
-			(at 246.38 38.176 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
-			(at 246.38 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 246.38 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 246.38 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "MPN" "0402WGF1000TCE"
-			(at 246.38 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Manufacturer" "UNI-ROYAL"
-			(at 246.38 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C25076"
-			(at 246.38 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "49e3a277-04ba-55e8-a642-531dd1c56584")
-		)
-		(pin "2"
-			(uuid "483c2930-9f7c-5212-9414-74375b190068")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
-					(reference "R71")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 242.57 35.56) (xy 240.03 35.56))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "4cba7c7d-cd92-52c0-a915-4fdeae79aeb7")
-	)
-	(label "CAP_TX1_J"
-		(at 240.03 35.56 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "40d1e245-efb5-5abd-ae86-ac66e39efa8d")
-	)
-	(wire
-		(pts (xy 250.19 35.56) (xy 252.73 35.56))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "4562bcfb-38c8-5461-ac95-a9698cffdf22")
-	)
-	(label "CAP_EL_TX1"
-		(at 252.73 35.56 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "c099139b-658a-5da9-b67b-507e58086457")
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 289.56 35.56 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "f32aba64-06e0-5414-aa36-b0a6815d0066")
-		(property "Reference" "R72"
-			(at 289.56 32.944 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "100"
-			(at 289.56 38.176 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
-			(at 289.56 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 289.56 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 289.56 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "MPN" "0402WGF1000TCE"
-			(at 289.56 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Manufacturer" "UNI-ROYAL"
-			(at 289.56 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C25076"
-			(at 289.56 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "db8c6598-821b-5fef-adbc-018692ac4461")
-		)
-		(pin "2"
-			(uuid "69036431-2f08-5ae1-8a0e-75e81f4422bb")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
-					(reference "R72")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 285.75 35.56) (xy 283.21 35.56))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "fe413132-ce58-525e-86ad-5fd209addf5e")
-	)
-	(label "CAP_TX2_J"
-		(at 283.21 35.56 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "26880fbd-7b65-59c4-9e2b-bedb81607b8b")
-	)
-	(wire
-		(pts (xy 293.37 35.56) (xy 295.91 35.56))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "fea2568f-e8f4-55a9-95b1-fdcf5a0d0988")
-	)
-	(label "CAP_EL_TX2"
-		(at 295.91 35.56 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "e96e7725-b5ac-540e-8da0-e740dfa74996")
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 332.74 35.56 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "965d5c1a-a571-5c9d-96d4-f6472813555b")
-		(property "Reference" "R73"
-			(at 332.74 32.944 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "100"
-			(at 332.74 38.176 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
-			(at 332.74 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 332.74 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 332.74 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "MPN" "0402WGF1000TCE"
-			(at 332.74 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Manufacturer" "UNI-ROYAL"
-			(at 332.74 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C25076"
-			(at 332.74 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "e593ff2b-1404-5384-bc18-d72af3549040")
-		)
-		(pin "2"
-			(uuid "c2014eef-c81c-5bf2-97e0-4035f4b7f4f8")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
-					(reference "R73")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 328.93 35.56) (xy 326.39 35.56))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "ee9353f2-15d3-596b-a3fc-6bf5202ad45a")
-	)
-	(label "CAP_TX3_J"
-		(at 326.39 35.56 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "da0d65a4-26b6-5fd7-9a5f-a3cc3503a8ea")
-	)
-	(wire
-		(pts (xy 336.55 35.56) (xy 339.09 35.56))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "0f4d7edc-73f1-58ee-bde2-26ba4df98ee2")
-	)
-	(label "CAP_EL_TX3"
-		(at 339.09 35.56 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "326af22d-19d7-56c1-8038-6c3000127b4a")
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 200.66 48.26 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "72360fd5-68c7-5d68-afa6-4fa2443c0473")
-		(property "Reference" "R74"
-			(at 200.66 45.644 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "100"
-			(at 200.66 50.876 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
-			(at 200.66 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 200.66 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 200.66 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "MPN" "0402WGF1000TCE"
-			(at 200.66 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Manufacturer" "UNI-ROYAL"
-			(at 200.66 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C25076"
-			(at 200.66 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "6b914ae8-0f9d-5f95-9268-b4e8912d65b0")
-		)
-		(pin "2"
-			(uuid "09630f67-7e57-5fc3-9f39-7808352aca7c")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
-					(reference "R74")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 196.85 48.26) (xy 194.31 48.26))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "391ee07e-93c9-5269-8f93-e6ab6333853f")
-	)
-	(label "CAP_TX4_J"
-		(at 194.31 48.26 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "66f4322f-3ee7-575b-9d4a-30cd35503ca3")
-	)
-	(wire
-		(pts (xy 204.47 48.26) (xy 207.01 48.26))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "678d4f0f-6f0c-5566-b08a-0e0cb9838df4")
-	)
-	(label "CAP_EL_TX4"
-		(at 207.01 48.26 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "96a77335-87e6-52a3-9f45-d629ffa2a848")
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 246.38 48.26 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "f6b921c2-4fed-5c7e-bc46-061370955d2f")
-		(property "Reference" "R75"
-			(at 246.38 45.644 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "100"
-			(at 246.38 50.876 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
-			(at 246.38 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 246.38 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 246.38 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "MPN" "0402WGF1000TCE"
-			(at 246.38 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Manufacturer" "UNI-ROYAL"
-			(at 246.38 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C25076"
-			(at 246.38 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "b2a1af97-4745-51e1-9933-fdaaa277f812")
-		)
-		(pin "2"
-			(uuid "94a22ee2-9935-59b0-90c3-032cce9c5ba5")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
-					(reference "R75")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 242.57 48.26) (xy 240.03 48.26))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "b4dc6a64-7ca7-5a6f-a248-4708b7287dfb")
-	)
-	(label "CAP_TX5_J"
-		(at 240.03 48.26 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "abec518d-89fc-53a5-b6c6-b7c5890b0c88")
-	)
-	(wire
-		(pts (xy 250.19 48.26) (xy 252.73 48.26))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "3a3dbbc3-3f9a-5193-9e9a-66982310df17")
-	)
-	(label "CAP_EL_TX5"
-		(at 252.73 48.26 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "ee15b946-f5ec-5893-b5a8-15075a991ab3")
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 289.56 48.26 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "03399cac-d49e-5788-96be-73cde110ba16")
-		(property "Reference" "R76"
-			(at 289.56 45.644 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "100"
-			(at 289.56 50.876 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
-			(at 289.56 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 289.56 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 289.56 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "MPN" "0402WGF1000TCE"
-			(at 289.56 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Manufacturer" "UNI-ROYAL"
-			(at 289.56 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C25076"
-			(at 289.56 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "7d06781a-7269-5f93-9f4e-6e29fbe85c66")
-		)
-		(pin "2"
-			(uuid "2e25a000-8ded-5f8b-97cf-3b3d6147dd36")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
-					(reference "R76")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 285.75 48.26) (xy 283.21 48.26))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "429cde55-e700-5313-b15c-4af358b60c29")
-	)
-	(label "CAP_TX6_J"
-		(at 283.21 48.26 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "8b21da7a-f14d-5ad0-bfb8-4f803113da8e")
-	)
-	(wire
-		(pts (xy 293.37 48.26) (xy 295.91 48.26))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "1ff9a6fb-31a9-5bf9-ad74-8d2f68c69b13")
-	)
-	(label "CAP_EL_TX6"
-		(at 295.91 48.26 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "e73104c0-1fe0-5c67-b620-44e861054b43")
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 332.74 48.26 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "7ef34445-90b3-5162-a06d-834c631a48e5")
-		(property "Reference" "R77"
-			(at 332.74 45.644 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "100"
-			(at 332.74 50.876 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
-			(at 332.74 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 332.74 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 332.74 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "MPN" "0402WGF1000TCE"
-			(at 332.74 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Manufacturer" "UNI-ROYAL"
-			(at 332.74 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C25076"
-			(at 332.74 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "dd0a148f-f99d-522b-b049-30fe9b536a8b")
-		)
-		(pin "2"
-			(uuid "a128623c-a068-56be-87c2-81680a7d3d10")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
-					(reference "R77")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 328.93 48.26) (xy 326.39 48.26))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a2a339f1-2c0b-56d3-913a-263e3cbc29ef")
-	)
-	(label "CAP_TX7_J"
-		(at 326.39 48.26 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "d00902e0-2e4a-5b55-ba80-51a7d2b94c39")
-	)
-	(wire
-		(pts (xy 336.55 48.26) (xy 339.09 48.26))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "cac4f109-5dc0-5e13-87df-173b7203c693")
-	)
-	(label "CAP_EL_TX7"
-		(at 339.09 48.26 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "e54a8536-413a-5892-9021-38991a7849c0")
+		(uuid "1d62bdab-4f35-5440-a7ab-4095678158d1")
 	)
 	(symbol
 		(lib_id "caliper:CAP_ELECTRODES")
-		(at 40.64 93.98 0)
+		(at 110.49 110.49 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -3560,25 +1276,25 @@
 		(dnp no)
 		(uuid "98991332-86df-507a-bd9e-2883f7d5b0cf")
 		(property "Reference" "E40"
-			(at 30.48 77.98 0)
+			(at 102.87 94.79 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify right bottom)
+				(justify left)
 			)
 		)
 		(property "Value" "CAP_ELECTRODES"
-			(at 30.48 80.28 0)
+			(at 102.87 96.54 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify right bottom)
+				(justify left)
 			)
 		)
 		(property "Footprint" "caliper:Caliper_CapTX_Electrode_Seed_8Phase_P0.635mm"
-			(at 40.64 93.98 0)
+			(at 110.49 110.49 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3587,7 +1303,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 40.64 93.98 0)
+			(at 110.49 110.49 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3596,7 +1312,7 @@
 			)
 		)
 		(property "Description" "Capacitive scale electrodes (bottom copper): 8 transmitter phases + receive strip. Seed pads only; layout draws the full comb on these nets. Not a BOM part."
-			(at 40.64 93.98 0)
+			(at 110.49 110.49 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3640,187 +1356,35 @@
 			)
 		)
 	)
-	(wire
-		(pts (xy 30.48 85.09) (xy 27.94 85.09))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "85a44346-9d54-5f71-b7d3-8ce5bd9e2f9e")
-	)
 	(label "CAP_EL_TX0"
-		(at 27.94 85.09 180)
+		(at 78.74 81.28 180)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
 			(justify right bottom)
 		)
-		(uuid "72dc71fa-01bd-528b-bf93-f9127fc9ce99")
-	)
-	(wire
-		(pts (xy 30.48 87.63) (xy 27.94 87.63))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "310e6da9-24d2-5843-8606-871e75dd7c56")
-	)
-	(label "CAP_EL_TX1"
-		(at 27.94 87.63 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "b48f4515-71a0-59df-914e-bf56a24dc2e3")
-	)
-	(wire
-		(pts (xy 30.48 90.17) (xy 27.94 90.17))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "efefb26d-7e87-5310-845f-a908112397ba")
-	)
-	(label "CAP_EL_TX2"
-		(at 27.94 90.17 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "f1040e3e-a06a-5c22-9915-669d1f414786")
-	)
-	(wire
-		(pts (xy 30.48 92.71) (xy 27.94 92.71))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "6685b5b6-c53c-521e-ae6b-17c8f88b8211")
-	)
-	(label "CAP_EL_TX3"
-		(at 27.94 92.71 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "e7ee076d-6fe1-5a98-bab6-fb615e83b9c5")
-	)
-	(wire
-		(pts (xy 30.48 95.25) (xy 27.94 95.25))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "c1246005-d2f3-5625-a11e-f5b3d832913f")
-	)
-	(label "CAP_EL_TX4"
-		(at 27.94 95.25 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "d52b90b2-b124-5f29-80a2-1fbacba504b1")
-	)
-	(wire
-		(pts (xy 30.48 97.79) (xy 27.94 97.79))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "3a99ba1e-1d52-59dd-9fa5-082d3ebd0588")
-	)
-	(label "CAP_EL_TX5"
-		(at 27.94 97.79 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "01568883-6d94-50d1-bf16-045fefb8864d")
-	)
-	(wire
-		(pts (xy 30.48 100.33) (xy 27.94 100.33))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "079a6d36-4bd0-5929-823f-36c38aef4215")
-	)
-	(label "CAP_EL_TX6"
-		(at 27.94 100.33 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "933aac17-6277-5e73-9368-836c24733988")
-	)
-	(wire
-		(pts (xy 30.48 102.87) (xy 27.94 102.87))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "dedfa6bb-dd1b-52f2-bded-74a555a47baf")
-	)
-	(label "CAP_EL_TX7"
-		(at 27.94 102.87 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "1996ab71-18d1-504d-973c-4ed53a1cc3f4")
-	)
-	(wire
-		(pts (xy 50.8 93.98) (xy 53.34 93.98))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "7e4cfed1-522d-57fb-bae2-c2bf4d33f218")
-	)
-	(label "CAP_EL_RX"
-		(at 53.34 93.98 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "d9b816bf-cc5c-5b7c-8df8-e348e4bf164a")
+		(uuid "186f095c-8fb8-522c-abba-f6dc63433d22")
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 154.94 78.74 90)
+		(at 58.42 81.28 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "a083d03a-71f6-5587-becf-8f3bc445355a")
-		(property "Reference" "R80"
-			(at 154.94 76.124 90)
+		(uuid "4ff9c121-4ef0-59b7-a885-3851155ea5b5")
+		(property "Reference" "R70"
+			(at 58.42 78.764 90)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 			)
 		)
-		(property "Value" "0R"
-			(at 154.94 81.356 90)
+		(property "Value" "100"
+			(at 58.42 83.796 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3828,7 +1392,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
-			(at 154.94 78.74 0)
+			(at 58.42 81.28 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3837,7 +1401,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 154.94 78.74 0)
+			(at 58.42 81.28 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3846,7 +1410,7 @@
 			)
 		)
 		(property "Description" "Resistor"
-			(at 154.94 78.74 0)
+			(at 58.42 81.28 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3854,8 +1418,8 @@
 				(hide yes)
 			)
 		)
-		(property "MPN" "0402WGF0000TCE"
-			(at 154.94 78.74 0)
+		(property "MPN" "0402WGF1000TCE"
+			(at 58.42 81.28 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3864,7 +1428,111 @@
 			)
 		)
 		(property "Manufacturer" "UNI-ROYAL"
-			(at 154.94 78.74 0)
+			(at 58.42 81.28 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C25076"
+			(at 58.42 81.28 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "9135036f-c2f6-5477-ac03-3347d4984782")
+		)
+		(pin "2"
+			(uuid "522da126-2d97-5283-9798-c865f39013bb")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
+					(reference "R70")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(label "CAP_TX0_J"
+		(at 53.34 81.28 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "ea70bf5f-745a-5d07-9e0b-3331e0e3c464")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 34.29 81.28 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "ae2cc9e9-38fc-5d1b-9a47-90a252f23f6e")
+		(property "Reference" "R60"
+			(at 34.29 78.764 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "0R"
+			(at 34.29 83.796 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 34.29 81.28 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 34.29 81.28 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 34.29 81.28 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "0402WGF0000TCE"
+			(at 34.29 81.28 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 34.29 81.28 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3873,7 +1541,1743 @@
 			)
 		)
 		(property "LCSC" "C17168"
-			(at 154.94 78.74 0)
+			(at 34.29 81.28 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "2574bbc6-ad4a-5ad9-9075-de4a496f741a")
+		)
+		(pin "2"
+			(uuid "267c5369-662f-5606-b058-0b6aa409c873")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
+					(reference "R60")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label "CAP_TX0"
+		(shape passive)
+		(at 27.94 81.28 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "94d9e641-e01e-5eae-9827-373f98bdccbb")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 27.94 81.28 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(label "CAP_EL_TX1"
+		(at 78.74 88.9 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "98ea1ed9-6dae-5422-b778-449502f16eb1")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 58.42 88.9 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "942599a0-2baf-5073-a46a-38a740fe32a8")
+		(property "Reference" "R71"
+			(at 58.42 86.384 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "100"
+			(at 58.42 91.416 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 58.42 88.9 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 58.42 88.9 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 58.42 88.9 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "0402WGF1000TCE"
+			(at 58.42 88.9 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 58.42 88.9 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C25076"
+			(at 58.42 88.9 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "49e3a277-04ba-55e8-a642-531dd1c56584")
+		)
+		(pin "2"
+			(uuid "483c2930-9f7c-5212-9414-74375b190068")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
+					(reference "R71")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(label "CAP_TX1_J"
+		(at 53.34 88.9 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "f43f420a-08d4-54bc-9a8a-d79675d266b3")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 34.29 88.9 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "6e79e3c8-a3db-59a4-bc36-7c117a7760de")
+		(property "Reference" "R61"
+			(at 34.29 86.384 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "0R"
+			(at 34.29 91.416 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 34.29 88.9 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 34.29 88.9 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 34.29 88.9 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "0402WGF0000TCE"
+			(at 34.29 88.9 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 34.29 88.9 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C17168"
+			(at 34.29 88.9 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "e88dd61b-88ec-596a-b7c5-d568b6d11c20")
+		)
+		(pin "2"
+			(uuid "8d8a7a67-1ea7-55dd-bd27-91bd33ef1da8")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
+					(reference "R61")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label "CAP_TX1"
+		(shape passive)
+		(at 27.94 88.9 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "84048657-43d5-59ce-af69-d88838392cc8")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 27.94 88.9 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(label "CAP_EL_TX2"
+		(at 78.74 96.52 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "fcf75b91-18db-5911-88e4-66a190b1eb1e")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 58.42 96.52 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "f32aba64-06e0-5414-aa36-b0a6815d0066")
+		(property "Reference" "R72"
+			(at 58.42 94.004 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "100"
+			(at 58.42 99.036 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 58.42 96.52 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 58.42 96.52 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 58.42 96.52 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "0402WGF1000TCE"
+			(at 58.42 96.52 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 58.42 96.52 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C25076"
+			(at 58.42 96.52 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "db8c6598-821b-5fef-adbc-018692ac4461")
+		)
+		(pin "2"
+			(uuid "69036431-2f08-5ae1-8a0e-75e81f4422bb")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
+					(reference "R72")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(label "CAP_TX2_J"
+		(at 53.34 96.52 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "fabac78d-7e32-5697-a314-34bcc7af21bf")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 34.29 96.52 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "11f0ce3a-6d30-5d51-86cb-92c2dbd24db2")
+		(property "Reference" "R62"
+			(at 34.29 94.004 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "0R"
+			(at 34.29 99.036 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 34.29 96.52 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 34.29 96.52 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 34.29 96.52 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "0402WGF0000TCE"
+			(at 34.29 96.52 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 34.29 96.52 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C17168"
+			(at 34.29 96.52 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "c9716cec-40f1-549b-928a-54f0c07bcac9")
+		)
+		(pin "2"
+			(uuid "52f09a5a-89c2-57c9-b227-0ce780d96342")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
+					(reference "R62")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label "CAP_TX2"
+		(shape passive)
+		(at 27.94 96.52 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "806b04af-6725-5b36-8cef-63f1f6138937")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 27.94 96.52 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(label "CAP_EL_TX3"
+		(at 78.74 104.14 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "e7b7928d-c777-5dcf-ad53-6f8e650d2ef7")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 58.42 104.14 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "965d5c1a-a571-5c9d-96d4-f6472813555b")
+		(property "Reference" "R73"
+			(at 58.42 101.624 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "100"
+			(at 58.42 106.656 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 58.42 104.14 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 58.42 104.14 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 58.42 104.14 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "0402WGF1000TCE"
+			(at 58.42 104.14 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 58.42 104.14 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C25076"
+			(at 58.42 104.14 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "e593ff2b-1404-5384-bc18-d72af3549040")
+		)
+		(pin "2"
+			(uuid "c2014eef-c81c-5bf2-97e0-4035f4b7f4f8")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
+					(reference "R73")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(label "CAP_TX3_J"
+		(at 53.34 104.14 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "62264435-21a1-5d03-b68c-3deda68eb85f")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 34.29 104.14 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "857f796d-02e5-53a6-b095-1f309f9669b3")
+		(property "Reference" "R63"
+			(at 34.29 101.624 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "0R"
+			(at 34.29 106.656 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 34.29 104.14 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 34.29 104.14 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 34.29 104.14 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "0402WGF0000TCE"
+			(at 34.29 104.14 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 34.29 104.14 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C17168"
+			(at 34.29 104.14 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "9ff946f7-1889-529f-8c2e-e2db599d514d")
+		)
+		(pin "2"
+			(uuid "3bf52dee-ff01-5476-acd4-a39f58b9ec89")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
+					(reference "R63")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label "CAP_TX3"
+		(shape passive)
+		(at 27.94 104.14 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "f3f0c4b9-73a1-5f92-9cd6-74d538e77e9c")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 27.94 104.14 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(label "CAP_EL_TX4"
+		(at 78.74 111.76 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "b9f0d06d-c7a0-54a7-951f-0e29ea7de4a0")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 58.42 111.76 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "72360fd5-68c7-5d68-afa6-4fa2443c0473")
+		(property "Reference" "R74"
+			(at 58.42 109.244 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "100"
+			(at 58.42 114.276 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 58.42 111.76 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 58.42 111.76 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 58.42 111.76 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "0402WGF1000TCE"
+			(at 58.42 111.76 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 58.42 111.76 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C25076"
+			(at 58.42 111.76 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "6b914ae8-0f9d-5f95-9268-b4e8912d65b0")
+		)
+		(pin "2"
+			(uuid "09630f67-7e57-5fc3-9f39-7808352aca7c")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
+					(reference "R74")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(label "CAP_TX4_J"
+		(at 53.34 111.76 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "d1641450-722e-5bdf-a82c-331084058b47")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 34.29 111.76 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "b405de2c-00a4-52c9-802a-995cba905a7a")
+		(property "Reference" "R64"
+			(at 34.29 109.244 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "0R"
+			(at 34.29 114.276 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 34.29 111.76 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 34.29 111.76 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 34.29 111.76 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "0402WGF0000TCE"
+			(at 34.29 111.76 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 34.29 111.76 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C17168"
+			(at 34.29 111.76 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "d35c131a-298a-56da-a180-3d9a4726d573")
+		)
+		(pin "2"
+			(uuid "6da2b8c2-112b-5977-85e8-d8f457de6480")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
+					(reference "R64")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label "CAP_TX4"
+		(shape passive)
+		(at 27.94 111.76 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "fb38af41-38e2-5bee-9e8c-f364966d6ca9")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 27.94 111.76 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(label "CAP_EL_TX5"
+		(at 78.74 119.38 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "4c4b6094-738f-5798-8034-c6d0db79fe34")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 58.42 119.38 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "f6b921c2-4fed-5c7e-bc46-061370955d2f")
+		(property "Reference" "R75"
+			(at 58.42 116.864 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "100"
+			(at 58.42 121.896 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 58.42 119.38 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 58.42 119.38 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 58.42 119.38 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "0402WGF1000TCE"
+			(at 58.42 119.38 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 58.42 119.38 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C25076"
+			(at 58.42 119.38 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "b2a1af97-4745-51e1-9933-fdaaa277f812")
+		)
+		(pin "2"
+			(uuid "94a22ee2-9935-59b0-90c3-032cce9c5ba5")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
+					(reference "R75")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(label "CAP_TX5_J"
+		(at 53.34 119.38 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "a98374f8-7bf4-5589-913b-87d7fb474635")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 34.29 119.38 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "074d506e-3c38-5512-bc50-45163fda18f2")
+		(property "Reference" "R65"
+			(at 34.29 116.864 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "0R"
+			(at 34.29 121.896 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 34.29 119.38 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 34.29 119.38 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 34.29 119.38 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "0402WGF0000TCE"
+			(at 34.29 119.38 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 34.29 119.38 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C17168"
+			(at 34.29 119.38 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "6b75a35d-f731-5871-ae59-33a5aa12994e")
+		)
+		(pin "2"
+			(uuid "458626a3-633d-5ea9-a861-9ccf5448ad5a")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
+					(reference "R65")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label "CAP_TX5"
+		(shape passive)
+		(at 27.94 119.38 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "af90b5f5-34eb-57aa-ac13-48bc4806aa37")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 27.94 119.38 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(label "CAP_EL_TX6"
+		(at 78.74 127 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "5d721dd8-5d0c-54f9-81d8-7a09aced3a89")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 58.42 127 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "03399cac-d49e-5788-96be-73cde110ba16")
+		(property "Reference" "R76"
+			(at 58.42 124.484 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "100"
+			(at 58.42 129.516 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 58.42 127 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 58.42 127 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 58.42 127 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "0402WGF1000TCE"
+			(at 58.42 127 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 58.42 127 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C25076"
+			(at 58.42 127 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "7d06781a-7269-5f93-9f4e-6e29fbe85c66")
+		)
+		(pin "2"
+			(uuid "2e25a000-8ded-5f8b-97cf-3b3d6147dd36")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
+					(reference "R76")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(label "CAP_TX6_J"
+		(at 53.34 127 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "fadc255c-a08e-5c3a-94ee-a76290164669")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 34.29 127 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "7714b337-cc7e-53d7-bfbd-6b1a5be548c9")
+		(property "Reference" "R66"
+			(at 34.29 124.484 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "0R"
+			(at 34.29 129.516 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 34.29 127 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 34.29 127 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 34.29 127 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "0402WGF0000TCE"
+			(at 34.29 127 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 34.29 127 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C17168"
+			(at 34.29 127 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "aaa0089d-91ca-503d-b8e0-9019398de776")
+		)
+		(pin "2"
+			(uuid "6e571d97-28c1-5a77-a1a5-5cd34347542f")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
+					(reference "R66")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label "CAP_TX6"
+		(shape passive)
+		(at 27.94 127 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "66f05979-0e22-5bf8-ae44-41eeb7b0eb43")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 27.94 127 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(label "CAP_EL_TX7"
+		(at 78.74 134.62 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "d985970a-a4af-58b6-b0c6-4bedc35c4d38")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 58.42 134.62 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "7ef34445-90b3-5162-a06d-834c631a48e5")
+		(property "Reference" "R77"
+			(at 58.42 132.104 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "100"
+			(at 58.42 137.136 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 58.42 134.62 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 58.42 134.62 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 58.42 134.62 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "0402WGF1000TCE"
+			(at 58.42 134.62 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 58.42 134.62 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C25076"
+			(at 58.42 134.62 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "dd0a148f-f99d-522b-b049-30fe9b536a8b")
+		)
+		(pin "2"
+			(uuid "a128623c-a068-56be-87c2-81680a7d3d10")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
+					(reference "R77")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(label "CAP_TX7_J"
+		(at 53.34 134.62 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "a3785500-bd44-5138-a8cb-0124635d27aa")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 34.29 134.62 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "1632728c-d5de-5d00-8cd0-69557f6be894")
+		(property "Reference" "R67"
+			(at 34.29 132.104 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "0R"
+			(at 34.29 137.136 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 34.29 134.62 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 34.29 134.62 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 34.29 134.62 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "0402WGF0000TCE"
+			(at 34.29 134.62 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 34.29 134.62 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C17168"
+			(at 34.29 134.62 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "a0ea3eaf-e0c1-5d95-8996-536bb335280a")
+		)
+		(pin "2"
+			(uuid "62bf4992-8721-51bf-ad0a-f449bbdcd286")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
+					(reference "R67")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label "CAP_TX7"
+		(shape passive)
+		(at 27.94 134.62 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "365140c7-08c6-5fa7-9bcd-c4d2e6ff5be4")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 27.94 134.62 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(label "CAP_EL_RX"
+		(at 185.42 110.49 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "1153ba3b-02aa-56f4-bbdf-4885cb80a98d")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 204.47 110.49 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "a083d03a-71f6-5587-becf-8f3bc445355a")
+		(property "Reference" "R80"
+			(at 204.47 107.974 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "0R"
+			(at 204.47 113.006 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 204.47 110.49 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 204.47 110.49 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 204.47 110.49 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "0402WGF0000TCE"
+			(at 204.47 110.49 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 204.47 110.49 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C17168"
+			(at 204.47 110.49 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3896,305 +3300,19 @@
 			)
 		)
 	)
-	(wire
-		(pts (xy 151.13 78.74) (xy 148.59 78.74))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "74fb835c-9b2b-54a6-a362-663b61beba71")
-	)
-	(label "CAP_EL_RX"
-		(at 148.59 78.74 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "ea12f528-813b-5357-8868-916d8c4f6cf0")
-	)
-	(wire
-		(pts (xy 158.75 78.74) (xy 161.29 78.74))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "9f24eedb-2230-526f-8853-10f4374d98c7")
-	)
 	(label "CAP_RX_IN"
-		(at 161.29 78.74 0)
+		(at 209.55 110.49 0)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
 			(justify left bottom)
 		)
-		(uuid "60ce4eaf-f2ec-5d54-969d-16c8d87a89cd")
-	)
-	(symbol
-		(lib_id "Device:C")
-		(at 198.12 78.74 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "e30944f1-2ddf-563b-a21f-e87625c6a74a")
-		(property "Reference" "C40"
-			(at 198.12 75.108 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "10p C0G"
-			(at 198.12 82.372 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-			(at 198.12 78.74 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 198.12 78.74 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Unpolarized capacitor"
-			(at 198.12 78.74 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "MPN" "0402CG100J500NT"
-			(at 198.12 78.74 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Manufacturer" "FH (Guangdong Fenghua)"
-			(at 198.12 78.74 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C1545"
-			(at 198.12 78.74 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "10442f76-20b5-5f4e-8f11-97ed63c558bb")
-		)
-		(pin "2"
-			(uuid "3566e929-1d14-506f-bd4b-2b98ee23bdd9")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
-					(reference "C40")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 194.31 78.74) (xy 191.77 78.74))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "6c3bc233-3f22-547b-aa50-5670fd58e654")
-	)
-	(label "CAP_RX_IN"
-		(at 191.77 78.74 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "721619c1-88ac-5281-9b6e-da4d0629d008")
-	)
-	(wire
-		(pts (xy 201.93 78.74) (xy 204.47 78.74))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "f3783920-22e5-5ed2-b963-e00533ea501a")
-	)
-	(label "CAP_AMP_OUT"
-		(at 204.47 78.74 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "cfe20238-6538-5f6e-bb02-cdc671ac8027")
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 241.3 78.74 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "81ac8824-08e5-54f7-bd92-571e80b0e3ef")
-		(property "Reference" "R81"
-			(at 241.3 76.124 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "10M"
-			(at 241.3 81.356 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
-			(at 241.3 78.74 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 241.3 78.74 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 241.3 78.74 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "MPN" "0402WGF1005TCE"
-			(at 241.3 78.74 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Manufacturer" "UNI-ROYAL"
-			(at 241.3 78.74 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C26082"
-			(at 241.3 78.74 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "c7da2747-489b-5bbd-957a-4a7da9f4bd2a")
-		)
-		(pin "2"
-			(uuid "2522ac8d-57d6-53b7-a7b3-1da87a179b23")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
-					(reference "R81")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 237.49 78.74) (xy 234.95 78.74))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "19ed6967-38a3-5133-a902-08ad8b0057f3")
-	)
-	(label "CAP_RX_IN"
-		(at 234.95 78.74 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "7615b121-b445-50f7-b99e-4ada3acde90d")
-	)
-	(wire
-		(pts (xy 245.11 78.74) (xy 247.65 78.74))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "852e3be6-1a0d-59a4-b664-d1ca86e3e207")
-	)
-	(label "CAP_AMP_OUT"
-		(at 247.65 78.74 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "70b32b3b-3b5f-59a9-a883-b03b15cc85ca")
+		(uuid "a4e29da1-da79-580d-8f04-b3f356c6f60f")
 	)
 	(symbol
 		(lib_id "Amplifier_Operational:TLV9062")
-		(at 157.48 101.6 0)
+		(at 232.41 101.6 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -4202,25 +3320,25 @@
 		(dnp no)
 		(uuid "ccc981c8-351b-5179-810c-e352b845da93")
 		(property "Reference" "U40"
-			(at 149.86 93.22 0)
+			(at 227.33 93.52 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify right bottom)
+				(justify left)
 			)
 		)
 		(property "Value" "TLV9062IDGKR"
-			(at 149.86 95.52 0)
+			(at 227.33 95.27 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify right bottom)
+				(justify left)
 			)
 		)
 		(property "Footprint" "Package_SO:VSSOP-8_3x3mm_P0.65mm"
-			(at 157.48 101.6 0)
+			(at 232.41 101.6 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4229,7 +3347,7 @@
 			)
 		)
 		(property "Datasheet" "https://www.ti.com/lit/ds/symlink/tlv9062.pdf"
-			(at 157.48 101.6 0)
+			(at 232.41 101.6 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4238,7 +3356,7 @@
 			)
 		)
 		(property "Description" "Dual Operational Amplifiers, SOIC-8/TSSOP-8/VSSOP-8"
-			(at 157.48 101.6 0)
+			(at 232.41 101.6 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4247,7 +3365,7 @@
 			)
 		)
 		(property "MPN" "TLV9062IDGKR"
-			(at 157.48 101.6 0)
+			(at 232.41 101.6 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4256,7 +3374,7 @@
 			)
 		)
 		(property "Manufacturer" "Texas Instruments"
-			(at 157.48 101.6 0)
+			(at 232.41 101.6 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4265,7 +3383,7 @@
 			)
 		)
 		(property "LCSC" "C398356"
-			(at 157.48 101.6 0)
+			(at 232.41 101.6 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4291,386 +3409,27 @@
 			)
 		)
 	)
-	(wire
-		(pts (xy 149.86 99.06) (xy 147.32 99.06))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "8b1036bd-0253-5fff-88ce-784256473f28")
-	)
 	(label "CAP_VREF"
-		(at 147.32 99.06 180)
+		(at 212.09 92.71 180)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
 			(justify right bottom)
 		)
-		(uuid "33f71285-5755-5af9-97a6-978496ef0ade")
-	)
-	(wire
-		(pts (xy 149.86 104.14) (xy 147.32 104.14))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e2bc1857-2d16-5fb5-a413-5bd7def2c8e0")
-	)
-	(label "CAP_RX_IN"
-		(at 147.32 104.14 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "29f7179a-e23e-5e1c-9362-6221852e6db7")
-	)
-	(wire
-		(pts (xy 165.1 101.6) (xy 167.64 101.6))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "99e1b5ac-6635-5c39-9c64-591e82d1840c")
-	)
-	(label "CAP_AMP_OUT"
-		(at 167.64 101.6 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "404b8b1b-9acd-5e03-af75-9a271dcf1075")
+		(uuid "a91b05b5-ff84-5bcd-8e15-2ebe6d505bcc")
 	)
 	(symbol
-		(lib_id "Device:R")
-		(at 33.02 137.16 90)
+		(lib_id "Connector:TestPoint")
+		(at 198.12 92.71 0)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(dnp no)
-		(uuid "e01523b0-0572-5a1f-85eb-e8cfafb9313b")
-		(property "Reference" "R82"
-			(at 33.02 134.544 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "100k"
-			(at 33.02 139.776 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
-			(at 33.02 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 33.02 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 33.02 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "MPN" "0402WGF1003TCE"
-			(at 33.02 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Manufacturer" "UNI-ROYAL"
-			(at 33.02 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C25741"
-			(at 33.02 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "7dd03fa3-6fee-5735-b8d9-224825f45be7")
-		)
-		(pin "2"
-			(uuid "23a5f691-57db-5bb4-b957-bf32096ac4be")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
-					(reference "R82")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 29.21 137.16) (xy 26.67 137.16))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "eb865da6-8f3b-53ce-a080-95e0fd10bd41")
-	)
-	(symbol
-		(lib_id "power:VCC")
-		(at 26.67 137.16 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "d330d7bb-e8e3-5b0a-89ed-151d5959d53b")
-		(property "Reference" "#PWR05001"
-			(at 26.67 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "+3V3_SNS"
-			(at 23.37 137.16 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" ""
-			(at 26.67 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 26.67 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 26.67 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "e2a2f66d-70a8-5a60-9259-86e6d153d4d0")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
-					(reference "#PWR05001")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 36.83 137.16) (xy 39.37 137.16))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e0083249-a934-583d-b9eb-c1e1e3a9f51b")
-	)
-	(label "CAP_VDIV"
-		(at 39.37 137.16 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "a33e883a-e01d-544f-86a4-d29d6b135236")
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 73.66 137.16 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "fd0e9a3e-bb0c-5120-af2f-21cfc71c1b09")
-		(property "Reference" "R83"
-			(at 73.66 134.544 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "100k"
-			(at 73.66 139.776 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
-			(at 73.66 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 73.66 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 73.66 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "MPN" "0402WGF1003TCE"
-			(at 73.66 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Manufacturer" "UNI-ROYAL"
-			(at 73.66 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C25741"
-			(at 73.66 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "bb10aa46-3558-58e5-8001-1d4157e30d79")
-		)
-		(pin "2"
-			(uuid "d8bd3a69-9860-5f98-b578-f1acc5fe4c50")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
-					(reference "R83")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 69.85 137.16) (xy 67.31 137.16))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "10b5373e-165e-5299-b842-4da364268c67")
-	)
-	(label "CAP_VDIV"
-		(at 67.31 137.16 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "6df731ce-2635-5a8b-94a9-d072016f72b8")
-	)
-	(wire
-		(pts (xy 77.47 137.16) (xy 80.01 137.16))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "1f12b4f5-8eb9-5edb-b0e3-180094f2cb13")
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 80.01 137.16 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "ab71d909-1da3-5f32-a9f2-8711012c243c")
-		(property "Reference" "#PWR05002"
-			(at 80.01 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "GND"
-			(at 83.31 137.16 90)
+		(uuid "6a380816-7608-581e-aab4-cb7d14094ea5")
+		(property "Reference" "TP41"
+			(at 196.458 88.408 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4678,72 +3437,17 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" ""
-			(at 80.01 137.16 0)
+		(property "Value" "CAP_VREF"
+			(at 196.458 90.408 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
+				(justify right)
 			)
 		)
-		(property "Datasheet" ""
-			(at 80.01 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 80.01 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "d9e79aec-4fcf-5da8-be38-b857300d24e4")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
-					(reference "#PWR05002")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:C")
-		(at 109.22 137.16 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "b2ce15ba-276c-55ad-a8cd-e2de251e76c9")
-		(property "Reference" "C41"
-			(at 109.22 133.528 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "1u"
-			(at 109.22 140.792 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-			(at 109.22 137.16 0)
+		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
+			(at 198.12 92.71 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4752,7 +3456,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 109.22 137.16 0)
+			(at 198.12 92.71 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4760,35 +3464,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Unpolarized capacitor"
-			(at 109.22 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "MPN" "CL05A105KA5NQNC"
-			(at 109.22 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Manufacturer" "Samsung Electro-Mechanics"
-			(at 109.22 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C52923"
-			(at 109.22 137.16 0)
+		(property "Description" "test point"
+			(at 198.12 92.71 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4797,107 +3474,12 @@
 			)
 		)
 		(pin "1"
-			(uuid "58e29325-52a7-5999-b905-24131ba6d4d3")
-		)
-		(pin "2"
-			(uuid "5ad31504-60ef-5cc6-b12a-177ede0abef0")
+			(uuid "e2c0a77a-a0b0-5baa-9c59-e58db6529e14")
 		)
 		(instances
 			(project "prettycool-caliper-slider"
 				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
-					(reference "C41")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 105.41 137.16) (xy 102.87 137.16))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "915da251-76d6-580e-bc2f-77486c79be41")
-	)
-	(label "CAP_VDIV"
-		(at 102.87 137.16 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "6a17dee8-bf14-57ab-90fe-b2ac5f8ef597")
-	)
-	(wire
-		(pts (xy 113.03 137.16) (xy 115.57 137.16))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "25ebbd60-899b-57e5-868b-22508c665f3d")
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 115.57 137.16 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "f7c8e706-bb08-502e-9b5b-cdb0067fcc29")
-		(property "Reference" "#PWR05003"
-			(at 115.57 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "GND"
-			(at 118.87 137.16 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Footprint" ""
-			(at 115.57 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 115.57 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 115.57 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "6e5d87db-2871-573b-84ae-de2ed85bca07")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
-					(reference "#PWR05003")
+					(reference "TP41")
 					(unit 1)
 				)
 			)
@@ -4905,7 +3487,7 @@
 	)
 	(symbol
 		(lib_id "Amplifier_Operational:TLV9062")
-		(at 149.86 147.32 0)
+		(at 175.26 96.52 0)
 		(unit 2)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -4913,25 +3495,25 @@
 		(dnp no)
 		(uuid "0f268495-053a-5def-9494-14055fcdf6be")
 		(property "Reference" "U40"
-			(at 142.24 138.94 0)
+			(at 168.88 88.44 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify right bottom)
+				(justify right)
 			)
 		)
 		(property "Value" "TLV9062IDGKR"
-			(at 142.24 141.24 0)
+			(at 168.88 90.19 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify right bottom)
+				(justify right)
 			)
 		)
 		(property "Footprint" "Package_SO:VSSOP-8_3x3mm_P0.65mm"
-			(at 149.86 147.32 0)
+			(at 175.26 96.52 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4940,7 +3522,7 @@
 			)
 		)
 		(property "Datasheet" "https://www.ti.com/lit/ds/symlink/tlv9062.pdf"
-			(at 149.86 147.32 0)
+			(at 175.26 96.52 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4949,7 +3531,7 @@
 			)
 		)
 		(property "Description" "Dual Operational Amplifiers, SOIC-8/TSSOP-8/VSSOP-8"
-			(at 149.86 147.32 0)
+			(at 175.26 96.52 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4958,7 +3540,7 @@
 			)
 		)
 		(property "MPN" "TLV9062IDGKR"
-			(at 149.86 147.32 0)
+			(at 175.26 96.52 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4967,7 +3549,7 @@
 			)
 		)
 		(property "Manufacturer" "Texas Instruments"
-			(at 149.86 147.32 0)
+			(at 175.26 96.52 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4976,7 +3558,7 @@
 			)
 		)
 		(property "LCSC" "C398356"
-			(at 149.86 147.32 0)
+			(at 175.26 96.52 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5002,571 +3584,45 @@
 			)
 		)
 	)
-	(wire
-		(pts (xy 142.24 144.78) (xy 139.7 144.78))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a1b42ee9-53e2-5f10-9343-179ff775c611")
-	)
 	(label "CAP_VDIV"
-		(at 139.7 144.78 180)
+		(at 163.83 93.98 180)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
 			(justify right bottom)
 		)
-		(uuid "68915e8c-d86d-56cb-91e7-4792b7fc97f4")
-	)
-	(wire
-		(pts (xy 142.24 149.86) (xy 139.7 149.86))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "75a6265a-b587-5ae2-a6fc-2dc057387759")
-	)
-	(label "CAP_VREF"
-		(at 139.7 149.86 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "878a88b3-a1a0-59c9-ad15-3f30fff3e9d6")
-	)
-	(wire
-		(pts (xy 157.48 147.32) (xy 160.02 147.32))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e65af8f6-7c50-5345-9868-3e35a06a6bb5")
-	)
-	(label "CAP_VREF"
-		(at 160.02 147.32 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "39dcc347-97b9-5b79-8527-ff746d5deece")
-	)
-	(symbol
-		(lib_id "Device:C")
-		(at 198.12 137.16 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "fdac8a78-fd97-550f-a5e5-b289e3db0b83")
-		(property "Reference" "C42"
-			(at 198.12 133.528 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "100n"
-			(at 198.12 140.792 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-			(at 198.12 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 198.12 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Unpolarized capacitor"
-			(at 198.12 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "MPN" "CL05B104KO5NNNC"
-			(at 198.12 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Manufacturer" "Samsung Electro-Mechanics"
-			(at 198.12 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C1525"
-			(at 198.12 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "4eb617b1-b73d-55f8-b3ae-d82af9eb4e3d")
-		)
-		(pin "2"
-			(uuid "6a71bc90-ef5c-558d-9843-5db82d7fe480")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
-					(reference "C42")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 194.31 137.16) (xy 191.77 137.16))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "72526138-c386-53c6-b7ff-3c18fce30a5d")
-	)
-	(symbol
-		(lib_id "power:VCC")
-		(at 191.77 137.16 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "cfff97b4-8bba-5a50-83c5-389b5633bec2")
-		(property "Reference" "#PWR05004"
-			(at 191.77 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "+3V3_SNS"
-			(at 188.47 137.16 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" ""
-			(at 191.77 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 191.77 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 191.77 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "aad20849-0c7b-55d2-8940-f250893d777f")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
-					(reference "#PWR05004")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 201.93 137.16) (xy 204.47 137.16))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a15446a9-0f74-55f1-8b06-39f13d9d7158")
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 204.47 137.16 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "54be4543-b35d-5c8f-bb25-8cc40f9394a1")
-		(property "Reference" "#PWR05005"
-			(at 204.47 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "GND"
-			(at 207.77 137.16 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Footprint" ""
-			(at 204.47 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 204.47 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 204.47 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "4baf23f7-5725-5c9c-adea-816d2ee70bc3")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
-					(reference "#PWR05005")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Amplifier_Operational:TLV9062")
-		(at 238.76 132.08 90)
-		(unit 3)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "796e3744-03eb-5aaf-813d-9efe784f2530")
-		(property "Reference" "U40"
-			(at 238.76 133.02 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "TLV9062IDGKR"
-			(at 238.76 136.22 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Package_SO:VSSOP-8_3x3mm_P0.65mm"
-			(at 238.76 132.08 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "https://www.ti.com/lit/ds/symlink/tlv9062.pdf"
-			(at 238.76 132.08 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Dual Operational Amplifiers, SOIC-8/TSSOP-8/VSSOP-8"
-			(at 238.76 132.08 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "MPN" "TLV9062IDGKR"
-			(at 238.76 132.08 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Manufacturer" "Texas Instruments"
-			(at 238.76 132.08 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C398356"
-			(at 238.76 132.08 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "8"
-			(uuid "5e52afcc-30aa-50bf-9c34-69355b84f2bb")
-		)
-		(pin "4"
-			(uuid "02e502c6-6264-5bf9-9497-9ed34d1b599f")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
-					(reference "U40")
-					(unit 3)
-				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 231.14 134.62) (xy 228.6 134.62))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "1396474f-8fb9-5842-a7ee-b81c5a20c954")
-	)
-	(symbol
-		(lib_id "power:VCC")
-		(at 228.6 134.62 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "7c6f01c9-c5d5-5f99-8803-1891088c2eb9")
-		(property "Reference" "#PWR05006"
-			(at 228.6 134.62 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "+3V3_SNS"
-			(at 225.3 134.62 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" ""
-			(at 228.6 134.62 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 228.6 134.62 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 228.6 134.62 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "576011e3-c737-5aa4-a5c4-6a34d4914254")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
-					(reference "#PWR05006")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 246.38 134.62) (xy 248.92 134.62))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "2e5bb91c-dc38-5e0c-98bf-ce333a7fc6da")
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 248.92 134.62 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "d985cd76-30b7-5d4c-ba2b-e61d46134a4a")
-		(property "Reference" "#PWR05007"
-			(at 248.92 134.62 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "GND"
-			(at 252.22 134.62 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Footprint" ""
-			(at 248.92 134.62 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 248.92 134.62 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 248.92 134.62 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "1771e13e-b37f-52c1-8878-b71bd712b0d6")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
-					(reference "#PWR05007")
-					(unit 1)
-				)
-			)
-		)
+		(uuid "90b62721-785f-5368-b3d9-4a2e69bd901b")
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 35.56 180.34 90)
+		(at 146.05 90.17 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "ff884197-4fb7-564b-abd6-9f62ddc43862")
-		(property "Reference" "R84"
-			(at 35.56 177.724 90)
+		(uuid "e01523b0-0572-5a1f-85eb-e8cfafb9313b")
+		(property "Reference" "R82"
+			(at 144.134 89.17 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify right)
 			)
 		)
-		(property "Value" "390"
-			(at 35.56 182.956 90)
+		(property "Value" "100k"
+			(at 144.134 91.17 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify right)
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
-			(at 35.56 180.34 0)
+			(at 146.05 90.17 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5575,7 +3631,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 35.56 180.34 0)
+			(at 146.05 90.17 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5584,7 +3640,7 @@
 			)
 		)
 		(property "Description" "Resistor"
-			(at 35.56 180.34 0)
+			(at 146.05 90.17 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5592,8 +3648,8 @@
 				(hide yes)
 			)
 		)
-		(property "MPN" "0402WGF3900TCE"
-			(at 35.56 180.34 0)
+		(property "MPN" "0402WGF1003TCE"
+			(at 146.05 90.17 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5602,7 +3658,567 @@
 			)
 		)
 		(property "Manufacturer" "UNI-ROYAL"
-			(at 35.56 180.34 0)
+			(at 146.05 90.17 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C25741"
+			(at 146.05 90.17 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "7dd03fa3-6fee-5735-b8d9-224825f45be7")
+		)
+		(pin "2"
+			(uuid "23a5f691-57db-5bb4-b957-bf32096ac4be")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
+					(reference "R82")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:VCC")
+		(at 146.05 86.36 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "7cbd9a45-8e2d-5ba7-94f8-f10fefaf4581")
+		(property "Reference" "#PWR05001"
+			(at 146.05 86.36 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "+3V3_SNS"
+			(at 146.05 83.06 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+			)
+		)
+		(property "Footprint" ""
+			(at 146.05 86.36 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 146.05 86.36 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 146.05 86.36 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "ba44af4c-8b51-51d3-85a3-51391d0d2c23")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
+					(reference "#PWR05001")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 143.51 97.79 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "fd0e9a3e-bb0c-5120-af2f-21cfc71c1b09")
+		(property "Reference" "R83"
+			(at 141.594 96.79 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "100k"
+			(at 141.594 98.79 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 143.51 97.79 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 143.51 97.79 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 143.51 97.79 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "0402WGF1003TCE"
+			(at 143.51 97.79 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 143.51 97.79 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C25741"
+			(at 143.51 97.79 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "bb10aa46-3558-58e5-8001-1d4157e30d79")
+		)
+		(pin "2"
+			(uuid "d8bd3a69-9860-5f98-b578-f1acc5fe4c50")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
+					(reference "R83")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 143.51 101.6 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "dae5c6e0-cb83-5420-b3b2-2f2b344a90bb")
+		(property "Reference" "#PWR05002"
+			(at 143.51 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 143.51 104.9 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Footprint" ""
+			(at 143.51 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 143.51 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 143.51 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "1c7e9889-d684-5f11-8628-b15219d25a69")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
+					(reference "#PWR05002")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 132.08 97.79 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "b2ce15ba-276c-55ad-a8cd-e2de251e76c9")
+		(property "Reference" "C41"
+			(at 129.148 96.79 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "1u"
+			(at 129.148 98.79 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+			(at 132.08 97.79 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 132.08 97.79 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 132.08 97.79 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "CL05A105KA5NQNC"
+			(at 132.08 97.79 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "Samsung Electro-Mechanics"
+			(at 132.08 97.79 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C52923"
+			(at 132.08 97.79 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "58e29325-52a7-5999-b905-24131ba6d4d3")
+		)
+		(pin "2"
+			(uuid "5ad31504-60ef-5cc6-b12a-177ede0abef0")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
+					(reference "C41")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 132.08 101.6 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "02818c66-5c4f-58f4-b31e-1334fdf7a075")
+		(property "Reference" "#PWR05003"
+			(at 132.08 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 132.08 104.9 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Footprint" ""
+			(at 132.08 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 132.08 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 132.08 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "567f10ce-40f4-585c-a944-24691c8bd8d3")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
+					(reference "#PWR05003")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(label "CAP_AMP_OUT"
+		(at 243.84 101.6 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "688854b2-6274-5e94-93b9-e0205984e34a")
+	)
+	(symbol
+		(lib_id "Connector:TestPoint")
+		(at 261.62 101.6 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(dnp no)
+		(uuid "f217ac83-b14c-566f-b61b-f442a5c72786")
+		(property "Reference" "TP40"
+			(at 263.282 97.298 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "CAP_AMP_OUT"
+			(at 263.282 99.298 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
+			(at 261.62 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 261.62 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "test point"
+			(at 261.62 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "67651282-0d86-5d2f-8ffa-9be0d55bdbf2")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
+					(reference "TP40")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 284.48 101.6 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "ff884197-4fb7-564b-abd6-9f62ddc43862")
+		(property "Reference" "R84"
+			(at 284.48 99.084 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "390"
+			(at 284.48 104.116 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 284.48 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 284.48 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 284.48 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "0402WGF3900TCE"
+			(at 284.48 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 284.48 101.6 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5611,7 +4227,7 @@
 			)
 		)
 		(property "LCSC" "C25109"
-			(at 35.56 180.34 0)
+			(at 284.48 101.6 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5634,45 +4250,19 @@
 			)
 		)
 	)
-	(wire
-		(pts (xy 31.75 180.34) (xy 29.21 180.34))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "fa5dc781-2776-509e-8e80-841d41862606")
-	)
-	(label "CAP_AMP_OUT"
-		(at 29.21 180.34 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "caf0b722-da8c-594b-82e8-66f9038e41e7")
-	)
-	(wire
-		(pts (xy 39.37 180.34) (xy 41.91 180.34))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "f7c3de2f-39b9-52a2-b51f-511c1127c8ce")
-	)
 	(label "CAP_LP1"
-		(at 41.91 180.34 0)
+		(at 289.56 101.6 0)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
 			(justify left bottom)
 		)
-		(uuid "641cd831-5658-5a4c-a333-dd0e8d28a44e")
+		(uuid "3d5c94b9-d447-5bce-b564-ba3527532141")
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 73.66 182.88 90)
+		(at 303.53 105.41 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -5680,23 +4270,25 @@
 		(dnp no)
 		(uuid "c691a4e1-8b91-552f-a6f2-653e472a8d36")
 		(property "Reference" "C43"
-			(at 73.66 179.248 90)
+			(at 306.462 104.41 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left)
 			)
 		)
 		(property "Value" "1n"
-			(at 73.66 186.512 90)
+			(at 306.462 106.41 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left)
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-			(at 73.66 182.88 0)
+			(at 303.53 105.41 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5705,7 +4297,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 73.66 182.88 0)
+			(at 303.53 105.41 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5714,7 +4306,7 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
-			(at 73.66 182.88 0)
+			(at 303.53 105.41 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5723,7 +4315,7 @@
 			)
 		)
 		(property "MPN" "0402B102K500NT"
-			(at 73.66 182.88 0)
+			(at 303.53 105.41 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5732,7 +4324,7 @@
 			)
 		)
 		(property "Manufacturer" "FH (Guangdong Fenghua)"
-			(at 73.66 182.88 0)
+			(at 303.53 105.41 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5741,7 +4333,7 @@
 			)
 		)
 		(property "LCSC" "C1523"
-			(at 73.66 182.88 0)
+			(at 303.53 105.41 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5764,43 +4356,17 @@
 			)
 		)
 	)
-	(wire
-		(pts (xy 69.85 182.88) (xy 67.31 182.88))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "cf16ccae-58ae-56ba-9f3e-074ab1b92cfa")
-	)
-	(label "CAP_LP1"
-		(at 67.31 182.88 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "03265dc7-23fc-5cf2-a227-875c0b0c3f40")
-	)
-	(wire
-		(pts (xy 77.47 182.88) (xy 80.01 182.88))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "6d060d8e-2d37-5452-80d1-a1019a090158")
-	)
 	(symbol
 		(lib_id "power:GND")
-		(at 80.01 182.88 90)
+		(at 303.53 109.22 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "96c6f609-c67b-5f94-9e3b-e97bf9a4c893")
-		(property "Reference" "#PWR05008"
-			(at 80.01 182.88 0)
+		(uuid "7fc4ba89-dec1-5c3c-abc9-8a8d5497cc59")
+		(property "Reference" "#PWR05004"
+			(at 303.53 109.22 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5809,16 +4375,16 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 83.31 182.88 90)
+			(at 303.53 112.52 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify right)
+				(justify top)
 			)
 		)
 		(property "Footprint" ""
-			(at 80.01 182.88 0)
+			(at 303.53 109.22 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5827,7 +4393,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 80.01 182.88 0)
+			(at 303.53 109.22 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5836,7 +4402,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 80.01 182.88 0)
+			(at 303.53 109.22 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5845,12 +4411,12 @@
 			)
 		)
 		(pin "1"
-			(uuid "7e83344d-dcdd-54ed-8751-8dc64a71b910")
+			(uuid "4794acef-5aa1-59a4-9db6-82fdd26833f2")
 		)
 		(instances
 			(project "prettycool-caliper-slider"
 				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
-					(reference "#PWR05008")
+					(reference "#PWR05004")
 					(unit 1)
 				)
 			)
@@ -5858,7 +4424,7 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 109.22 180.34 90)
+		(at 317.5 101.6 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -5866,7 +4432,7 @@
 		(dnp no)
 		(uuid "5be05b96-0e84-537b-954a-c89ddeed0543")
 		(property "Reference" "R85"
-			(at 109.22 177.724 90)
+			(at 317.5 99.084 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5874,7 +4440,7 @@
 			)
 		)
 		(property "Value" "3.9k"
-			(at 109.22 182.956 90)
+			(at 317.5 104.116 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5882,7 +4448,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
-			(at 109.22 180.34 0)
+			(at 317.5 101.6 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5891,7 +4457,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 109.22 180.34 0)
+			(at 317.5 101.6 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5900,7 +4466,7 @@
 			)
 		)
 		(property "Description" "Resistor"
-			(at 109.22 180.34 0)
+			(at 317.5 101.6 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5909,7 +4475,7 @@
 			)
 		)
 		(property "MPN" "0402WGF3901TCE"
-			(at 109.22 180.34 0)
+			(at 317.5 101.6 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5918,7 +4484,7 @@
 			)
 		)
 		(property "Manufacturer" "UNI-ROYAL"
-			(at 109.22 180.34 0)
+			(at 317.5 101.6 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5927,7 +4493,7 @@
 			)
 		)
 		(property "LCSC" "C51721"
-			(at 109.22 180.34 0)
+			(at 317.5 101.6 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5950,81 +4516,35 @@
 			)
 		)
 	)
-	(wire
-		(pts (xy 105.41 180.34) (xy 102.87 180.34))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "612e3280-e270-59a3-aa62-4fa0d7700d82")
-	)
-	(label "CAP_LP1"
-		(at 102.87 180.34 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "4294c115-62bc-5c96-a7cb-a56d5d6ebf06")
-	)
-	(wire
-		(pts (xy 113.03 180.34) (xy 115.57 180.34))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "2a26d2c8-374c-5577-84d1-765e56fbe62b")
-	)
-	(global_label "CAP_RX"
-		(shape passive)
-		(at 115.57 180.34 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "61dc8c03-5e7a-5db1-ab0f-b43da58a6313")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 115.57 180.34 0)
+	(symbol
+		(lib_id "Connector:TestPoint")
+		(at 323.85 101.6 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(dnp no)
+		(uuid "93aa89b8-d4da-520b-a1a5-cd6021791708")
+		(property "Reference" "TP42"
+			(at 325.512 97.298 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify left)
-				(hide yes)
 			)
 		)
-	)
-	(symbol
-		(lib_id "Device:C")
-		(at 144.78 182.88 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "69337f61-19a2-591b-a79f-ff2401ee383f")
-		(property "Reference" "C44"
-			(at 144.78 179.248 90)
+		(property "Value" "CAP_RX"
+			(at 325.512 99.298 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left)
 			)
 		)
-		(property "Value" "100p C0G"
-			(at 144.78 186.512 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-			(at 144.78 182.88 0)
+		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
+			(at 323.85 101.6 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6033,7 +4553,73 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 144.78 182.88 0)
+			(at 323.85 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "test point"
+			(at 323.85 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "d7ebfdd6-dd1e-584c-9097-bcadbbbd9098")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
+					(reference "TP42")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 326.39 105.41 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "69337f61-19a2-591b-a79f-ff2401ee383f")
+		(property "Reference" "C44"
+			(at 329.322 104.41 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "100p C0G"
+			(at 329.322 106.41 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+			(at 326.39 105.41 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 326.39 105.41 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6042,7 +4628,7 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
-			(at 144.78 182.88 0)
+			(at 326.39 105.41 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6051,7 +4637,7 @@
 			)
 		)
 		(property "MPN" "0402CG101J500NT"
-			(at 144.78 182.88 0)
+			(at 326.39 105.41 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6060,7 +4646,7 @@
 			)
 		)
 		(property "Manufacturer" "FH (Guangdong Fenghua)"
-			(at 144.78 182.88 0)
+			(at 326.39 105.41 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6069,7 +4655,7 @@
 			)
 		)
 		(property "LCSC" "C1546"
-			(at 144.78 182.88 0)
+			(at 326.39 105.41 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6092,55 +4678,17 @@
 			)
 		)
 	)
-	(wire
-		(pts (xy 140.97 182.88) (xy 138.43 182.88))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "cede3e66-5d8b-5efd-a9fd-f65b491162b9")
-	)
-	(global_label "CAP_RX"
-		(shape passive)
-		(at 138.43 182.88 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "8522cb10-6d7d-5f75-b522-cc9c88b06033")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 138.43 182.88 180)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-				(hide yes)
-			)
-		)
-	)
-	(wire
-		(pts (xy 148.59 182.88) (xy 151.13 182.88))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "be26e19b-0c55-5325-b4e1-cba76afcec2e")
-	)
 	(symbol
 		(lib_id "power:GND")
-		(at 151.13 182.88 90)
+		(at 326.39 109.22 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "651a784e-e441-52c7-b485-50a7ac79250d")
-		(property "Reference" "#PWR05009"
-			(at 151.13 182.88 0)
+		(uuid "143a81a2-5021-5433-a437-e9bf4b65d903")
+		(property "Reference" "#PWR05005"
+			(at 326.39 109.22 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6149,16 +4697,16 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 154.43 182.88 90)
+			(at 326.39 112.52 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify right)
+				(justify top)
 			)
 		)
 		(property "Footprint" ""
-			(at 151.13 182.88 0)
+			(at 326.39 109.22 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6167,7 +4715,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 151.13 182.88 0)
+			(at 326.39 109.22 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6176,7 +4724,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 151.13 182.88 0)
+			(at 326.39 109.22 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6185,280 +4733,1496 @@
 			)
 		)
 		(pin "1"
-			(uuid "14651eb4-d557-506d-be87-d011710d8031")
+			(uuid "a72b54cf-3be9-5bb9-b532-c06f6b74fe7a")
 		)
 		(instances
 			(project "prettycool-caliper-slider"
 				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
-					(reference "#PWR05009")
+					(reference "#PWR05005")
 					(unit 1)
 				)
 			)
 		)
-	)
-	(symbol
-		(lib_id "Connector:TestPoint")
-		(at 170.18 180.34 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom no)
-		(on_board yes)
-		(dnp no)
-		(uuid "f217ac83-b14c-566f-b61b-f442a5c72786")
-		(property "Reference" "TP40"
-			(at 171.45 179.07 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "CAP_AMP_OUT"
-			(at 171.45 181.61 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
-			(at 170.18 180.34 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 170.18 180.34 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "test point"
-			(at 170.18 180.34 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "67651282-0d86-5d2f-8ffa-9be0d55bdbf2")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
-					(reference "TP40")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 170.18 180.34) (xy 170.18 182.88))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "97cef0fd-87a7-5669-84e6-0d4e9943ff39")
-	)
-	(label "CAP_AMP_OUT"
-		(at 170.18 182.88 270)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "20ac79c0-eda3-5cfb-824a-3e2f6f8e31ae")
-	)
-	(symbol
-		(lib_id "Connector:TestPoint")
-		(at 177.8 180.34 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom no)
-		(on_board yes)
-		(dnp no)
-		(uuid "6a380816-7608-581e-aab4-cb7d14094ea5")
-		(property "Reference" "TP41"
-			(at 179.07 179.07 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "CAP_VREF"
-			(at 179.07 181.61 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
-			(at 177.8 180.34 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 177.8 180.34 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "test point"
-			(at 177.8 180.34 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "e2c0a77a-a0b0-5baa-9c59-e58db6529e14")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
-					(reference "TP41")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 177.8 180.34) (xy 177.8 182.88))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "f92237fa-895d-5712-b4a6-445b8b123a48")
-	)
-	(label "CAP_VREF"
-		(at 177.8 182.88 270)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "410a3990-1262-59d1-ad12-6e5836d24a69")
-	)
-	(symbol
-		(lib_id "Connector:TestPoint")
-		(at 185.42 180.34 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom no)
-		(on_board yes)
-		(dnp no)
-		(uuid "93aa89b8-d4da-520b-a1a5-cd6021791708")
-		(property "Reference" "TP42"
-			(at 186.69 179.07 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "CAP_RX"
-			(at 186.69 181.61 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
-			(at 185.42 180.34 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 185.42 180.34 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "test point"
-			(at 185.42 180.34 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "d7ebfdd6-dd1e-584c-9097-bcadbbbd9098")
-		)
-		(instances
-			(project "prettycool-caliper-slider"
-				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
-					(reference "TP42")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts (xy 185.42 180.34) (xy 185.42 182.88))
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "b94f0964-6be6-58f1-b6c4-552a5e5fa731")
 	)
 	(global_label "CAP_RX"
 		(shape passive)
-		(at 185.42 182.88 270)
+		(at 342.9 101.6 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify right)
+			(justify left)
 		)
-		(uuid "2c7b7a68-dc2f-5f44-b811-54980ad1a082")
+		(uuid "8b0f07e0-5e68-5bc1-8c2b-3590089c32a1")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 185.42 182.88 270)
+			(at 342.9 101.6 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify right)
+				(justify left)
 				(hide yes)
 			)
 		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 232.41 113.03 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "e30944f1-2ddf-563b-a21f-e87625c6a74a")
+		(property "Reference" "C40"
+			(at 232.41 109.498 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "10p C0G"
+			(at 232.41 116.562 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+			(at 232.41 113.03 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 232.41 113.03 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 232.41 113.03 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "0402CG100J500NT"
+			(at 232.41 113.03 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "FH (Guangdong Fenghua)"
+			(at 232.41 113.03 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C1545"
+			(at 232.41 113.03 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "10442f76-20b5-5f4e-8f11-97ed63c558bb")
+		)
+		(pin "2"
+			(uuid "3566e929-1d14-506f-bd4b-2b98ee23bdd9")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
+					(reference "C40")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 232.41 123.19 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "81ac8824-08e5-54f7-bd92-571e80b0e3ef")
+		(property "Reference" "R81"
+			(at 232.41 120.674 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "10M"
+			(at 232.41 125.706 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 232.41 123.19 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 232.41 123.19 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 232.41 123.19 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "0402WGF1005TCE"
+			(at 232.41 123.19 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 232.41 123.19 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C26082"
+			(at 232.41 123.19 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "c7da2747-489b-5bbd-957a-4a7da9f4bd2a")
+		)
+		(pin "2"
+			(uuid "2522ac8d-57d6-53b7-a7b3-1da87a179b23")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
+					(reference "R81")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts (xy 236.22 113.03) (xy 237.49 113.03))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0d60031d-d9a4-5827-b69e-7dc91eea088d")
+	)
+	(wire
+		(pts (xy 236.22 123.19) (xy 237.49 123.19))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "58f8dd63-2b12-5ec4-8446-c40bed193d30")
+	)
+	(wire
+		(pts (xy 237.49 113.03) (xy 237.49 123.19))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "80946e47-fa2b-5c21-9c5d-068a3536b420")
+	)
+	(wire
+		(pts (xy 237.49 113.03) (xy 240.03 113.03))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "43e7350f-f4f4-5692-9198-67904ac8fba2")
+	)
+	(wire
+		(pts (xy 240.03 101.6) (xy 240.03 113.03))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "849d199a-2ce0-578a-abc5-8dec6f46b207")
+	)
+	(wire
+		(pts (xy 240.03 101.6) (xy 243.84 101.6))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3c6301d1-1992-59df-af49-1b11ad20e086")
+	)
+	(wire
+		(pts (xy 243.84 101.6) (xy 261.62 101.6))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8b5005f2-d21f-591b-a18c-10b8f68ede77")
+	)
+	(wire
+		(pts (xy 261.62 101.6) (xy 280.67 101.6))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "61d0e9e5-11e1-55a1-81dc-96104325a5ca")
+	)
+	(wire
+		(pts (xy 120.65 110.49) (xy 185.42 110.49))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c16a8e18-bbcd-5cfe-9a29-2a5801909f2b")
+	)
+	(wire
+		(pts (xy 185.42 110.49) (xy 200.66 110.49))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2ba85aed-10b1-5855-9783-b1be4c7d8626")
+	)
+	(wire
+		(pts (xy 62.23 81.28) (xy 78.74 81.28))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "fd76d1b4-8c11-55ee-b170-004d1856aa7d")
+	)
+	(wire
+		(pts (xy 78.74 81.28) (xy 87.63 81.28))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d846f187-ac94-5d60-a004-e54102510ef1")
+	)
+	(wire
+		(pts (xy 87.63 81.28) (xy 87.63 101.6))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3856b272-baba-5a8f-9c72-8e8bae948609")
+	)
+	(wire
+		(pts (xy 87.63 101.6) (xy 100.33 101.6))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "92258e0b-139a-5573-a716-5c77d5777fc8")
+	)
+	(wire
+		(pts (xy 62.23 88.9) (xy 78.74 88.9))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6653c3eb-a47b-50c6-8490-09cb437dbf4c")
+	)
+	(wire
+		(pts (xy 78.74 88.9) (xy 85.09 88.9))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3bf40e7e-2e88-5a12-b1ca-d8278515494d")
+	)
+	(wire
+		(pts (xy 85.09 88.9) (xy 85.09 104.14))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9697afdf-a81d-50c7-bcda-54361f1dc3a6")
+	)
+	(wire
+		(pts (xy 85.09 104.14) (xy 100.33 104.14))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6f8271be-01be-58d6-914b-255b6a6f17d3")
+	)
+	(wire
+		(pts (xy 62.23 96.52) (xy 78.74 96.52))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "77e617d8-5a45-5b7d-b00d-29f5f73e99c8")
+	)
+	(wire
+		(pts (xy 78.74 96.52) (xy 82.55 96.52))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "cfa6954e-c1cf-5077-9571-e3b01d9b3b92")
+	)
+	(wire
+		(pts (xy 82.55 96.52) (xy 82.55 106.68))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1ab455ef-6f8e-5bd3-876a-6f8f7667ff08")
+	)
+	(wire
+		(pts (xy 82.55 106.68) (xy 100.33 106.68))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ed28dd85-201f-5d8c-92dd-70c0aa08c968")
+	)
+	(wire
+		(pts (xy 62.23 104.14) (xy 78.74 104.14))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c5b6f4c5-cb06-5737-88d3-5bdc778c84fc")
+	)
+	(wire
+		(pts (xy 78.74 104.14) (xy 80.01 104.14))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e721a20e-1a50-59f2-a449-f20f9d4549df")
+	)
+	(wire
+		(pts (xy 80.01 104.14) (xy 80.01 109.22))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "40bec284-a744-59cf-b304-3b3dc09ccd7f")
+	)
+	(wire
+		(pts (xy 80.01 109.22) (xy 100.33 109.22))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1e3416ef-7517-5d22-9800-762eb72ef0c3")
+	)
+	(wire
+		(pts (xy 62.23 111.76) (xy 78.74 111.76))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9a643d43-643e-5b65-930a-d792020b8cde")
+	)
+	(wire
+		(pts (xy 78.74 111.76) (xy 100.33 111.76))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "49d5468b-5fde-5dfc-a69c-1d355ccec777")
+	)
+	(wire
+		(pts (xy 62.23 119.38) (xy 78.74 119.38))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "06aefe05-1a9f-5b11-9cf2-83b637ee5a92")
+	)
+	(wire
+		(pts (xy 78.74 119.38) (xy 80.01 119.38))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9d6a617f-0c77-5982-8c7a-00d34360518e")
+	)
+	(wire
+		(pts (xy 80.01 114.3) (xy 80.01 119.38))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3fb8b294-bcd8-57e3-a13c-e05b2e77ec58")
+	)
+	(wire
+		(pts (xy 80.01 114.3) (xy 100.33 114.3))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "bd13fc9e-85a0-5647-ae8e-5d2eee3a3ca8")
+	)
+	(wire
+		(pts (xy 62.23 127) (xy 78.74 127))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ccec391f-7c4d-5209-b66e-3a32436a0917")
+	)
+	(wire
+		(pts (xy 78.74 127) (xy 82.55 127))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ee70a3ea-4d41-513c-ba0c-445ae466808c")
+	)
+	(wire
+		(pts (xy 82.55 116.84) (xy 82.55 127))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3f25311b-7ebe-5313-8ca0-2befc25dca10")
+	)
+	(wire
+		(pts (xy 82.55 116.84) (xy 100.33 116.84))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ee32df8b-951c-555f-8eb4-09802862be9c")
+	)
+	(wire
+		(pts (xy 62.23 134.62) (xy 78.74 134.62))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "697cb827-3207-5fc2-bf71-70e993d97a6e")
+	)
+	(wire
+		(pts (xy 78.74 134.62) (xy 85.09 134.62))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "eee1b246-54a0-5cd0-9e98-8351701e7652")
+	)
+	(wire
+		(pts (xy 85.09 119.38) (xy 85.09 134.62))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8cfae492-c358-5123-b191-f8999bba26e5")
+	)
+	(wire
+		(pts (xy 85.09 119.38) (xy 100.33 119.38))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "21ff953f-e6bf-5f06-b387-c343fe4bbdf0")
+	)
+	(wire
+		(pts (xy 288.29 101.6) (xy 289.56 101.6))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b14da372-bb49-56d9-ad63-1da4f7e6c80f")
+	)
+	(wire
+		(pts (xy 289.56 101.6) (xy 303.53 101.6))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "563b220e-24f4-5ce2-9cf4-9c9c3cec5561")
+	)
+	(wire
+		(pts (xy 303.53 101.6) (xy 313.69 101.6))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b5e78504-2032-554b-b9e9-f46bf4116742")
+	)
+	(wire
+		(pts (xy 321.31 101.6) (xy 323.85 101.6))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5db5c554-39c3-5298-a994-b95a2ebaf679")
+	)
+	(wire
+		(pts (xy 323.85 101.6) (xy 326.39 101.6))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e2a63964-fd87-5288-9689-d864b03d0fc9")
+	)
+	(wire
+		(pts (xy 326.39 101.6) (xy 342.9 101.6))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8dd4e0e3-af8c-51d9-9472-1f88e8f095e2")
+	)
+	(wire
+		(pts (xy 208.28 104.14) (xy 208.28 110.49))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "afaa29af-9356-50bc-aa68-519f67dbacb8")
+	)
+	(wire
+		(pts (xy 208.28 104.14) (xy 224.79 104.14))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4880cb20-8713-5728-a2ef-8c33823a9df5")
+	)
+	(wire
+		(pts (xy 208.28 110.49) (xy 209.55 110.49))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "dc5e7339-106e-5f83-b1fd-833bdb269fc5")
+	)
+	(wire
+		(pts (xy 224.79 104.14) (xy 224.79 113.03))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b769e049-1d57-5b56-aa4f-f6b1eaf0b96d")
+	)
+	(wire
+		(pts (xy 224.79 113.03) (xy 227.33 113.03))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "33c1788e-b110-56a9-9d4d-d817d1d7efd5")
+	)
+	(wire
+		(pts (xy 227.33 113.03) (xy 227.33 123.19))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "22bf88d4-a886-56f2-b32b-d534aa6124b5")
+	)
+	(wire
+		(pts (xy 227.33 113.03) (xy 228.6 113.03))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d9f25cfe-82a5-5159-897c-d469ceb1c21e")
+	)
+	(wire
+		(pts (xy 227.33 123.19) (xy 228.6 123.19))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "11bd8843-849c-5947-a6f2-212ee9c3641d")
+	)
+	(wire
+		(pts (xy 27.94 81.28) (xy 30.48 81.28))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b5b96f0e-591f-589c-a4c0-ec2302219f6d")
+	)
+	(wire
+		(pts (xy 38.1 81.28) (xy 53.34 81.28))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ff21a02e-6e36-5aa4-ad58-b13bf877d3a8")
+	)
+	(wire
+		(pts (xy 53.34 81.28) (xy 54.61 81.28))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "83521b46-a24b-54b9-86f0-8f40a2a6f7f4")
+	)
+	(wire
+		(pts (xy 27.94 88.9) (xy 30.48 88.9))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0be70bd2-ebd4-500d-94e8-ef7fbe4eb606")
+	)
+	(wire
+		(pts (xy 38.1 88.9) (xy 53.34 88.9))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "dd6ad91a-960f-5490-8d01-5bbad13f384a")
+	)
+	(wire
+		(pts (xy 53.34 88.9) (xy 54.61 88.9))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "10ec6c11-a711-5e74-b8a8-1b0947dac3ae")
+	)
+	(wire
+		(pts (xy 27.94 96.52) (xy 30.48 96.52))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2c575749-3aab-5692-98e2-856f39afa392")
+	)
+	(wire
+		(pts (xy 38.1 96.52) (xy 53.34 96.52))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c6be62ac-2a31-5246-af41-95292c0d9f24")
+	)
+	(wire
+		(pts (xy 53.34 96.52) (xy 54.61 96.52))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4a5ff0b7-b4ed-5448-a449-1104b6109009")
+	)
+	(wire
+		(pts (xy 27.94 104.14) (xy 30.48 104.14))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "929a0085-5ee6-5973-b480-56752da27db5")
+	)
+	(wire
+		(pts (xy 38.1 104.14) (xy 53.34 104.14))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5c441b04-6349-5196-838b-a4de72c4d6a3")
+	)
+	(wire
+		(pts (xy 53.34 104.14) (xy 54.61 104.14))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3b2201bd-933e-5d15-a594-021451261bed")
+	)
+	(wire
+		(pts (xy 27.94 111.76) (xy 30.48 111.76))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "922c597e-a57d-52fe-bbaf-99ea15e862ce")
+	)
+	(wire
+		(pts (xy 38.1 111.76) (xy 53.34 111.76))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9a9c8a24-740f-5313-bf10-926102ae18b5")
+	)
+	(wire
+		(pts (xy 53.34 111.76) (xy 54.61 111.76))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2f66d88a-cb7d-537f-b1b6-e61550c588fe")
+	)
+	(wire
+		(pts (xy 27.94 119.38) (xy 30.48 119.38))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9d4a66d9-e845-578b-a2c5-2749c9d0e080")
+	)
+	(wire
+		(pts (xy 38.1 119.38) (xy 53.34 119.38))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "187f2752-0c2b-5eb1-8e14-d8436154ca6d")
+	)
+	(wire
+		(pts (xy 53.34 119.38) (xy 54.61 119.38))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a593cc4e-c20c-5514-87c7-ec1e59107632")
+	)
+	(wire
+		(pts (xy 27.94 127) (xy 30.48 127))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1e9aacec-abda-502b-8586-c84564bf3092")
+	)
+	(wire
+		(pts (xy 38.1 127) (xy 53.34 127))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e784c114-220b-5c86-a8a2-cf58b402551c")
+	)
+	(wire
+		(pts (xy 53.34 127) (xy 54.61 127))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "14d91686-72c1-5177-9484-725f0c5fc5d0")
+	)
+	(wire
+		(pts (xy 27.94 134.62) (xy 30.48 134.62))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ea1f5b3e-09db-5e80-977e-367580b7eb0a")
+	)
+	(wire
+		(pts (xy 38.1 134.62) (xy 53.34 134.62))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "651e480c-f25b-54a7-ab6a-e6391c4b78a7")
+	)
+	(wire
+		(pts (xy 53.34 134.62) (xy 54.61 134.62))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3201d0d9-6c3c-5de7-8433-8aab1a8530e1")
+	)
+	(wire
+		(pts (xy 132.08 93.98) (xy 143.51 93.98))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7a252503-9723-53cd-a75f-3a3d1c7e5b25")
+	)
+	(wire
+		(pts (xy 143.51 93.98) (xy 146.05 93.98))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f4a6e4c0-9cbb-5cb1-91ff-6d34b6caaadb")
+	)
+	(wire
+		(pts (xy 146.05 93.98) (xy 163.83 93.98))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b203eac7-88af-58d7-96b5-5d07072dbc8b")
+	)
+	(wire
+		(pts (xy 163.83 93.98) (xy 167.64 93.98))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9342db61-f427-51f4-a0a2-21618615ffc5")
+	)
+	(wire
+		(pts (xy 166.37 99.06) (xy 166.37 104.14))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5e795ccf-af6c-53f5-9a8d-231fc1fe024f")
+	)
+	(wire
+		(pts (xy 166.37 99.06) (xy 167.64 99.06))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "02bdfae6-2f0c-5d96-8b81-4cbb0c702441")
+	)
+	(wire
+		(pts (xy 166.37 104.14) (xy 182.88 104.14))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "16c44d3b-e4a2-55f5-adba-fb8060c4ebc9")
+	)
+	(wire
+		(pts (xy 182.88 96.52) (xy 182.88 104.14))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5cb784fe-680e-5f0b-9a5c-a8105a9eb1f6")
+	)
+	(wire
+		(pts (xy 182.88 96.52) (xy 198.12 96.52))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e2afa787-353b-5e9e-885e-576939615260")
+	)
+	(wire
+		(pts (xy 198.12 92.71) (xy 198.12 96.52))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "accddf5a-d16a-5c9f-ab94-b837a34340b2")
+	)
+	(wire
+		(pts (xy 198.12 92.71) (xy 212.09 92.71))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "10c62b55-8cd7-5529-b104-d59ea0543087")
+	)
+	(wire
+		(pts (xy 212.09 92.71) (xy 213.36 92.71))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7c7f2168-a6ae-5307-b085-9b2422c12304")
+	)
+	(wire
+		(pts (xy 213.36 92.71) (xy 213.36 99.06))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "892d9883-31d4-5bb0-ac1c-0251081ed961")
+	)
+	(wire
+		(pts (xy 213.36 99.06) (xy 224.79 99.06))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "cd76166f-25c7-508e-879a-ae69492ea9bc")
+	)
+	(junction
+		(at 143.51 93.98)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "33cde758-ed41-5b92-b264-b483c341b3bc")
+	)
+	(junction
+		(at 146.05 93.98)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "50d8ca04-7879-560c-90fc-68250cdc9675")
+	)
+	(junction
+		(at 182.88 96.52)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "1aa8b651-53e9-56b8-98dc-95d803603400")
+	)
+	(junction
+		(at 198.12 92.71)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "3d291915-bd24-56af-a6af-fb6a996d4e15")
+	)
+	(junction
+		(at 208.28 110.49)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "4a031495-155d-5b29-9c1f-9b2e8afce1fe")
+	)
+	(junction
+		(at 224.79 104.14)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "621a02c1-f74e-5903-b67b-29d07069bf03")
+	)
+	(junction
+		(at 227.33 113.03)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "bdb66f7b-6aac-5a61-82af-7255773202c0")
+	)
+	(junction
+		(at 237.49 113.03)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "850509e1-b01f-545b-b1c9-7225f17bea98")
+	)
+	(junction
+		(at 240.03 101.6)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "3adb46cc-1495-5553-a7c3-ab17bb658e2e")
+	)
+	(junction
+		(at 261.62 101.6)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "67737454-b345-526a-95a0-438782f9cedf")
+	)
+	(junction
+		(at 303.53 101.6)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "ec5fbfb1-d5e6-5c8f-855d-f67f0eb3f5ab")
+	)
+	(junction
+		(at 323.85 101.6)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "a40f8ccf-9415-5c1a-b7f7-efbb789a0ea3")
+	)
+	(junction
+		(at 326.39 101.6)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "bfb61cc7-76f9-5d97-a3f5-6c71e7f0328d")
+	)
+	(text "Op-amp supply"
+		(exclude_from_sim no)
+		(at 363.22 15.24 0)
+		(effects
+			(font
+				(size 2 2)
+				(bold yes)
+			)
+			(justify left top)
+		)
+		(uuid "a64bef66-b96d-5147-82a3-7375ecd20e7e")
+	)
+	(text "100n at pin 8"
+		(exclude_from_sim no)
+		(at 363.22 19.05 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+				(italic yes)
+			)
+			(justify left top)
+		)
+		(uuid "c55337b8-fe11-5c6f-afee-3c7e5a15ab72")
+	)
+	(rectangle
+		(start 360.68 12.7)
+		(end 396.24 67.31)
+		(stroke
+			(width 0.1)
+			(type dash)
+		)
+		(fill
+			(type none)
+		)
+		(uuid "99fa0a09-876b-51b3-966c-624f2aa1d6db")
+	)
+	(symbol
+		(lib_id "Amplifier_Operational:TLV9062")
+		(at 368.3 53.34 0)
+		(unit 3)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "796e3744-03eb-5aaf-813d-9efe784f2530")
+		(property "Reference" "U40"
+			(at 366.96 52.34 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "TLV9062IDGKR"
+			(at 366.96 54.34 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Package_SO:VSSOP-8_3x3mm_P0.65mm"
+			(at 368.3 53.34 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "https://www.ti.com/lit/ds/symlink/tlv9062.pdf"
+			(at 368.3 53.34 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Dual Operational Amplifiers, SOIC-8/TSSOP-8/VSSOP-8"
+			(at 368.3 53.34 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "TLV9062IDGKR"
+			(at 368.3 53.34 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "Texas Instruments"
+			(at 368.3 53.34 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C398356"
+			(at 368.3 53.34 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "8"
+			(uuid "5e52afcc-30aa-50bf-9c34-69355b84f2bb")
+		)
+		(pin "4"
+			(uuid "02e502c6-6264-5bf9-9497-9ed34d1b599f")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
+					(reference "U40")
+					(unit 3)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 365.76 60.96 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "70a3cb5f-d430-5fa6-aec1-31b3fbcac13c")
+		(property "Reference" "#PWR05006"
+			(at 365.76 60.96 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 365.76 64.26 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Footprint" ""
+			(at 365.76 60.96 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 365.76 60.96 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 365.76 60.96 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "7b7d864e-57ef-5ef8-85a7-444ae3769e4f")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
+					(reference "#PWR05006")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 369.57 34.29 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "fdac8a78-fd97-550f-a5e5-b289e3db0b83")
+		(property "Reference" "C42"
+			(at 372.502 33.29 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "100n"
+			(at 372.502 35.29 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+			(at 369.57 34.29 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 369.57 34.29 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 369.57 34.29 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "CL05B104KO5NNNC"
+			(at 369.57 34.29 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "Samsung Electro-Mechanics"
+			(at 369.57 34.29 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C1525"
+			(at 369.57 34.29 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "4eb617b1-b73d-55f8-b3ae-d82af9eb4e3d")
+		)
+		(pin "2"
+			(uuid "6a71bc90-ef5c-558d-9843-5db82d7fe480")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
+					(reference "C42")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 369.57 38.1 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "fdd6a838-ff50-590e-9544-520e796f74a3")
+		(property "Reference" "#PWR05007"
+			(at 369.57 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 369.57 41.4 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Footprint" ""
+			(at 369.57 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 369.57 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 369.57 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "e6e817a1-4b16-5a3e-9da2-a4373280940d")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
+					(reference "#PWR05007")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:VCC")
+		(at 381 30.48 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "752d7d65-43e8-57ea-bfd0-a0864de55c3a")
+		(property "Reference" "#PWR05008"
+			(at 381 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "+3V3_SNS"
+			(at 381 27.18 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+			)
+		)
+		(property "Footprint" ""
+			(at 381 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 381 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 381 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "a279973e-08c8-5ed3-b9a7-a17b091912c3")
+		)
+		(instances
+			(project "prettycool-caliper-slider"
+				(path "/b08a52c2-37a7-52c8-9c3d-6723ce8ef562/c63678c9-e694-5432-a20c-1bdbb8c26df3"
+					(reference "#PWR05008")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts (xy 365.76 30.48) (xy 365.76 45.72))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "24bb5c4e-a9c8-5b93-927b-93d276d63233")
+	)
+	(wire
+		(pts (xy 365.76 30.48) (xy 369.57 30.48))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "27879363-fe71-5528-8359-bf03f1040555")
+	)
+	(wire
+		(pts (xy 369.57 30.48) (xy 381 30.48))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8e2fbcfb-e0ed-54d2-94d8-02dd845d3148")
+	)
+	(junction
+		(at 369.57 30.48)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "fed5a912-1a5c-516d-842a-13a62e93b216")
 	)
 	(embedded_fonts no)
 )

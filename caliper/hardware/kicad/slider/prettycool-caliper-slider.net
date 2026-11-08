@@ -1,7 +1,7 @@
 (export (version "E")
   (design
     (source "/mnt/c/source/tyevco/prettycoolboards/caliper/hardware/kicad/slider/prettycool-caliper-slider.kicad_sch")
-    (date "2026-11-07T17:23:25-0800")
+    (date "2026-11-08T10:23:24-0800")
     (tool "Eeschema 9.0.9-9.0.9~ubuntu24.04.1")
     (sheet (number "1") (name "/") (tstamps "/")
       (title_block

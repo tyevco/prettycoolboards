@@ -151,7 +151,7 @@ def build(d):
     d.group("USB-C input and protection",
             "HRO TYPE-C-31-M-12 (USB 2.0 device, sink only). Separate 5.1k Rd per CC pin; D+/D- pairs tied at the\n"
             "connector. USBLC6-2SC6 + SMF5.0A within 5 mm of J1, D+/D- routed through the ESD pads as a 90R pair.\n"
-            "No series resistors on D+/D- (inside the ESP32-S3, SPEC §5). Right board edge, x = 62, y ~ 26 (SPEC §2.1).")
+            "No series resistors on D+/D- (inside the ESP32-S3, SPEC §5). Right board edge, y 26.5 (SPEC §2.1).")
     res(d, "R1", "5.1k", "USB_CC1", "GND")
     res(d, "R2", "5.1k", "USB_CC2", "GND")
     d.add("J1", "Connector:USB_C_Receptacle_USB2.0_16P", "TYPE-C-31-M-12",
@@ -255,7 +255,8 @@ def build(d):
     res(d, "R9", "10k", "+3V3", "FG_ALRT_N")
 
     d.group("Mounting holes and fiducials",
-            "4 x M2 plated at (3,3) (59,3) (3,31) (59,31) to GND (SPEC §2.1; mechanics may move them). 3 top fiducials.")
+            "H1 (18.75, 24) support hole; H2-H4 tab clamp holes (-3.5, 5.5) (-3.5, 14) (65.5, 5.5), plated, to GND (SPEC §2.1).\n"
+            "H5 (65.5, 14) is on the board only, not yet in this schematic. 3 top fiducials.")
     for i in range(1, 5):
         d.add(f"H{i}", "Mechanical:MountingHole_Pad", "M2", "MountingHole:MountingHole_2.2mm_M2_Pad_Via",
               pins={"1": "GND"}, in_bom=False)
