@@ -198,6 +198,30 @@ def test_inside_jaw_stiffening_keeps_the_tip_and_clears_the_fixed_jaw():
     assert M.slider_body().is_valid and jaw.is_valid
 
 
+def test_fixed_inside_jaw_stiffening_keeps_the_tip_and_clears_the_moving_jaw():
+    """The fixed inside jaw's measuring face, its 3.0 tip over the whole 6 mm and its right flank are unchanged;
+    nothing is added left of the face above y 31 (a bore takes the full tip); everything new sits on the fixed
+    block's top, clear of the beam slot, bolts, dowels and nut traps; the full-depth gusset keeps IJ_FIXED_CLR from
+    the moving inside jaw at every R >= 0 and the shoulder keeps the 0.2 z gap over its plate."""
+    pts = M.fixed_inside_jaw_pts()
+    for p in [(0, P.IJ_TIP_Y1), (P.IJ_TIP_W, P.IJ_TIP_Y1), (P.IJ_TIP_W, P.IJ_TIP_Y0), (0, P.IJ_TIP_Y0)] + \
+            list(P.FIXED_IJ_FLANK):
+        assert p in pts
+    assert max(x for x, y in pts) <= P.IJ_TIP_W + 1e-9                   # nothing right of the old outline
+    assert max(y for x, y in pts if x < -1e-9) <= P.IJ_TIP_Y0 + 1e-9
+    g = P.fixed_inside_jaw_gusset_outline()
+    assert max(y for x, y in g) <= P.IJ_TIP_Y0 + 1e-9
+    assert min(y for x, y in pts + g) >= P.FJ_Y1 - 0.1 - 1e-9              # on the block top, above the beam (y 20)
+    # the gusset clears the moving jaw's leftmost edge (tip base / left part at u -IJ_TIP_BASE_W)
+    assert max(x for x, y in g) <= min(u for u, y in M.moving_inside_jaw_pts()) - P.IJ_FIXED_CLR + 1e-9
+    jaw, gs = M.moving_inside_jaw(), M.prism(g, P.FJ_Z0, P.IJ_FIXED_Z[1])
+    for R in (0.0, 0.5, 1.0, 3.0):
+        assert (M.Pos(R, 0, 0) * jaw).distance_to(gs) >= 0.9 * P.IJ_FIXED_CLR
+    fj = M.fixed_jaw()
+    assert fj.is_valid and len(fj.solids()) == 1
+    assert fj.bounding_box().max.Z == pytest.approx(P.FJ_Z1) and fj.bounding_box().min.Z == pytest.approx(P.FJ_Z0)
+
+
 def test_fixed_jaw_bolt_engages_the_nut():
     """The M3 x 10 from the front face runs through the whole nut, ends under the back face, and the
     trap floor keeps a web over the beam slot."""

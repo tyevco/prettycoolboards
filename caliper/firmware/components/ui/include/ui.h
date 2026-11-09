@@ -27,6 +27,9 @@ extern "C" {
 esp_err_t ui_init(void);
 void ui_handle_button(btn_event_t ev); /* from the button task */
 void ui_sleep(void);                   /* panel off before deep sleep */
+/* Bring-up: colour bars + frame + corner labels over everything (true), or removed (false).
+ * ESP_ERR_INVALID_STATE if the display is not up. */
+esp_err_t ui_test_pattern(bool on);
 
 /* internal (ui_*.c) */
 typedef enum { UI_SCR_MAIN = 0, UI_SCR_CHART, UI_SCR_STATS, UI_SCR_MENU, UI_SCR_COUNT } ui_screen_t;

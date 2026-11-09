@@ -9,6 +9,7 @@
 #include "esp_check.h"
 #include "esp_log.h"
 #include "esp_timer.h"
+#include "freertos/FreeRTOS.h"
 #include "sdkconfig.h"
 
 static const char *TAG = "power";
@@ -81,6 +82,8 @@ static bool s_usb_configured;
 static bool s_guard_dis;
 static int64_t s_vbus_since;
 static uint8_t s_ilim = BQ_ILIM_100MA;
+static power_status_t s_last; /* the last power_poll() result, for the bring-up CLI */
+static portMUX_TYPE s_last_mux = portMUX_INITIALIZER_UNLOCKED;
 
 static esp_err_t wr8(i2c_master_dev_handle_t d, uint8_t reg, uint8_t v)
 {
@@ -165,13 +168,13 @@ static uint8_t ichg_value(void)
     return (uint8_t)(ichg_code(CONFIG_CALIPER_CHARGE_MA) | (s_guard_dis ? BQ_ICHG_CHG_DIS : 0));
 }
 
-/* Writes the whole table; IC_CTRL first because it disables the watchdog that starts on the
- * first I2C transaction (dial-me-spinner docs/firmware.md §13.1). */
-static esp_err_t bq_write_table(void)
+/* The register table, IC_CTRL first because it disables the watchdog that starts on the first I2C
+ * transaction (dial-me-spinner docs/firmware.md §13.1). ICHG_CTRL and TMR_ILIM carry their live
+ * values (the temperature guard's CHG_DIS, the USB input limit), so the table is also what a
+ * read-back of a healthy charger returns (the bring-up check "bu bq"). */
+size_t power_bq_table(power_reg_t *out, size_t max)
 {
-    const struct {
-        uint8_t reg, val;
-    } table[] = {
+    const power_reg_t table[] = {
         {BQ_IC_CTRL, BQ_IC_CTRL_VAL},
         {BQ_VBAT_CTRL, 0x46},  /* 4.20 V */
         {BQ_ICHG_CTRL, ichg_value()}, /* 250 mA (SPEC §1) -> code 52 = 0x34 */
@@ -188,7 +191,18 @@ static esp_err_t bq_write_table(void)
         {BQ_TS_CONTROL, 0x90},
 #endif
     };
-    for (size_t i = 0; i < sizeof(table) / sizeof(table[0]); i++) {
+    size_t n = sizeof(table) / sizeof(table[0]);
+    for (size_t i = 0; i < n && i < max; i++) {
+        out[i] = table[i];
+    }
+    return n;
+}
+
+static esp_err_t bq_write_table(void)
+{
+    power_reg_t table[12];
+    size_t n = power_bq_table(table, sizeof(table) / sizeof(table[0]));
+    for (size_t i = 0; i < n; i++) {
         ESP_RETURN_ON_ERROR(wr8(s_bq, table[i].reg, table[i].val), TAG, "bq reg 0x%02x", table[i].reg);
     }
     uint8_t st[3];
@@ -294,7 +308,7 @@ void power_poll(power_status_t *o)
     if (s_fg_ok) {
         uint8_t b[2];
         if (rd(s_fg, FG_VCELL, b, 2) == ESP_OK) {
-            o->vcell_mv = (uint16_t)((((uint32_t)b[0] << 8) | b[1]) * 78125u / 1000000u); /* 78.125 uV/LSB */
+            o->vcell_mv = (uint16_t)((((uint64_t)b[0] << 8) | b[1]) * 78125u / 1000000u); /* 78.125 uV/LSB (64-bit: 32 overflows above 4.29 V) */
         }
         if (rd(s_fg, FG_SOC, b, 2) == ESP_OK) {
             o->soc_pct = b[0] > 100 ? 100 : b[0]; /* 1 %/LSB in the high byte */
@@ -358,6 +372,25 @@ void power_poll(power_status_t *o)
         }
         o->chg_disabled = s_guard_dis;
     }
+    taskENTER_CRITICAL(&s_last_mux);
+    s_last = *o;
+    taskEXIT_CRITICAL(&s_last_mux);
+}
+
+void power_get_last(power_status_t *out)
+{
+    taskENTER_CRITICAL(&s_last_mux);
+    *out = s_last;
+    taskEXIT_CRITICAL(&s_last_mux);
+}
+
+esp_err_t power_diag_read(uint8_t addr, uint8_t reg, uint8_t *buf, size_t n)
+{
+    i2c_master_dev_handle_t d = addr == I2C_ADDR_BQ25180    ? s_bq
+                                : addr == I2C_ADDR_MAX17048 ? s_fg
+                                : addr == I2C_ADDR_LIS2DW12 ? s_imu
+                                                            : NULL;
+    return d ? rd(d, reg, buf, n) : ESP_ERR_NOT_FOUND;
 }
 
 esp_err_t power_ship_mode(void)

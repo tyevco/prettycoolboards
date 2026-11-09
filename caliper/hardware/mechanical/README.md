@@ -9,7 +9,7 @@ the FEA runs on the Windows Python with the `print-stress` skill:
 
 ```
 bash caliper/hardware/mechanical/run_all.sh        # extract board, tests, models, STL/STEP, drawings, clash, calcs, renders (~3 min)
-py fea_jaw.py; py fea_inside_jaw.py; py fea_slider.py   # Windows: FEA (inside jaw ~4 min, the others ~10 min), then rerun calcs.py
+py fea_jaw.py; py fea_inside_jaw.py; py fea_slider.py   # Windows: FEA (inside jaws ~15 min, the others ~10 min), then rerun calcs.py
 ```
 
 | Path | What |
@@ -23,7 +23,7 @@ py fea_jaw.py; py fea_inside_jaw.py; py fea_slider.py   # Windows: FEA (inside j
 | `clash_check.py` | Exact B-rep intersections: board vs housing, slider vs beam / fixed jaw / tape / scale / stop at R = 0, 75, 151, slider-internal pairs; the sensor gaps; the webs between the body's cut features; metal and carbon-filled (PA-CF jaws) vs antenna (RF; FAIL / RISK) -> `clash_report.txt` |
 | `calcs.py` | Jaw deflection, gib preloads, sliding force, back web, thermal error, gap stack-ups, AS5311 gap budget, board under a button press -> `calcs_output.txt` |
 | `fea_jaw.py` | FEA of the moving outside jaw (print-stress solver, Windows Python) -> `fea_jaw_output.txt`, `renders/fea_jaw.png` |
-| `fea_inside_jaw.py` | FEA of the moving inside jaw: the old 2.4 mm plate vs the stiffened jaw (shoulder block + gusset), rigid root and with the local body, PA-CF with the unfilled-PA zone near the antenna, PETG; plus the fixed inside jaw for the budget (Windows Python) -> `fea_inside_jaw_output.txt` |
+| `fea_inside_jaw.py` | FEA of the moving inside jaw: the old 2.4 mm plate vs the stiffened jaw (shoulder block + gusset), rigid root and with the local body, PA-CF with the unfilled-PA zone near the antenna, PETG; and the fixed inside jaw: the old triangle vs the stiffened jaw (shoulder block + full-depth gusset), rigid root and with the fixed block's top part, PA-CF and PETG (Windows Python) -> `fea_inside_jaw_output.txt` |
 | `fea_slider.py` | FEA of the whole body under both gib preloads, and of the board under a button press (with and without the button-band ledge) -> `fea_slider_output.txt`, `renders/fea_body.png` |
 | `render.py` | `renders/*.png` (matplotlib, flat-shaded B-rep tessellation; exact sections) |
 | `tests/test_mechanical.py` | Invariants: gaps, SPEC/nets contract, envelope, valid solids, walls, clamp stack, RF, print poses, sliding force, no slider/beam interference |

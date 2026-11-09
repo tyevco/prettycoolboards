@@ -34,8 +34,13 @@ Moving inside jaw (FEA only, fea_inside_jaw.py): tip 2.4 thick (z), 3 wide at y 
   PETG   with the local body  2.4 plate 23.24 um/N -> as built  4.05 um/N (5.7x stiffer) = 24.3 um over a 6 N spread
   (datasheet E, no FDM knock-down; unfilled PA E 1.5 GPa (TVP) within 5.15 mm of the antenna.)
   PA-CF with the local body: 11.9 um over 2-8 N, NOT inside a 10 um share of the 30 um budget; /0.85 for the FDM knock-down: 14.0 um.
-  Fixed inside jaw (unchanged, 8.5 thick, rigid root): PA-CF 1.70 um/N, PETG 4.21 um/N.
-  Inside reading, both jaws (PA-CF): 3.68 um/N -> 22.1 um over 2-8 N (outside reading, both jaws: 14.7 um).
+Fixed inside jaw (FEA, fea_inside_jaw.py): plate 8.5 thick, tip 3 wide over its 6 mm, on a shoulder block x -18..0 up to y 31 with a full-depth gusset left of x -4.4; 5 N in +x on the face:
+  PA-CF  rigid root            old triangle  1.71 um/N -> as built  0.94 um/N (1.8x stiffer) =  5.6 um over a 6 N spread
+  PETG   rigid root            old triangle  4.22 um/N -> as built  2.32 um/N (1.8x stiffer) = 13.9 um over a 6 N spread
+  PA-CF  with the local block  old triangle  2.17 um/N -> as built  1.13 um/N (1.9x stiffer) =  6.8 um over a 6 N spread
+  PETG   with the local block  old triangle  5.37 um/N -> as built  2.79 um/N (1.9x stiffer) = 16.7 um over a 6 N spread
+  PA-CF with the local block: 1.13 um/N, above the 1.0 um/N target; /0.85 for the FDM knock-down: 1.33 um/N.
+  Inside reading, both jaws (PA-CF, local bodies): 3.11 um/N -> 18.7 um over 2-8 N, 22.0 um with the FDM knock-down (rigid roots: 2.66 um/N -> 16.0 um); outside reading, both jaws: 14.7 um.
 
 2. Slider yaw under the measuring force -> Y-gib preload
 ---------------------------------------------------------

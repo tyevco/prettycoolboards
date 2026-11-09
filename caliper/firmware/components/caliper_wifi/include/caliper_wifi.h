@@ -9,6 +9,8 @@
 #pragma once
 
 #include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include "esp_err.h"
 
@@ -18,6 +20,14 @@ extern "C" {
 
 esp_err_t caliper_wifi_init(void); /* registers handlers; the radio stays off */
 bool caliper_wifi_active(void);
+
+/* bring-up: one blocking scan (about 2-3 s); fills up to max entries, strongest first */
+typedef struct {
+    char ssid[33];
+    int8_t rssi;
+    uint8_t channel;
+} cal_wifi_ap_t;
+esp_err_t caliper_wifi_scan(cal_wifi_ap_t *out, size_t max, size_t *n);
 
 /* internal */
 esp_err_t web_start(void);

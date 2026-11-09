@@ -9,6 +9,9 @@
 > 102 CPL rows after the 2026-11-08 phase-4 fixes: 0 red, 0 yellow, 102 green; scale: no parts, 0 red). The slider was review-only until J50 got the
 > C2911931 vendor land (SPEC §12). Still designed, not built: buy the display panel and check it (§1), give the
 > machine routing a hand review (§5) and work through the preview checklist (§6) before ordering.
+>
+> **The order itself** (the JLC options to pick, a rough price, the two preview items and the off-board parts with
+> sources) is the one-page [Order checklist](ordering.md) (2026-11-09).
 
 Rev A is two PCBs, a bought display panel, a LiPo cell, a magnetic tape and the printed/brass mechanics
 ([Mechanical design](mechanical.md)).
@@ -19,7 +22,7 @@ Rev A is two PCBs, a bought display panel, a LiPo cell, a magnetic tape and the 
 |---|---|---|
 | Slider PCB + assembly | JLCPCB, `caliper/hardware/fab/slider/` (`gerbers.zip`, `*-BOM-JLCPCB.csv`, `*-CPL-JLCPCB.csv`) | §2 |
 | Scale PCB (no assembly) | JLCPCB, `caliper/hardware/fab/scale/gerbers.zip` | §3 |
-| AS5311-ATST encoder (U30) | in the JLC BOM (LCSC C22459687) | **only 80 pcs at LCSC on 2026-11-07.** If they are gone, order the board with U30 DNP and buy AS5311-ATST (or -ATSU, reel) from Mouser/DigiKey; hand-solder it (TSSOP-20, 0.65 mm) |
+| AS5311-ATST encoder (U30) | in the JLC BOM (LCSC C22459687) | **only 80 pcs at LCSC on 2026-11-07, 75 in JLC's parts library on 2026-11-09** (USD 12.64 at 1–9; [Order checklist §4](ordering.md#_4-rough-cost-5-slider-pcbas-5-scales)). If they are gone, order the board with U30 DNP and buy AS5311-ATST (or -ATSU, reel) from Mouser/DigiKey; hand-solder it (TSSOP-20, 0.65 mm) |
 | LCD panel | 1.14 in 240 × 135 ST7789 IPS, 13-pin 0.5 mm FPC, pin order as DisplayModule DM-TFT114-397 §3.1 | **buy it first** and check its drawing: the board needs a 0.5 mm-pitch, 0.3 mm-thick plug-in tail long enough to fold from the glass's −x end back under it into J50 (SPEC §2.1). J50 is **bottom contact** and the fold turns the tail over, so with the panel lying flat, face up, tail toward −x, the tail's contacts must be on the **face (viewer) side** and its pin 1 on the **+y side** (toward the buttons): J50 pin 1 is at board y 10.5, pin 13 at y 4.5. A different pin order needs `PANEL_PINS` changed in `sheets/ui.py` |
 | LiPo cell | 402535, ~500 mAh, 1S, with a JST-SH 2-pin (SHR-02V-S) plug | lead polarity is not standardised: J2 pin 1 = BAT+ (marked on the bottom silk). Check every pack with a meter before plugging it in: Q1 (a P-FET in the BAT+ lead, SPEC §3) keeps a reversed pack from powering the board, but a reversed pack still does not work. The leads leave the cell's −x end and come over the board's top edge (mechanics: lead channel and plug relief) |
 | Magnetic tape | ams **AS5000-MS10-H075-100** (2.0 mm pole pair) or a generic 2 mm pole-pair encoder tape | slit to **8.0 mm** wide, ≤ 0.60 mm thick with backing (SPEC §7, D2); 172 mm long |
@@ -35,14 +38,14 @@ Rev A is two PCBs, a bought display panel, a LiPo cell, a magnetic tape and the 
 | Layers | 4 |
 | Dimensions | 74 × 34 mm (62 × 34 body plus two 6 × 14 mm end tabs) |
 | Thickness | **1.0 mm** |
-| Stack-up | **JLC04101H-3313**: JLC's symmetric 1.0 mm 4-layer construction with one 3313 prepreg (0.0994 mm, εr 4.1) between each outer and inner layer. The board file carries this stack (`layout.py` `SLIDER_STACKUP`) and `ORDER-NOTES.md` names it; select it in the order's stack-up option |
+| Stack-up | **JLC04101H-3313**: JLC's symmetric 1.0 mm 4-layer construction with one 3313 prepreg (0.0994 mm, εr 4.1) between each outer and inner layer. The board file carries this stack (`layout.py` `SLIDER_STACKUP`) and `ORDER-NOTES.md` names it; select it in the order's stack-up option. Checked 2026-11-09 ([Order checklist §2.1](ordering.md#_2-1-stack-up-check-2026-11-09)): the prepreg and εr agree with JLC's impedance page; a third-party catalogue of JLC's templates gives the core as 0.70 mm against the board file's 0.6708 mm, which no line depends on; no stack-up change |
 | Impedance control | **no**: USB_DP / USB_DM are full-speed (12 Mb/s), where it would buy nothing. The pair (0.16 mm tracks, 0.16 mm gap, mostly on L4 over an In2 GND strip, the same structure as L1 over L2 in this symmetric stack) is 89 Ω differential on JLC04101H-3313 by a 2D field solve ([Schematics and boards §7.1](electronics.md#_7-1-stack-up-and-rules-slider)) |
 | Surface finish | **ENIG** (0.4 mm-pitch DSBGA, LGA module, bare electrode copper) |
 | Copper | 1 oz outer, 0.5 oz inner |
-| Min via | 0.40 / 0.20 mm (signal), 0.45–0.50 / 0.20–0.25 mm (power/GND) |
+| Min via | 0.40 / 0.20 mm (signal), 0.45–0.50 / 0.20–0.25 mm (power/GND). **Order the 0.2 mm via-hole option**, not the free 0.3 mm one (432 vias have a 0.20 mm drill): it costs extra and JLC is reported to add a 4-wire Kelvin test ([Order checklist §2](ordering.md#_2-jlcpcb-slider-4-layer-pcb-pcba)) |
 | Mask / silk | green / white, both sides |
 | Remark (paste into the order) | "Flatness: bow/twist ≤ 0.03 mm over the lower 20 mm band (y 0–20, incl. the end tabs), 100 % inspected, reject above. Copper is poured on all four layers there, wherever the routing leaves room, on purpose. Bottom electrode area: mask opened per finger, bare ENIG, no paste." IPC-6012 class 2 allows 0.75 % (0.55 mm here), so this needs JLC to agree (and may need a quote) |
-| Assembly | PCBA, **both sides**: top = everything placed; bottom = U30, C30, C31 (beam band) and C21, C23, R85, C44 (0402, under the module: its 3V3 decoupling and the ADC input's RC filter). Alternatively order top-only and hand-solder the seven bottom parts |
+| Assembly | **Standard** PCBA (Economic is one-sided, needs ≥ 0.5 mm BGA pitch against U2's 0.4 mm DSBGA, and takes standard stack-ups only), **both sides**, panelised by JLCPCB (1 × 2, edge rails on the long sides: Standard needs rails, fiducials and ≥ 70 × 70 mm; no break-off tabs on the end tabs, which are clamp faces): top = everything placed; bottom = U30, C30, C31 (beam band) and C21, C23, R85, C44 (0402, under the module: its 3V3 decoupling and the ADC input's RC filter). Alternatively order top-only and hand-solder the seven bottom parts |
 | BOM / CPL | `prettycool-caliper-slider-BOM-JLCPCB.csv`, `prettycool-caliper-slider-CPL-JLCPCB.csv`. The CPL is written by `jlcplace cpl` from the Gerbers' (0, 0) with JLC's EasyEDA rotation/origin corrections (`caliper/hardware/design/jlcplace-db/`) and passes the jlcplace check: 102 rows, 0 red, 0 yellow, 102 green (§6; BZ50 is a recorded non-polar decision, but jlcplace 0.2.1 still lists it on the preview checklist). In JLC's placement preview, work through `jlcplace-checklist.md` (U30's bottom-side reading; BZ50 either way round) and still glance at every IC and connector |
 | Not placed | E40 (the electrode comb is copper, not a part), the 19 test pads, H1–H5, the fiducials. DNP list: see `ORDER-NOTES.md` |
 
@@ -93,6 +96,8 @@ question.
 * The new E40 / scale-hole footprints are not in the schematic yet (the board carries them as layout-side edits;
   SPEC D5). H5 is in the schematic; the SMT standoffs are hand-fitted (§1).
 * AS5311 stock (above). The panel's tail length and pin order (buy it first).
+* The live JLC quote: the small-via / Kelvin charge, whether the flatness remark is accepted, and whether a mouse-bite
+  nub left on the long edges clears the slider body ([Order checklist §7](ordering.md#_7-still-unverified-before-ordering)).
 
 ## 6. jlcplace placement gate
 

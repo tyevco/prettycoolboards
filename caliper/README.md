@@ -33,4 +33,5 @@ A 150 mm digital caliper that remembers its readings and sends them wirelessly.
 | [docs/firmware.md](docs/firmware.md) | ESP-IDF firmware: sensing, UI, BLE, Wi-Fi, storage, power |
 | [docs/app.md](docs/app.md) | Web Bluetooth companion page |
 | [docs/assembly.md](docs/assembly.md) | Ordering (JLCPCB), sourcing, assembly |
-| [docs/bringup.md](docs/bringup.md) | Placeholder: the bring-up and acceptance test plan is not written yet |
+| [docs/ordering.md](docs/ordering.md) | One-page order checklist: JLC options, panel, rough cost, off-board parts (prepared, nothing ordered) |
+| [docs/bringup.md](docs/bringup.md) | The bring-up procedure B-0…B-17: test pads, supplies, meter points, expected values, the `bu` console checks; written, not run |

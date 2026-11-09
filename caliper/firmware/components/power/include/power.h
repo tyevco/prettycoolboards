@@ -5,6 +5,7 @@
 #pragma once
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 #include "driver/i2c_master.h"
@@ -33,6 +34,18 @@ esp_err_t power_init(void);             /* I2C bus + all three chips; individual
 i2c_master_bus_handle_t power_i2c_bus(void);
 void power_poll(power_status_t *out);   /* call at about 1 Hz */
 void power_usb_configured(bool configured); /* ILIM 100 mA before enumeration, 500 mA after */
+
+/* ---- bring-up diagnostics (the CLI "bu" commands) ---- */
+typedef struct {
+    uint8_t reg, val;
+} power_reg_t;
+void power_get_last(power_status_t *out); /* the last power_poll() result (about 1 s old) */
+/* The BQ25180 register values power_init writes, with the live ICHG_CTRL (CHG_DIS from the
+ * temperature guard) and TMR_ILIM (USB input limit). Returns the entry count (fills up to max). */
+size_t power_bq_table(power_reg_t *out, size_t max);
+/* Reads n bytes from reg of one of the three chips (I2C_ADDR_BQ25180 / _MAX17048 / _LIS2DW12):
+ * ESP_ERR_NOT_FOUND for any other address. Thread-safe (the I2C driver's bus lock). */
+esp_err_t power_diag_read(uint8_t addr, uint8_t reg, uint8_t *buf, size_t n);
 
 /* ---- user-facing outputs ---- */
 esp_err_t power_outputs_init(void);

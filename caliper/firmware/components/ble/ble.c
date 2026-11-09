@@ -5,6 +5,7 @@
 
 #include "caliper_core.h"
 #include "caliper_gatt.h"
+#include "esp_bt.h"
 #include "esp_log.h"
 #include "esp_timer.h"
 #include "freertos/FreeRTOS.h"
@@ -149,6 +150,27 @@ static void start_adv(void)
     rc = ble_gap_adv_start(s_own_addr_type, NULL, BLE_HS_FOREVER, &p, gap_event, NULL);
     if (rc && rc != BLE_HS_EALREADY) {
         ESP_LOGE(TAG, "adv start: %d", rc);
+    }
+}
+
+void ble_diag(ble_diag_t *out)
+{
+    memset(out, 0, sizeof(*out));
+    out->synced = ble_hs_synced();
+    out->advertising = out->synced && ble_gap_adv_active();
+    if (out->synced) {
+        ble_hs_id_copy_addr(s_own_addr_type, out->addr, NULL);
+    }
+    /* level index -> dBm: -24 + 3 * index up to +18 dBm (index 14), index 15 = +20 dBm */
+    esp_power_level_t lvl = esp_ble_tx_power_get(ESP_BLE_PWR_TYPE_ADV);
+    out->tx_adv_dbm = lvl == ESP_PWR_LVL_INVALID ? -128 : lvl >= 15 ? 20 : -24 + 3 * (int)lvl;
+    ble_conn_t c[BLE_MAX_CONN];
+    out->conns = ble_conn_snapshot(c);
+    for (int i = 0; i < out->conns; i++) {
+        out->handle[i] = c[i].handle;
+        if (ble_gap_conn_rssi(c[i].handle, &out->rssi[i]) != 0) {
+            out->rssi[i] = 127; /* not available */
+        }
     }
 }
 

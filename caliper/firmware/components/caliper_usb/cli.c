@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "bringup.h"
 #include "caliper_core.h"
 #include "caliper_usb.h"
 #include "esp_app_desc.h"
@@ -138,16 +139,43 @@ static void print_profiles(void)
     }
 }
 
+#if CONFIG_CALIPER_BRINGUP
+/* For the bring-up checks: the next console line (an operator's y/n), read from the CLI queue
+ * while a "bu" command runs in this task. */
+static bool ask(char *line, size_t len, uint32_t timeout_ms)
+{
+    line_t l;
+    if (!s_q || xQueueReceive(s_q, &l, pdMS_TO_TICKS(timeout_ms)) != pdTRUE) {
+        return false;
+    }
+    strlcpy(line, l.s, len);
+    return true;
+}
+
+static const bu_io_t s_bu_io = {.out = out, .ask = ask};
+#endif
+
 static void help(void)
 {
+    /* out() formats into 256 bytes: the four lines in one call (257 bytes) lost their last two
+     * characters ("bootloader\n" printed as "bootloade") */
     out("read | status | zero | hold | rec | send | unit mm|in | log [from] [n] | csv | clear yes\n"
-           "capture off|settle|sweep [auto|min|max] | rearm\n"
-           "get | set <key> <value> | profiles | profile <id> | time <unix_s> | wifi on|off|ap\n"
+           "capture off|settle|sweep [auto|min|max] | rearm\n");
+    out("get | set <key> <value> | profiles | profile <id> | time <unix_s> | wifi on|off|ap\n"
            "export | sleep | reboot | bootloader\n");
+#if CONFIG_CALIPER_BRINGUP
+    out("bu help: bring-up checks\n");
+#endif
 }
 
 static void run(char *line)
 {
+#if CONFIG_CALIPER_BRINGUP
+    if (!strncmp(line, "bu", 2) && (line[2] == ' ' || line[2] == '\0')) {
+        bringup_cmd(&s_bu_io, line + 2);
+        return;
+    }
+#endif
     char *save = NULL;
     char *cmd = strtok_r(line, " ", &save);
     char *a1 = strtok_r(NULL, " ", &save);

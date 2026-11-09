@@ -43,6 +43,16 @@ menu "PrettyCool Caliper"
             Disable only on a board without it (TS then needs a plain 10 k to GND). The firmware
             also guards charging with the ESP32-S3 die temperature in both cases.
 
+    config CALIPER_BRINGUP
+        bool "Bring-up checks on the USB console (the \"bu\" commands)"
+        default y
+        help
+            The guided first-board checks of docs/bringup.md (rails, I2C, charger, gauge, IMU,
+            sensor rail, AS5311, display, buttons, piezo, LED, capacitive front-end, BLE and
+            Wi-Fi RSSI, sleep, ship mode) as CLI commands in the normal image. About 24 KB of
+            flash; with it off the linker drops the commands and the scan / test-pattern helpers
+            they alone use.
+
     config CALIPER_CHARGE_MA
         int "Charge current (mA)"
         range 40 500

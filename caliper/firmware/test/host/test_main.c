@@ -1332,6 +1332,7 @@ static void test_cap_unwrap(void)
 }
 
 void capture_tests(void); /* test_capture.c */
+void bringup_tests(void); /* test_bringup.c */
 
 int main(void)
 {
@@ -1362,6 +1363,7 @@ int main(void)
     RUN(test_cap_demod);
     RUN(test_cap_unwrap);
     capture_tests();
+    bringup_tests();
     printf("%d checks, %d failures\n", tt_checks, tt_failures);
     return tt_failures ? 1 : 0;
 }

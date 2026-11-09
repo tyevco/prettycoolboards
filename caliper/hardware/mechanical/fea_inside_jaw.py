@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""FEA of the printed moving inside jaw under the 5 N measuring force: the 2.4 plate vs the stiffened jaw.
+"""FEA of the printed inside jaws under the 5 N measuring force: each one before and after its stiffening.
 
 Uses the `print-stress` skill's mesher and element formulation (linear tets; ~/.claude/skills/print-stress/
 scripts), which run on the Windows Python on the design machine, not in the WSL venv:
 
-    py fea_inside_jaw.py [size]          # -> fea_inside_jaw_output.txt   (~10 min)
+    py fea_inside_jaw.py [size]          # -> fea_inside_jaw_output.txt   (~15 min)
 
 Why: the RF-relieved 2.4 mm plate (params.moving_inside_jaw_outline()) deflected 8.0 um/N on PA-CF at the
 measuring face, ~48 um over a 2-8 N thumb spread.  The stiffened jaw (params.py "Stiffening") keeps the measuring
@@ -25,6 +25,11 @@ Supports, two cases:
                 only at the two cut faces y 15 and u 14.  This includes the root's own give.
 Load: 5 N in -u (the bore wall pushing the tip toward the fixed jaw), spread over the measuring face u = 0,
 y IJ_TIP_Y0..IJ_TIP_Y1.
+
+The fixed inside jaw (second part, RESULT FIXED lines): the old triangle (params.fixed_inside_jaw_outline(False):
+the 3 mm tip on a sloping left edge) vs the stiffened jaw (params.py "Fixed inside jaw stiffening": a shoulder
+block under the face and a full-depth gusset where the moving jaw never reaches), rigid root and with the fixed
+block's top part; PA-CF and PETG.  Its own comment block below gives the supports.
 """
 import os
 import sys
@@ -195,31 +200,97 @@ for body in (False, True):
                      f"block {d1 * 1000:.2f} um, as built {d2 * 1000:.2f} um ({d2 / LOAD * 1000:.2f} um/N, "
                      f"{d0 / d2:.1f}x stiffer)")
 
-# The fixed inside jaw, for the error budget (the reading sees both jaws).  Unchanged by the stiffening:
-# 8.5 thick (IJ_FIXED_Z), all PA-CF (5.15 mm from the antenna at R = 0); root on the fixed block (rigid);
-# 5 N in +x on its measuring face x 0 (normal -x), y IJ_TIP_Y0..IJ_TIP_Y1.
-(_xt, _yt), (xr, yr) = P.FIXED_IJ_FLANK
-fpts = [(0.0, P.IJ_TIP_Y1), (P.IJ_TIP_W, P.IJ_TIP_Y1), (P.IJ_TIP_W, P.IJ_TIP_Y0), (xr, yr), (xr, yb), (-12.0, yb),
-        (0.0, P.IJ_TIP_Y0)]
+# The fixed inside jaw (the reading sees both jaws): the old triangle vs the stiffened jaw (params.py, fixed inside
+# jaw stiffening).  All PA-CF (its right edge, x 3.0, is 5.15 mm from the antenna at R = 0); 5 N in +x on its
+# measuring face x 0 (normal -x), y IJ_TIP_Y0..IJ_TIP_Y1.  Same frame: X' = z, Y' = x, Z' = y.
+#   rigid root  - the jaw's root face on the fixed block top (y FJ_Y1 - 0.1) fixed;
+#   local body  - the jaw fused to the fixed block's top part (x FJ_X0..FJ_X1, y FIX_BODY_Y0..FJ_Y1, full depth, less
+#                 the beam slot, the M3 bolt bores with their nut traps and the dowel bores, all left empty), fixed only
+#                 at the cut face y FIX_BODY_Y0.  The beam does not support the plates between y 15 and 20 and the
+#                 dowels carry nothing, so this is the soft bound for the block's give.
+FIX_BODY_Y0 = 15.0
+FSIZE = 0.4
 fz0, fz1 = P.IJ_FIXED_Z
-Mf = Model()
-Mf.profile_yz(fpts, fz0, fz1)
-p, t = Mf.mesh(size=0.4, fine=[((fz0 - 0.5, -0.5, P.IJ_TIP_Y0 - 1, fz1 + 0.5, P.IJ_TIP_W + 0.5, P.IJ_TIP_Y1 + 0.5), 0.3)])
-lines.append("")
-lines.append(f"Fixed inside jaw (unchanged; for the budget): {len(t)} tets, z {fz0:g}..{fz1:g}, root on the fixed block (rigid)")
-for mat, E in (("PA-CF", E_CF), ("PETG", E_PETG)):
-    Pt = Part(None, mesh=(p, t))
-    nfix = Pt.fix(lambda C, N: (np.abs(C[:, 2] - yb) < 0.02) & (N[:, 2] < -0.9), "xyz")
-    face = lambda C, N: (np.abs(C[:, 1]) < 0.02) & (N[:, 1] < -0.9) & \
-        (C[:, 2] > P.IJ_TIP_Y0) & (C[:, 2] < P.IJ_TIP_Y1)
-    nl, area = Pt.load(face, (0.0, LOAD, 0.0))
-    solve(Pt, np.full(len(t), E))
-    nodes = np.unique(Pt.bf[face(Pt.bc, Pt.bn)])
-    d = float(Pt.u[nodes, 1].mean())
-    rep = Pt.report(layer_normal=(1, 0, 0))
-    lines.append(f"  {mat:<6} deflection at the face {d * 1000:6.2f} um ({d / LOAD * 1000:5.2f} um/N); reaction "
-                 f"{rep['reaction_N']} N (fixed facets {nfix}, load facets {nl}, {area:.1f} mm2)")
-    lines.append(f"RESULT FIXED {mat}: {d * 1000:.2f} um ({d / LOAD * 1000:.2f} um/N)")
+fyb = P.FJ_Y1 - 0.1
+
+
+def build_fixed(pieces, body):
+    M = Model()
+    sol = [M.profile_yz(pts, a, b) for pts, a, b in pieces]
+    if body:
+        b = M.box(P.FJ_Z0, P.FJ_X0, FIX_BODY_Y0, P.FJ_Z1 - P.FJ_Z0, P.FJ_X1 - P.FJ_X0, P.FJ_Y1 - FIX_BODY_Y0)
+        fit = 0.05
+        slot = M.box(-P.BEAM_T - fit, P.BEAM_X0 - fit, FIX_BODY_Y0 - 1, P.BEAM_T + 2 * fit, 20.0,
+                     P.BEAM_W + fit - FIX_BODY_Y0 + 1)
+        holes = []
+        for x, y in P.FJ_BOLTS:
+            holes.append(M.cyl_axis(P.FJ_Z0 - 1, x, y, P.FJ_Z1 - P.FJ_Z0 + 2, 0, 0, P.M3_CLR / 2))
+            # the hex trap as a round of the same area
+            holes.append(M.cyl_axis(P.FJ_Z0 - 0.01, x, y, P.FJ_NUT_TRAP_DEPTH + 0.01, 0, 0,
+                                    P.FJ_NUT_TRAP_AF * np.sqrt(np.sqrt(3) / 2 / np.pi)))
+        for x, y in P.FJ_DOWELS:
+            holes.append(M.cyl_axis(P.FJ_Z0 - 1, x, y, P.FJ_Z1 - P.FJ_Z0 + 2, 0, 0, P.DOWEL_D / 2))
+        sol.append(M.cut(b, [slot] + holes))
+        M.o.synchronize()
+    if len(sol) > 1:
+        M.fuse(sol)
+    fine = [((P.FJ_Z0 - 0.5, P.FIXED_IJ_SHOULDER_X0 - 0.5, fyb - 0.5, P.FJ_Z1 + 0.5, P.IJ_TIP_W + 0.5,
+              P.IJ_TIP_Y1 + 0.5), FSIZE),
+            ((fz0 - 0.5, -0.5, P.IJ_TIP_Y0 - 1.0, fz1 + 0.5, P.IJ_TIP_W + 0.5, P.IJ_TIP_Y1 + 0.5), min(size, 0.25))]
+    return M.mesh(size=0.9 if body else FSIZE, fine=fine)
+
+
+def run_fixed(pieces, body):
+    p, t = build_fixed(pieces, body)
+    out = {}
+    for mat, E in (("PA-CF", E_CF), ("PETG", E_PETG)):
+        Pt = Part(None, mesh=(p, t))
+        y_fix = FIX_BODY_Y0 if body else fyb
+        nfix = Pt.fix(lambda C, N: (np.abs(C[:, 2] - y_fix) < 0.02) & (N[:, 2] < -0.9), "xyz")
+        face = lambda C, N: (np.abs(C[:, 1]) < 0.02) & (N[:, 1] < -0.9) & \
+            (C[:, 2] > P.IJ_TIP_Y0) & (C[:, 2] < P.IJ_TIP_Y1)
+        nl, area = Pt.load(face, (0.0, LOAD, 0.0))
+        solve(Pt, np.full(len(t), E))
+        nodes = np.unique(Pt.bf[face(Pt.bc, Pt.bn)])
+        d = float(Pt.u[nodes, 1].mean())
+        tip = Pt.p[:, 2] > P.IJ_TIP_Y1 - 0.05
+        d_tip = float(Pt.u[tip, 1].mean())
+        rep = Pt.report(layer_normal=(1, 0, 0), s_inter=20.0, s_in=45.0)
+        out[mat] = (d, d_tip, rep, nfix, nl, area)
+    return len(t), len(p), out
+
+
+fvariants = (("old triangle (before)", [(P.fixed_inside_jaw_outline(False), fz0, fz1)]),
+             ("shoulder block, plate only", [(P.fixed_inside_jaw_outline(), fz0, fz1)]),
+             ("as built: shoulder block + gusset", [(P.fixed_inside_jaw_outline(), fz0, fz1),
+                                                    (P.fixed_inside_jaw_gusset_outline(), P.FJ_Z0, fz1)]))
+lines += ["", "Fixed inside jaw: the old triangle vs the stiffened jaw (shoulder block x "
+          f"{P.FIXED_IJ_SHOULDER_X0:g}..0 up to y {P.IJ_TIP_Y0:g}, full-depth gusset z {P.FJ_Z0:g}..{fz1:g} left of x "
+          f"{P.FIXED_IJ_GUSSET_X1:g}); plate z {fz0:g}..{fz1:g}, tip {P.IJ_TIP_W:g} wide; 5 N in +x on the face x 0, "
+          f"y {P.IJ_TIP_Y0:g}..{P.IJ_TIP_Y1:g}; all PA-CF (or PETG); mesh {FSIZE} on the jaw, {min(size, 0.25)} at the tip",
+          f"local body: the fixed block x {P.FJ_X0:g}..{P.FJ_X1:g}, y {FIX_BODY_Y0:g}..{P.FJ_Y1:g} with the beam slot, "
+          "bolt bores, nut traps and dowel bores empty, fixed at the cut face only (soft bound)", ""]
+fres = {}
+for body in (False, True):
+    for name, pieces in fvariants:
+        t0 = time.time()
+        nt, npn, out = run_fixed(pieces, body)
+        fres[(name, body)] = out
+        lines.append(f"FIXED {name} [{'local body' if body else 'rigid root'}]: {nt} tets / {npn} nodes "
+                     f"({time.time() - t0:.0f} s)")
+        for mat, (d, dt, rep, nfix, nl, area) in out.items():
+            lines.append(f"  {mat:<6} deflection at the face {d * 1000:6.2f} um ({d / LOAD * 1000:5.2f} um/N), at the tip "
+                         f"{dt * 1000:6.2f} um; von Mises {rep['von_mises']} MPa (SF in-layer {rep['SF_in_layer']}), "
+                         f"interlayer {rep['interlayer_tension']}/{rep['interlayer_shear']} MPa; reaction "
+                         f"{rep['reaction_N']} N (fixed facets {nfix}, load facets {nl}, {area:.1f} mm2)")
+        lines.append("")
+        print("\n".join(lines[-4:]), flush=True)
+for body in (False, True):
+    for mat in ("PA-CF", "PETG"):
+        d0, d1, d2 = (fres[(fvariants[i][0], body)][mat][0] for i in range(3))
+        lines.append(f"RESULT FIXED {mat} {'body' if body else 'rigid'}: before {d0 * 1000:.2f} um ({d0 / LOAD * 1000:.2f} um/N), "
+                     f"block {d1 * 1000:.2f} um, as built {d2 * 1000:.2f} um ({d2 / LOAD * 1000:.2f} um/N, "
+                     f"{d0 / d2:.1f}x stiffer)")
 lines += ["", "Strength numbers are the skill's PETG book values (45 in-layer, 20 interlayer).",
           "Linear tets run ~5 % stiff; every variant is meshed the same way, so the comparison holds."]
 txt = "\n".join(lines) + "\n"

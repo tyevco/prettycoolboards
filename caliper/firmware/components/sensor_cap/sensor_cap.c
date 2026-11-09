@@ -60,7 +60,7 @@ static const char *TAG = "cap";
 #define WIN_SAMPLES  ((CAP_K - 2 * MARGIN_CYC) * SPC)
 #define TAIL_STEPS   (2 * CAP_PHASES)
 #define MAX_SAMPLES  (2 * CAP_K * SPC + 128)
-#define MIN_AMP_LSB  8.0f
+#define MIN_AMP_LSB  CAP_MIN_AMP_LSB
 /* Direction of the capacitive reading relative to the magnetic one (TVP). */
 #define CAP_SIGN     (-1)
 
@@ -75,6 +75,37 @@ static portMUX_TYPE s_mux = portMUX_INITIALIZER_UNLOCKED;
 /* the ADC sample period as the hardware runs it: s_fs_den / s_fs_num seconds */
 static uint32_t s_fs_num = 80000000u;                       /* APB Hz */
 static uint32_t s_fs_den = ADC_CLKM_DIV * 2 * ADC_INTERVAL; /* APB cycles per sample */
+/* bring-up diagnostics (sensor_cap_diag): written by the cap task, copied by the CLI */
+static cap_diag_t s_diag;
+static portMUX_TYPE s_diag_mux = portMUX_INITIALIZER_UNLOCKED;
+
+static void diag_put(esp_err_t err, bool late, const cap_reading_t *r, cap_iq_t f, cap_iq_t rv, float mean)
+{
+    taskENTER_CRITICAL(&s_diag_mux);
+    s_diag.running = true;
+    s_diag.bursts++;
+    if (err != ESP_OK) {
+        s_diag.errors++;
+    } else if (late) {
+        s_diag.late++;
+    } else {
+        s_diag.fwd = f;
+        s_diag.rev = rv;
+        s_diag.mean_lsb = mean;
+        s_diag.amp_fwd = r->amp_fwd;
+        s_diag.amp_rev = r->amp_rev;
+        s_diag.frac = r->frac;
+        s_diag.valid += r->valid;
+    }
+    taskEXIT_CRITICAL(&s_diag_mux);
+}
+
+void sensor_cap_diag(cap_diag_t *out)
+{
+    taskENTER_CRITICAL(&s_diag_mux);
+    *out = s_diag;
+    taskEXIT_CRITICAL(&s_diag_mux);
+}
 
 esp_err_t sensor_cap_init(void)
 {
@@ -202,6 +233,9 @@ esp_err_t sensor_cap_measure(cap_reading_t *out)
     /* Anything still in the driver's pool belongs to an earlier burst (adc_continuous_stop() does
      * not empty it); left there it would shift every sample index of this burst. */
     adc_continuous_flush_pool(s_adc);
+    bool late = false;
+    cap_iq_t f = {0}, r = {0};
+    float mean = 0.0f;
     esp_err_t err = adc_continuous_start(s_adc);
     /* start() enables the controller as its last step: the first sample follows closely */
     int64_t t_adc = esp_timer_get_time();
@@ -211,7 +245,7 @@ esp_err_t sensor_cap_measure(cap_reading_t *out)
     int64_t t_drive = drive_burst();
     /* samples taken before the drive started */
     int64_t d_est = (t_drive - t_adc) * (int64_t)s_fs_num / ((int64_t)s_fs_den * 1000000);
-    bool late = d_est < 0 || d_est > D_EST_MAX;
+    late = d_est < 0 || d_est > D_EST_MAX;
     size_t want = (late ? 0 : (size_t)d_est) + 2 * CAP_K * SPC + SPC;
     size_t n = late ? 0 : collect(want);
     adc_continuous_stop(s_adc);
@@ -229,8 +263,13 @@ esp_err_t sensor_cap_measure(cap_reading_t *out)
     }
     size_t f0 = (size_t)d_est + MARGIN_CYC * SPC;
     size_t r0 = (size_t)d_est + (size_t)CAP_K * SPC + MARGIN_CYC * SPC;
-    cap_iq_t f = cap_demod_iq(&s_samples[f0], WIN_SAMPLES, (float)SPC, f0);
-    cap_iq_t r = cap_demod_iq(&s_samples[r0], WIN_SAMPLES, (float)SPC, r0);
+    f = cap_demod_iq(&s_samples[f0], WIN_SAMPLES, (float)SPC, f0);
+    r = cap_demod_iq(&s_samples[r0], WIN_SAMPLES, (float)SPC, r0);
+    uint32_t sum = 0;
+    for (size_t i = 0; i < WIN_SAMPLES; i++) {
+        sum += s_samples[f0 + i];
+    }
+    mean = (float)sum / (float)WIN_SAMPLES; /* the DC level at the ADC: CAP_VREF through the filter */
     out->amp_fwd = cap_iq_amplitude(f);
     out->amp_rev = cap_iq_amplitude(r);
     out->bursts = ++s_bursts;
@@ -246,5 +285,6 @@ done:
 #if CONFIG_PM_ENABLE
     esp_pm_lock_release(s_pm);
 #endif
+    diag_put(err, late, out, f, r, mean);
     return err;
 }

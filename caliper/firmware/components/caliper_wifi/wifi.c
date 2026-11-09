@@ -14,6 +14,7 @@
  * is wiped after use.
  */
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "caliper_core.h"
@@ -220,6 +221,57 @@ static void on_cmd(void *arg, esp_event_base_t base, int32_t id, void *data)
     default: break;
     }
     WUNLOCK();
+}
+
+/* Bring-up ("bu wifi"): one blocking all-channel scan. With the radio off it starts the station
+ * just for the scan (no connect: on_wifi only connects in W_CONNECTING) and stops it again; in
+ * station mode it scans alongside; the provisioning AP refuses (ESP_ERR_INVALID_STATE). */
+static int by_rssi(const void *a, const void *b)
+{
+    return ((const wifi_ap_record_t *)b)->rssi - ((const wifi_ap_record_t *)a)->rssi;
+}
+
+esp_err_t caliper_wifi_scan(cal_wifi_ap_t *out, size_t max, size_t *n)
+{
+    *n = 0;
+    WLOCK();
+    esp_err_t err = ESP_OK;
+    bool started = false;
+    if (s_state == W_AP || s_state == W_CONNECTING) {
+        err = ESP_ERR_INVALID_STATE;
+    } else if (s_state == W_OFF) {
+        err = ensure_init();
+        if (err == ESP_OK) {
+            esp_wifi_set_mode(WIFI_MODE_STA);
+            err = esp_wifi_start();
+            started = err == ESP_OK;
+        }
+    }
+    if (err == ESP_OK) {
+        err = esp_wifi_scan_start(NULL, true);
+    }
+    uint16_t num = 0;
+    if (err == ESP_OK) {
+        esp_wifi_scan_get_ap_num(&num);
+        wifi_ap_record_t *rec = num ? calloc(num, sizeof(*rec)) : NULL;
+        if (num && rec && esp_wifi_scan_get_ap_records(&num, rec) == ESP_OK) {
+            qsort(rec, num, sizeof(*rec), by_rssi);
+            for (uint16_t i = 0; i < num && *n < max; i++) {
+                strlcpy(out[*n].ssid, (const char *)rec[i].ssid, sizeof(out[*n].ssid));
+                out[*n].rssi = rec[i].rssi;
+                out[*n].channel = rec[i].primary;
+                (*n)++;
+            }
+        } else {
+            esp_wifi_clear_ap_list();
+        }
+        free(rec);
+    }
+    if (started) {
+        esp_wifi_stop();
+    }
+    WUNLOCK();
+    return err;
 }
 
 esp_err_t caliper_wifi_init(void)

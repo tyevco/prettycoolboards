@@ -22,6 +22,7 @@ extern "C" {
 #define CAP_PITCH_NM      5080000L
 #define CAP_HALF_PITCH_NM 2540000L
 #define CAP_PHASES        8
+#define CAP_MIN_AMP_LSB   8.0f /* a burst below this amplitude (ADC LSB) has no usable coupling */
 
 typedef struct {
     float i;

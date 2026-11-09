@@ -43,7 +43,8 @@ and **the electrodes** (§2.2 table) with their guard copper. Everything else on
 copper under solder mask, nothing proud of it. Bottom in y 22…34: flat test pads only (no parts; the battery is
 1.55 mm below), **except under the module** (x 1.8…4.4, y 22.7…27.0, left of the battery pocket): the module's
 100 nF + 10 µF decoupling C21 / C23 and the ADC input's RC filter R85 / C44, 0402, ≤ 0.55 mm tall against the
-0.75 mm housing-floor gap there (§12, §13).
+0.75 mm housing-floor gap there (§12, §13). The extension of this exception from y 24.8 down to y 22.7 for R85 / C44
+(§13 R5) was **accepted by the owner on 2026-11-09** (§11).
 
 **Placement table (D4).** Centre coordinates in board mm; rotation in degrees as seen from the top, 0 = the
 footprint's own orientation; the layout script may move a part ≤ 1 mm without a SPEC change if every rule here
@@ -324,8 +325,16 @@ The authoritative copy is `nets.py: MCU_PINS`. The constraints behind it:
 - **Moving inside jaw (2026-11-08):** stiffened from a 2.4 mm plate (≈ 9.5 µm/N on PA-CF at the measuring face) to **≈ 2.0 µm/N** (FEA with
   the local body, datasheet E; 2.3 with the 0.85 FDM knock-down, so at the 2 µm/N target, not under it; PETG 4.1): the measuring face (u 0, y 31…37), the tip's z (−8.6…−6.2) and its 3.0 mm end width are unchanged; the tip
   tapers to 4.0 mm at its base, a shoulder block fills u −4…6.4 under it up to y 31, and a full-height gusset (z −8.6…+2.4) fills the part
-  the fixed inside jaw never reaches (0.4 mm clear). An inside reading over a 2–8 N touch still moves ≈ 22 µm with both PA-CF inside jaws
-  (the fixed one is 1.7 µm/N, unchanged). Designed, not built or measured; detail in docs/mechanical.md §9.
+  the fixed inside jaw never reaches (0.4 mm clear). With the fixed inside jaw stiffened too (below), an inside reading over a 2–8 N touch
+  moves ≈ 19 µm with both PA-CF inside jaws (22 µm with the 0.85 FDM knock-down; both jaws with their local bodies). Designed, not built or
+  measured; detail in docs/mechanical.md §9.
+- **Fixed inside jaw (2026-11-09):** stiffened from ≈ 2.2 µm/N on PA-CF at the measuring face (FEA with the fixed block's top part; 1.7
+  with a rigid root) to **≈ 1.1 µm/N** (0.94 with a rigid root; 1.3 with the 0.85 FDM knock-down; PETG 2.8). The measuring face (x 0,
+  y 31…37), the tip's 3.0 mm width over its whole 6 mm, its z (−6.0…+2.5, 0.2 mm over the moving tip) and its right flank are unchanged.
+  A shoulder block fills x −18…0 under the face up to y 31, and a full-depth gusset (z −8.6…+2.5) fills it left of x −4.4, where the
+  moving inside jaw never reaches (0.4 mm clear). No tip taper: the tip's right edge is 5.15 mm from the antenna area at R = 0, so the
+  minimum gap is unchanged. It misses the ≤ 1.0 µm/N goal by 0.13 once the block's give is counted. Designed, not built or measured;
+  detail in docs/mechanical.md §9.
 - The slider housing straddles the beam: printed PETG/PA-CF in rev A, CNC 6061 in rev B. Brass gibs with
   M2 set screws + springs set the 0.3 mm (magnetic) and 0.15 mm (capacitive) gaps. The fixed jaw is
   bolted and dowelled to the beam end. The moving jaw is part of the slider housing.
@@ -450,11 +459,15 @@ mechanics and the firmware now do where they differ from the first-draft section
   input capacitor, the VBUS feed that skipped D1, CAP_RX's long run with its filter at the far end, the missing
   stack-up, the bypass around U1 on each USB line. Still open: backlight up to ≈ 31 mA through R50 15 Ω at the
   VF-min / +3V3-max corner against a 20 mA typical rating (R50 18–22 Ω or a firmware duty cap; owner decision).
+* **Owner decision (2026-11-09): ACCEPTED** the extended under-module bottom-side exception (§2.1): R85 / C44 (CAP_RX
+  anti-alias RC, 0402, 0.5 mm tall) on the bottom under the module, which takes the exception's lower edge from
+  y 24.8 (C21 / C23 only, §12 H4) to **y 22.7** (x 1.8…4.4 unchanged). The mechanics clear it (0.5 mm in the 0.75 mm
+  housing-floor gap; clash check 0 not clear, §13 gates).
 * **Mechanics (§7):** closed back web over the beam with the back plungers (u 14 and 64, y 5, 2.5 N each); Y plungers
   u 14 / 24 (4 N each) and the lock u 19 left of the battery pocket; housing end face u 77.4, roller rim u 78.0; the
   end stop is an M2×6 socket screw in a tapped hole; tab clamps use 0.3 mm shim washers bedded in epoxy on 0.150 mm
   foil; a shimmed ledge under the board's top edge at board x 29…57.5, y 32.6…34 (keep it free of bottom parts, test
-  pads and exposed copper; the VBAT band runs under it, under mask with tented vias, so the shim keeps at least one Kapton layer); inside jaws in z: moving −8.6…−6.2, fixed −6.0…+2.5. Detail in docs/mechanical.md.
+  pads and exposed copper; the VBAT band runs under it, under mask with tented vias, so the shim keeps at least one Kapton layer); inside jaws in z: moving −8.6…−6.2, fixed −6.0…+2.5 (the fixed jaw's shoulder gusset left of x −4.4 runs full depth, −8.6…+2.5). Detail in docs/mechanical.md.
 * **Firmware (§4, §8):** D1 tolerance 12 LSB / 3 edges (§4.1); cap drive 5.04 kHz at 80 645 S/s (§4.2); the cap
   reading is aligned to the magnetic reading at its first valid burst after boot and whole 2.54 mm slips are
   corrected against it (no cap zero is kept across sleep); LIVE flag bit 6 REZERO; CSV flags `H P F E Z`; on-flash
@@ -507,10 +520,25 @@ every unchanged net kept). Numbers are calculations on the board files (docs/ele
 | R7 | **USB through U1**: J1 → U1 pre-routed straight; U1's I/O pins as jumper pad groups (1/6, 3/4) so no router adds a bypass | the loop round U1 on each line is gone |
 | R8 | Schematic packing: the power sheet fits A3 (was a half-empty A2) | |
 
-Open: CAP_LP1 itself still runs broadside to BTN_MODE_N for 5.7 mm (sicalc upper bound 20 mV on a terminated line;
-the node is held by C43 1 nF and filtered again by R85 / C44); R50 is drawn ≈ 45 mm of wire from J50 on the UI sheet.
+Open: R50 is drawn ≈ 45 mm of wire from J50 on the UI sheet. (CAP_LP1 itself ran broadside to BTN_MODE_N for
+5.7 mm, sicalc upper bound 20 mV: closed on 2026-11-09, §14.)
 
 **Gates after these changes (2026-11-08):** wiring check and ERC as before; DRC + schematic parity 0 / 0 / 0 (7
 `lib_footprint_mismatch`, 2 `track_dangling` warnings); `release.py` passes for both boards; jlcplace slider 102 rows,
 0 red, 0 yellow, 102 green; `check_contract.py` OK; firmware pin tables up to date; mechanics extract + clash check
 0 clashes. Evidence: docs/electronics.md §7.13.
+
+## 14. CAP_LP1 crosstalk shield (2026-11-09)
+Designed, not built. Numbers are hwtools `sicalc xtalk` calculations on the board file (config
+`design/xtalk-cap.yaml`), not measurements; detail and evidence in docs/electronics.md §7.14.
+
+| # | Change | Before → after |
+|---|---|---|
+| S1 | **Shielded corridor for CAP_LP1's B.Cu and In2 stretches** (`layout.py` `CAP_LP1_SHIELD`; the pre-route `CAP_LP1_PATH` unchanged): no other track within 1.0 mm of the centre line on the stretch's own layer, none along it on the neighbouring layer (0.8 mm crossing windows every 1.6 mm), an In2 GND zone over both stretches plus the B.Cu GND pour over the In2 one, GND vias along both edges | CAP_LP1 worst aggressor **BTN_MODE_N 20.4 → 0.88 mV** (1 mV budget); BOOT_N 4.4 → 0.03, RGB_DIN 3.7 → not coupled, IMU_INT2 3.2 → 0.64, I2C_SDA 3.0 → 0.14, BUZZ_D 1.8 → not coupled. CAP_AMP_OUT 0.65 → 0.15, CAP_RX 0.14 (unchanged). Over-budget pairs on the board 10 → 3 |
+| S2 | Re-routed round the corridors with `layout.py --rework` (no part moved): the button, I2C, IMU, LCD_BL, RGB_DIN, BOOT_N, CAP_TX and CAP_AMP_OUT lines that ran in them; USB, VBUS, VBAT, VSYS and CAP_RX copper as before, every pre-route locked | BTN_MODE_N 77 → 111 mm, I2C_SCL 107 → 74 mm, LCD_BL 55 → 39 mm, the others within ±12 mm. Still over sicalc's 10 mV USB budget: MAG_A → D+ 25.5 mV in the slot where I2C_SCL was (22.4 mV) |
+
+The §2.1 under-module bottom-side exception for R85 / C44 (y 22.7) was accepted by the owner the same day (§11).
+
+**Gates (2026-11-09):** DRC + schematic parity 0 / 0 / 0 (7 `lib_footprint_mismatch` warnings); `release.py` PASS,
+jlcplace slider 102 rows, 0 red, 0 yellow, 102 green; `check_contract.py` OK; `tools/tests` 19 passed; mechanics
+extract + clash check 0 not clear (part envelopes identical to the committed extract).

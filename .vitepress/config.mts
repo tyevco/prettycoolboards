@@ -62,6 +62,7 @@ export default withMermaid(defineConfig({
             { text: 'Mechanical design', link: '/caliper/docs/mechanical' },
             { text: 'Simulation', link: '/caliper/docs/simulation' },
             { text: 'Assembly and ordering', link: '/caliper/docs/assembly' },
+            { text: 'Order checklist', link: '/caliper/docs/ordering' },
             { text: 'Bring-up', link: '/caliper/docs/bringup' },
           ],
         },

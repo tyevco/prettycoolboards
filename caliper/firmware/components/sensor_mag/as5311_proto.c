@@ -175,3 +175,84 @@ bool as5311_jump_filter(as5311_jump_t *j, int64_t raw, int64_t max_step, int64_t
     *out = j->last;
     return false;
 }
+
+/* ---- bring-up: SSI vs count cross-check ------------------------------------------------- */
+
+void as5311_xcheck_init(as5311_xcheck_t *x)
+{
+    *x = (as5311_xcheck_t){0};
+}
+
+static int64_t abs64(int64_t v)
+{
+    return v < 0 ? -v : v;
+}
+
+void as5311_xcheck_feed(as5311_xcheck_t *x, int64_t count, uint16_t ssi_pos)
+{
+    ssi_pos &= AS5311_SSI_STEPS - 1;
+    if (!x->have) {
+        as5311_xcheck_init(x);
+        x->have = true;
+        x->count0 = count;
+        x->ssi_last = ssi_pos;
+        x->frames = 1;
+        return;
+    }
+    int32_t step = as5311_wrap_diff(ssi_pos, x->ssi_last);
+    int32_t at = (int32_t)x->ssi_last + step;
+    if (at < 0 || at >= AS5311_SSI_STEPS) {
+        x->crossings++;
+    }
+    x->ssi_last = ssi_pos;
+    x->ssi_u += step;
+    x->count_d = count - x->count0;
+    x->travel += step < 0 ? -step : step;
+    if ((step < 0 ? -step : step) > x->max_step) {
+        x->max_step = step < 0 ? -step : step;
+    }
+    if (x->ssi_u < x->min_u) {
+        x->min_u = x->ssi_u;
+    }
+    if (x->ssi_u > x->max_u) {
+        x->max_u = x->ssi_u;
+    }
+    int64_t dp = abs64(x->ssi_u - AS5311_LSB_PER_COUNT * x->count_d);
+    int64_t dm = abs64(x->ssi_u + AS5311_LSB_PER_COUNT * x->count_d);
+    if (dp > x->dev_p_max) {
+        x->dev_p_max = dp;
+    }
+    if (dm > x->dev_m_max) {
+        x->dev_m_max = dm;
+    }
+    x->frames++;
+}
+
+as5311_xc_result_t as5311_xcheck_result(const as5311_xcheck_t *x)
+{
+    if (x->max_step > AS5311_XC_MAX_STEP) {
+        return AS5311_XC_FAST;
+    }
+    if (!x->have || x->max_u - x->min_u < AS5311_XC_MIN_SPAN) {
+        return AS5311_XC_SHORT;
+    }
+    if (x->dev_p_max <= AS5311_XC_TOL_LSB) {
+        return AS5311_XC_OK;
+    }
+    if (x->dev_m_max <= AS5311_XC_TOL_LSB) {
+        return AS5311_XC_INVERTED;
+    }
+    return AS5311_XC_MISMATCH;
+}
+
+const char *as5311_xcheck_str(as5311_xc_result_t r)
+{
+    switch (r) {
+    case AS5311_XC_OK: return "count and SSI agree";
+    case AS5311_XC_SHORT: return "moved less than 2 mm: move further";
+    case AS5311_XC_FAST: return "moved too fast for the SSI unwrap: repeat slower";
+    case AS5311_XC_INVERTED: return "count runs against the SSI: flip SSI_SIGN (sensor_mag.c)";
+    case AS5311_XC_MISMATCH: return "count and SSI disagree: missed edges or a bad A/B/SSI line";
+    }
+    return "?";
+}

@@ -126,6 +126,58 @@ esp_err_t ui_init(void)
     return ESP_OK;
 }
 
+/* Bring-up test pattern ("bu lcd", docs/bringup.md): eight full-height colour bars (white, yellow,
+ * cyan, green, magenta, red, blue, black) inset 3-4 px in a black field, a 1 px white frame on the
+ * outermost pixels (a wrong LCD_GAP_X / _Y cuts one edge of it off and shows noise on the opposite
+ * side), and corner labels (a wrong rotation / mirror puts "TOP LEFT" elsewhere or mirrors it).
+ * Drawn on LVGL's top layer over the normal screens; off removes it. */
+static lv_obj_t *s_pattern;
+
+esp_err_t ui_test_pattern(bool on)
+{
+    static const uint32_t bars[8] = {0xFFFFFF, 0xFFFF00, 0x00FFFF, 0x00FF00, 0xFF00FF, 0xFF0000, 0x0000FF, 0x000000};
+    if (!ui_lock()) {
+        return ESP_ERR_INVALID_STATE;
+    }
+    if (s_pattern) {
+        lv_obj_delete(s_pattern);
+        s_pattern = NULL;
+    }
+    if (on) {
+        lv_obj_t *p = lv_obj_create(lv_layer_top());
+        lv_obj_remove_style_all(p);
+        lv_obj_set_pos(p, 0, 0);
+        lv_obj_set_size(p, LCD_HRES, LCD_VRES);
+        lv_obj_set_style_bg_color(p, lv_color_black(), 0);
+        lv_obj_set_style_bg_opa(p, LV_OPA_COVER, 0);
+        lv_obj_set_style_border_color(p, lv_color_white(), 0);
+        lv_obj_set_style_border_width(p, 1, 0);
+        lv_obj_set_style_border_opa(p, LV_OPA_COVER, 0);
+        lv_obj_remove_flag(p, LV_OBJ_FLAG_SCROLLABLE);
+        for (int i = 0; i < 8; i++) {
+            lv_obj_t *b = lv_obj_create(p);
+            lv_obj_remove_style_all(b);
+            lv_obj_set_pos(b, 4 + 29 * i, 3);
+            lv_obj_set_size(b, 29, LCD_VRES - 6);
+            lv_obj_set_style_bg_color(b, lv_color_hex(bars[i]), 0);
+            lv_obj_set_style_bg_opa(b, LV_OPA_COVER, 0);
+        }
+        static const char *const txt[2] = {"TOP LEFT", "BR"};
+        for (int i = 0; i < 2; i++) {
+            lv_obj_t *l = lv_label_create(p);
+            lv_label_set_text(l, txt[i]);
+            lv_obj_set_style_text_color(l, lv_color_white(), 0);
+            lv_obj_set_style_bg_color(l, lv_color_black(), 0);
+            lv_obj_set_style_bg_opa(l, LV_OPA_COVER, 0);
+            lv_obj_set_style_pad_all(l, 2, 0);
+            lv_obj_align(l, i ? LV_ALIGN_BOTTOM_RIGHT : LV_ALIGN_TOP_LEFT, i ? -5 : 5, i ? -5 : 5);
+        }
+        s_pattern = p;
+    }
+    ui_unlock();
+    return ESP_OK;
+}
+
 void ui_sleep(void)
 {
     /* Stop LVGL first: the panel commands below share the SPI device with LVGL's flushes, which run

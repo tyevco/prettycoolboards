@@ -10,6 +10,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "cap_demod.h"
 #include "esp_err.h"
 
 #ifdef __cplusplus
@@ -34,6 +35,16 @@ esp_err_t sensor_cap_init(void);
 esp_err_t sensor_cap_measure(cap_reading_t *out);
 void sensor_cap_idle(void); /* all phases low */
 void sensor_cap_deinit(void);
+
+/* ---- bring-up diagnostics (the CLI "bu cap") ---- */
+typedef struct {
+    bool running;      /* at least one burst ran */
+    uint32_t bursts, valid, late, errors;
+    cap_iq_t fwd, rev; /* the last demodulated burst (raw I/Q, ADC LSB) */
+    float amp_fwd, amp_rev, frac;
+    float mean_lsb;    /* mean ADC code over the forward window (the DC level) */
+} cap_diag_t;
+void sensor_cap_diag(cap_diag_t *out);
 
 #ifdef __cplusplus
 }

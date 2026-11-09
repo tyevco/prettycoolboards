@@ -50,6 +50,22 @@ esp_err_t sensor_mag_read(mag_reading_t *out, bool do_ssi);
  * before deep sleep. */
 void sensor_mag_prepare_sleep(void);
 
+/* ---- bring-up diagnostics (the CLI "bu mag" commands) ---- */
+typedef struct {
+    uint32_t samples;    /* sensor_mag_read() calls */
+    uint32_t frames_ok;  /* valid SSI frames (parity, OCF = 1, COF = 0) */
+    uint32_t frames_bad;
+    uint32_t last_raw;   /* the last SSI frame as read, 18 bits */
+    int64_t pcnt;        /* the filtered PCNT count, no origin, no slip correction */
+    uint32_t idx_pulses; /* MAG_IDX rising edges since power-up */
+    uint32_t slips, jumps;
+    bool powered;
+    as5311_xcheck_t xc;  /* the count vs SSI cross-check while armed */
+} mag_diag_t;
+void sensor_mag_diag(mag_diag_t *out);
+void sensor_mag_xcheck_start(void); /* clears and arms the cross-check (fed by the sensor task) */
+void sensor_mag_xcheck_stop(void);
+
 #ifdef __cplusplus
 }
 #endif

@@ -155,8 +155,10 @@ CAP_AMP_OUT ─ R84 390R ─┬─ R85 3.9k ─┬─ CAP_RX (GPIO1, ADC1_CH0)
 * **Placement (2026-11-08):** R84 / C43 sit at U40; R85 / C44 sit at the ESP32's GPIO1 pad (bottom side, under the
   module, beside GPIO1's escape via), so the long run across the board is **CAP_LP1** (390 Ω and 1 nF at its source
   end, a low-impedance node) and **CAP_RX** is ≈ 2 mm from the ADC pin. Both nets are in their own net class
-  (*Analog*): 0.3 mm from every other net, and the GND pour follows them at 0.3 mm. TP42 (scope point) is on CAP_LP1
-  (it was on CAP_RX; a pad in the test-pad row would now hang a 30 mm stub on the ADC node). §7.13.
+  (*Analog*): 0.2 mm from every other net, and the GND pour follows them. TP42 (scope point) is on CAP_LP1
+  (it was on CAP_RX; a pad in the test-pad row would now hang a 30 mm stub on the ADC node). §7.13. CAP_LP1's B.Cu
+  and In2 stretches run in a shielded corridor (no other track within 1 mm on their layer or along them on the
+  neighbouring one, GND copper round them): §7.14.
 
 * **Op-amp:** TLV9062IDGKR (C398356): dual, 10 MHz GBW, rail-to-rail in/out, 538 µA per amplifier, 1.8–5.5 V.
   It meets SPEC's "≥ 10 MHz GBW, RRIO CMOS" at $0.23. If the bandwidth turns out short, a 50 MHz RRIO dual such as
@@ -279,7 +281,8 @@ itself is not a PCBA part: it plugs into J50 by hand.
 > scratch after the hardware changes in §7.11 (Q1, 2.2 k I2C pull-ups, the J50 land, bottom-side module
 > decoupling, H5, silk); the figures in §7.5 and §7.10 are from the board before that re-route. The phase-4 review
 > fixes (§7.13: VBAT / VSYS / VBUS pre-routes, C13, R85/C44 at the ADC pin, the stack-up, the USB loop round U1) were
-> made with `layout.py --rework`, which keeps the routing of every unchanged net. Designed,
+> made with `layout.py --rework`, which keeps the routing of every unchanged net; so was the CAP_LP1 crosstalk
+shield (§7.14, 2026-11-09). Designed,
 > not built: nothing has been fabricated or measured, and no signal-integrity, RF or thermal analysis was run on
 > the layout. An adversarial layout review on 2026-11-08 found and fixed five defects (the USB pair, three
 > decoupling placements, a truncated electrode guard) and corrected several claims here; its findings, fixed and
@@ -556,7 +559,13 @@ battery and the standoffs are not on the board.
   geometry; for a bottom placement at rotation 0 its RX pad must sit at local y −3.75) and the scale's Ø1.0 NPTH
   holes. (H5 and the module decoupling were closed on 2026-11-08, §7.11; the SMT standoffs are hand-fitted.)
 * **USB**: the first 7 mm of the pair, under the module's escape-via field, has no plane directly under it (§7.5).
-  The bypasses around U1 that the 2026-11-08 re-route had added are gone (§7.13).
+  The bypasses around U1 that the 2026-11-08 re-route had added are gone (§7.13). sicalc puts MAG_A → D+ at 25.5 mV
+  (5.9 mm at 0.18 mm on B.Cu along the pair's jog at x 10–14, y 20.5; I2C_SCL sat there before, 22.4 mV) against
+  its 10 mV USB budget: a GND guard or a re-route of that jog (§7.14).
+* **`--rework` and Freerouting**: Freerouting does not see U1's jumper pad groups, so a rework that runs it puts a
+  bypass round U1 back on each USB line, and it re-writes pieces of the VBUS / VBAT pre-routes; finish such a rework
+  with `--rework --rip USB_DP,USB_DM,VBUS --no-freerouting` and `--rip VBUS,VSYS,VBAT --no-freerouting` (§7.14), or
+  drop the USB nets from its DSN (not done yet).
 * **From the hwtools run on the re-routed board (2026-11-08)**: the VBAT run, U6's input capacitor, the VBUS / TVS
   order, CAP_RX and the missing stack-up were fixed on 2026-11-08 (§7.13). Still open from that list:
   * **Backlight corner current**: R50 15 Ω gives up to ≈ 31 mA at VF 2.9 V and +3V3 at its top tolerance against the
@@ -713,11 +722,11 @@ router fixes were in. Results below are the routed board's (resistance: a resist
 | 6 | each USB line looped through U1 (D+ In2 J1 via → climb via; D− TP23 → U1 pin 4) | J1 → U1 pre-routed straight (`USB_J1_U1`), D− via → pin 3 locked, and U1's pins 1/6 and 3/4 declared **jumper pad groups** (they are one conductor in the USBLC6): KiCad then sees each line connected through the part and no router adds the bypass back (it was the routers' answer to "pin 1 and pin 6 not connected") | bypasses gone; D+ / D− J1 → U1 on F.Cu only |
 | 7 | schematic readability | `schgen`: when the in-order rows do not fit a paper size, a first-fit-decreasing-height packing (whose last row may sit left of the title block) is tried before going up a size | power sheet **A2 → A3** (it was more than half empty); every sheet is A3 now. R50 still sits ≈ 45 mm of wire from J50 pin 12 and the dense sides keep their fanned labels (not changed: the placer's spine logic, more than a modest change) |
 
-**CAP_LP1 crosstalk** (open): the same scan flags the new long run itself. Worst BTN_MODE_N 20.4 mV (5.7 mm broadside,
+**CAP_LP1 crosstalk** (closed 2026-11-09, §7.14: worst 20.4 → 0.88 mV): the same scan flagged the new long run itself. Worst BTN_MODE_N 20.4 mV (5.7 mm broadside,
 B.Cu over the In2 leg), then BOOT_N 4.4, RGB_DIN 3.7, IMU_INT2 3.2, I2C_SDA 3.0, BUZZ_D 1.8 mV. sicalc models a
 terminated line; CAP_LP1 is not: 1 nF (C43) holds its source end and the coupled charge is filtered by R85 / C44
 (408 kHz) before the ADC, so these are upper bounds, far above what reaches CAP_RX. The button and LED lines do not
-switch during a burst in normal use. A B.Cu keep-out under the In2 leg would remove the largest one.
+switch during a burst in normal use.
 
 **Independent check of this rework (review 2026-11-09, own pcbnew scripts on the committed board vs HEAD 2e86e8b):**
 
@@ -782,3 +791,82 @@ IDENTICAL across the `schgen` packing change; DRC + schematic parity **0 errors,
 102 rows 0 red; `check_contract.py` OK; firmware `gen_pins.py --check` / `pin_plan.py --check` up to date;
 `tools/tests` 18 passed; mechanics `extract_board_parts.py` + `clash_check.py` on the reworked board: 108 envelopes,
 6255 intersections, **0 not clear, 0 FAIL / RISK** (R85 / C44 under the module, 0.5 mm, inside the 0.75 mm floor gap).
+
+### 7.14 CAP_LP1 crosstalk shield (2026-11-09)
+
+Designed, not built: every number below is a calculation on the board file (hwtools `sicalc xtalk`, config
+`caliper/hardware/design/xtalk-cap.yaml`, the JLC04101H-3313 stack in the board), not a measurement.
+
+**Problem (§7.13, open item).** CAP_LP1, the 58 mm run from R84 / C43 at U40 to R85 under the module, was the victim
+of every digital line over the 1 mV ANALOG budget. All of it sat on the two stretches that are not F.Cu over the In1
+plane: B.Cu under the module (R85 → the climb past H1) and In2 from H1 to TP42. B.Cu and In2 are only 0.1 mm apart
+and In2 has no GND plane of its own, so a line on B.Cu over the In2 stretch couples broadside, and the B.Cu stretch
+has no ground closer than In1 (0.77 mm down):
+
+| aggressor | where (before) | before | after |
+|---|---|---|---|
+| BTN_MODE_N | B.Cu right over the In2 stretch, 5.7 mm (15 mm alongside), offset 0.13 mm | **20.4 mV** | 0.88 mV (F.Cu, 4.4 mm at 0.49 mm in the electrode-field channel at x 38.9, F.Cu over In1: the lower half, unchanged) |
+| BOOT_N | In2, 0.73 mm beside the In2 stretch's start | 4.4 | 0.03 (GND guard 0.53 mm wide between) |
+| RGB_DIN | B.Cu, 0.44 mm beside the B.Cu stretch at the module's right edge | 3.7 | not coupled |
+| IMU_INT2 | B.Cu, 0.42 mm beside the B.Cu stretch | 3.2 | 0.64 (F.Cu beside the short F.Cu hop by H1, 1.8 mm at 0.35 mm) |
+| I2C_SDA | B.Cu, 0.37 mm beside the B.Cu stretch | 3.0 | 0.14 (GND guard 0.33 mm wide between) |
+| BUZZ_D | B.Cu over the In2 stretch at TP42 | 1.8 | not coupled |
+
+**Fix (`layout.py`: `CAP_LP1_SHIELD`, `cap_lp1_shield_keepouts`, `cap_lp1_ref_zone`, `cap_lp1_stitch`).** The pre-route
+(`CAP_LP1_PATH`) is unchanged; each of its two inner stretches gets a 2 mm wide shielded corridor (1.0 mm either side
+of the centre line):
+
+* **Its own layer** (B.Cu for the B.Cu stretch, In2 for the In2 stretch): rule areas (no tracks) from 0.3 mm to
+  1.0 mm either side, so no other line runs closer than ≈ 0.85 mm edge to edge, and the GND pour fills the gap.
+* **The neighbouring layer** (In2 under the B.Cu stretch, B.Cu over the In2 stretch): a no-track rule area over the
+  whole 2 mm band, cut by 0.8 mm crossing windows every 1.6 mm, so other nets still cross at right angles (a crossing
+  couples over ≈ 0.2 mm, a parallel run over all of it) but none runs along it. The module's right-column escape vias
+  inside the B.Cu stretch's band get a window of their own; the B.Cu test pads over the In2 stretch (TP30–TP41) get a
+  channel out of the band on their far side.
+* **GND copper**: an In2 GND zone over both bands (`CAP_LP1_REF_IN2`, priority 2 over the In2 +3V3 pour), so the In2
+  stretch is a stripline with GND 0.2 mm beside it on In2 and the B.Cu GND pour 0.1 mm above it, and the B.Cu stretch
+  a microstrip 0.1 mm over In2 GND with the B.Cu pour beside it; tied to In1 by GND vias 0.62 mm either side of the
+  centre line every ≈ 1.6 mm where they fit (`cap_lp1_stitch`, after routing; 17 GND vias inside the bands).
+* The ends stop short where CAP_LP1's own copper is on the guarded layer (the TP42 stub on B.Cu) or other parts'
+  locked copper is (R85 / C44 / C23 at the B.Cu stretch's start).
+
+**How the board was changed** (`layout.py --rework`, in a scratch copy of the repo, the result copied back; every step
+DRC-clean): (1) `--rework --rip I2C_SDA,MAG_B` from the committed board: the new rule areas dropped every copied
+track that now lay in them (BTN_MODE_N, BOOT_N, RGB_DIN, IMU_INT2, BUZZ_D and the lines crossing the corridors at a
+shallow angle), Freerouting and the grid router re-routed them. A first attempt that ripped CAP_LP1 and the six
+aggressors had left TP31 (MAG_B) with no way out of the B.Cu band and let I2C_SDA leave a U60 escape via under
+CAP_AMP_OUT through a window; the pad channels and the "escape windows on the B.Cu stretch only" rule came from it.
+(2) `--rip CAP_AMP_OUT,I2C_SCL,LCD_BL`: I2C_SCL had settled on In2 under CAP_AMP_OUT's B.Cu run to TP40 (2.3 mV) and
+LCD_BL beside it (1.0 mV). (3) `--rip USB_DP,USB_DM,VBUS --no-freerouting`: Freerouting had added a bypass round U1
+on each USB line again (it does not see U1's jumper pad groups) and re-written pieces of the VBUS / VBAT pre-routes;
+(4) `--rip VBAT,VSYS --no-freerouting` and (5) `--rip VBUS,VSYS,VBAT --no-freerouting` (a rework that does not rip a
+pre-routed net copies its split pieces unlocked; ripping the three together puts every generated piece back locked).
+Result: USB_DP / USB_DM, VBUS, VBAT, VBAT_RAW, VSYS, CAP_RX and CAP_LP1 copper as on the committed board (CAP_LP1
+plus a 0.26 mm grid-router joint at R84), every generated pre-route item locked.
+
+Side effects (none timing-critical): BTN_MODE_N 77 → 111 mm (+6 vias, round the corridors), BTN_HOLD_N 72 → 84 mm,
+I2C_SDA 88 → 96 mm, IMU_INT1 41 → 53 mm; I2C_SCL 107 → 74 mm, LCD_BL 55 → 39 mm, CAP_AMP_OUT 29 → 22 mm; CAP_TX1/2/3/7 re-routed under the module (In2 band), BOOT_N, RGB_DIN, IMU_INT2, MAG_A/B, BUZZ, the +3V3
+routing round it; GND vias 179 → 191. No part moved (the mechanics' extracted envelope is identical).
+
+Review (2026-11-09, pcbnew comparison with the committed board): 39 nets' copper differs, not only the ones named above.
+Also re-routed in part (pieces that crossed a new rule area or were displaced by the re-routes): BTN_ZERO_N, MAG_DEC_N,
+MAG_IDX, BATFET_G (its B.Cu hop through the corridor is now on F.Cu), MCU_EN, and **CAP_VREF** (a 2 mm piece now runs on
+In2 with two vias, outside the In2 stretch's corridor; its closest approach to CAP_LP1 is unchanged, 0.23 mm on F.Cu
+by U40 as on the committed board). CAP_RX_IN, CAP_VDIV, +3V3_SNS, +3V3_UI, CAP_TX0/5, CHG_TSMR, UI_CT,
+LCD_CS_N, FG_ALRT_N, MAG_CSN and MAG_INC_N kept all their copper and gained short grid-router joints; router segments
+under 1 µm went from 25 to 70 (no DRC finding). USB_DP/DM, VBUS, VBAT, VBAT_RAW, VSYS and CAP_RX are identical, no
+footprint moved, and the 22 new zones are the shield's.
+
+**Scan after (whole board, same config):** over-budget pairs 10 → 3. ANALOG victims (1 mV): CAP_LP1 worst **0.88 mV**
+(BTN_MODE_N, above), CAP_AMP_OUT worst 0.65 → 0.15 mV (MAG_IDX), CAP_RX 0.14 mV (unchanged). USB (10 mV budget,
+terminated-line upper bounds): the pair on itself 51 mV as before; I2C_SCL → D+ 22.4 and IMU_INT1 → D− 13.4 are gone,
+**MAG_A → D+ 25.5 mV** took I2C_SCL's place (5.9 mm at 0.18 mm on B.Cu along the pair's jog at x 10–14, y 20.5, just
+east of the module's escape-via field), I2C_SCL → D− 7.4 mV. Full-speed USB receivers reject most of it as common mode
+(§7.13); a GND guard or a re-route of that jog is the remaining USB item (§7.9).
+
+**Gates (2026-11-09, KiCad 10.0.8, WSL):** DRC + schematic parity **0 errors, 0 unconnected, 0 parity** (7
+`lib_footprint_mismatch` warnings, the intended local overrides; no `track_dangling` left); `release.py --board slider`
+PASS, jlcplace 0.2.1 **102 rows: 0 red, 0 yellow, 102 green** (the scale package is unchanged); `check_contract.py` OK;
+`tools/tests` 19 passed; mechanics `extract_board_parts.py` + `clash_check.py` on this board (in a scratch copy of
+`hardware/mechanical/`): 108 envelopes identical to the committed `board_parts.json`, 6255 intersections, **0 not
+clear, 0 FAIL / RISK**. The schematic and netlist did not change.

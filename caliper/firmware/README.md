@@ -6,8 +6,9 @@ Information + HID keyboard), Wi-Fi with a web page and MQTT/HTTP push, TinyUSB C
 log, and the BQ25180 / MAX17048 / LIS2DW12 power side.
 
 > **Status:** **builds with `idf.py build` on ESP-IDF v5.4.2** (esp32s3, 4 MB layout, 0 warnings; image
-> 1 660 592 B, 6 % of the app slot free) but has **never run on hardware**. The portable core passes its host
-> tests (25 groups, 792 checks, ASan + UBSan, `-Werror`), and the log store its own (3 groups, 2589 checks).
+> 1 688 432 B, 4.6 % of the app slot free with the bring-up commands, 6 % with `CONFIG_CALIPER_BRINGUP=n`) but
+> has **never run on hardware**. The portable core passes its host tests (59 groups, 1276 checks, ASan + UBSan,
+> `-Werror`), and the log store its own (3 groups, 2589 checks).
 > Details, design, the 2026-11-07 review fixes and the list of unverified items:
 > [docs/firmware.md](../docs/firmware.md).
 
@@ -45,5 +46,6 @@ cmake -S test/host -B build-host -G Ninja && cmake --build build-host && ctest -
 | `components/measure` | portable core: units, rounding, tolerance, stats, log records, GATT codecs, settings JSON, CSV, buttons, HID map |
 | `components/sensor_mag`, `sensor_cap` | AS5311 and the experimental capacitive scale |
 | `components/caliper_core` | event bus, live state, commands |
+| `components/bringup` | the `bu` bring-up checks on the USB console ([docs/bringup.md](../docs/bringup.md)); `bringup_eval.c` (the pass/fail rules) is portable |
 | `components/store`, `ui`, `ble`, `caliper_wifi`, `caliper_usb`, `power` | the rest |
-| `test/host` | host unit tests (`caliper_tests`: the portable core; `store_tests`: `store.c` against `test/host/stubs`) |
+| `test/host` | host unit tests (`caliper_tests`: the portable core and the bring-up rules; `store_tests`: `store.c` against `test/host/stubs`) |

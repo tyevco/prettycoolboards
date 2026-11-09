@@ -142,14 +142,27 @@ if os.path.exists(ij_path):
         say(f"  PA-CF with the local body: {k * 6:.1f} um over 2-8 N, "
             f"{'inside' if k * 6 <= 10.0 + 1e-9 else 'NOT inside'} a 10 um share of the 30 um budget"
             f"{'' if k <= 2.0 else ' (above the 2 um/N target)'}; /0.85 for the FDM knock-down: {k / FDM_KD * 6:.1f} um.")
-    fx = dict(re.findall(r"^RESULT FIXED (\S+): [\d.]+ um \(([\d.]+) um/N\)", open(ij_path).read(), re.M))
+    fx = re.findall(r"^RESULT FIXED (\S+) (rigid|body): before [\d.]+ um \(([\d.]+) um/N\), block [\d.]+ um, "
+                    r"as built [\d.]+ um \(([\d.]+) um/N, ([\d.]+)x stiffer\)", open(ij_path).read(), re.M)
+    FX = {}
     if fx:
-        say(f"  Fixed inside jaw (unchanged, 8.5 thick, rigid root): PA-CF {float(fx['PA-CF']):.2f} um/N, PETG "
-            f"{float(fx['PETG']):.2f} um/N.")
-        if k is not None:
-            kk = k + float(fx["PA-CF"])
-            say(f"  Inside reading, both jaws (PA-CF): {kk:.2f} um/N -> {kk * 6:.1f} um over 2-8 N "
-                f"(outside reading, both jaws: {2 * JAW[('PA-CF', -37.0)] / F * 6e3:.1f} um).")
+        say(f"Fixed inside jaw (FEA, fea_inside_jaw.py): plate {P.IJ_FIXED_Z[1] - P.IJ_FIXED_Z[0]:.1f} thick, tip "
+            f"{P.IJ_TIP_W:g} wide over its 6 mm, on a shoulder block x {P.FIXED_IJ_SHOULDER_X0:g}..0 up to y "
+            f"{P.IJ_TIP_Y0:g} with a full-depth gusset left of x {P.FIXED_IJ_GUSSET_X1:g}; {F:g} N in +x on the face:")
+        for mat, sup, k0, k2, x in fx:
+            FX[(mat, sup)] = float(k2)
+            say(f"  {mat:<6} {'rigid root' if sup == 'rigid' else 'with the local block':<21} old triangle {float(k0):5.2f} "
+                f"um/N -> as built {float(k2):5.2f} um/N ({x}x stiffer) = {float(k2) * 6:4.1f} um over a 6 N spread")
+        kf = FX.get(("PA-CF", "body"))
+        if kf is not None:
+            say(f"  PA-CF with the local block: {kf:.2f} um/N, {'at or under' if kf <= 1.0 + 1e-9 else 'above'} the 1.0 um/N "
+                f"target; /0.85 for the FDM knock-down: {kf / FDM_KD:.2f} um/N.")
+        if k is not None and kf is not None:
+            kk = k + kf
+            kr = IJ.get(("PA-CF", "rigid"), 0.0) + FX.get(("PA-CF", "rigid"), 0.0)
+            say(f"  Inside reading, both jaws (PA-CF, local bodies): {kk:.2f} um/N -> {kk * 6:.1f} um over 2-8 N, "
+                f"{kk / FDM_KD * 6:.1f} um with the FDM knock-down (rigid roots: {kr:.2f} um/N -> {kr * 6:.1f} um); "
+                f"outside reading, both jaws: {2 * JAW[('PA-CF', -37.0)] / F * 6e3:.1f} um.")
 else:
     say("  (fea_inside_jaw_output.txt missing: run `py fea_inside_jaw.py`)")
 

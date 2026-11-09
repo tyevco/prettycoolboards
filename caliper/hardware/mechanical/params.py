@@ -336,6 +336,23 @@ FJ_X0, FJ_X1 = -18.0, -0.5
 FJ_Z0, FJ_Z1 = Z_BACK, 2.5
 FJ_Y0, FJ_Y1 = H_Y0, STEP_Y1
 
+# Fixed inside jaw stiffening (2026-11-09).  The fixed inside jaw (IJ_FIXED_Z, 8.5 thick) was a triangle: the
+# 3 x 6 tip on a left edge sloping from the face's lower end (x 0, y 31) down to (-12, 22.9), so its neck at
+# y 31 was the 3.0 tip alone; 1.71 um/N (PA-CF, rigid root), 2.17 with the fixed block's own give.  Kept: the
+# measuring face (x 0, y 31..37, normal -x), the tip's 3.0 width over its whole 6 mm, its z (-6.0..2.5: the 0.2
+# gap over the moving tip), its right flank FIXED_IJ_FLANK (the moving gusset keeps IJ_FIXED_CLR from it) and
+# the tip's right edge x 3.0, which is RF_CLEAR + IJ_RF_MARGIN from the antenna area at R = 0 (so no taper:
+# a 4.0 base would put PA-CF 4.15 mm from it and run into the moving gusset).  Added:
+#  * a shoulder block x FIXED_IJ_SHOULDER_X0..0 under the face, its top level with the face's lower end (y 31),
+#    on the whole fixed block top (it passes over the moving plate 0.2 apart in z, as the tip does);
+#  * a full-depth gusset (z FJ_Z0..IJ_FIXED_Z[1]) left of FIXED_IJ_GUSSET_X1, where the moving inside jaw never
+#    reaches at any R >= 0: IJ_FIXED_CLR left of its leftmost edge (u -IJ_TIP_BASE_W, the tip base and the block's
+#    left part, which hangs over the fixed block at y >= IJ_LEFT_Y0).
+# Nothing is added left of the face above y 31 (a bore or slot still takes the whole 6 mm tip) and nothing to the
+# right of the old outline.  fea_inside_jaw.py compares it with the old triangle.
+FIXED_IJ_SHOULDER_X0 = FJ_X0
+FIXED_IJ_GUSSET_X1 = -IJ_TIP_BASE_W - IJ_FIXED_CLR
+
 # Depth rod: OMITTED in rev A (see docs/mechanical.md section 7)
 DEPTH_ROD = False
 
@@ -416,6 +433,27 @@ def moving_inside_jaw_gusset_outline():
     y_low = ya + (u_low - fixed_flank_offset_u(ya)) * (yb_ - ya) / (xb - xa)
     return [(IJ_ROOT_U0, yb), (STEP_U1, yb), (STEP_U1, s), (fixed_flank_offset_u(s), s),
             (u_low, y_low), (u_low, IJ_LEFT_Y0), (IJ_ROOT_U0, IJ_LEFT_Y0)]
+
+
+def fixed_inside_jaw_outline(stiffened=True):
+    """Plan outline (x, y) of the fixed inside jaw's plate (z IJ_FIXED_Z): the tip (face x 0, y 31..37, 3.0 wide)
+    on its right flank FIXED_IJ_FLANK and, stiffened, a shoulder block x FIXED_IJ_SHOULDER_X0..0 up to y 31;
+    stiffened=False is the old triangle (left edge sloping from (0, 31) to (-12, 22.9)), kept for the FEA."""
+    t0, t1, w = IJ_TIP_Y0, IJ_TIP_Y1, IJ_TIP_W
+    yb = FJ_Y1 - 0.1
+    (_xt, _yt), (xr, yr) = FIXED_IJ_FLANK
+    tip = [(0.0, t1), (w, t1), (w, t0), (xr, yr), (xr, yb)]
+    if not stiffened:
+        return tip + [(-12.0, yb), (0.0, t0)]
+    return tip + [(FIXED_IJ_SHOULDER_X0, yb), (FIXED_IJ_SHOULDER_X0, t0), (0.0, t0)]
+
+
+def fixed_inside_jaw_gusset_outline():
+    """Plan outline (x, y) of the fixed inside jaw's full-depth gusset (z FJ_Z0..IJ_FIXED_Z[1]): the shoulder block
+    left of FIXED_IJ_GUSSET_X1, where the moving inside jaw never reaches at any R >= 0."""
+    yb = FJ_Y1 - 0.1
+    return [(FIXED_IJ_SHOULDER_X0, yb), (FIXED_IJ_GUSSET_X1, yb), (FIXED_IJ_GUSSET_X1, IJ_TIP_Y0),
+            (FIXED_IJ_SHOULDER_X0, IJ_TIP_Y0)]
 
 
 def moving_inside_jaw_outline(rf_relief=True, root_u0=None):

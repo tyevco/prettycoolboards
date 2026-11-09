@@ -19,9 +19,21 @@ esp_err_t ble_init(void);   /* after core_init(); starts advertising */
 void ble_tick(void);        /* 10 Hz from the app: LIVE + battery notifications */
 bool ble_any_connected(void);
 
-/* ---- internal (ble_*.c) ---- */
 #define BLE_MAX_CONN 2
 
+/* bring-up diagnostics (the CLI "bu ble"): advertising state, own address, advertising TX power,
+ * and the RSSI the controller measures on each connection (127 = not available). */
+typedef struct {
+    bool synced, advertising;
+    uint8_t addr[6]; /* little-endian, as NimBLE stores it */
+    int tx_adv_dbm;
+    int conns;
+    uint16_t handle[BLE_MAX_CONN];
+    int8_t rssi[BLE_MAX_CONN];
+} ble_diag_t;
+void ble_diag(ble_diag_t *out);
+
+/* ---- internal (ble_*.c) ---- */
 typedef struct {
     bool used;
     uint16_t handle;

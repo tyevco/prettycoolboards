@@ -160,6 +160,49 @@ bool as5311_jump_filter(as5311_jump_t *j, int64_t raw, int64_t max_step, int64_t
 /* Whether raw is within max_step of the last accepted count (always true before the first). */
 bool as5311_jump_plausible(const as5311_jump_t *j, int64_t raw, int64_t max_step);
 
+/*
+ * Bring-up cross-check of the two outputs ("bu mag move", docs/bringup.md): the quadrature count
+ * against the SSI position, unwrapped frame to frame on its own (no count involved), while the
+ * slider is moved by hand over a few pole pairs. Feed every valid frame together with a count read
+ * at the same sample, already multiplied by the firmware's SSI sign. A healthy sensor keeps
+ *     ssi_unwrapped - 4 * (count - count0)
+ * within the incremental hysteresis (2 edges = 8 LSB) plus one edge of read skew between the count
+ * and the frame plus the lock tolerance: AS5311_XC_TOL_LSB. If instead ssi + 4 * count stays
+ * there, the sign is wrong (SSI_SIGN in sensor_mag.c). The unwrap needs less than half a pole
+ * pair (2048 LSB) between two frames: above AS5311_XC_MAX_STEP the run is refused as too fast.
+ */
+#define AS5311_XC_TOL_LSB  (AS5311_FINE_TOL_LSB + AS5311_LSB_PER_COUNT) /* 16 LSB = 7.8 um */
+#define AS5311_XC_MAX_STEP 1536                       /* LSB per frame: 0.75 mm in one 10 ms sample */
+#define AS5311_XC_MIN_SPAN AS5311_SSI_STEPS           /* at least one pole pair (2 mm) covered */
+
+typedef enum {
+    AS5311_XC_OK = 0,
+    AS5311_XC_SHORT,    /* moved less than one pole pair: no verdict */
+    AS5311_XC_FAST,     /* a step above AS5311_XC_MAX_STEP: the SSI unwrap is not trustworthy */
+    AS5311_XC_INVERTED, /* the count runs against the SSI: flip SSI_SIGN */
+    AS5311_XC_MISMATCH, /* neither sign fits: missed edges, noise, a bad A/B/SSI line */
+} as5311_xc_result_t;
+
+typedef struct {
+    bool have;
+    int64_t count0;
+    uint16_t ssi_last;
+    int64_t ssi_u;      /* SSI position unwrapped since the first frame, LSB */
+    int64_t count_d;    /* count - count0 (counts) */
+    int64_t dev_p_max;  /* max |ssi_u - 4 * count_d| */
+    int64_t dev_m_max;  /* max |ssi_u + 4 * count_d| */
+    int64_t min_u, max_u;
+    int64_t travel;     /* sum of |step|, LSB */
+    int32_t max_step;   /* largest |step| between two frames, LSB */
+    uint32_t frames;
+    uint32_t crossings; /* pole boundaries (4095 <-> 0) the SSI position crossed */
+} as5311_xcheck_t;
+
+void as5311_xcheck_init(as5311_xcheck_t *x);
+void as5311_xcheck_feed(as5311_xcheck_t *x, int64_t count, uint16_t ssi_pos);
+as5311_xc_result_t as5311_xcheck_result(const as5311_xcheck_t *x);
+const char *as5311_xcheck_str(as5311_xc_result_t r);
+
 #ifdef __cplusplus
 }
 #endif

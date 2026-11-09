@@ -65,6 +65,12 @@ static uint32_t s_jumps;
 static volatile int s_idx_pcnt;
 static volatile bool s_idx_new;
 static int32_t s_idx_ref = -1;
+static volatile uint32_t s_idx_total;
+static uint32_t s_raw_last;
+/* bring-up diagnostics (sensor_mag_diag): written by the sensor task, copied by the CLI */
+static mag_diag_t s_diag;
+static bool s_xc_armed;
+static portMUX_TYPE s_diag_mux = portMUX_INITIALIZER_UNLOCKED;
 
 /* ---- SSI ------------------------------------------------------------------------------------ */
 
@@ -94,7 +100,8 @@ static uint32_t ssi_read_raw(void)
 
 static bool ssi_read(as5311_frame_t *f)
 {
-    as5311_decode(ssi_read_raw(), f);
+    s_raw_last = ssi_read_raw();
+    as5311_decode(s_raw_last, f);
     return as5311_frame_valid(f);
 }
 
@@ -136,6 +143,7 @@ static void IRAM_ATTR idx_isr(void *arg)
         s_idx_pcnt = c;
         s_idx_new = true;
     }
+    s_idx_total++;
 }
 
 /* ---- power ---------------------------------------------------------------------------------- */
@@ -305,10 +313,12 @@ esp_err_t sensor_mag_read(mag_reading_t *out, bool do_ssi)
     bool held;
     int64_t c1 = pcnt_filtered(&held);
     as5311_fine_t fine = {.lsb = (s_base + c1) * AS5311_LSB_PER_COUNT, .residual = 0, .status = AS5311_FINE_COARSE};
+    bool tried = false, valid = false;
+    as5311_frame_t f = {0};
 
     if (do_ssi && s_powered) {
-        as5311_frame_t f;
-        bool valid = ssi_read(&f);
+        tried = true;
+        valid = ssi_read(&f);
         /* not moving during the frame (and the count read was believed): the comparison is meaningful */
         bool still = !held && pcnt_raw() == (int)c1;
         if (valid) {
@@ -360,7 +370,49 @@ esp_err_t sensor_mag_read(mag_reading_t *out, bool do_ssi)
     out->jumps = s_jumps;
     out->ok = s_powered && s_bad_frames < BAD_FRAMES_LIMIT && out->field != AS5311_FIELD_BAD &&
               fine.status != AS5311_FINE_MISMATCH;
+
+    taskENTER_CRITICAL(&s_diag_mux);
+    s_diag.samples++;
+    if (tried) {
+        if (valid) {
+            s_diag.frames_ok++;
+        } else {
+            s_diag.frames_bad++;
+        }
+        s_diag.last_raw = s_raw_last;
+    }
+    s_diag.pcnt = c1;
+    s_diag.slips = s_slips;
+    s_diag.jumps = s_jumps;
+    s_diag.idx_pulses = s_idx_total;
+    s_diag.powered = s_powered;
+    if (s_xc_armed && valid && !held) {
+        as5311_xcheck_feed(&s_diag.xc, SSI_SIGN * c1, f.pos);
+    }
+    taskEXIT_CRITICAL(&s_diag_mux);
     return ESP_OK;
+}
+
+void sensor_mag_diag(mag_diag_t *out)
+{
+    taskENTER_CRITICAL(&s_diag_mux);
+    *out = s_diag;
+    taskEXIT_CRITICAL(&s_diag_mux);
+}
+
+void sensor_mag_xcheck_start(void)
+{
+    taskENTER_CRITICAL(&s_diag_mux);
+    as5311_xcheck_init(&s_diag.xc);
+    s_xc_armed = true;
+    taskEXIT_CRITICAL(&s_diag_mux);
+}
+
+void sensor_mag_xcheck_stop(void)
+{
+    taskENTER_CRITICAL(&s_diag_mux);
+    s_xc_armed = false;
+    taskEXIT_CRITICAL(&s_diag_mux);
 }
 
 void sensor_mag_prepare_sleep(void)

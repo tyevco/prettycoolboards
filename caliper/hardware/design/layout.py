@@ -804,6 +804,8 @@ def pours_slider(bb):
     # reference plane for the USB pair's B.Cu run (preroute_usb_pair): GND on In2 right under it, tied to In1 by the
     # usb_ref_stitch() vias along both edges
     bb.zone("GND", [pcbnew.In2_Cu], poly_page(USB_REF_POLY), priority=1, clearance=0.2, name="USB_REF_IN2")
+    # In2 GND along CAP_LP1's B.Cu and In2 stretches (see CAP_LP1_SHIELD)
+    cap_lp1_ref_zone(bb)
 
 
 def add_fiducial_keepouts(bb):
@@ -1113,6 +1115,7 @@ def generate(board, pours=True):
         preroute_vsys(bb)
         preroute_cap_rx(bb)
         preroute_cap_lp1(bb)
+        print(f"[slider] CAP_LP1 shield: {cap_lp1_shield_keepouts(bb)} rule areas")
         # U1's VBUS pin sits between the D+/D- pins: give it a via so VBUS need not thread the pair
         others += escape_signal_pads(bb, "U1", lambda pd, xy: pd.GetNumber() == "5")
         print(f"[slider] signal escapes: module right column {right_col}, U60/U4 {others}")
@@ -1497,6 +1500,252 @@ def preroute_cap_lp1(bb):
     add_path(b, [(41.13, 8.2), c43], pcbnew.F_Cu, net, 0.15)
 
 
+# CAP_LP1 shield (hwtools sicalc xtalk scan with design/xtalk-cap.yaml, 2026-11-09). The two inner-board stretches
+# of CAP_LP1 were the victims of every digital line over 1 mV (the CAP_RX budget): BTN_MODE_N 20.4 mV (15 mm on B.Cu
+# right over the In2 stretch), BOOT_N 4.4 (In2, beside it), RGB_DIN 3.7 / IMU_INT2 3.2 / I2C_SDA 3.0 (B.Cu, beside the
+# B.Cu stretch at the module's right edge), BUZZ_D 1.8 (B.Cu over In2). F.Cu over the solid In1 plane needs nothing;
+# B.Cu and In2 are 0.1 mm apart and In2 has no GND plane of its own, so each of the two stretches gets:
+#  * its own layer: no other track within CAP_LP1_SHIELD_HALF of the centre line (two rule-area strips, one each
+#    side, from CAP_LP1_SHIELD_OWN out), so no same-layer line runs closer than ~0.85 mm edge to edge;
+#  * the neighbouring layer (In2 under the B.Cu stretch, B.Cu over the In2 stretch): no track along it in the same
+#    band, but with crossing windows (CAP_LP1_WINDOW wide every CAP_LP1_PIECE) so other nets still cross at right
+#    angles (a crossing couples over ~0.2 mm, a parallel run over its whole length);
+#  * GND copper: an In2 GND zone over both bands (pours_slider: the In2 stretch becomes a stripline with GND beside
+#    it, the B.Cu stretch a microstrip over In2 GND) and the B.Cu GND pour, which the rule areas leave free, over the
+#    In2 stretch; tied to In1 by GND vias along both edges (cap_lp1_stitch, after routing).
+# The ends of a band stop short where CAP_LP1's own copper sits on the guarded layer (the TP42 stub on B.Cu) or where
+# other parts' locked copper is (R85 / C44 / C23 at the start of the B.Cu stretch).
+CAP_LP1_SHIELD_HALF, CAP_LP1_SHIELD_OWN = 1.0, 0.3
+CAP_LP1_WINDOW, CAP_LP1_PIECE = 0.8, 1.6
+# (own layer, neighbouring layer, own-strip trims (start, end), neighbour-band trims (start, end)) per stretch, mm of
+# path length
+CAP_LP1_SHIELD = {"B": ("B.Cu", "In2.Cu", (0.95, 0.0), (0.0, 0.0)),
+                  "In2": ("In2.Cu", "B.Cu", (0.0, 0.0), (0.0, 1.3))}
+
+
+def cap_lp1_runs(board):
+    """The B.Cu and In2 stretches of CAP_LP1 as board-mm polylines: {"B": [...], "In2": [...]}."""
+    fp = board.FindFootprintByReference("R85")
+    runs = {}
+    for kind, pts in CAP_LP1_PATH:
+        if kind in CAP_LP1_SHIELD and kind not in runs:
+            runs[kind] = list(pts)
+    if fp is not None:
+        runs["B"] = [pad_xy(fp, net="CAP_LP1")] + runs["B"]
+    return runs
+
+
+def _path_len(path):
+    return sum(math.hypot(c[0] - a[0], c[1] - a[1]) for a, c in zip(path, path[1:]))
+
+
+def _path_at(path, s):
+    """Point and unit direction at arc length s along a polyline."""
+    for a, c in zip(path, path[1:]):
+        L = math.hypot(c[0] - a[0], c[1] - a[1])
+        if s <= L or c == path[-1]:
+            t = min(max(s / L, 0.0), 1.0) if L else 0.0
+            return (a[0] + (c[0] - a[0]) * t, a[1] + (c[1] - a[1]) * t), ((c[0] - a[0]) / L, (c[1] - a[1]) / L)
+        s -= L
+    raise ValueError("empty path")
+
+
+def _trim_path(path, s0, s1):
+    """The part of a polyline from arc length s0 to (length - s1)."""
+    L = _path_len(path)
+    if s0 <= 0 and s1 <= 0:
+        return list(path)
+    a, _ = _path_at(path, s0)
+    c, _ = _path_at(path, L - s1)
+    out, acc = [a], 0.0
+    for p, q in zip(path, path[1:]):
+        acc += math.hypot(q[0] - p[0], q[1] - p[1])
+        if s0 < acc < L - s1:
+            out.append(q)
+    return out + [c]
+
+
+def _polyset(pts):
+    ps = pcbnew.SHAPE_POLY_SET()
+    ps.NewOutline()
+    for p in pts:
+        v = V(*p)
+        ps.Append(v.x, v.y)
+    return ps
+
+
+def _band(path, d, round_ends=False):
+    """Board-mm polyline buffered by d (flat ends unless round_ends; round joins) as a SHAPE_POLY_SET (page IU)."""
+    out = pcbnew.SHAPE_POLY_SET()
+    for a, c in zip(path, path[1:]):
+        L = math.hypot(c[0] - a[0], c[1] - a[1])
+        if L < 1e-6:
+            continue
+        nx, ny = -(c[1] - a[1]) / L * d, (c[0] - a[0]) / L * d
+        out.BooleanAdd(_polyset([(a[0] + nx, a[1] + ny), (c[0] + nx, c[1] + ny), (c[0] - nx, c[1] - ny),
+                                 (a[0] - nx, a[1] - ny)]))
+    joints = path[1:-1] + ([path[0], path[-1]] if round_ends else [])
+    for x, y in joints:
+        out.BooleanAdd(_polyset([(x + d * math.cos(math.radians(k * 15)), y + d * math.sin(math.radians(k * 15)))
+                                 for k in range(24)]))
+    return out
+
+
+def _outlines_mm(ps):
+    """Page-mm point lists of the outlines of a SHAPE_POLY_SET (no holes expected)."""
+    res = []
+    for i in range(ps.OutlineCount()):
+        assert ps.HoleCount(i) == 0, "CAP_LP1 shield polygon with a hole"
+        ch = ps.Outline(i)
+        res.append([(TO(ch.CPoint(k).x), TO(ch.CPoint(k).y)) for k in range(ch.PointCount())])
+    return res
+
+
+def _project(path, pt):
+    """(arc length, distance) of the point of a polyline nearest to pt."""
+    best, acc = (0.0, float("inf")), 0.0
+    for a, c in zip(path, path[1:]):
+        dx, dy = c[0] - a[0], c[1] - a[1]
+        L2 = dx * dx + dy * dy
+        t = 0.0 if L2 == 0 else max(0.0, min(1.0, ((pt[0] - a[0]) * dx + (pt[1] - a[1]) * dy) / L2))
+        d = math.hypot(pt[0] - a[0] - t * dx, pt[1] - a[1] - t * dy)
+        if d < best[1]:
+            best = (acc + t * math.sqrt(L2), d)
+        acc += math.sqrt(L2)
+    return best
+
+
+def _cut_window(ps, path, s, width):
+    """Subtract from ps a rectangle across the polyline, `width` long along it, centred at arc length s."""
+    (x, y), (ux, uy) = _path_at(path, s)
+    hw, hl = width / 2, CAP_LP1_SHIELD_HALF + 0.3
+    ps.BooleanSubtract(_polyset([(x + ux * hw - uy * hl, y + uy * hw + ux * hl),
+                                 (x - ux * hw - uy * hl, y - uy * hw + ux * hl),
+                                 (x - ux * hw + uy * hl, y - uy * hw - ux * hl),
+                                 (x + ux * hw + uy * hl, y + uy * hw - ux * hl)]))
+
+
+def cap_lp1_shield_keepouts(bb):
+    """The rule areas of the CAP_LP1 shield (see CAP_LP1_SHIELD). Returns the number of areas."""
+    if "R85" not in bb.footprints:
+        return 0
+    lay = {"B.Cu": pcbnew.B_Cu, "In2.Cu": pcbnew.In2_Cu}
+    # the module's right-column escape vias that land in the B.Cu stretch's band get a window on both layers, so
+    # their line can leave them at right angles instead of the escape being dead (on the In2 stretch a window let
+    # I2C_SDA out of U60's escape via under CAP_AMP_OUT: those escapes stay closed); a pad of another net on a
+    # guarded layer (the B.Cu test pads over the In2 stretch) gets a channel out of the band on its far side
+    vias = [bxy(t) for t in bb.board.GetTracks() if t.Type() == pcbnew.PCB_VIA_T
+            and net_short(t.GetNetname()) not in ("CAP_LP1", "GND")]
+    pads = [(p.GetLayerSet(), bxy(p), TO(max(p.GetBoundingBox().GetWidth(), p.GetBoundingBox().GetHeight())))
+            for fp in bb.board.GetFootprints() for p in fp.Pads()
+            if net_short(p.GetNetname()) not in ("CAP_LP1", "GND", "")]
+    n = 0
+    for kind, path in cap_lp1_runs(bb.board).items():
+        own, nbr, (o0, o1), (n0, n1) = CAP_LP1_SHIELD[kind]
+        # own layer: the band minus a round-ended inner band = one strip each side
+        p = _trim_path(path, o0, o1)
+        strips = _band(p, CAP_LP1_SHIELD_HALF)
+        strips.BooleanSubtract(_band(p, CAP_LP1_SHIELD_OWN, round_ends=True))
+        # neighbouring layer: the whole band, cut by crossing windows
+        q = _trim_path(path, n0, n1)
+        band = _band(q, CAP_LP1_SHIELD_HALF)
+        L, s = _path_len(q), CAP_LP1_PIECE
+        while s < L - CAP_LP1_WINDOW:
+            _cut_window(band, q, s + CAP_LP1_WINDOW / 2, CAP_LP1_WINDOW)
+            s += CAP_LP1_PIECE + CAP_LP1_WINDOW
+        for v in (vias if kind == "B" else []):
+            for ps, pp in ((strips, p), (band, q)):
+                sv, d = _project(pp, v)
+                if d < CAP_LP1_SHIELD_HALF + 0.25 and 0.0 < sv < _path_len(pp):
+                    _cut_window(ps, pp, sv, CAP_LP1_WINDOW)
+        for ls, xy, size in pads:
+            for layer, ps, pp in ((own, strips, p), (nbr, band, q)):
+                if not ls.Contains(lay[layer]):
+                    continue
+                sv, d = _project(pp, xy)
+                if not (1e-3 < d < CAP_LP1_SHIELD_HALF + size / 2 and 0.0 < sv < _path_len(pp)):
+                    continue
+                # a channel from the pad's near edge (or from CAP_LP1_SHIELD_OWN, for a pad over the trace's edge: TP31)
+                # straight out of the band, away from CAP_LP1
+                (x0, y0), _ = _path_at(pp, sv)
+                nx, ny = (xy[0] - x0) / d, (xy[1] - y0) / d
+                a, c, hw = max(d - size / 2 - 0.15, CAP_LP1_SHIELD_OWN), CAP_LP1_SHIELD_HALF + 0.5, size / 2 + 0.15
+                ps.BooleanSubtract(_polyset([(x0 + nx * a - ny * hw, y0 + ny * a + nx * hw),
+                                             (x0 + nx * c - ny * hw, y0 + ny * c + nx * hw),
+                                             (x0 + nx * c + ny * hw, y0 + ny * c - nx * hw),
+                                             (x0 + nx * a + ny * hw, y0 + ny * a - nx * hw)]))
+        for layer, ps, tag in ((own, strips, "SIDE"), (nbr, band, "CROSS")):
+            for pts in _outlines_mm(ps):
+                bb.keepout([lay[layer]], pts, tracks=True, vias=False, pads=False, pours=False,
+                           name=f"CAP_LP1_{tag}_{layer.split('.')[0].upper()}")
+                n += 1
+    return n
+
+
+def cap_lp1_ref_zone(bb):
+    """In2 GND copper along both shielded stretches of CAP_LP1 (pours_slider)."""
+    runs = cap_lp1_runs(bb.board)
+    if "B" not in runs or bb.board.FindFootprintByReference("R85") is None:
+        return
+    ps = _band(runs["B"], CAP_LP1_SHIELD_HALF)
+    ps.BooleanAdd(_band(runs["In2"], CAP_LP1_SHIELD_HALF))
+    for pts in _outlines_mm(ps):
+        bb.zone("GND", [pcbnew.In2_Cu], pts, priority=2, clearance=0.2, name="CAP_LP1_REF_IN2")
+
+
+def cap_lp1_stitch(b, pitch=1.6, off=0.62, clearance=0.15):
+    """GND vias along both edges of CAP_LP1's B.Cu / In2 stretches, inside the shield band, so the In2 GND zone and
+    the B.Cu pour there are tied to In1 every ~1.6 mm. A candidate clears every other-net item on every layer."""
+    gnd = b.FindNet("GND")
+    if gnd is None or b.FindFootprintByReference("R85") is None:
+        return 0
+    code = gnd.GetNetCode()
+    runs = cap_lp1_runs(b)
+    items = [t for t in b.GetTracks() if t.GetNetCode() != code]
+    pads = [p for fp in b.GetFootprints() for p in fp.Pads()]
+    holes = [t.GetPosition() for t in b.GetTracks() if t.Type() == pcbnew.PCB_VIA_T] + \
+            [p.GetPosition() for p in pads if p.GetDrillSize().x > 0]
+    no_via = [z for z in b.Zones() if z.GetIsRuleArea() and z.GetDoNotAllowVias()]
+    plane = next(z for z in b.Zones() if z.GetZoneName() == "GND_PLANE")
+    r = MM(0.2)
+    band = pcbnew.SHAPE_POLY_SET()
+    for path in runs.values():
+        band.BooleanAdd(_band(path, CAP_LP1_SHIELD_HALF))
+    placed = [t.GetPosition() for t in b.GetTracks() if t.Type() == pcbnew.PCB_VIA_T and t.GetNetCode() == code
+              and band.Contains(t.GetPosition())]
+    n0 = len(placed)
+    for path in runs.values():
+        L, s = _path_len(path), 0.0
+        while s <= L:
+            (x, y), (ux, uy) = _path_at(path, s)
+            s += 0.2
+            for side in (-1, 1):
+                pt = V(x - side * uy * off, y + side * ux * off)
+                if any((pt - q).EuclideanNorm() < MM(pitch) for q in placed):
+                    continue
+                if not plane.Outline().Contains(pt) or any(z.Outline().Collide(pt, r + MM(clearance)) for z in no_via):
+                    continue
+                if any(it.HitTest(pt, r + max(MM(clearance), it.GetOwnClearance(it.GetLayer()))) for it in items):
+                    continue
+                if any(p.GetNetCode() != code and p.HitTest(pt, r + MM(clearance)) for p in pads):
+                    continue
+                if any(p.GetNetCode() == code and p.GetAttribute() in (pcbnew.PAD_ATTRIB_SMD, pcbnew.PAD_ATTRIB_CONN)
+                       and p.HitTest(pt, r + MM(0.05)) for p in pads):
+                    continue
+                if any((pt - h).EuclideanNorm() < MM(0.45) for h in holes):
+                    continue
+                v = pcbnew.PCB_VIA(b)
+                v.SetPosition(pt)
+                v.SetWidth(MM(0.4))
+                v.SetDrill(MM(0.2))
+                v.SetNet(gnd)
+                v.SetLocked(True)
+                b.Add(v)
+                placed.append(pt)
+                holes.append(pt)
+    return len(placed) - n0
+
+
 # USB D+/D- from the module's escape vias to U1, as one locked pair (layout review 2026-11-08). The routers had run
 # them as two independent tracks, 85 % on B.Cu and up to 4.7 mm apart (D+ above the test-pad rows, D- between them,
 # crossing ~25 In2 signals broadside at 0.1 mm). Now they run together, 0.32 mm apart centre to centre (0.14 mm
@@ -1768,6 +2017,7 @@ def finish(board, path):
     b = pcbgen.refill(path)
     if board == "slider":   # more ties for the USB pair's In2 GND strip, now that the routing is known
         print(f"[{board}] USB reference strip: {usb_ref_stitch(b)} more GND vias")
+        print(f"[{board}] CAP_LP1 shield: {cap_lp1_stitch(b)} GND vias")
     stitched = pcbgen.stitch_vias(b, "GND", pitch=BOARDS[board].get("stitch_pitch", 3.0), via=0.45, drill=0.2,
                                   priority=thermal_points(b))
     moved, hidden = silk.place_refs(b)

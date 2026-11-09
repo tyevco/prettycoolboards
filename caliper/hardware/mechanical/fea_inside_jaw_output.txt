@@ -1,30 +1,30 @@
-FEA of the printed moving inside jaw under the 5 N measuring force: the 2.4 plate vs the stiffened jaw.
+FEA of the printed inside jaws under the 5 N measuring force: each one before and after its stiffening.
 
 load 5 N in -u on the measuring face u 0, y 31..37; plate 2.4 thick (z -8.6..-6.2); as built: tip 3 wide at y 37, 4 at the shoulder y 31, gusset to z 2.4, 0.4 clear of the fixed jaw's flank; mesh 0.3 mm on the jaw
 PA-CF E 4200, unfilled PA E 1500 (TVP) within 5.15 mm of the antenna; PETG E 1700 throughout
 layer normal = assembly z (body printed back face down): bending is in the layer plane
 
-2.4 plate (RF-relieved, before) [rigid root]: 29054 tets / 6513 nodes, 0 tets in unfilled PA (9 s)
+2.4 plate (RF-relieved, before) [rigid root]: 29054 tets / 6513 nodes, 0 tets in unfilled PA (21 s)
   PA-CF  deflection at the face  39.31 um ( 7.86 um/N), at the tip  59.75 um; von Mises 6.63 MPa (SF in-layer 6.8), interlayer 1.29/0.73 MPa; reaction [-0.0, -5.0, -0.0] N (fixed facets 510, load facets 548, 14.4 mm2)
   PETG   deflection at the face  97.12 um (19.42 um/N), at the tip 147.61 um; von Mises 6.63 MPa (SF in-layer 6.8), interlayer 1.29/0.73 MPa; reaction [0.0, -5.0, 0.0] N (fixed facets 510, load facets 548, 14.4 mm2)
 
-shoulder block, plate only [rigid root]: 46930 tets / 10105 nodes, 6538 tets in unfilled PA (17 s)
+shoulder block, plate only [rigid root]: 46930 tets / 10105 nodes, 6538 tets in unfilled PA (42 s)
   PA-CF  deflection at the face   9.32 um ( 1.86 um/N), at the tip  15.06 um; von Mises 3.09 MPa (SF in-layer 14.6), interlayer 0.58/0.33 MPa; reaction [-0.0, -5.0, -0.0] N (fixed facets 928, load facets 548, 14.4 mm2)
   PETG   deflection at the face  19.33 um ( 3.87 um/N), at the tip  32.43 um; von Mises 3.09 MPa (SF in-layer 14.6), interlayer 0.62/0.3 MPa; reaction [0.0, -5.0, -0.0] N (fixed facets 928, load facets 548, 14.4 mm2)
 
-as built: shoulder block + gusset [rigid root]: 98852 tets / 19991 nodes, 28248 tets in unfilled PA (36 s)
+as built: shoulder block + gusset [rigid root]: 98852 tets / 19991 nodes, 28248 tets in unfilled PA (132 s)
   PA-CF  deflection at the face   8.58 um ( 1.72 um/N), at the tip  14.08 um; von Mises 2.47 MPa (SF in-layer 18.2), interlayer 0.35/0.34 MPa; reaction [0.0, -5.0, 0.0] N (fixed facets 4000, load facets 548, 14.4 mm2)
   PETG   deflection at the face  18.53 um ( 3.71 um/N), at the tip  31.33 um; von Mises 2.48 MPa (SF in-layer 18.1), interlayer 0.36/0.28 MPa; reaction [0.0, -5.0, 0.0] N (fixed facets 4000, load facets 548, 14.4 mm2)
 
-2.4 plate (RF-relieved, before) [local body]: 67647 tets / 15339 nodes, 21699 tets in unfilled PA (12 s)
+2.4 plate (RF-relieved, before) [local body]: 67647 tets / 15339 nodes, 21699 tets in unfilled PA (49 s)
   PA-CF  deflection at the face  47.39 um ( 9.48 um/N), at the tip  69.93 um; von Mises 4.98 MPa (SF in-layer 9.0), interlayer 0.47/0.33 MPa; reaction [0.0, -5.0, 0.0] N (fixed facets 703, load facets 548, 14.4 mm2)
   PETG   deflection at the face 116.22 um (23.24 um/N), at the tip 171.71 um; von Mises 4.99 MPa (SF in-layer 9.0), interlayer 0.48/0.33 MPa; reaction [0.0, -5.0, -0.0] N (fixed facets 703, load facets 548, 14.4 mm2)
 
-shoulder block, plate only [local body]: 83189 tets / 18165 nodes, 27709 tets in unfilled PA (22 s)
+shoulder block, plate only [local body]: 83189 tets / 18165 nodes, 27709 tets in unfilled PA (80 s)
   PA-CF  deflection at the face  11.37 um ( 2.27 um/N), at the tip  17.69 um; von Mises 1.89 MPa (SF in-layer 23.9), interlayer 0.17/0.15 MPa; reaction [0.0, -5.0, -0.0] N (fixed facets 703, load facets 548, 14.4 mm2)
   PETG   deflection at the face  21.74 um ( 4.35 um/N), at the tip  35.59 um; von Mises 1.89 MPa (SF in-layer 23.9), interlayer 0.16/0.15 MPa; reaction [-0.0, -5.0, -0.0] N (fixed facets 703, load facets 548, 14.4 mm2)
 
-as built: shoulder block + gusset [local body]: 132312 tets / 25948 nodes, 48329 tets in unfilled PA (122 s)
+as built: shoulder block + gusset [local body]: 132312 tets / 25948 nodes, 48329 tets in unfilled PA (366 s)
   PA-CF  deflection at the face   9.89 um ( 1.98 um/N), at the tip  15.78 um; von Mises 1.81 MPa (SF in-layer 24.9), interlayer 0.16/0.26 MPa; reaction [-0.0, -5.0, -0.0] N (fixed facets 703, load facets 548, 14.4 mm2)
   PETG   deflection at the face  20.24 um ( 4.05 um/N), at the tip  33.60 um; von Mises 1.8 MPa (SF in-layer 24.9), interlayer 0.15/0.2 MPa; reaction [-0.0, -5.0, 0.0] N (fixed facets 703, load facets 548, 14.4 mm2)
 
@@ -33,11 +33,37 @@ RESULT PETG rigid: plate 97.12 um (19.42 um/N), block 19.33 um, as built 18.53 u
 RESULT PA-CF body: plate 47.39 um (9.48 um/N), block 11.37 um, as built 9.89 um (1.98 um/N, 4.8x stiffer)
 RESULT PETG body: plate 116.22 um (23.24 um/N), block 21.74 um, as built 20.24 um (4.05 um/N, 5.7x stiffer)
 
-Fixed inside jaw (unchanged; for the budget): 59177 tets, z -6..2.5, root on the fixed block (rigid)
-  PA-CF  deflection at the face   8.51 um ( 1.70 um/N); reaction [-0.0, 5.0, 0.0] N (fixed facets 1450, load facets 1342, 51.0 mm2)
-RESULT FIXED PA-CF: 8.51 um (1.70 um/N)
-  PETG   deflection at the face  21.04 um ( 4.21 um/N); reaction [0.0, 5.0, -0.0] N (fixed facets 1450, load facets 1342, 51.0 mm2)
-RESULT FIXED PETG: 21.04 um (4.21 um/N)
+Fixed inside jaw: the old triangle vs the stiffened jaw (shoulder block x -18..0 up to y 31, full-depth gusset z -8.6..2.5 left of x -4.4); plate z -6..2.5, tip 3 wide; 5 N in +x on the face x 0, y 31..37; all PA-CF (or PETG); mesh 0.4 on the jaw, 0.25 at the tip
+local body: the fixed block x -18..-0.5, y 15..23 with the beam slot, bolt bores, nut traps and dowel bores empty, fixed at the cut face only (soft bound)
+
+FIXED old triangle (before) [rigid root]: 80148 tets / 16291 nodes (80 s)
+  PA-CF  deflection at the face   8.53 um ( 1.71 um/N), at the tip  13.53 um; von Mises 1.74 MPa (SF in-layer 25.8), interlayer 0.53/0.19 MPa; reaction [0.0, 5.0, -0.0] N (fixed facets 1450, load facets 1918, 51.0 mm2)
+  PETG   deflection at the face  21.08 um ( 4.22 um/N), at the tip  33.43 um; von Mises 1.74 MPa (SF in-layer 25.8), interlayer 0.53/0.19 MPa; reaction [0.0, 5.0, -0.0] N (fixed facets 1450, load facets 1918, 51.0 mm2)
+
+FIXED shoulder block, plate only [rigid root]: 132189 tets / 25905 nodes (164 s)
+  PA-CF  deflection at the face   4.78 um ( 0.96 um/N), at the tip   8.27 um; von Mises 1.23 MPa (SF in-layer 36.5), interlayer 0.45/0.12 MPa; reaction [0.0, 5.0, 0.0] N (fixed facets 2204, load facets 1918, 51.0 mm2)
+  PETG   deflection at the face  11.81 um ( 2.36 um/N), at the tip  20.42 um; von Mises 1.23 MPa (SF in-layer 36.5), interlayer 0.45/0.12 MPa; reaction [0.0, 5.0, 0.0] N (fixed facets 2204, load facets 1918, 51.0 mm2)
+
+FIXED as built: shoulder block + gusset [rigid root]: 150630 tets / 29325 nodes (211 s)
+  PA-CF  deflection at the face   4.70 um ( 0.94 um/N), at the tip   8.16 um; von Mises 1.19 MPa (SF in-layer 38.0), interlayer 0.41/0.12 MPa; reaction [0.0, 5.0, 0.0] N (fixed facets 2745, load facets 1924, 51.0 mm2)
+  PETG   deflection at the face  11.61 um ( 2.32 um/N), at the tip  20.17 um; von Mises 1.19 MPa (SF in-layer 38.0), interlayer 0.41/0.12 MPa; reaction [0.0, 5.0, -0.0] N (fixed facets 2745, load facets 1924, 51.0 mm2)
+
+FIXED old triangle (before) [local body]: 95871 tets / 19729 nodes (102 s)
+  PA-CF  deflection at the face  10.86 um ( 2.17 um/N), at the tip  16.35 um; von Mises 1.46 MPa (SF in-layer 30.9), interlayer 0.35/0.18 MPa; reaction [-0.0, 5.0, 0.0] N (fixed facets 321, load facets 1918, 51.0 mm2)
+  PETG   deflection at the face  26.83 um ( 5.37 um/N), at the tip  40.39 um; von Mises 1.46 MPa (SF in-layer 30.9), interlayer 0.35/0.18 MPa; reaction [-0.0, 5.0, -0.0] N (fixed facets 321, load facets 1918, 51.0 mm2)
+
+FIXED shoulder block, plate only [local body]: 146757 tets / 28729 nodes (273 s)
+  PA-CF  deflection at the face   5.81 um ( 1.16 um/N), at the tip   9.46 um; von Mises 1.11 MPa (SF in-layer 40.4), interlayer 0.33/0.11 MPa; reaction [0.0, 5.0, -0.0] N (fixed facets 321, load facets 1918, 51.0 mm2)
+  PETG   deflection at the face  14.36 um ( 2.87 um/N), at the tip  23.37 um; von Mises 1.11 MPa (SF in-layer 40.4), interlayer 0.33/0.11 MPa; reaction [0.0, 5.0, -0.0] N (fixed facets 321, load facets 1918, 51.0 mm2)
+
+FIXED as built: shoulder block + gusset [local body]: 163634 tets / 31603 nodes (351 s)
+  PA-CF  deflection at the face   5.65 um ( 1.13 um/N), at the tip   9.25 um; von Mises 1.09 MPa (SF in-layer 41.3), interlayer 0.31/0.11 MPa; reaction [0.0, 5.0, -0.0] N (fixed facets 321, load facets 1918, 51.0 mm2)
+  PETG   deflection at the face  13.95 um ( 2.79 um/N), at the tip  22.85 um; von Mises 1.09 MPa (SF in-layer 41.3), interlayer 0.31/0.11 MPa; reaction [-0.0, 5.0, -0.0] N (fixed facets 321, load facets 1918, 51.0 mm2)
+
+RESULT FIXED PA-CF rigid: before 8.53 um (1.71 um/N), block 4.78 um, as built 4.70 um (0.94 um/N, 1.8x stiffer)
+RESULT FIXED PETG rigid: before 21.08 um (4.22 um/N), block 11.81 um, as built 11.61 um (2.32 um/N, 1.8x stiffer)
+RESULT FIXED PA-CF body: before 10.86 um (2.17 um/N), block 5.81 um, as built 5.65 um (1.13 um/N, 1.9x stiffer)
+RESULT FIXED PETG body: before 26.83 um (5.37 um/N), block 14.36 um, as built 13.95 um (2.79 um/N, 1.9x stiffer)
 
 Strength numbers are the skill's PETG book values (45 in-layer, 20 interlayer).
 Linear tets run ~5 % stiff; every variant is meshed the same way, so the comparison holds.

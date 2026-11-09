@@ -137,10 +137,16 @@ def moving_inside_jaw():
 
 
 def fixed_inside_jaw_pts():
-    t0, t1, w = P.IJ_TIP_Y0, P.IJ_TIP_Y1, P.IJ_TIP_W
-    yb = P.FJ_Y1 - 0.1
-    (_xt, _yt), (xr, yr) = P.FIXED_IJ_FLANK
-    return [(0, t1), (w, t1), (w, t0), (xr, yr), (xr, yb), (-12.0, yb), (0, t0)]
+    """The fixed inside jaw plate's plan outline: the tip on a shoulder block (params.py, fixed inside jaw
+    stiffening)."""
+    return P.fixed_inside_jaw_outline()
+
+
+def fixed_inside_jaw():
+    """The fixed inside jaw as built: the plate (IJ_FIXED_Z, from the fixed jaw's bed) plus the full-depth gusset
+    left of FIXED_IJ_GUSSET_X1 that the moving inside jaw never reaches."""
+    return (prism(fixed_inside_jaw_pts(), *P.IJ_FIXED_Z)
+            + prism(P.fixed_inside_jaw_gusset_outline(), P.FJ_Z0, P.IJ_FIXED_Z[1]))
 
 
 # ---------------------------------------------------------------------------
@@ -149,7 +155,7 @@ def fixed_inside_jaw_pts():
 def fixed_jaw(rev="A"):
     s = box(P.FJ_X0, P.FJ_X1, P.FJ_Y0, P.FJ_Y1, P.FJ_Z0, P.FJ_Z1)
     s += prism(outside_jaw_pts(-1), P.FJ_Z0, P.FJ_Z1)        # full block depth: prints flat either way
-    s += prism(fixed_inside_jaw_pts(), *P.IJ_FIXED_Z)        # reaches the front face = the print bed
+    s += fixed_inside_jaw()                                  # reaches the front face = the print bed
     fit = 0.05 if rev == "A" else 0.01
     s -= box(P.BEAM_X0 - fit, 1.0, -fit, P.BEAM_W + fit, -P.BEAM_T - fit, fit)
     for x, y in P.FJ_BOLTS:

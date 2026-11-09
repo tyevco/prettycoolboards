@@ -2,12 +2,13 @@
 
 > **Status: builds for the target, not run on hardware.** The ESP-IDF project in
 > [`caliper/firmware`](../firmware/README.md) **builds with `idf.py build` on ESP-IDF v5.4.2** for the
-> esp32s3 (4 MB / N4R2 layout, clean build, **0 warnings**). The image is **1 664 912 B and fits the
-> 1 728 KB app slot with 105 584 B (6 %) to spare** (§13). No binary has been flashed: nothing has run on a
+> esp32s3 (4 MB / N4R2 layout, clean build, **0 warnings**). With the bring-up commands (§10.1) the image is
+> **1 688 432 B and fits the 1 728 KB app slot with 81 040 B (4.6 %) to spare**; `CONFIG_CALIPER_BRINGUP=n`
+> gives 23 520 B of that back (§13). No binary has been flashed: nothing has run on a
 > chip. The portable core (units, rounding, tolerance, statistics, the SETTLE / SWEEP capture modes, log
 > records, GATT codecs, settings JSON, CSV, button gestures, the AS5311 frame logic, the SSI fine
-> interpolation and the capacitive demodulator) is compiled and tested on the host: **50 test groups, 1110
-> checks, 0 failures**, with `-Werror`,
+> interpolation, the capacitive demodulator and the bring-up pass/fail rules) is compiled and tested on the host:
+> **59 test groups, 1276 checks, 0 failures**, with `-Werror`,
 > AddressSanitizer and UBSan (fatal: any undefined behaviour fails the run), and also compiled as strict ISO C11; the reading-log store (`store.c`) has its
 > own host test against stubbed LittleFS/NVS (**3 groups, 2589 checks, 0 failures**). Everything that
 > touches a peripheral is unverified. Numbers marked **TVP** are to be verified on the prototype. The
@@ -594,6 +595,49 @@ TinyUSB owns the native USB PHY (`CONFIG_CALIPER_USB_TINYUSB=y`), as a composite
 * Early boot logs go to USB-Serial-JTAG until TinyUSB takes the PHY. UART0's pins are capacitive TX phases,
   so there is no UART console.
 
+### 10.1 Bring-up commands (`bu`)
+
+The guided first-board checks of [Bring-up](bringup.md) are CLI commands in the normal image
+(`components/bringup`, `CONFIG_CALIPER_BRINGUP`, default on). `bu help` lists them; each prints its numbers and
+ends with one line `PASS <name>: ...` or `FAIL <name>: ...`; the visual / audible ones ask for a `y` / `n` typed on
+the console (`ask()` in `cli.c` reads the next line from the CLI queue while the command runs in the CLI task).
+
+| Command | Checks | Reads |
+|---|---|---|
+| `bu all` | rails, i2c, bq, fg, imu, mag, cap, ble (2 s), then `SUMMARY n PASS, m FAIL` | |
+| `bu rails [vbat_mv]` | charger and gauge present; VBAT (MAX17048 VCELL) 2.5–4.5 V and within ±30 mV of the meter value given; VBUS, charge state, die temperature. VSYS and the 3.3 V rails have no ADC: the meter, at TP3–TP6 | `power_get_last()` (the app task's 1 Hz poll) |
+| `bu i2c` | `i2c_master_probe` 0x08–0x77: exactly 0x19, 0x36, 0x6A (the table is `board_pins.h`) | |
+| `bu bq` | STAT0 / STAT1 / FLAG0 decoded (fails on VIN OVP, safety timer, BAT_OCP, TS open / hot / cold); registers 0x00–0x0C dumped and compared with the init table (`power_bq_table()`, with the live ICHG and ILIM) | `power_diag_read()` |
+| `bu fg [vbat_mv]` | VERSION 0x001x, VCELL, SOC, and the settings §12.2 makes (VRESET.Dis, HIBRT 0x8030, CONFIG.SLEEP clear) | |
+| `bu imu` / `bu imu move [s]` | WHO_AM_I 0x44 and \|a\| 850–1150 mg at rest / a ≥ 500 mg swing and IMU_INT1 going low (the wake-up interrupt), latch cleared after | |
+| `bu sns off` / `on` | SNS_PWR_EN: the UI stopped, its lines low, rails off, operator reads TP5 / TP6 / rails back on and the AS5311 answering; then `reboot` | `sensor_mag_power()` |
+| `bu mag` / `bu mag move [s]` | one second of frames: ≥ 50, ≤ 1 % bad, last valid, field in range / the count vs SSI cross-check below | `sensor_mag_diag()` |
+| `bu lcd [off]` | colour bars, a 1 px frame, corner labels on LVGL's top layer (`ui_test_pattern()`), backlight dim and back; operator y / n | |
+| `bu btn [s]` | each button pressed and released (≥ 20 ms), none down at the start | GPIO levels |
+| `bu beep`, `bu led` | two beeps; red, green, blue, white; operator y / n | |
+| `bu cap [scale]` | DC level at the ADC 1700–2700 LSB, the last burst's raw I/Q and amplitudes; with `scale` ≥ 90 % valid and both amplitudes ≥ 8 LSB | `sensor_cap_diag()` |
+| `bu ble [s] [min_dbm]` | host synced, advertising, advertising TX power, the link RSSI of a connected phone averaged over s seconds (optional floor) | `ble_diag()` |
+| `bu wifi [ssid] [min_dbm]` | a blocking all-channel scan (the station started just for it if the radio was off; refused while the setup AP or a connection attempt runs), strongest first; one SSID's RSSI and an optional floor | `caliper_wifi_scan()` |
+| `bu sleep [delay_s]` | deep sleep after a delay (to unplug USB first) for the current measurement | |
+| `bu ship` | `power_ship_mode()` (§12.1); pending until USB is unplugged | |
+
+No check owns a bus or a pin the normal firmware owns: the I2C reads go through the I2C driver's bus lock, and
+the AS5311, the capacitive burst, BLE and Wi-Fi are read from snapshots their own tasks publish
+(`sensor_mag_diag`, `sensor_cap_diag`, `ble_diag`) or through their component's lock (`caliper_wifi_scan` under
+the Wi-Fi state lock). The pass/fail rules are portable (`bringup_eval.c`) and host-tested (§13).
+
+**Count vs SSI (`bu mag move`).** The sensor task feeds every valid, still-believed frame with the raw PCNT count
+(no origin, no slip correction) into `as5311_xcheck_feed()`: the SSI position is unwrapped frame to frame on its
+own, and `ssi_unwrapped − 4 × Δcount` must stay within **16 LSB** (`AS5311_XC_TOL_LSB`: the 12 LSB fine tolerance
+of §4 plus one edge of skew between the count read and the frame). If `ssi + 4 × Δcount` stays there instead,
+`SSI_SIGN` is wrong; a step above 1536 LSB (0.75 mm in one 10 ms sample) makes the unwrap untrustworthy and the run
+is refused as too fast; less than one pole pair of span gives no verdict. It also reports the pole crossings the
+SSI saw and the index pulses counted meanwhile.
+
+Found while adding them: the CLI `help` text was one `out()` call of 257 bytes into a 256-byte buffer and lost
+its last two characters (now three calls); the gauge's VCELL conversion multiplied in 32 bits and wrapped above
+4.29 V (now 64-bit, in `power.c` and the bring-up rule).
+
 ## 11. Storage
 
 | Partition (4 MB) | Offset | Size | Use |
@@ -664,8 +708,8 @@ back wrong (a BQ reset), checked at 1 Hz.
   (3 °C hysteresis). The die runs warmer than the cell; the limits are a backstop (**TVP**).
 * Storage mode (`power_ship_mode`) writes SHIP_RST **0x28**: EN_RST_SHIP = 01, the BQ25180's *shutdown*
   mode with wake on adapter insert only (15 nA, SLUSE99C IBAT_SHUTDOWN). TS/MR has no button on rev A, so the
-  button-wake ship mode (10, 3.2 µA IBAT_SHIP for its push-button scan) would buy nothing. Not wired to the UI
-  or the CLI yet; only plugging in USB leaves it. It puts the MAX17048 to sleep first (§12.2).
+  button-wake ship mode (10, 3.2 µA IBAT_SHIP for its push-button scan) would buy nothing. Not wired to the UI;
+  the CLI reaches it through the bring-up command `bu ship` (§10.1). Only plugging in USB leaves it. It puts the MAX17048 to sleep first (§12.2).
 
 ### 12.2 Fuel gauge and IMU
 
@@ -925,17 +969,27 @@ not found" CMake notice and skipped the generated-file check (the host ctest run
 flags: `core_sample` 64 → `refresh_locked` 64 → `meas_cap_result` 432 → `run_extremes` 48 → `refine_extreme` 400
 → `line_fit` 96, about 1.1 KB of the sensor task's 4 KB (`sweep_start`, on the update path, 560 B).
 
-| `idf.py size` (4 MB / N4R2) | Used | Of |
+**With the bring-up commands** (§10.1; 2026-11-09, a copy of `caliper/firmware` and `nets.py` in WSL `/tmp`, an
+empty build directory, 0 warnings): *"caliper.bin binary size 0x19c370 bytes. Smallest app partition is 0x1b0000
+bytes. 0x13c90 bytes (5%) free."* and ESP-IDF's notice *"The smallest app partition is nearly full (5% free space
+left)!"*. That is 24 544 B over the capture-review image (0x196390, rebuilt from HEAD the same way the same day):
+1 024 B stay in either way (the snapshots the AS5311 and capacitive tasks write, the cached power poll, the
+BQ25180 table as a function) and 23 520 B are the commands and the helpers only they call (`power_diag_read`,
+`ble_diag`, `caliper_wifi_scan`, the test pattern): 8.6 KB of code in `libbringup.a`, about 7.7 KB of message
+strings, about 4 KB of Wi-Fi scan code in `libnet80211.a`. With `CONFIG_CALIPER_BRINGUP=n` (built the same way,
+0 warnings): *"caliper.bin binary size 0x196790 bytes ... 0x19870 bytes (6%) free."*: the linker drops all of it.
+
+| `idf.py size` (4 MB / N4R2, bring-up on) | Used | Of |
 |---|---|---|
-| Image (.bin) | **1 664 912 B** | 1 769 472 B app slot (`ota_0`/`ota_1`): **105 584 B (6 %) free** |
-| Flash code (.text) | 1 139 292 B | |
-| Flash data (.rodata) | 373 544 B | |
-| DIRAM (.text + .data + .bss) | 218 711 B (64.0 %) | 341 760 B, 123 049 B free (the capture state is about 1.7 KB) |
+| Image (.bin) | **1 688 432 B** | 1 769 472 B app slot (`ota_0`/`ota_1`): **81 040 B (4.6 %) free** (104 560 B with `CONFIG_CALIPER_BRINGUP=n`) |
+| Flash code (.text) | 1 155 156 B | |
+| Flash data (.rodata) | 382 436 B | |
+| DIRAM (.text + .data + .bss) | 218 995 B (64.1 %) | 341 760 B, 122 765 B free (the capture state is about 1.7 KB) |
 | IRAM | 16 383 B | 16 384 B: the S3's fixed IRAM block, which the linker always fills before using DIRAM |
 | RTC slow / fast | 52 B / 148 B | 8 KB each (the AS5311 position, the zero) |
 
-The 6 % margin is thin for one slot of a two-slot OTA layout: the next big feature should look at the
-fonts (Montserrat 48 is the largest), the MQTT client (no Kconfig switch yet) or TinyUSB MSC first. The 8 MB
+The 4.6 % margin (6 % without the bring-up commands) is thin for one slot of a two-slot OTA layout: a release
+image can turn `CONFIG_CALIPER_BRINGUP` off, and the next big feature should look at the fonts (Montserrat 48 is the largest), the MQTT client (no Kconfig switch yet) or TinyUSB MSC first. The 8 MB
 overlay (`SDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.defaults.8mb"`, `partitions_8mb.csv`, 16 384-record
 log) also builds with 0 warnings (clean `build8` directory): *"caliper.bin binary size 0x1956b0 bytes. Smallest
 app partition is 0x280000 bytes. 0xea950 bytes (37%) free."*
@@ -951,8 +1005,13 @@ They build with `-Wall -Wextra -Werror -Wshadow -Wconversion` and AddressSanitiz
 sources are also compiled as strict ISO C11 (`-std=c11 -pedantic`, target `portable_c11`, part of the default
 build), which is what caught `strnlen` (POSIX, not C11) in `gatt_codec.c`. The sanitizers run with
 `-fno-sanitize-recover=all` since the capture review, so a UBSan report fails the test instead of scrolling past.
-Result (2026-11-07, after the capture review, WSL Ubuntu 24.04, gcc 13.3): `caliper_tests` **50 groups PASS, 1110
-checks, 0 failures** (the 25 before, the 14 capture groups of §6.1 and the review's 11); `store_tests` **3 groups PASS, 2589 checks, 0 failures**; ctest
+Result (2026-11-09, with the bring-up rules, WSL Ubuntu 24.04, gcc 13.3): `caliper_tests` **59 groups PASS, 1276
+checks, 0 failures** (the 25 before, the 14 capture groups of §6.1, the capture review's 11 and the 9 bring-up
+groups of `test_bringup.c`: the I2C expectation table incl. a dead and a shorted bus, the BQ25180 status decode
+and every fault bit, the register read-back compare, the MAX17048 rule and VCELL conversion at full scale, the
+LIS2DW12 scaling / norm / motion rule, the button press tracker with glitches and stuck buttons, the AS5311 frame
+text and frame rule, the count vs SSI cross-check on synthetic slides with hysteresis, lost edges, the wrong sign,
+too-fast and too-short runs, and the capacitive rule); `store_tests` **3 groups PASS, 2589 checks, 0 failures**; ctest
 "100% tests passed, 0 tests failed out of 6" (with `pin_plan_tests` and the generated-file checks).
 Covered: count → nm (1953.125 nm/count) and SSI LSB → nm (488.28125 nm) and their
 symmetry, mm and inch rounding edges (halves, −0, carries, ±150 mm, the 0.0005 in step), zero/hold, auto-hold
@@ -998,6 +1057,10 @@ host tests; `./gen_vectors` prints LIVE v3, LOG and COMMAND bytes):
   `-fstack-usage`, §13), the LVGL arrow/play/stop glyphs on the panel, and the
   layout of the detail line at inch widths. The design note's bench plan (noise floor, force, a ground dowel in
   a V-block by three users against a micrometer, a ring gauge for ID, gauge blocks for depth) has not been run.
+* **The bring-up commands (§10.1) have not run either:** their limits are first-board limits from SPEC and the
+  datasheets ([Bring-up](bringup.md) marks them TVP), the BQ25180 STAT1 / FLAG0 bit positions are from SLUSE99C
+  §8.6 as read for this page (TVP against the part), `i2c_master_probe` sharing the bus with the 1 Hz power
+  poll, the Wi-Fi scan from a stopped radio, and the operator prompts over CDC are unexercised.
 * **Nothing has run on hardware.** In particular (**TVP**): the AS5311 SSI timing, the direction of SSI vs
   count (`SSI_SIGN`), the fine-combine tolerance (12 LSB) against real hysteresis and SSI noise, the 100 Hz
   SSI cost, whether the wrap race happens at all on this core layout, the MagINC/MagDEC interpretation, the

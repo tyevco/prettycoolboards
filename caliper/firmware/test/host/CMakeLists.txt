@@ -19,16 +19,19 @@ set(PORTABLE_SRCS
     ${FW}/components/measure/hid_keymap.c
     ${FW}/components/sensor_mag/as5311_proto.c
     ${FW}/components/sensor_cap/cap_demod.c
+    ${FW}/components/bringup/bringup_eval.c
 )
 set(PORTABLE_INCS
     ${FW}/main/proto
     ${FW}/components/measure/include
     ${FW}/components/sensor_mag/include
     ${FW}/components/sensor_cap/include
+    ${FW}/components/bringup/include
+    ${FW}/main
 )
 set(WARN -Wall -Wextra -Werror -Wshadow -Wconversion -Wno-sign-conversion)
 
-add_executable(caliper_tests test_main.c test_capture.c ${PORTABLE_SRCS})
+add_executable(caliper_tests test_main.c test_capture.c test_bringup.c ${PORTABLE_SRCS})
 target_include_directories(caliper_tests PRIVATE ${CMAKE_CURRENT_LIST_DIR} ${PORTABLE_INCS})
 target_compile_options(caliper_tests PRIVATE ${WARN} -fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer -O1 -g)
 target_link_options(caliper_tests PRIVATE -fsanitize=address,undefined)
