@@ -125,7 +125,7 @@ The scale has no parts. It is checked with an empty CPL, which is not shipped: n
 `jlcplace-report.html` draws the EasyEDA pad outlines (JLCEDA/EasyEDA Official Library). It is for your own review,
 so it is git-ignored and never published. Open it locally after a release.
 
-**Result 2026-11-08** (jlcplace 0.2.1, KiCad 9.0.9 board):
+**Result 2026-11-08** (jlcplace 0.2.1; the same on the KiCad 9.0.9 board and after the move to KiCad 10.0.8):
 
 | Board | Rows | Red | Yellow | Green | Preview checklist |
 |---|---|---|---|---|---|

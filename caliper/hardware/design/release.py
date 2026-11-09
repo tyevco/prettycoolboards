@@ -99,6 +99,12 @@ def kicad_cli():
     return os.environ.get("KICAD_CLI", "kicad-cli")
 
 
+def kicad_version():
+    """'10.0.8': the kicad-cli that runs the gates (written into ORDER-NOTES.md)."""
+    r = subprocess.run([kicad_cli(), "version"], capture_output=True, text=True)
+    return r.stdout.strip() or "?"
+
+
 def render3d(pcb, png, side, zoom=1.0, size=(1600, 1000)):
     cmd = [kicad_cli(), "pcb", "render", "-o", png, "--width", str(size[0]), "--height", str(size[1]), "--side", side,
            "--background", "opaque", "--quality", "high", "--zoom", str(zoom), pcb]
@@ -117,7 +123,8 @@ def board_pdf(pcb, pdf, layers):
 
 
 def sync_fields(pcb, net):
-    """Copy value/MPN/LCSC/Manufacturer/DNP from the netlist onto the board footprints."""
+    """Copy value/DNP and every symbol field (MPN, LCSC, Manufacturer, Description, Datasheet, JLC, ...) from the
+    netlist onto the board footprints."""
     import pcbnew
     import pcbgen
     comps, _ = pcbgen.load_netlist(net)
@@ -136,19 +143,21 @@ def sync_fields(pcb, net):
             changed += 1
         for k in ("MPN", "LCSC", "Manufacturer"):
             v = c["fields"].get(k)
-            current = fp.GetFieldText(k) if fp.HasFieldByName(k) else None
+            current = fp.GetFieldText(k) if fp.HasField(k) else None
             if v and current != v:
                 fp.SetField(k, v)
-                fld = fp.GetFieldByName(k)
+                fld = fp.GetField(k)
                 if fld:
                     fld.SetVisible(False)
                 changed += 1
         if pcbgen.set_description(fp, c["fields"].get("Description")):
             changed += 1
-        # KiCad 10's parity also compares Datasheet and custom fields (KiCad 9 does not): keep them in step too
-        for k in ("Datasheet", "JLC"):
-            if pcbgen.set_field_hidden(fp, k, c["fields"].get(k)):
-                changed += 1
+        # KiCad 10's parity also compares Datasheet and custom fields: keep every other symbol field in step too,
+        # hidden (as pcbgen.place_from_netlist does)
+        for k, v in c["fields"].items():
+            if k not in ("Reference", "Value", "Footprint", "MPN", "LCSC", "Manufacturer", "Description"):
+                if pcbgen.set_field_hidden(fp, k, v):
+                    changed += 1
     if changed:
         pcbnew.SaveBoard(pcb, b)
     return changed
@@ -181,7 +190,7 @@ def order_notes(board, pcb, net, path, review_only, jlc_lines, gate_line):
             f.write("> **REVIEW-ONLY PACKAGE: do not order.** It was written with `--force`: the DRC/parity gate or "
                     "the jlcplace placement gate did not pass (see below and drc-parity.rpt).\n\n")
         f.write("Rev A is **designed, not built**: nothing here has been fabricated, assembled or measured.\n\n")
-        f.write(f"* DRC/parity gate (kicad-cli 9, errors only): {gate_line}\n")
+        f.write(f"* DRC/parity gate (kicad-cli {kicad_version()}, errors only): {gate_line}\n")
         f.write(f"* Do not place (DNP): {', '.join(dnp) or 'none'}\n")
         f.write(f"* Not assembled, not in BOM/CPL (copper / mechanical only): {', '.join(excluded) or 'none'}"
                 + (" (E40 = the capacitive electrode comb: bare copper, no part)" if "E40" in excluded else "") + "\n")

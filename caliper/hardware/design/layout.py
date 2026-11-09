@@ -1359,7 +1359,7 @@ def preroute_usb(bb):
 def thermal_points(b):
     pts = []
     for fp in b.GetFootprints():
-        if "BQ25180" in (fp.GetFieldText("MPN") if fp.HasFieldByName("MPN") else ""):
+        if "BQ25180" in (fp.GetFieldText("MPN") if fp.HasField("MPN") else ""):
             for pad in fp.Pads():
                 if pad.GetNumber() == "D2":
                     x, y = TO(pad.GetPosition().x), TO(pad.GetPosition().y)
@@ -1472,7 +1472,7 @@ def finish(board, path):
     b = pcbnew.LoadBoard(path)
     finish_route.anchor_all(b)
     dups, trimmed = pcbgen.dedupe_tracks(b), pcbgen.trim_dangling(b)
-    # zero-length segments (left by anchor/trim): KiCad 9 ignores them, KiCad 10 reports one lying near another net's
+    # zero-length segments (left by anchor/trim): KiCad 10 reports one lying near another net's
     # track as tracks_crossing (an error); the copper at that point always belongs to the items that meet there
     zero = [t for t in b.GetTracks() if t.Type() == pcbnew.PCB_TRACE_T and t.GetLength() == 0]
     for t in zero:

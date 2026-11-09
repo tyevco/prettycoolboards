@@ -4,7 +4,7 @@
 
 Rev A is **designed, not built**: nothing here has been fabricated, assembled or measured.
 
-* DRC/parity gate (kicad-cli 9, errors only): ** Found 0 DRC violations **; ** Found 0 unconnected pads **; ** Found 0 Footprint errors **
+* DRC/parity gate (kicad-cli 10.0.8, errors only): ** Found 0 DRC violations **; ** Found 0 unconnected pads **; ** Found 0 Footprint errors **
 * Do not place (DNP): none
 * Not assembled, not in BOM/CPL (copper / mechanical only): FID1, FID2, H1, H2
 * Bottom-side placements (0): none

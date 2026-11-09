@@ -13,7 +13,7 @@ the prototype; section 13 collects them.
   (OpenCascade). `run_all.sh` regenerates the board extraction, STLs, STEPs, drawings, clash report,
   calculations and renders in about four minutes (WSL, the dial-me-spinner venv).
 * **Real board:** [`extract_board_parts.py`](../hardware/mechanical/extract_board_parts.py) reads the routed
-  `caliper/hardware/kicad/slider/prettycool-caliper-slider.kicad_pcb` (KiCad 9 `pcbnew`) into
+  `caliper/hardware/kicad/slider/prettycool-caliper-slider.kicad_pcb` (KiCad 10 `pcbnew`) into
   [`board_parts.json`](../hardware/mechanical/board_parts.json): the Edge.Cuts outline with the end tabs,
   the five holes, 101 part envelopes (Fab outline × datasheet height), plus the four SMT standoffs,
   the H1 screw head and the mated JST plug.

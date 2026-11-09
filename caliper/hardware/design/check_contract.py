@@ -51,7 +51,11 @@ def load(path):
         if short:
             all_nets.add(short)
         for node in _find(n, "node"):
-            key = (_val(node, "ref"), _val(node, "pinfunction") or _val(node, "pin"))
+            pin, func = _val(node, "pin"), _val(node, "pinfunction")
+            # KiCad 10 writes pinfunction as "<pin name>_<pin number>" ("IO4_8"); KiCad 9 wrote the name alone
+            if func and pin and func.endswith("_" + pin):
+                func = func[:-len(pin) - 1]
+            key = (_val(node, "ref"), func or pin)
             pins.setdefault(key, set()).add(short)
     return comps, pins, all_nets
 

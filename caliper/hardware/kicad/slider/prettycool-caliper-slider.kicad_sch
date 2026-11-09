@@ -1,7 +1,7 @@
 (kicad_sch
-	(version 20250114)
+	(version 20260306)
 	(generator "eeschema")
-	(generator_version "9.0")
+	(generator_version "10.0")
 	(uuid "b08a52c2-37a7-52c8-9c3d-6723ce8ef562")
 	(paper "A3")
 	(title_block
@@ -24,11 +24,13 @@
 			(type solid)
 		)
 		(fill
-			(color 0 0 0 0.0000)
+			(color 0 0 0 0)
 		)
 		(uuid "8b8d7e2d-ec91-5520-bcb3-8e934148e707")
 		(property "Sheetname" "Power: USB-C, charger, 3V3, rails"
 			(at 25.4 39.9284 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 2.54 2.54)
@@ -39,6 +41,8 @@
 		)
 		(property "Sheetfile" "power.kicad_sch"
 			(at 25.4 64.0846 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -67,11 +71,13 @@
 			(type solid)
 		)
 		(fill
-			(color 0 0 0 0.0000)
+			(color 0 0 0 0)
 		)
 		(uuid "8d5a83de-97b2-5444-b563-2b828a684645")
 		(property "Sheetname" "ESP32-S3 module"
 			(at 145.88 39.9284 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 2.54 2.54)
@@ -82,6 +88,8 @@
 		)
 		(property "Sheetfile" "mcu.kicad_sch"
 			(at 145.88 64.0846 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -110,11 +118,13 @@
 			(type solid)
 		)
 		(fill
-			(color 0 0 0 0.0000)
+			(color 0 0 0 0)
 		)
 		(uuid "e4404b34-3f55-50db-8321-51b9507445ac")
 		(property "Sheetname" "AS5311 magnetic encoder"
 			(at 266.36 39.9284 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 2.54 2.54)
@@ -125,6 +135,8 @@
 		)
 		(property "Sheetfile" "sensor_mag.kicad_sch"
 			(at 266.36 64.0846 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -153,11 +165,13 @@
 			(type solid)
 		)
 		(fill
-			(color 0 0 0 0.0000)
+			(color 0 0 0 0)
 		)
 		(uuid "c63678c9-e694-5432-a20c-1bdbb8c26df3")
 		(property "Sheetname" "Capacitive front-end (experimental)"
 			(at 25.4 85.6484 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 2.54 2.54)
@@ -168,6 +182,8 @@
 		)
 		(property "Sheetfile" "sensor_cap.kicad_sch"
 			(at 25.4 109.8046 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -196,11 +212,13 @@
 			(type solid)
 		)
 		(fill
-			(color 0 0 0 0.0000)
+			(color 0 0 0 0)
 		)
 		(uuid "44e3b392-2117-5e58-96d0-5b272847d240")
 		(property "Sheetname" "Display, buttons, LED, piezo"
 			(at 145.88 85.6484 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 2.54 2.54)
@@ -211,6 +229,8 @@
 		)
 		(property "Sheetfile" "ui.kicad_sch"
 			(at 145.88 109.8046 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -239,11 +259,13 @@
 			(type solid)
 		)
 		(fill
-			(color 0 0 0 0.0000)
+			(color 0 0 0 0)
 		)
 		(uuid "8b669b1b-99f1-54bd-8e1f-df2e8a8ba4f1")
 		(property "Sheetname" "Accelerometer"
 			(at 266.36 85.6484 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 2.54 2.54)
@@ -254,6 +276,8 @@
 		)
 		(property "Sheetfile" "imu.kicad_sch"
 			(at 266.36 109.8046 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -285,5 +309,4 @@
 			(page "1")
 		)
 	)
-	(embedded_fonts no)
 )

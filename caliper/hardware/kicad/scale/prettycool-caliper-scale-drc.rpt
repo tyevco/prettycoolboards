@@ -1,12 +1,18 @@
 ** Drc report for prettycool-caliper-scale.kicad_pcb **
-** Created on 2026-11-08T07:42:33-0800 **
+** Created on 2026-11-08T14:42:21 **
 ** Report includes: Errors, Warnings, Exclusions **
 
-** Found 3 DRC violations **
-[lib_footprint_mismatch]: Footprint 'MountingHole_2.2mm_M2_Pad_Via' does not match copy in library 'MountingHole'.
+** Found 5 DRC violations **
+[lib_footprint_mismatch]: Footprint 'Fiducial_1mm_Mask2mm' does not match copy in library 'Fiducial'
+    Local override; warning
+    @(101.5000 mm, 88.2000 mm): Footprint FID1
+[lib_footprint_mismatch]: Footprint 'MountingHole_2.2mm_M2_Pad_Via' does not match copy in library 'MountingHole'
     Local override; warning
     @(101.5000 mm, 86.0000 mm): Footprint H1
-[lib_footprint_mismatch]: Footprint 'MountingHole_2.2mm_M2_Pad_Via' does not match copy in library 'MountingHole'.
+[lib_footprint_mismatch]: Footprint 'Fiducial_1mm_Mask2mm' does not match copy in library 'Fiducial'
+    Local override; warning
+    @(298.5000 mm, 83.8000 mm): Footprint FID2
+[lib_footprint_mismatch]: Footprint 'MountingHole_2.2mm_M2_Pad_Via' does not match copy in library 'MountingHole'
     Local override; warning
     @(298.5000 mm, 86.0000 mm): Footprint H2
 [isolated_copper]: Isolated copper fill
@@ -16,11 +22,20 @@
 ** Found 0 unconnected pads **
 
 ** Found 2 Footprint errors **
-[net_conflict]: No pad found for pin 1 (GND) in schematic.
+[net_conflict]: No pad found for pin 1 (GND) in schematic
     Local override; warning
     @(101.5000 mm, 86.0000 mm): Footprint H1
-[net_conflict]: No pad found for pin 1 (GND) in schematic.
+[net_conflict]: No pad found for pin 1 (GND) in schematic
     Local override; warning
     @(298.5000 mm, 86.0000 mm): Footprint H2
+
+** Ignored checks **
+    - Footprint has no courtyard defined
+    - Track endpoint not centered on via
+    - Tuning profile track geometries
+    - Footprint doesn't match symbol's footprint filters
+    - PTH inside courtyard
+    - NPTH inside courtyard
+    - Footprint component type doesn't match footprint pads
 
 ** End of Report **

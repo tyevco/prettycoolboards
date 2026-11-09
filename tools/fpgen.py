@@ -118,7 +118,7 @@ class Footprint:
         self.circle(pcbnew.F_SilkS, x, y, 0.15, 0.3)
 
     def save(self, lib_dir):
-        io = pcbnew.PCB_IO_MGR.PluginFind(pcbnew.PCB_IO_MGR.KICAD_SEXP)
+        io = pcbnew.PCB_IO_MGR.FindPlugin(pcbnew.PCB_IO_MGR.KICAD_SEXP)   # KiCad 10 renamed it (9: PluginFind)
         if not os.path.isdir(lib_dir):
             os.makedirs(lib_dir)
         ref = self.fp.Reference()

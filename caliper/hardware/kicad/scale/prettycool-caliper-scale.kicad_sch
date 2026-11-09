@@ -1,7 +1,7 @@
 (kicad_sch
-	(version 20250114)
+	(version 20260306)
 	(generator "eeschema")
-	(generator_version "9.0")
+	(generator_version "10.0")
 	(uuid "b08a52c2-37a7-52c8-9c3d-6723ce8ef562")
 	(paper "A3")
 	(title_block
@@ -24,11 +24,13 @@
 			(type solid)
 		)
 		(fill
-			(color 0 0 0 0.0000)
+			(color 0 0 0 0)
 		)
 		(uuid "76002d28-736a-5e6d-921f-bd5a910eb8a0")
 		(property "Sheetname" "Capacitive scale (passive)"
 			(at 25.4 39.9284 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 2.54 2.54)
@@ -39,6 +41,8 @@
 		)
 		(property "Sheetfile" "scale.kicad_sch"
 			(at 25.4 64.0846 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -70,5 +74,4 @@
 			(page "1")
 		)
 	)
-	(embedded_fonts no)
 )

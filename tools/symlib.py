@@ -9,7 +9,7 @@ from dataclasses import dataclass
 import sexpr
 from sexpr import Q, find, find_all
 
-KICAD_SYMBOL_DIR = os.environ.get("KICAD9_SYMBOL_DIR", "/usr/share/kicad/symbols")
+KICAD_SYMBOL_DIR = os.environ.get("KICAD10_SYMBOL_DIR", "/usr/share/kicad/symbols")
 
 _lib_cache: dict[str, list] = {}
 _extra_libs: dict[str, str] = {}

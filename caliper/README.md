@@ -3,8 +3,9 @@
 A 150 mm digital caliper that remembers its readings and sends them wirelessly.
 
 > **Status (2026-11-08): rev A designed, not built.** Schematics captured (ERC clean, 2 waived); both boards laid
-> out and routed (KiCad 9 DRC + schematic parity: 0 errors, 0 unconnected); the scale's fab package is released,
-> the slider's is **review-only** until the J50 part/footprint mismatch is fixed; the mechanics pass the clash
+> out and routed (KiCad 10.0.8 DRC + schematic parity: 0 errors, 0 unconnected); both fab packages pass
+> `release.py`, including the jlcplace placement gate (slider 0 red, 1 yellow; the J50 land matches its part since
+> phase 4); the mechanics pass the clash
 > check against the routed board; the firmware builds for the ESP32-S3 and passes its host tests. Nothing has been
 > fabricated, flashed, printed or measured, and no SPICE simulation has been run. Every figure here is a design
 > target until the prototype passes [bring-up](docs/bringup.md).

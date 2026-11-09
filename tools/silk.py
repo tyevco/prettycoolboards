@@ -111,14 +111,14 @@ def clip_silk_at_edge(board, refs, margin=0.25):
     """clip_footprint_silk for the named footprints only (the edited instances show up as a local override, a
     lib_footprint_mismatch warning, which is the intended trade for a silk line that would otherwise cross the edge)."""
     outline = pcbnew.SHAPE_POLY_SET()
-    board.GetBoardPolygonOutlines(outline)
+    board.GetBoardPolygonOutlines(outline, True)   # KiCad 10: infer-outline flag is required
     return clip_footprint_silk(board, _edge_points(board), outline, margin, refs=set(refs))
 
 
 def place_refs(board, height=0.8, thickness=0.15, gap=0.15, mask=0.1, edge=0.3, max_off=3.0, hide=("H", "FID"),
                clip_silk=False):
     outline = pcbnew.SHAPE_POLY_SET()
-    board.GetBoardPolygonOutlines(outline)
+    board.GetBoardPolygonOutlines(outline, True)   # KiCad 10: infer-outline flag is required
     edge_pts = _edge_points(board)
     if clip_silk:  # off by default: an edited footprint shows up as a library mismatch in DRC
         clip_footprint_silk(board, edge_pts, outline)

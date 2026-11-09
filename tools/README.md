@@ -2,8 +2,8 @@
 
 The KiCad projects (`<project>/hardware/kicad/`) are **generated** from Python, so the
 circuit is reviewable as code and can be regenerated after every change.
-Open a generated project in KiCad 9 to inspect it. Do not hand-edit the generated files:
-change the Python and rebuild.
+Open a generated project in KiCad 10 to inspect it, but do not save the generated files from the GUI and do not
+hand-edit them: change the Python and rebuild.
 
 | Module | What it does |
 |---|---|
@@ -12,7 +12,7 @@ change the Python and rebuild.
 | `symgen.py` | Builds simple box symbols for parts missing from the KiCad libraries |
 | `schgen.py` | The schematic API (`Design` / `sheet` / `group` / `add`) and the writer of the hierarchical `.kicad_sch` sheets. `Design.check()` verifies the **drawing** against the wiring rule below |
 | `schplace.py` | The placer and router behind `schgen`: clusters, anchor ICs, satellite parts placed next to the pin they serve, and an orthogonal grid maze router that draws every wire |
-| `netlist_diff.py` | Proves two KiCad netlists are electrically identical (same nets, same `(ref, pin)` members, same component fields). It is the gate for any generator change |
+| `netlist_diff.py` | Proves two KiCad netlists are electrically identical (same nets, same `(ref, pin)` members, same component fields). It is the gate for any generator change. `--pin-rename REF:OLD=NEW` maps a pin a library update renumbered (reported as a NOTE); a Datasheet of `~` (KiCad 9) equals an empty one (KiCad 10) |
 | `pcbgen.py` | Builds a `.kicad_pcb` from the KiCad netlist through the `pcbnew` API: footprints linked to symbols, outline, zones, keepouts, fills, and Specctra DSN/SES I/O for Freerouting |
 | `fab.py` | Gerbers, drill files, and the JLCPCB BOM (the CPL comes from jlcplace) |
 | `jlcplace_gate.py` | The release gate around [jlcplace](https://github.com/tyevco/jlcplace): `jlcplace cpl` writes the JLCPCB CPL, `jlcplace check` simulates JLC's placement of every row with JLC's own EasyEDA footprints over the Gerbers, and the release refuses on any red row. Also turns the yellow rows and the preview checklist into ORDER-NOTES lines. Replaces the former `jlc_cpl.py` (see below) |
@@ -64,9 +64,48 @@ python3 -m pytest tools/tests -q                                         # the w
 Then **look at the rendered PNGs** (`render/sheet-N.png`) and fix what does not read like a hand-drawn
 schematic.
 
+## KiCad 10
+
+The toolchain targets **KiCad 10.0.8** (since 2026-11-08; it was written against 9.0.9). The writers emit KiCad 10
+files: schematics `(version 20260306)`, symbol libraries `(version 20251024)`, generator version `10.0`, a hidden
+property carrying `(hide yes)` itself, `(body_style 1)` / `(in_pos_files yes)` on every symbol instance, an empty
+datasheet as `""` (KiCad 9 wrote `"~"`), no file-level `(embedded_fonts no)`. A `kicad-cli sch upgrade` of a generated
+sheet changes only token order and formatting (checked on every sheet when the format moved), with one known
+exception: on a multi-unit symbol (caliper U40, TLV9062) KiCad adds `(pin ... (uuid ...))` entries for the other
+units' pins, which the writer does not emit. Wire UUIDs are numbered per sheet (a net drawn in two clusters of one
+sheet used to give two wires the same UUID, which KiCad renumbers on load). Boards and footprints are written by
+`pcbnew` itself (`(version 20260206)`).
+
+What changed between KiCad 9 and 10 for this toolchain:
+
+* pcbnew API: `PCB_IO_MGR.PluginFind` → `FindPlugin`; `FOOTPRINT.HasFieldByName` / `GetFieldByName` →
+  `HasField` / `GetField` (returns `None` for a missing field); `ZONE.Get/SetDoNotAllowCopperPour` →
+  `Get/SetDoNotAllowZoneFills`; `BOARD.GetBoardPolygonOutlines(outline)` needs the `aInferOutlineIfNecessary` flag
+  (`True` keeps 9's behaviour).
+* Netlist export: one token per line (format `E`), `pinfunction` is `<pin name>_<pin number>` (`"IO4_8"`; 9 wrote
+  `"IO4"`), an empty datasheet is `""`, and each net's `(class ...)` is the net class the project's
+  `netclass_patterns` assign (9 wrote `"Default"` for every net). Nothing in the toolchain reads the netlist's
+  class, and `netlist_diff.py` ignores it; a build into an empty `--out` directory (no project patterns yet) still
+  says `"Default"`.
+* Schematic parity also compares custom symbol fields (`footprint_symbol_field_mismatch`): `pcbgen` (and caliper
+  `release.py`'s `sync_fields`) copy every symbol field onto the footprint, hidden.
+* Board file (`(version 20260206)`): no net table; pads, tracks and zones name their net as `(net "NAME")` (9:
+  `(net N "NAME")` / `(net N)` plus a table), so a script that reads a `.kicad_pcb` as text must not look nets up by
+  number (the toolchain goes through `pcbnew`). `(setup)` writes tenting as `(tenting (front yes) (back yes))` and
+  adds `covering` / `plugging` / `capping` / `filling` (all `no`); the HPGL plot parameters are gone.
+* DRC: zero-length track segments next to another net are a `tracks_crossing` error; new rule keys in the project
+  (`footprint_symbol_field_mismatch`, `missing_tuning_profile`, `track_not_centered_on_via`,
+  `track_on_post_machined_layer`, `tuning_profile_track_geometries`); reports list the ignored checks.
+* Libraries (10.0.8): `Connector:USB_C_Receptacle_USB2.0_16P` and the `USB_C_Receptacle_HRO_TYPE-C-31-M-12`
+  footprint call the shield `SH` (9: `S1`), and that footprint's signal pads are rounded rectangles (9: rectangles);
+  `TPS22917DBV` moved its pins; `Fiducial_1mm_Mask2mm` changed. A footprint already on a board keeps its 9.0 copy
+  (`lib_footprint_mismatch`, a warning) until someone updates it from the library on purpose.
+* The user library tables live in `~/.config/kicad/10.0/` (`cp /usr/share/kicad/template/{sym,fp}-lib-table`); the
+  stock libraries are `${KICAD10_SYMBOL_DIR}` / `${KICAD10_FOOTPRINT_DIR}` (`/usr/share/kicad/...`).
+
 ## Requirements
 
-* KiCad 9 (`kicad-cli` and the `pcbnew` Python module), with the stock symbol and footprint libraries
+* KiCad 10.0.8 (`kicad-cli` and the `pcbnew` Python module), with the stock symbol and footprint libraries
 * poppler-utils (`pdftoppm`) for `--render`
 * Java 21 + [Freerouting](https://github.com/freerouting/freerouting) 2.1.x (optional, for autorouting)
 * Python 3.10+ (pytest for the tests)

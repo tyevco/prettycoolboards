@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Extract the routed slider board into the mechanical model.
 
-    python3 extract_board_parts.py [path/to/slider.kicad_pcb]     # needs KiCad 9 pcbnew (WSL)
+    python3 extract_board_parts.py [path/to/slider.kicad_pcb]     # needs KiCad 10 pcbnew (WSL)
 
 Adapted from dial-me-spinner/hardware/mechanical/extract_board_parts.py.  Writes
 board_parts.json, which board_envelope.py prefers over its SPEC placeholder, so

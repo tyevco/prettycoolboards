@@ -1,6 +1,6 @@
 """The wiring rule (tools/README.md, R1-R6) is enforced by schgen.Design.check().
 
-Run in WSL (needs the KiCad 9 symbol libraries at /usr/share/kicad/symbols):
+Run in WSL (needs the KiCad 10 symbol libraries at /usr/share/kicad/symbols):
     $HOME/.venvs/dial-me-spinner/bin/python -m pytest tools/tests -q
 """
 
@@ -16,7 +16,7 @@ import schplace
 
 from conftest import REPO
 
-needs_kicad = pytest.mark.skipif(not os.path.isdir("/usr/share/kicad/symbols"), reason="KiCad 9 symbols not installed")
+needs_kicad = pytest.mark.skipif(not os.path.isdir("/usr/share/kicad/symbols"), reason="KiCad symbols not installed")
 
 
 def small_design(intersheet=False):

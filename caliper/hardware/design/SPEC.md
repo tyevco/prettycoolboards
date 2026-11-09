@@ -476,3 +476,8 @@ placement simulation. Mechanics re-extracted (101 part envelopes plus the 4 stan
 added the same day: `release.py` now writes the CPL with jlcplace (`jlcplace cpl`, corrections in
 `design/jlcplace-db/`) and refuses on any red row of `jlcplace check` (docs: assembly §6). jlcplace 0.2.1: slider
 101 rows, 0 red, 1 yellow (BZ50 polarity: a preview item), 100 green; scale 0 rows, 0 red.
+
+**KiCad 10.0.8 (2026-11-08, same day):** the toolchain and both boards moved from KiCad 9.0.9 to 10.0.8 with no
+design change: the netlists are identical (the library renamed J1's shield pin S1 → SH), the committed routed
+boards were only re-saved (copper, pads and nets identical, J1's four shield pads renumbered to SH), the Gerbers are
+geometrically identical and the jlcplace result is unchanged. Evidence: docs/electronics.md §7.12.

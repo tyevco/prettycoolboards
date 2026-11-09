@@ -1,4 +1,4 @@
-ERC report (2026-11-08T12:53:37-0800, Encoding UTF8)
+ERC report (2026-11-08T16:41:42, Encoding UTF8)
 Report includes: Errors, Warnings, Exclusions
 
 ***** Sheet /
@@ -6,11 +6,11 @@ Report includes: Errors, Warnings, Exclusions
 ***** Sheet /Power: USB-C, charger, 3V3, rails/
 [pin_to_pin]: Pins of type Open collector and Power output are connected
     ; error
-    @(189.23 mm, 157.48 mm): Symbol U5 Pin 5 [QOD, Open collector, Line]
+    @(189.23 mm, 160.02 mm): Symbol U5 Pin 5 [QOD, Open collector, Line]
     @(189.23 mm, 154.94 mm): Symbol U5 Pin 6 [VOUT, Power output, Line]
 [pin_to_pin]: Pins of type Open collector and Power output are connected
     ; error
-    @(307.34 mm, 139.70 mm): Symbol U6 Pin 5 [QOD, Open collector, Line]
+    @(307.34 mm, 142.24 mm): Symbol U6 Pin 5 [QOD, Open collector, Line]
     @(307.34 mm, 137.16 mm): Symbol U6 Pin 6 [VOUT, Power output, Line]
 
 ***** Sheet /ESP32-S3 module/
@@ -24,3 +24,9 @@ Report includes: Errors, Warnings, Exclusions
 ***** Sheet /Accelerometer/
 
  ** ERC messages: 2  Errors 2  Warnings 0
+
+ ** Ignored checks:
+    - Global label only appears once in the schematic
+    - Four connection points are joined together
+    - SPICE model issue
+    - Assigned footprint doesn't match footprint filters

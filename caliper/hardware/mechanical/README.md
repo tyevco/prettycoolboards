@@ -4,7 +4,7 @@ Parametric build123d (OpenCascade) model, calculations, clash check and part fil
 PrettyCool Caliper rev A (printed slider) and rev B (machined slider). Design notes, the gap
 procedure, print settings and the hardware BOM: [`docs/mechanical.md`](../../docs/mechanical.md).
 
-Everything runs in WSL with the dial-me-spinner venv (KiCad 9 pcbnew, build123d 0.13, matplotlib);
+Everything runs in WSL with the dial-me-spinner venv (KiCad 10 pcbnew, build123d 0.13, matplotlib);
 the FEA runs on the Windows Python with the `print-stress` skill:
 
 ```
@@ -18,7 +18,7 @@ py fea_jaw.py; py fea_inside_jaw.py; py fea_slider.py   # Windows: FEA (inside j
 | `models.py` | The parts as exact solids, the part registry (material, process, print pose), the body's named cut features (`body_cuts`) and `assembly(R)` at reading R |
 | `export.py` | `stl/*.stl` (binary, print pose, on the bed), `stl/slider_body_rf_modifier.stl` (slicer modifier: unfilled PA near the antenna) and `step/*.step` (assembly pose) per part, plus `step/caliper_assembly.step` (40 named, coloured solids at R = 0) |
 | `drawgen.py` | Rev B: `step/{slider_body_b,beam_pockets}.step` and `drawings/*.{svg,dxf,pdf}` (A3, tolerances and process notes) |
-| `extract_board_parts.py` | Reads `../kicad/slider/*.kicad_pcb` (KiCad 9 `pcbnew`) and writes `board_parts.json`: the Edge.Cuts outline (body + tabs), the holes, one box per part (Fab outline x datasheet height) plus the SMT standoffs, the H1 screw head and the mated JST plug |
+| `extract_board_parts.py` | Reads `../kicad/slider/*.kicad_pcb` (KiCad 10 `pcbnew`) and writes `board_parts.json`: the Edge.Cuts outline (body + tabs), the holes, one box per part (Fab outline x datasheet height) plus the SMT standoffs, the H1 screw head and the mated JST plug |
 | `board_envelope.py` | The slider-board envelope from `board_parts.json` (SPEC 2.1 placeholder without it) and the board rules the housing depends on (height zones, bottom window, antenna keep-out, holes) |
 | `clash_check.py` | Exact B-rep intersections: board vs housing, slider vs beam / fixed jaw / tape / scale / stop at R = 0, 75, 151, slider-internal pairs; the sensor gaps; the webs between the body's cut features; metal and carbon-filled (PA-CF jaws) vs antenna (RF; FAIL / RISK) -> `clash_report.txt` |
 | `calcs.py` | Jaw deflection, gib preloads, sliding force, back web, thermal error, gap stack-ups, AS5311 gap budget, board under a button press -> `calcs_output.txt` |

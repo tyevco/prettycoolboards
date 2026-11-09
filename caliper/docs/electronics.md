@@ -1,7 +1,8 @@
 # Schematics and boards
 
 > **Status: rev A schematics captured, ERC clean (2 waived, listed below). Designed, not built or tested.**
-> **Layout (§7):** both boards laid out and routed; KiCad 9 and 10 DRC + schematic parity: 0 errors, 0 unconnected.
+> **Layout (§7):** both boards laid out and routed; KiCad 10.0.8 DRC + schematic parity: 0 errors, 0 unconnected.
+> The toolchain and both boards moved from KiCad 9.0.9 to KiCad 10.0.8 on 2026-11-08 with no design change (§7.12).
 > Both fab packages pass `release.py` (the J50 land now matches its part, §7.11); designed, not built.
 > Every current, voltage and part choice here is a datasheet or catalogue figure, not a measurement.
 
@@ -11,7 +12,7 @@ Why the big parts were chosen (and what lost) is in [Architecture](architecture.
 
 ## 1. How the schematic is made
 
-The KiCad 9 projects are **generated from Python**, with the same toolchain as dial-me-spinner (vendored in
+The KiCad 10 projects are **generated from Python**, with the same toolchain as dial-me-spinner (vendored in
 [`tools/`](https://github.com/tyevco/prettycoolboards/tree/main/tools)):
 
 ```
@@ -19,7 +20,7 @@ caliper/hardware/design/sheets/*.py ──build.py──▶ caliper/hardware/kic
 ```
 
 ```sh
-# in WSL (Ubuntu 24.04, KiCad 9.0.9)
+# in WSL (Ubuntu 24.04, KiCad 10.0.8)
 python3 caliper/hardware/design/build.py --render      # both boards: schematic, ERC, netlist, PDF + PNG per sheet
 python3 caliper/hardware/design/check_contract.py      # ESP32 pins in the netlist == nets.MCU_PINS
 python3 tools/lcsc_check.py caliper/hardware/kicad/slider/prettycool-caliper-slider.net   # LCSC stock/type check
@@ -64,7 +65,7 @@ and `pcbgen.py` is now settable (`schgen.set_uuid_namespace()`, `pcbgen.UUID_NAM
 
 ## 2. ERC status
 
-| Board | Result (kicad-cli 9.0.9, `--severity-all`) |
+| Board | Result (kicad-cli 10.0.8, `--severity-all`) |
 |---|---|
 | slider | **0 unwaived**; 2 waived `pin_to_pin` |
 | scale | **clean** |
@@ -264,8 +265,9 @@ itself is not a PCBA part: it plugs into J50 by hand.
 
 ## 7. Layout
 
-> **Status (2026-11-08): both boards laid out, routed and through the DRC + schematic-parity gate (KiCad 9.0.9:
-> 0 errors, 0 unconnected, 0 parity errors on both; KiCad 10.0.8 agrees), and both fab packages pass
+> **Status (2026-11-08): both boards laid out, routed and through the DRC + schematic-parity gate (KiCad 10.0.8:
+> 0 errors, 0 unconnected, 0 parity errors on both; it was KiCad 9.0.9 until the move in §7.12, which changed no
+> copper), and both fab packages pass
 > `release.py`**, including the jlcplace placement gate on every CPL row (§7.7). The slider was re-placed and re-routed from
 > scratch after the hardware changes in §7.11 (Q1, 2.2 k I2C pull-ups, the J50 land, bottom-side module
 > decoupling, H5, silk); the figures in §7.5 and §7.10 are from the board before that re-route. Designed,
@@ -280,7 +282,7 @@ dial-me-spinner's) and released by
 [`release.py`](https://github.com/tyevco/prettycoolboards/blob/main/caliper/hardware/design/release.py):
 
 ```sh
-# in WSL (Ubuntu 24.04, KiCad 9.0.9, Freerouting 2.1.0, FREEROUTING_JAR=/opt/freerouting/freerouting.jar)
+# in WSL (Ubuntu 24.04, KiCad 10.0.8, Freerouting 2.1.0, FREEROUTING_JAR=/opt/freerouting/freerouting.jar)
 python3 caliper/hardware/design/layout.py --board scale                                  # place, pour, DRC
 python3 caliper/hardware/design/layout.py --board slider --route --minutes 8 --attempts 1 # place, route, pour, DRC
 python3 caliper/hardware/design/layout.py --board slider --complete                      # only if any stay open
@@ -394,7 +396,7 @@ the tab clamp holes at (−3.5 / 65.5, 5.5 / 14.0), plated GND, Ø4.4 top pads f
 
 ### 7.5 Routing result (slider)
 
-The slider is fully routed: **0 unconnected** in KiCad 9 and KiCad 10. After the review: 2955 mm of track (F.Cu
+The slider is fully routed: **0 unconnected** (KiCad 9.0.9 then, KiCad 10.0.8 now). After the review: 2955 mm of track (F.Cu
 1054, In2 933, B.Cu 968 mm) and 481 vias, 234 of them locked (electrode comb, escapes, the USB pair, GND fan-out,
 stitching). The review's changes were made by moving the parts, ripping up the copper they disturbed and closing it
 again with `layout.py --complete`, not by a fresh Freerouting run; `layout.py` carries the same placement and
@@ -444,10 +446,11 @@ around the module and the charger.
 
 | Board | KiCad | Errors | Unconnected | Parity errors | Warnings |
 |---|---|---|---|---|---|
-| slider | 9.0.9 (WSL, the gate) | **0** | **0** | **0** | 7: `lib_footprint_mismatch` ×7 (E40, U10, J1, H2–H5) |
-| slider | 10.0.8 (Windows, scratch copy) | **0** | **0** | **0** | 10: the same 7, plus `lib_footprint_mismatch` on FID1–3 (KiCad 10's own library versions of those footprints differ from 9's) |
-| scale | 9.0.9 | **0** | **0** | **0** | 5: `lib_footprint_mismatch` ×2 (H1, H2), `isolated_copper` ×1, `net_conflict` ×2 (parity warning) |
-| scale | 10.0.8 | **0** | **0** | **0** | 7: the same 5 plus `lib_footprint_mismatch` on FID1/FID2 (KiCad 10 library) |
+| slider | 10.0.8 (WSL, the gate) | **0** | **0** | **0** | 10: `lib_footprint_mismatch` ×10 (E40, U10, J1, H2–H5, FID1–3) |
+| scale | 10.0.8 | **0** | **0** | **0** | 7: `lib_footprint_mismatch` ×4 (H1, H2, FID1, FID2), `isolated_copper` ×1, `net_conflict` ×2 (parity warning) |
+
+Under KiCad 9.0.9 (until 2026-11-08) the same boards gave the same 0 / 0 / 0 with 7 and 5 warnings: the
+fiducials matched the 9.0 library.
 
 Why each warning is intended:
 
@@ -458,13 +461,16 @@ Why each warning is intended:
 * **J1**: its shell outline silk is clipped where it ran past the right edge (the receptacle overhangs the edge by
   1 mm). This replaced the four `silk_edge_clearance` warnings (`silk.clip_silk_at_edge`, layout.py).
 * **H2–H5**: B.Mask removed from the tab-hole pads (no exposed copper 0.15 mm over the beam, SPEC §2.1).
+* **FID1–3 (slider), FID1/FID2 (scale)**: the board keeps the KiCad 9.0 library's `Fiducial_1mm_Mask2mm`; KiCad
+  10.0.8's copy of that footprint differs (§7.12). The fiducial copper and mask are unchanged; updating them from the
+  library is not needed for the order.
 * **Scale H1/H2** (`lib_footprint_mismatch`, `net_conflict` "no pad for pin 1 (GND)"): the netlist still has plated
   M2 holes; the instances are the SPEC Ø1.0 NPTH alignment holes, which have no copper pad for the GND pin.
 * **Scale `isolated_copper`**: the back GND plane connects to nothing once the holes are NPTH (the scale is bonded
   with no fastener). Intentional for now; whether to tie it to the beam is an open question (§7.9).
 
-The full reports: `caliper/hardware/kicad/<board>/*-drc.rpt` (KiCad 9, `--severity-all`), `caliper/hardware/fab/<board>/drc-parity.rpt`
-(the release gate, errors only) and `fab/<board>/drc-kicad10-second-opinion.rpt`.
+The full reports: `caliper/hardware/kicad/<board>/*-drc.rpt` (`--severity-all`) and
+`caliper/hardware/fab/<board>/drc-parity.rpt` (the release gate, errors only).
 
 ### 7.7 Release (fab package)
 
@@ -491,14 +497,12 @@ renders and `ORDER-NOTES.md`; for the slider also the JLCPCB BOM and CPL. Order 
 
 | | Top | Bottom |
 |---|---|---|
-| Slider (KiCad 9, `release.py`) | ![slider top, KiCad 9](../hardware/fab/slider/prettycool-caliper-slider-3d-top.png) | ![slider bottom, KiCad 9](../hardware/fab/slider/prettycool-caliper-slider-3d-bottom.png) |
-| Slider (KiCad 10) | ![slider top, KiCad 10](../hardware/fab/slider/prettycool-caliper-slider-3d-top-kicad10.png) | ![slider bottom, KiCad 10](../hardware/fab/slider/prettycool-caliper-slider-3d-bottom-kicad10.png) |
+| Slider (`release.py`, KiCad 10.0.8) | ![slider top](../hardware/fab/slider/prettycool-caliper-slider-3d-top.png) | ![slider bottom](../hardware/fab/slider/prettycool-caliper-slider-3d-bottom.png) |
 
-![scale top, KiCad 9](../hardware/fab/scale/prettycool-caliper-scale-3d-top.png)
+![scale top](../hardware/fab/scale/prettycool-caliper-scale-3d-top.png)
 
 The module has no 3D body in the render (no model is installed for the KiCad footprint); the display glass, the
-battery and the standoffs are not on the board. The KiCad 10 renders are copied into `fab/` by hand after a release
-(`release.py` regenerates the folder and runs KiCad 9 only).
+battery and the standoffs are not on the board.
 
 ### 7.9 Open layout items
 
@@ -536,7 +540,9 @@ battery and the standoffs are not on the board. The KiCad 10 renders are copied 
   coupling that matters is into the RX strip, and the In2 GND guard sits between the buses and the strip. Worth a
   look at bring-up, not expected to be a fixed offset source.
 * **Scale back plane** floats (no fastener); decide whether to tie it to the beam.
-* **Freerouting** stalls on this board; the grid router does most of the closing (§7.5). Re-runs differ.
+* **Freerouting** stalls on this board; the grid router does most of the closing (§7.5). Re-runs differ: the first
+  fresh run on KiCad 10 left USB_CC2 and CHG_INT_N open (§7.12). Locking the short R1/R2 → J1 CC links in
+  `preroute_usb` would keep Power-class VBUS out of the CC2 gap; CHG_INT_N may need a longer locked U2.A1 escape.
 * **Hand review** of the routing in KiCad before ordering (density around the module and the charger).
 
 ### 7.10 Layout review (2026-11-08)
@@ -593,3 +599,47 @@ Placement moves for these: Q1 (25.1, 25.1), R10 (22.5, 23.5), RT1 (24.5, 26.5) �
 C21/C23 bottom (3.1, 26.5 / 25.3). A fresh route moves most other tracks, so the per-net figures in §7.5 and the
 review table in §7.10 (USB lengths, copper balance, decoupling distances other than the above) describe the previous
 board and were not re-measured.
+
+### 7.12 Move to KiCad 10.0.8 (2026-11-08)
+
+On 2026-11-08 WSL's KiCad went from 9.0.9 to **10.0.8** (kicad-cli, the `pcbnew` module and the 10.0.8 symbol,
+footprint and 3D libraries). The toolchain was ported (API and file-format changes: [`tools/README.md`, "KiCad
+10"](https://github.com/tyevco/prettycoolboards/blob/main/tools/README.md#kicad-10)) and both boards were moved
+**without a design change**. KiCad 10 is now the only KiCad: the "KiCad 10 second opinion" files that used to be
+copied into `fab/` by hand are gone. Evidence, all from pcbnew 10.0.8 / kicad-cli 10.0.8 in WSL:
+
+* **Schematics** regenerated by `build.py` in the KiCad 10 format (`kicad-cli sch upgrade` of every generated sheet
+  changes only token order and formatting, apart from the pin UUIDs KiCad adds for the other units of the
+  multi-unit U40; the review also found 8 pairs of wires on the power and UI sheets sharing a UUID, a generator bug
+  older than the move, now fixed: `tools/README.md`, "KiCad 10"). Wiring check passes; ERC: slider the same 2 waived
+  `pin_to_pin`, scale clean; no new ERC rule fires (KiCad 10's report also lists the 4 checks the default settings
+  ignore).
+* **Netlists**: `netlist_diff.py --strict-fields` against the KiCad 9 netlists is **IDENTICAL** for both boards
+  (98 nets / 129 parts / 398 pins on the slider) once `--pin-rename J1:S1=SH` maps the one pin the 10.0.8 library
+  renamed (the USB-C shield). Format-only differences, not counted: KiCad 10 writes an empty datasheet as `""`
+  (9: `"~"`, 105 parts), pin functions as `name_number`, and each net's class as the project's net-class patterns
+  assign it (9: `"Default"` everywhere; nothing reads it). `check_contract.py`: OK.
+* **Boards**: the committed routed boards were loaded and saved by pcbnew 10, not re-routed. A pcbnew script compared
+  them with the KiCad 9 files: tracks (1671), vias (479), zones (12) and their fills (18 layers), pads (524 with
+  nets), footprints (129) and copper drawings (124) are **identical** in count, coordinates and nets on the slider,
+  and the scale likewise (1 zone, 4 pads, 43 drawings). The only edit: J1's four shield pads renumbered `S1` → `SH`
+  to match the symbol (same copper, same GND net). Its footprint is otherwise the 9.0 copy: 10.0.8 draws that
+  receptacle's signal pads as rounded rectangles, and updating it would change copper.
+* **DRC + parity** (`--severity-all`): 0 errors, 0 unconnected, 0 parity on both (§7.6); the new warnings are the
+  `lib_footprint_mismatch` of the fiducials against the 10.0.8 library.
+* **Fab outputs** regenerated by `release.py`: every Gerber layer and both drill files of both boards are
+  **geometrically identical** to the KiCad 9 package (same flashes, draws, arcs and regions per polarity block; only
+  the header, the object order and the `J1,SH` pad attribute differ). BOM, CPL and `jlcplace-checklist.md` are
+  byte-identical; jlcplace 0.2.1 still gives slider 101 rows, **0 red, 1 yellow (BZ50)**, 100 green, scale 0 rows.
+* **Toolchain on pcbnew 10**: `layout.py` re-places the slider exactly where the committed board has every part
+  (129 / 129 footprints at the same position, side and angle) and regenerates the scale copper-identical; `--finish`
+  runs. One fresh `--route --minutes 8 --attempts 1` run of the slider in a scratch copy worked end to end on
+  pcbnew 10 (Freerouting left 154 connections incomplete, about as many as the KiCad 9 run's 153; the grid router,
+  clean-up, pours, stitching and silk all ran; 113 min) but ended with **2 connections open**, both routing outcomes
+  rather than port defects: Freerouting ran VBUS through the gap between R2 and J1 that USB_CC2 needs (VBUS is
+  Power class, which the grid router may not rip up), and CHG_INT_N found no path out of U2's 0.4 mm-pitch ball
+  array. With that VBUS detour removed, `--complete` closed USB_CC2 at once; CHG_INT_N stayed open. Everything else
+  on that board passed DRC and parity (0 errors). The committed board is not affected (it keeps its KiCad 9 routing);
+  a future fresh route may need another run or a locked CC pre-route (open item).
+* **Mechanics and firmware**: `extract_board_parts.py` writes the same `board_parts.json`, `clash_check.py` 0
+  clashes, the mechanical tests and `tools/tests` pass, `gen_pins.py --check` and `pin_plan.py --check` up to date.

@@ -159,7 +159,7 @@ def build(d):
     res(d, "R2", "5.1k", "USB_CC2", "GND")
     d.add("J1", "Connector:USB_C_Receptacle_USB2.0_16P", "TYPE-C-31-M-12",
           "Connector_USB:USB_C_Receptacle_HRO_TYPE-C-31-M-12",
-          pins={"A4": "VBUS", "A1": "GND", "S1": "GND",
+          pins={"A4": "VBUS", "A1": "GND", "SH": "GND",   # KiCad 10 library: the shield pin is SH (9: S1)
                 "A5": "USB_CC1", "B5": "USB_CC2",
                 "A6": "USB_DP", "B6": "USB_DP", "A7": "USB_DM", "B7": "USB_DM",
                 "A8": None, "B8": None},

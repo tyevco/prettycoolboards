@@ -213,7 +213,7 @@ class Router:
         self.hole2hole = TO_MM(ds.m_HoleToHoleMin)
         self.edge_clr = TO_MM(ds.m_CopperEdgeClearance)
         self.outline = pcbnew.SHAPE_POLY_SET()
-        b.GetBoardPolygonOutlines(self.outline)
+        b.GetBoardPolygonOutlines(self.outline, True)   # KiCad 10: infer-outline flag is required
         self.added = []  # (netname, [uuids]) per connection
         self.ripped = set()
 

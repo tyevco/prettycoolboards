@@ -1,5 +1,5 @@
 ** Drc report for prettycool-caliper-slider.kicad_pcb **
-** Created on 2026-11-08T13:03:35-0800 **
+** Created on 2026-11-08T16:44:35 **
 ** Report includes: Errors **
 
 ** Found 0 DRC violations **
@@ -7,5 +7,14 @@
 ** Found 0 unconnected pads **
 
 ** Found 0 Footprint errors **
+
+** Ignored checks **
+    - Footprint has no courtyard defined
+    - Track endpoint not centered on via
+    - Tuning profile track geometries
+    - Footprint doesn't match symbol's footprint filters
+    - PTH inside courtyard
+    - NPTH inside courtyard
+    - Footprint component type doesn't match footprint pads
 
 ** End of Report **

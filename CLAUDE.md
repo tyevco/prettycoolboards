@@ -1,6 +1,6 @@
 # prettycoolboards
 
-Open hardware boards designed as code. Schematics and PCBs are generated from Python into KiCad 9 by the shared
+Open hardware boards designed as code. Schematics and PCBs are generated from Python into KiCad 10 by the shared
 toolchain in `tools/` (see `tools/README.md`), gated by ERC, DRC and schematic parity. The mechanics are
 build123d, and the docs are a VitePress site built from the repo root. One folder per board: `caliper/` holds
 `hardware/`, `firmware/` (ESP-IDF) and `docs/`, and its companion web app lives in `public/caliper/app/`.
@@ -24,10 +24,11 @@ $PY -m pytest tools/tests -q                        # toolchain tests incl. the 
 $PY tools/netlist_diff.py --strict-fields OLD.net NEW.net   # equivalence gate for any generator change
 ```
 
-* KiCad **9.0.9** is the target. A non-login shell does not set `FREEROUTING_JAR`, so export
-  `FREEROUTING_JAR=/opt/freerouting/freerouting.jar` yourself.
-* Native Windows also has KiCad 10. Use its `kicad-cli` only on **scratch copies**, because it upgrades any file
-  it saves.
+* KiCad **10.0.8** is the target, in WSL (the gates) and on native Windows (the GUI) alike; the boards moved from
+  9.0.9 on 2026-11-08 (`caliper/docs/electronics.md` §7.12). A non-login shell does not set `FREEROUTING_JAR`, so
+  export `FREEROUTING_JAR=/opt/freerouting/freerouting.jar` yourself.
+* Open the generated projects in the KiCad GUI to look at them, but **do not save generated files from the GUI**:
+  regenerate them with `build.py` / `layout.py` / `release.py`.
 * Docs: `npm run docs:build` on **native Windows**.
 
 ## Hard rule: schematics are drawn with wires

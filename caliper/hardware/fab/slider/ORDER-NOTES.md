@@ -4,7 +4,7 @@
 
 Rev A is **designed, not built**: nothing here has been fabricated, assembled or measured.
 
-* DRC/parity gate (kicad-cli 9, errors only): ** Found 0 DRC violations **; ** Found 0 unconnected pads **; ** Found 0 Footprint errors **
+* DRC/parity gate (kicad-cli 10.0.8, errors only): ** Found 0 DRC violations **; ** Found 0 unconnected pads **; ** Found 0 Footprint errors **
 * Do not place (DNP): none
 * Not assembled, not in BOM/CPL (copper / mechanical only): E40, FID1, FID2, FID3, H1, H2, H3, H4, H5, TP1, TP2, TP3, TP4, TP5, TP6, TP7, TP20, TP21, TP22, TP23, TP30, TP31, TP32, TP40, TP41, TP42, TP50, TP51 (E40 = the capacitive electrode comb: bare copper, no part)
 * Bottom-side placements (5): C21, C23, C30, C31, U30

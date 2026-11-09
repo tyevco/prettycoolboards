@@ -1,4 +1,4 @@
-"""Build a KiCad 9 board from a KiCad netlist using the pcbnew Python API.
+"""Build a KiCad 10 board from a KiCad netlist using the pcbnew Python API.
 
 Footprints are linked to their schematic symbols (KIID paths), so
 "Update PCB from Schematic" in KiCad keeps working on the generated board.
@@ -17,7 +17,7 @@ from sexpr import find, find_all
 
 MM = pcbnew.FromMM
 _FP_CACHE = {}
-FP_DIR = os.environ.get("KICAD9_FOOTPRINT_DIR", "/usr/share/kicad/footprints")
+FP_DIR = os.environ.get("KICAD10_FOOTPRINT_DIR", "/usr/share/kicad/footprints")
 
 
 def vec(x, y):
@@ -69,17 +69,17 @@ def export_netlist(sch_path, out_path):
 def set_field_hidden(fp, name, text):
     """Copy a symbol field into the footprint's field of that name, hidden, as KiCad's "Update PCB from Schematic"
     does (KiCad 10's schematic parity reports a difference as footprint_symbol_field_mismatch). Returns True if it
-    changed."""
+    changed. (KiCad 10: GetField(name) returns None for a missing field; 9 had Has/GetFieldByName.)"""
     if not text:
         return False
-    fld = fp.GetFieldByName(name) if fp.HasFieldByName(name) else None
+    fld = fp.GetField(name)
     if fld is not None and fld.GetText() == text:
         return False
     if fld is not None:
         fld.SetText(text)
     else:
         fp.SetField(name, text)
-        fld = fp.GetFieldByName(name)
+        fld = fp.GetField(name)
     if fld:
         fld.SetVisible(False)
     return True
@@ -219,7 +219,7 @@ class BoardBuilder:
         z.SetDoNotAllowTracks(tracks)
         z.SetDoNotAllowVias(vias)
         z.SetDoNotAllowPads(pads)
-        z.SetDoNotAllowCopperPour(pours)
+        z.SetDoNotAllowZoneFills(pours)
         z.SetDoNotAllowFootprints(footprints)
         if name:
             z.SetZoneName(name)
@@ -247,7 +247,7 @@ class BoardBuilder:
         z.SetDoNotAllowTracks(True)
         z.SetDoNotAllowVias(True)
         z.SetDoNotAllowPads(False)
-        z.SetDoNotAllowCopperPour(False)
+        z.SetDoNotAllowZoneFills(False)
         z.SetDoNotAllowFootprints(False)
         z.SetZoneName(name)
         ol = z.Outline()  # copy into the zone's own polygon set (SetOutline would take ownership)
@@ -305,14 +305,11 @@ class BoardBuilder:
             fp.SetValue(c["value"])
             fp.SetPath(pcbnew.KIID_PATH(c["sheet_tstamps"] + c["tstamp"]))
             fp.SetSheetname(c["sheet_names"].strip("/").split("/")[-1] if c["sheet_names"] != "/" else "")
-            for k in ("MPN", "LCSC", "Manufacturer"):
-                if c["fields"].get(k):
-                    fp.SetField(k, c["fields"][k])
-                    fld = fp.GetFieldByName(k)
-                    if fld:
-                        fld.SetVisible(False)
-            for k in ("Description", "Datasheet"):
-                set_field_hidden(fp, k, c["fields"].get(k))
+            # every symbol field, hidden, as "Update PCB from Schematic" does: KiCad 10's parity compares custom
+            # fields too (footprint_symbol_field_mismatch, e.g. a missing JLC field)
+            for k, v in c["fields"].items():
+                if k not in ("Reference", "Value", "Footprint"):
+                    set_field_hidden(fp, k, v)
             if c["props"].get("dnp") is not None or c["fields"].get("DNP"):
                 fp.SetDNP(True)
             if "exclude_from_bom" in c["props"]:
@@ -404,7 +401,7 @@ def export_dsn(pcb_path, dsn_path):
     first; otherwise the router may not run tracks through them or reach pads inside them.  The file is not saved."""
     b = pcbnew.LoadBoard(pcb_path)
     for z in list(b.Zones()):
-        if z.GetIsRuleArea() and z.GetDoNotAllowCopperPour() and not (
+        if z.GetIsRuleArea() and z.GetDoNotAllowZoneFills() and not (
                 z.GetDoNotAllowTracks() or z.GetDoNotAllowVias() or z.GetDoNotAllowPads()):
             b.Delete(z)
     if not pcbnew.ExportSpecctraDSN(b, dsn_path):

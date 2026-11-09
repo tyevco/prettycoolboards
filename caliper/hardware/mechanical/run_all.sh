@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Regenerate every mechanical output (WSL: KiCad 9 pcbnew + build123d + matplotlib in ~/.venvs/dial-me-spinner).
+# Regenerate every mechanical output (WSL: KiCad 10 pcbnew + build123d + matplotlib in ~/.venvs/dial-me-spinner).
 #   bash caliper/hardware/mechanical/run_all.sh
 # The FEA runs on the Windows Python with the print-stress skill, after this script (it reads step/):
 #   py fea_jaw.py          # moving jaw          -> fea_jaw_output.txt, renders/fea_jaw.png

@@ -1,4 +1,4 @@
-"""Generate KiCad 9 hierarchical schematics from a Python netlist description.
+"""Generate KiCad 10 hierarchical schematics from a Python netlist description.
 
 The sheets are DRAWN, not just labelled: connected pins are joined by wires that a reader can follow by eye
 (tools/README.md, "Wiring rule", R1-R6). schplace.py does the work:
@@ -44,6 +44,10 @@ GENERIC_POWER = "power:VCC"
 # Namespace prefix for the deterministic uuid5s of every schematic item. Each project sets its own
 # (set_uuid_namespace) so two projects' sheets never share UUIDs.
 UUID_NAMESPACE = "dial-me-spinner"
+# KiCad 10 file format (eeschema 10.0.x writes version 20260306). The writer emits what KiCad 10 itself writes,
+# so a load + save in KiCad 10 changes nothing but token order and formatting.
+SCH_VERSION = "20260306"
+GENERATOR_VERSION = "10.0"
 
 PAPERS = [("A3", 420.0, 297.0), ("A2", 594.0, 420.0), ("A1", 841.0, 594.0), ("A0", 1189.0, 841.0)]
 
@@ -266,7 +270,7 @@ class Design:
 
     def _root(self):
         items = [
-            "kicad_sch", ["version", "20250114"], ["generator", Q("eeschema")], ["generator_version", Q("9.0")],
+            "kicad_sch", ["version", SCH_VERSION], ["generator", Q("eeschema")], ["generator_version", Q(GENERATOR_VERSION)],
             ["uuid", Q(self.root_uuid)], ["paper", Q("A3")], self._title_block(self.title), ["lib_symbols"],
         ]
         cols = 3
@@ -278,7 +282,7 @@ class Design:
                 "sheet", ["at", x, y], ["size", w, h],
                 ["exclude_from_sim", "no"], ["in_bom", "yes"], ["on_board", "yes"], ["dnp", "no"],
                 ["fields_autoplaced", "yes"],
-                ["stroke", ["width", 0.1524], ["type", "solid"]], ["fill", ["color", 0, 0, 0, "0.0000"]],
+                ["stroke", ["width", 0.1524], ["type", "solid"]], ["fill", ["color", 0, 0, 0, 0]],
                 ["uuid", Q(s.uuid)],
                 ["property", Q("Sheetname"), Q(s.title), ["at", x, round(y - 0.7116, 4), 0],
                  ["effects", ["font", ["size", 2.54, 2.54], ["bold", "yes"]], ["justify", "left", "bottom"]]],
@@ -291,8 +295,7 @@ class Design:
             items.append(_text(note, 25.4, y_notes, _uid("rootnote", k)))
             y_notes += 6 + 2.2 * note.count("\n")
         items.append(["sheet_instances", ["path", Q("/"), ["page", Q("1")]]])
-        items.append(["embedded_fonts", "no"])
-        return items
+        return _k10(items)   # KiCad 10 drops the file-level (embedded_fonts no)
 
     def _write_pro(self, outdir):
         path = os.path.join(outdir, self.project + ".kicad_pro")
@@ -307,6 +310,29 @@ class Design:
         with open(path, "w", encoding="utf-8") as f:
             json.dump(pro, f, indent=2)
             f.write("\n")
+
+
+def _ds(v):
+    """A datasheet as KiCad 10 stores it: KiCad 9's "~" (none) is written as ""."""
+    return "" if not v or v == "~" else v
+
+
+def _k10(node):
+    """KiCad 10 property layout, in place: a hidden property carries (hide yes) itself, not inside its effects,
+    followed by the (show_name no) (do_not_autoplace no) flags KiCad 10 always writes."""
+    if isinstance(node, list):
+        for child in node:
+            _k10(child)
+        if node and node[0] == "property" and not any(isinstance(c, list) and c and c[0] == "show_name"
+                                                     for c in node):
+            eff = next((c for c in node if isinstance(c, list) and c and c[0] == "effects"), None)
+            hidden = eff is not None and ["hide", "yes"] in eff
+            if hidden:
+                eff.remove(["hide", "yes"])
+            at = next((i for i, c in enumerate(node) if isinstance(c, list) and c and c[0] == "at"), None)
+            pos = (at + 1) if at is not None else 3
+            node[pos:pos] = ([["hide", "yes"]] if hidden else []) + [["show_name", "no"], ["do_not_autoplace", "no"]]
+    return node
 
 
 def _write_table(path, head, libs):
@@ -750,7 +776,7 @@ def _emit_sheet(d: Design, plan: SheetPlan, page: int):
         return ["text", Q(t), ["exclude_from_sim", "no"], ["at", snap(x), snap(y), 0], eff, ["uuid", Q(uid)]]
     for k, n in enumerate(s.notes):
         items.append(_text(n, 15.24, 8.0 + 6 * k, _uid(s.name, "note", k)))
-    nlab = {}
+    nlab, nwire = {}, {}
     for ci, c in enumerate(plan.clusters):
         for kind, t, x, y in c.header:
             if kind == "title":
@@ -776,7 +802,10 @@ def _emit_sheet(d: Design, plan: SheetPlan, page: int):
             elif it.kind == "nc":
                 items.append(["no_connect", ["at", it.x, it.y], ["uuid", Q(_uid(s.name, "nc", it.x, it.y))]])
         for key in sorted(c.segs):
-            for k, (a, b) in enumerate(c.segs[key]):
+            for a, b in c.segs[key]:
+                # numbered per sheet, not per cluster: a net drawn in two clusters of one sheet used to give two
+                # wires the same uuid (KiCad renumbers them on load, so `sch upgrade` was not a no-op)
+                k = nwire[key] = nwire.get(key, -1) + 1
                 items.append(["wire", ["pts", ["xy", a[0], a[1]], ["xy", b[0], b[1]]],
                               ["stroke", ["width", 0], ["type", "default"]],
                               ["uuid", Q(_uid(s.name, "w", key, k))]])
@@ -785,10 +814,10 @@ def _emit_sheet(d: Design, plan: SheetPlan, page: int):
                           ["uuid", Q(_uid(s.name, "j", x, y))]])
     lib_symbols = ["lib_symbols"] + [symlib.get(l).embedded() for l in sorted(lib_ids)]
     head = [
-        "kicad_sch", ["version", "20250114"], ["generator", Q("eeschema")], ["generator_version", Q("9.0")],
+        "kicad_sch", ["version", SCH_VERSION], ["generator", Q("eeschema")], ["generator_version", Q(GENERATOR_VERSION)],
         ["uuid", Q(s.uuid)], ["paper", Q(plan.paper)], d._title_block(s.title), lib_symbols,
     ]
-    return head + items + [["embedded_fonts", "no"]]
+    return _k10(head + items)
 
 
 def _emit_symbol(d: Design, s: Sheet, ps):
@@ -811,14 +840,15 @@ def _emit_symbol(d: Design, s: Sheet, ps):
     inst = ["symbol", ["lib_id", Q(p.lib_id)], ["at", ox, oy, ps.rot]]
     if ps.mirror:
         inst.append(["mirror", "y"])
-    inst += [["unit", p.unit],
+    inst += [["unit", p.unit], ["body_style", 1],
              ["exclude_from_sim", "no"], ["in_bom", "yes" if p.in_bom else "no"],
-             ["on_board", "yes" if p.on_board else "no"], ["dnp", "yes" if p.dnp else "no"],
+             ["on_board", "yes" if p.on_board else "no"], ["in_pos_files", "yes"],
+             ["dnp", "yes" if p.dnp else "no"],
              ["uuid", Q(uid)],
              prop("Reference", p.ref, fl["Reference"][0], just=fl["Reference"][1]),
              prop("Value", p.value, fl["Value"][0], just=fl["Value"][1]),
              prop("Footprint", p.footprint or sym.prop("Footprint"), [ox, oy, 0], hide=True),
-             prop("Datasheet", p.datasheet or sym.prop("Datasheet") or "~", [ox, oy, 0], hide=True),
+             prop("Datasheet", _ds(p.datasheet or sym.prop("Datasheet")), [ox, oy, 0], hide=True),
              prop("Description", p.description or sym.prop("Description"), [ox, oy, 0], hide=True)]
     for k, v in p.fields.items():
         if v:
@@ -851,8 +881,8 @@ def _emit_power(d: Design, s: Sheet, pw, page: int, n: int):
         ["justify", vj[0]] if dy < 0 else ["justify", vj[1]]
     uid = _uid(s.name, "pwr", pw.net, x, y)
     return [
-        "symbol", ["lib_id", Q(lib_id)], ["at", x, y, rot], ["unit", 1],
-        ["exclude_from_sim", "no"], ["in_bom", "yes"], ["on_board", "yes"], ["dnp", "no"],
+        "symbol", ["lib_id", Q(lib_id)], ["at", x, y, rot], ["unit", 1], ["body_style", 1],
+        ["exclude_from_sim", "no"], ["in_bom", "yes"], ["on_board", "yes"], ["in_pos_files", "yes"], ["dnp", "no"],
         ["uuid", Q(uid)],
         ["property", Q("Reference"), Q(ref), ["at", x, y, 0], ["effects", ["font", ["size", FONT, FONT]], ["hide", "yes"]]],
         ["property", Q("Value"), Q(pw.net), ["at", round(x + vx, 4), round(y + vy, 4), rot % 180],

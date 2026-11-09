@@ -2,6 +2,7 @@
 """Prove two KiCad netlists are electrically identical (the schgen equivalence gate).
 
 usage: python3 tools/netlist_diff.py OLD.net NEW.net [--allow-rename] [--strict-fields]
+                                     [--pin-rename REF:OLD=NEW ...]
 
 Compares, from the `kicad-cli sch export netlist` (KiCad s-expression) format:
   * nets: the same set of nets, each with the same set of (ref, pin) members. A net is matched by its member
@@ -9,6 +10,10 @@ Compares, from the `kicad-cli sch export netlist` (KiCad s-expression) format:
     local nets, i.e. names that KiCad prefixed with a sheet path or auto-named "Net-(...)").
   * components: the same refs, each with the same value, footprint, DNP/BOM/board flags and BOM fields
     (MPN, Manufacturer, LCSC, ...). With --strict-fields every field and property must match too.
+  * --pin-rename REF:OLD=NEW maps a pin of the old netlist to its new number before comparing (a library update that
+    renumbered a pin, e.g. KiCad 10's USB-C shield S1 -> SH); each mapping used is reported as a NOTE.
+
+A Datasheet of "~" (KiCad's "empty") equals an empty one: KiCad 9 exported "~", KiCad 10 exports "".
 
 Exit 0 when identical, 1 with a list of differences otherwise. Positions, UUIDs, sheet paths and the like are
 ignored: they change whenever the schematic is redrawn.
@@ -45,6 +50,8 @@ def load(path: str):
         flds = find(c, "fields")
         info["fields"] = {str(find(f, "name")[1]): str(f[2]) if len(f) > 2 else ""
                           for f in find_all(flds, "field")} if flds else {}
+        if info["fields"].get("Datasheet") == "~":
+            info["fields"]["Datasheet"] = ""
         info["props"] = {str(find(p, "name")[1]): str(find(p, "value")[1]) if find(p, "value") else ""
                          for p in find_all(c, "property") if str(find(p, "name")[1]) not in _LAYOUT_PROPS}
         comps[ref] = info
@@ -55,10 +62,22 @@ def is_local_name(name: str) -> bool:
     return name.startswith("/") or name.startswith("Net-(")
 
 
-def diff(old_path: str, new_path: str, allow_rename: bool = False, strict_fields: bool = False):
+def diff(old_path: str, new_path: str, allow_rename: bool = False, strict_fields: bool = False,
+         pin_rename: dict | None = None):
     on, oc = load(old_path)
     nn, nc = load(new_path)
     errs, notes = [], []
+    if pin_rename:
+        used = set()
+        for name, mem in on.items():
+            new_mem = frozenset(pin_rename.get(m, m) for m in mem)
+            used |= {m for m in mem if m in pin_rename}
+            on[name] = new_mem
+        for (ref, old), (_, new) in sorted(pin_rename.items()):
+            if (ref, old) in used:
+                notes.append(f"pin renamed: {ref}.{old} -> {ref}.{new}")
+            else:
+                errs.append(f"--pin-rename {ref}:{old}={new}: no such pin in the old netlist")
 
     by_members_new = {}
     for name, mem in nn.items():
@@ -119,8 +138,17 @@ def main(argv=None):
     ap.add_argument("new")
     ap.add_argument("--allow-rename", action="store_true", help="accept renamed local nets (reported)")
     ap.add_argument("--strict-fields", action="store_true", help="every component property must match")
+    ap.add_argument("--pin-rename", action="append", default=[], metavar="REF:OLD=NEW",
+                    help="the old netlist's pin OLD of REF is NEW in the new one (a library renumbering)")
     a = ap.parse_args(argv)
-    errs, notes, stats = diff(a.old, a.new, a.allow_rename, a.strict_fields)
+    ren = {}
+    for spec in a.pin_rename:
+        ref, _, rest = spec.partition(":")
+        old, _, new = rest.partition("=")
+        if not (ref and old and new):
+            ap.error(f"--pin-rename {spec!r}: expected REF:OLD=NEW")
+        ren[(ref, old)] = (ref, new)
+    errs, notes, stats = diff(a.old, a.new, a.allow_rename, a.strict_fields, ren)
     print(f"{a.old} -> {a.new}")
     print("  nets {0[0]} -> {0[1]}, components {1[0]} -> {1[1]}, net members {2[0]} -> {2[1]}".format(
         stats["nets"], stats["components"], stats["pins"]))

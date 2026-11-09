@@ -2,7 +2,7 @@
 
 Pinout: Espressif "ESP32-S3-MINI-1 & MINI-1U Datasheet" v1.7, Table "Pin Definitions" (pads 1-65; 23 = IO19/USB_D-,
 24 = IO20/USB_D+, 39 TXD0 = GPIO43, 40 RXD0 = GPIO44, 41 IO45, 44 IO46, 45 EN, 1/2/42/43/46-65 GND).
-KiCad 9's RF_Module:ESP32-S3-MINI-1 symbol matches pad for pad (it names pads 23/24 USB_D-/USB_D+, which
+KiCad's RF_Module:ESP32-S3-MINI-1 symbol (9.0.9 and 10.0.8) matches pad for pad (it names pads 23/24 USB_D-/USB_D+, which
 _PIN_ALIAS maps back to the IO19/IO20 keys of nets.MCU_PINS). Its default footprint is
 RF_Module:ESP32-S2-MINI-1: the S2-MINI-1 and S3-MINI-1 share the 15.4 x 20.5 mm, 65-pad land pattern
 (S3-MINI-1 datasheet §11.1 "PCB Land Pattern", Fig. 11-1). The KiCad footprint has NO antenna keep-out zone (and
