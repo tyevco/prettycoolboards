@@ -8,7 +8,7 @@ Open the order's placement preview at JLC and look at each part below. Tick it w
 
 ## Uncertain correction
 
-- [ ] **BZ50** (C910763, top, rot 0): yellow db correction (auto): polarity decided by pad numbers only (rot 180 also lands both pads, and no pin names or drawn + confirm it): check the polarity mark in JLC's preview
+- [ ] **BZ50** (C910763, top, rot 0): yellow db correction (manual): polarity decided by pad numbers only (rot 180 also lands both pads, and no pin names or drawn + confirm it): check the polarity mark in JLC's preview
 
 ## Bottom reading
 

@@ -6,7 +6,7 @@
 > architecture of record and [Schematics and boards §7](electronics.md#_7-layout) for the layout and its DRC status.
 >
 > Both packages pass `release.py` (2026-11-08): the DRC/parity gate and the **jlcplace placement gate** (§6; slider
-> 101 CPL rows: 0 red, 1 yellow, 100 green; scale: no parts, 0 red). The slider was review-only until J50 got the
+> 102 CPL rows after the 2026-11-08 phase-4 fixes: 0 red, 0 yellow, 102 green; scale: no parts, 0 red). The slider was review-only until J50 got the
 > C2911931 vendor land (SPEC §12). Still designed, not built: buy the display panel and check it (§1), give the
 > machine routing a hand review (§5) and work through the preview checklist (§6) before ordering.
 
@@ -35,15 +35,15 @@ Rev A is two PCBs, a bought display panel, a LiPo cell, a magnetic tape and the 
 | Layers | 4 |
 | Dimensions | 74 × 34 mm (62 × 34 body plus two 6 × 14 mm end tabs) |
 | Thickness | **1.0 mm** |
-| Stack-up | JLC's standard **symmetric** 1.0 mm 4-layer impedance stack. The layout assumed a ~0.1 mm L1–L2 prepreg; read the exact stack ID and dielectric from JLC's impedance calculator when ordering |
-| Impedance control | **no** (layout review 2026-11-08). USB_DP / USB_DM are full-speed (12 Mb/s) and run as a 0.14 mm pair mostly on L4 (B.Cu) over an In2 GND strip, not as an L1-over-L2 microstrip, so the 90 Ω L1 estimate the class width came from does not describe them and there is nothing for JLC to tune. Full-speed USB tolerates this ([Schematics and boards §7.5](electronics.md#_7-5-routing-result-slider)) |
+| Stack-up | **JLC04101H-3313**: JLC's symmetric 1.0 mm 4-layer construction with one 3313 prepreg (0.0994 mm, εr 4.1) between each outer and inner layer. The board file carries this stack (`layout.py` `SLIDER_STACKUP`) and `ORDER-NOTES.md` names it; select it in the order's stack-up option |
+| Impedance control | **no**: USB_DP / USB_DM are full-speed (12 Mb/s), where it would buy nothing. The pair (0.16 mm tracks, 0.16 mm gap, mostly on L4 over an In2 GND strip, the same structure as L1 over L2 in this symmetric stack) is 89 Ω differential on JLC04101H-3313 by a 2D field solve ([Schematics and boards §7.1](electronics.md#_7-1-stack-up-and-rules-slider)) |
 | Surface finish | **ENIG** (0.4 mm-pitch DSBGA, LGA module, bare electrode copper) |
 | Copper | 1 oz outer, 0.5 oz inner |
 | Min via | 0.40 / 0.20 mm (signal), 0.45–0.50 / 0.20–0.25 mm (power/GND) |
 | Mask / silk | green / white, both sides |
 | Remark (paste into the order) | "Flatness: bow/twist ≤ 0.03 mm over the lower 20 mm band (y 0–20, incl. the end tabs), 100 % inspected, reject above. Copper is poured on all four layers there, wherever the routing leaves room, on purpose. Bottom electrode area: mask opened per finger, bare ENIG, no paste." IPC-6012 class 2 allows 0.75 % (0.55 mm here), so this needs JLC to agree (and may need a quote) |
-| Assembly | PCBA, **both sides**: top = everything placed; bottom = U30, C30, C31 (beam band) and C21, C23 (0402, under the module). Alternatively order top-only and hand-solder the five bottom parts |
-| BOM / CPL | `prettycool-caliper-slider-BOM-JLCPCB.csv`, `prettycool-caliper-slider-CPL-JLCPCB.csv`. The CPL is written by `jlcplace cpl` from the Gerbers' (0, 0) with JLC's EasyEDA rotation/origin corrections (`caliper/hardware/design/jlcplace-db/`) and passes the jlcplace check: 0 red, 1 yellow (BZ50 polarity), 100 green (§6). In JLC's placement preview, work through `jlcplace-checklist.md` (BZ50's polarity, U30's bottom-side reading) and still glance at every IC and connector |
+| Assembly | PCBA, **both sides**: top = everything placed; bottom = U30, C30, C31 (beam band) and C21, C23, R85, C44 (0402, under the module: its 3V3 decoupling and the ADC input's RC filter). Alternatively order top-only and hand-solder the seven bottom parts |
+| BOM / CPL | `prettycool-caliper-slider-BOM-JLCPCB.csv`, `prettycool-caliper-slider-CPL-JLCPCB.csv`. The CPL is written by `jlcplace cpl` from the Gerbers' (0, 0) with JLC's EasyEDA rotation/origin corrections (`caliper/hardware/design/jlcplace-db/`) and passes the jlcplace check: 102 rows, 0 red, 0 yellow, 102 green (§6; BZ50 is a recorded non-polar decision, but jlcplace 0.2.1 still lists it on the preview checklist). In JLC's placement preview, work through `jlcplace-checklist.md` (U30's bottom-side reading; BZ50 either way round) and still glance at every IC and connector |
 | Not placed | E40 (the electrode comb is copper, not a part), the 19 test pads, H1–H5, the fiducials. DNP list: see `ORDER-NOTES.md` |
 
 ## 3. JLCPCB settings: scale board
@@ -125,21 +125,25 @@ The scale has no parts. It is checked with an empty CPL, which is not shipped: n
 `jlcplace-report.html` draws the EasyEDA pad outlines (JLCEDA/EasyEDA Official Library). It is for your own review,
 so it is git-ignored and never published. Open it locally after a release.
 
-**Result 2026-11-08** (jlcplace 0.2.1; the same on the KiCad 9.0.9 board and after the move to KiCad 10.0.8):
+**Result 2026-11-08** (jlcplace 0.2.1, KiCad 10.0.8 board after the layout review: C13 added, R85/C44 on the bottom, BZ50 decided):
 
 | Board | Rows | Red | Yellow | Green | Preview checklist |
 |---|---|---|---|---|---|
-| slider | 101 | 0 | 1 | 100 | BZ50 polarity; U30 bottom-side reading |
+| slider | 102 | 0 | 0 | 102 | U30 bottom-side reading; BZ50 still listed (non-polar, either way) |
 | scale | 0 (no parts) | 0 | 0 | 0 | nothing (origin: the Gerbers' (0, 0) is the aux origin) |
 
 * **BZ50** (C910763, piezo): every pad lands as the correction puts it, but EasyEDA's footprint draws no "+" and names
-  no pins, so only the pad numbers decide which way round it goes. Check its polarity mark in JLC's preview.
+  no pins, so only the pad numbers decide which way round it goes. That does not matter: the PKMCS0909E4000-R1 is
+  non-polar (a piezo diaphragm, driven both ways in Murata's own SPL test; no + or pin-1 mark on the part or in its
+  drawings). This is recorded as a manual decision in the database (2026-11-08, `jlcplace confirm --source manual`),
+  so the row is green; jlcplace 0.2.1 still prints the stored fit doubt on the checklist, where either orientation
+  passes.
 * **U30** (AS5311, bottom): green under the bottom-side reading every open tool uses (`jlc-2022`). JLC does not
   document how it reads a bottom-side angle; under either "+180" reading pin 1 would sit on pad 11. It is the only
-  bottom part that depends on the reading: the other four (C21, C23, C30, C31) are non-polar two-pad capacitors.
+  bottom part that depends on the reading: the other six (C21, C23, C30, C31, C44, R85) are non-polar two-pad parts.
 
-No part needed a manual decision (`jlcplace confirm --source manual`): nothing was red. After checking the preview,
-record what it showed in the database, with the CPL that was uploaded, and commit it:
+Only BZ50 has a manual decision (above); nothing was red. After checking the preview, record what it showed in the
+database, with the CPL that was uploaded, and commit it:
 
 ```sh
 jlcplace confirm caliper/hardware/kicad/slider/prettycool-caliper-slider.kicad_pcb --ref BZ50 --ref U30     --db caliper/hardware/design/jlcplace-db --by <name> --source preview     --cpl caliper/hardware/fab/slider/prettycool-caliper-slider-CPL-JLCPCB.csv     --gerbers caliper/hardware/fab/slider/gerbers.zip

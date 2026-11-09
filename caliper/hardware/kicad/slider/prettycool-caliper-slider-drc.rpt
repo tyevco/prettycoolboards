@@ -1,38 +1,32 @@
 ** Drc report for prettycool-caliper-slider.kicad_pcb **
-** Created on 2026-11-08T14:42:12 **
+** Created on 2026-11-09T01:51:30 **
 ** Report includes: Errors, Warnings, Exclusions **
 
-** Found 10 DRC violations **
-[lib_footprint_mismatch]: Footprint 'Fiducial_1mm_Mask2mm' does not match copy in library 'Fiducial'
-    Local override; warning
-    @(160.5000 mm, 98.8000 mm): Footprint FID2
-[lib_footprint_mismatch]: Footprint 'Fiducial_1mm_Mask2mm' does not match copy in library 'Fiducial'
-    Local override; warning
-    @(133.0000 mm, 72.4000 mm): Footprint FID3
-[lib_footprint_mismatch]: Footprint 'MountingHole_2.2mm_M2_Pad_Via' does not match copy in library 'MountingHole'
-    Local override; warning
-    @(96.5000 mm, 86.0000 mm): Footprint H3
+** Found 8 DRC violations **
 [lib_footprint_mismatch]: Footprint 'ESP32-S2-MINI-1' does not match copy in library 'RF_Module'
     Local override; warning
     @(107.8500 mm, 75.7500 mm): Footprint U10
 [lib_footprint_mismatch]: Footprint 'MountingHole_2.2mm_M2_Pad_Via' does not match copy in library 'MountingHole'
     Local override; warning
-    @(165.5000 mm, 86.0000 mm): Footprint H5
-[lib_footprint_mismatch]: Footprint 'Fiducial_1mm_Mask2mm' does not match copy in library 'Fiducial'
-    Local override; warning
-    @(102.0000 mm, 98.5000 mm): Footprint FID1
-[lib_footprint_mismatch]: Footprint 'MountingHole_2.2mm_M2_Pad_Via' does not match copy in library 'MountingHole'
-    Local override; warning
-    @(96.5000 mm, 94.5000 mm): Footprint H2
-[lib_footprint_mismatch]: Footprint 'MountingHole_2.2mm_M2_Pad_Via' does not match copy in library 'MountingHole'
-    Local override; warning
     @(165.5000 mm, 94.5000 mm): Footprint H4
+[lib_footprint_mismatch]: Footprint 'MountingHole_2.2mm_M2_Pad_Via' does not match copy in library 'MountingHole'
+    Local override; warning
+    @(96.5000 mm, 86.0000 mm): Footprint H3
+[lib_footprint_mismatch]: Footprint 'MountingHole_2.2mm_M2_Pad_Via' does not match copy in library 'MountingHole'
+    Local override; warning
+    @(165.5000 mm, 86.0000 mm): Footprint H5
 [lib_footprint_mismatch]: Footprint 'USB_C_Receptacle_HRO_TYPE-C-31-M-12' does not match copy in library 'Connector_USB'
     Local override; warning
     @(159.3000 mm, 73.5000 mm): Footprint J1
+[lib_footprint_mismatch]: Footprint 'MountingHole_2.2mm_M2_Pad_Via' does not match copy in library 'MountingHole'
+    Local override; warning
+    @(96.5000 mm, 94.5000 mm): Footprint H2
 [lib_footprint_mismatch]: Footprint 'Caliper_CapTX_Electrode_Seed_8Phase_P0.635mm' does not match copy in library 'caliper'
     Local override; warning
     @(110.8300 mm, 84.5500 mm): Footprint E40
+[track_dangling]: Track has unconnected end
+    Local override; warning
+    @(116.6500 mm, 78.2250 mm): Track [I2C_SCL] on B.Cu, length 0.8174 mm
 
 ** Found 0 unconnected pads **
 

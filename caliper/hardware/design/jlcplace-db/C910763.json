@@ -60,10 +60,29 @@
     "polarity decided by pad numbers only (rot 180 also lands both pads, and no pin names or drawn + confirm it): check the polarity mark in JLC's preview",
     "rms 0.350 mm: the land patterns differ (every pad lands)"
    ],
-   "status": "auto",
+   "status": "manual",
    "tool": "jlcplace 0.2.1",
    "verdict": "yellow",
-   "verifications": []
+   "verifications": [
+    {
+     "board": "prettycool-caliper-slider.kicad_pcb",
+     "by": "Claude (datasheet review)",
+     "correction": {
+      "dx": -0.0001,
+      "dy": -0.0001,
+      "mirror": false,
+      "rot": 0.0
+     },
+     "date": "2026-11-08",
+     "layer": "top",
+     "note": "Non-polar: Murata PKMCS0909E4000-R1 is an externally driven piezo sounder (a piezo diaphragm, i.e. a capacitor). Murata datasheet (product search data sheet, updated 2025-03-11) and flyer (PKMCS0909E4000-R1_Flyer_V1, 2014): no +/pin-1 mark on the part or in the dimension/land drawing, the two terminals are identical and symmetric, the sound-emitting hole location is not specified; rated +/-12.5 Vo-p max, SPL measured at +/-1.5 Vo-p square wave (bipolar AC drive). Either 180-degree orientation is electrically the same.",
+     "ok": true,
+     "presses": null,
+     "ref": "BZ50",
+     "rotation": 0.0,
+     "source": "manual"
+    }
+   ]
   }
  ],
  "lcsc": "C910763"

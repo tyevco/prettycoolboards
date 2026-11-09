@@ -249,7 +249,9 @@ def build(d):
     d.group("UI rail +3V3_UI: TPS22917 (also on SNS_PWR_EN)",
             "LCD logic VDD (ST7789 sleep-in still draws 15+5 uA typ, DM-TFT114 §5.3) + WS2812 RGB LED: both off in deep sleep.\n"
             "Shares SNS_PWR_EN (no free GPIO): the rails are on together whenever the caliper is awake.\n"
+            "C13 1u at VIN (pin 1): the switch's own input cap (C5 is 12.5 mm away by copper).\n"
             "Firmware: drive the LCD_* lines and RGB_DIN low before switching off.")
+    cap(d, "C13", "1u", "+3V3", "GND", near="U6.1")
     d.add("U6", "Power_Management:TPS22917DBV", "TPS22917DBVR", "Package_TO_SOT_SMD:SOT-23-6",
           pins={"VIN": "+3V3", "GND": "GND", "ON": "SNS_PWR_EN", "CT": "UI_CT", "QOD": "+3V3_UI",
                 "VOUT": "+3V3_UI"},

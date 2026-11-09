@@ -124,14 +124,23 @@ def outside_jaw_pts(sign):
 
 
 def moving_inside_jaw_pts():
-    """Root flank relieved round the antenna corner (RF_CLEAR + IJ_RF_MARGIN), see params.py."""
-    return P.moving_inside_jaw_outline()
+    """The 2.4 plate's plan outline: the tip on a shoulder block (params.py, stiffening)."""
+    return P.moving_inside_jaw_block_outline()
+
+
+def moving_inside_jaw():
+    """The moving inside jaw as built: the 2.4 plate (IJ_MOVING_Z) plus the full-height gusset that the fixed
+    inside jaw never reaches.  Its material within RF_CLEAR + IJ_RF_MARGIN of the antenna prints in unfilled PA
+    (rf_modifier)."""
+    return prism(moving_inside_jaw_pts(), *P.IJ_MOVING_Z) + \
+        prism(P.moving_inside_jaw_gusset_outline(), P.IJ_MOVING_Z[0], P.IJ_GUSSET_Z1)
 
 
 def fixed_inside_jaw_pts():
     t0, t1, w = P.IJ_TIP_Y0, P.IJ_TIP_Y1, P.IJ_TIP_W
     yb = P.FJ_Y1 - 0.1
-    return [(0, t1), (w, t1), (w, t0), (-0.6, 24.2), (-0.6, yb), (-12.0, yb), (0, t0)]
+    (_xt, _yt), (xr, yr) = P.FIXED_IJ_FLANK
+    return [(0, t1), (w, t1), (w, t0), (xr, yr), (xr, yb), (-12.0, yb), (0, t0)]
 
 
 # ---------------------------------------------------------------------------
@@ -271,7 +280,7 @@ def slider_body(rev="A"):
         s -= c
     # jaws
     s += prism(outside_jaw_pts(+1), P.JAW_Z0, P.JAW_Z1)
-    s += prism(moving_inside_jaw_pts(), *P.IJ_MOVING_Z)
+    s += moving_inside_jaw()
     # fillets are left to the slicer / the machinist: the model keeps sharp edges so
     # that every face here is a datum the drawing can name.
     return s
@@ -290,13 +299,33 @@ def slider_body_b():
     return slider_body("B")
 
 
+def rf_zone(r, z0=P.Z_BACK, z1=P.Z_LID_IN):
+    """Everything within r (plan) of the antenna area: the area grown by r with round corners, z0..z1."""
+    a = P.ANTENNA
+    u0, u1, y0, y1 = bu(a[0]), bu(a[2]), a[1], a[3]
+    s = box(u0 - r, u1 + r, y0, y1, z0, z1) + box(u0, u1, y0 - r, y1 + r, z0, z1)
+    for u, y in ((u0, y0), (u0, y1), (u1, y0), (u1, y1)):
+        s += zcyl(u, y, 2 * r, z0, z1)
+    return s
+
+
 def rf_modifier():
-    """Slicer modifier volume: body material within RF_CLEAR (plan) of the antenna area, to be printed in
-    unfilled PA (PAHT) instead of PA-CF (SPEC D4).  The moving inside jaw (u < 6.4) stays PA-CF: its root
-    flank is relieved round the antenna corner instead (params.IJ_RF_MARGIN), so it clears RF_CLEAR."""
+    """Slicer modifier volume: body material near the antenna area, to be printed in unfilled PA (PAHT)
+    instead of PA-CF (SPEC D4).  Right of the inside jaw (u >= 6.4) it is the box RF_CLEAR round the area, as
+    before; on the moving inside jaw (u < 6.4: the shoulder block and its gusset reach the housing face at
+    u 6.4) it is the round-cornered zone RF_CLEAR + IJ_RF_MARGIN, so the jaw's PA-CF keeps 5.15 mm (plan)."""
     a = P.ANTENNA
     u0, u1 = max(bu(a[0]) - P.RF_CLEAR, P.STEP_U1), bu(a[2]) + P.RF_CLEAR
-    return box(u0, u1, a[1] - P.RF_CLEAR, a[3] + P.RF_CLEAR, P.Z_BACK, P.Z_LID_IN) & slider_body()
+    body = slider_body()
+    mod = box(u0, u1, a[1] - P.RF_CLEAR, a[3] + P.RF_CLEAR, P.Z_BACK, P.Z_LID_IN) & body
+    jaw = rf_zone(P.RF_CLEAR + P.IJ_RF_MARGIN) & box(-P.IJ_TIP_BASE_W - 1, P.STEP_U1, P.STEP_Y1 - 0.1, P.IJ_TIP_Y1 + 1,
+                                                       P.Z_BACK, P.Z_LID_IN) & body
+    return mod + jaw
+
+
+def moving_inside_jaw_pa_cf():
+    """The PA-CF part of the moving inside jaw: the jaw less its unfilled-PA modifier zone."""
+    return moving_inside_jaw() - rf_zone(P.RF_CLEAR + P.IJ_RF_MARGIN, P.Z_BACK - 1, P.Z_LID_IN + 1)
 
 
 # ---------------------------------------------------------------------------

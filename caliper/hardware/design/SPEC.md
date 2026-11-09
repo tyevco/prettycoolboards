@@ -41,8 +41,9 @@ two decoupling capacitors, inside y 2.4…9.6 and x 20…41, ≤ 1.30 mm tall** 
 y 1.9…10.1; x 20…41 is where the channel, beam x 28…200, stays under the board over the whole 0–151 mm travel),
 and **the electrodes** (§2.2 table) with their guard copper. Everything else on the bottom over y 0…20 is
 copper under solder mask, nothing proud of it. Bottom in y 22…34: flat test pads only (no parts; the battery is
-1.55 mm below), **except under the module** (x 1.8…4.4, y 24.8…27.0, left of the battery pocket): the module's
-100 nF + 10 µF decoupling C21 / C23, 0402, ≤ 0.55 mm tall against the 0.75 mm housing-floor gap there (§12).
+1.55 mm below), **except under the module** (x 1.8…4.4, y 22.7…27.0, left of the battery pocket): the module's
+100 nF + 10 µF decoupling C21 / C23 and the ADC input's RC filter R85 / C44, 0402, ≤ 0.55 mm tall against the
+0.75 mm housing-floor gap there (§12, §13).
 
 **Placement table (D4).** Centre coordinates in board mm; rotation in degrees as seen from the top, 0 = the
 footprint's own orientation; the layout script may move a part ≤ 1 mm without a SPEC change if every rule here
@@ -57,7 +58,7 @@ is given in the notes.
 | J50 | 13p 0.5 mm FPC, 2.0 tall, HDGC 0.5K-AX-13PWB (C2911931), bottom contact | top | 21.5 | 7.5 | contact row along y at x 23.35, opening toward −x; **pin 1 at y 10.5 (the +y end), pin 13 at y 4.5** | under the glass's −x end: the panel tail leaves the glass at x 17.5 and folds back under it into J50 (TVP: tail length of the bought panel). Land drawn from the vendor drawing (§12). **Tail orientation:** the fold turns the tail over, so the tail's contacts must face the viewer (the display side) when the panel lies flat, face up, tail toward −x; the fold keeps y, so the tail's pin 1 must be on its +y side (toward the buttons) |
 | — | Display glass (on the lid, not the board) | — | 33.0 | 10.0 | landscape, FPC at the −x end | glass 31.0 × 17.6 × 1.6: x 17.5…48.5, y 1.2…18.8; active area 24.91 × 14.86, centre (34.45, 10.0) (shifted 1.45 away from the FPC end, TVP); lid end ribs x 16.15…17.5 and 48.5…49.85 |
 | J1 | USB-C HRO TYPE-C-31-M-12, top-mount | top | 59.3 | 26.5 | opening toward +x | shell x 55.65…63.0 (1.0 mm past the edge), y 22.03…30.97, h 3.26 (mechanics DEV-4: y 26.5) |
-| U1, D1 | USBLC6-2SC6, SMF5.0A | top | 50.2 / 51.3 | 26.3 / 22.0 | | within 5 mm of J1's pads (draft: both at (53.0, 24.0) in x 50.5…55.0, y 21.0…27.0). U1 sits on the USB pair, which runs on B.Cu along y 19.2…19.6 over an In2 GND strip |
+| U1, D1 | USBLC6-2SC6, SMF5.0A | top | 50.2 / 52.7 | 26.3 / 19.95 | D1 180: VBUS pad 1 east | within 5 mm of J1's pads (draft: both at (53.0, 24.0) in x 50.5…55.0, y 21.0…27.0). U1 sits on the USB pair, which runs on B.Cu along y 19.2…19.6 over an In2 GND strip; D1 (moved from (51.3, 22.0), §13) sits on the VBUS trunk: both J1 VBUS pad pairs land on its pad 1, the run to C1 / U2 leaves from it |
 | SW50 | ZERO, TS-1088 3.9 × 2.9 × 2.0 | top | 31.0 | 31.0 | 0 | cap stem Ø3.5 at slider u 39 |
 | SW51 | HOLD/SEND | top | 38.5 | 31.0 | 0 | u 46.5. The mechanics' x 18.5 (DEV-5) only kept the cap off the old portrait glass; with the landscape glass that x is inside the antenna clearance, so it moves here (the cap still clears the glass rib, y ≥ 28 vs ≤ 20.15) |
 | SW52 | MODE | top | 46.0 | 31.0 | 0 | u 54; courtyard x ≤ 49, clear of J1 (x ≥ 53.7) and the antenna |
@@ -67,10 +68,12 @@ is given in the notes.
 | Q1, R10 | AO3401A battery reverse-polarity P-FET, 10 k gate resistor | top | 25.1 / 22.5 | 25.1 / 23.5 | Q1 90: drain pad up, under J2 pin 1 | §3. Q1's drain pad is 2.5 mm below J2 pin 1 (25.0, 28.6) |
 | BZ50 | PKMCS0909E piezo, 1.9 tall | top | 40.0 | 24.3 | 0 | courtyard x 34.75…45.25, y 19.55…29.05; sound port in the lid at u 48 |
 | U60 | LIS2DW12 | top | 30.0 | 23.5 | | ≥ 15 mm from L1 |
-| U2, U3, L1, U5, U6, C1–C6, C8–C12, R3–R5 | charger / buck-boost / rail-switch cluster | top | 56.0 | 11.0 | | inside x 50.5…61.5, y 2.5…20.5 (not under the glass; ≤ 4.2), except C8 (51.3, 1.55) and C10 (49.75, 5.5), held ≤ 2 mm from U5 and up to 0.95 outside the box. L1 and the U3 switch nodes ≥ 10 mm from U40 and the RX feed |
+| U2, U3, L1, U5, U6, C1–C6, C8–C13, R3–R5 | charger / buck-boost / rail-switch cluster | top | 56.0 | 11.0 | | inside x 50.5…61.5, y 2.5…20.5 (not under the glass; ≤ 4.2), except C8 (51.3, 1.55) and C10 (49.75, 5.5), held ≤ 2 mm from U5 and up to 0.95 outside the box. L1 and the U3 switch nodes ≥ 10 mm from U40 and the RX feed |
 | U4, C7 | MAX17048 fuel gauge + its VBAT cap | top | 29.6 / 27.37 | 27.2 / 26.3 | C7 90 | beside J2 (draft: in the cluster above); C7 left of U4's VBAT pins 2/3 |
 | R6–R9 | I2C pull-ups (R6, R7, **2.2 k**) and the CHG_INT_N / FG_ALRT_N pull-ups (R8, R9) | top | 5.1…9.0 | 3.7…5.8 | | below the module, left of the glass (draft: in the cluster) |
 | C21, C23 | module 100 nF / 10 µF, 0402 (0.5 mm) | **bottom** | 3.1 | 26.5 / 25.3 | 0; +3V3 pad toward x 2.6 | under the module, either side of pad 3's escape via (2.0, 25.95): their +3V3 pads are 1.9 mm from pad 3 (0.85, 25.95). Pad 3 is 0.45 mm from the left edge and the antenna keep-out is above it, so the top has no closer spot (§12) |
+| R85, C44 | CAP_RX anti-alias RC (3.9 k / 100 pF C0G), 0402 (0.5 mm) | **bottom** | 3.3 | 24.25 / 23.25 | R85 180, C44 0: their CAP_RX pads toward x 2.8 | under the module below C23, beside GPIO1's escape via (2.0, 24.25): the RC sits at the ADC input and the long run is CAP_LP1 (§13; they were at U40, 40 mm of track from GPIO1) |
+| C13 | U6 (+3V3_UI switch) input cap, 1 µF 0402 | top | 52.25 | 10.3 | 0 | under U6's VIN / GND pins (§13) |
 | C20 | module 22 µF bulk, 0603 | top | ≈ 2.75 | ≈ 5.5 | | below the module, about 20 mm from pad 3, fed through the In2 +3V3 pour (the bulk; the 100 n / 10 µ above do the local decoupling) |
 | U30 | AS5311 TSSOP-20 | **bottom** | 31.0 | 6.0 | long axis along X | body x 27.75…34.25, leads y 2.8…9.2, A ≤ 1.20 |
 | C30, C31 (AS5311 100 nF, 1 µF) | 0402 | **bottom** | 35.45 / 36.5 | 8.6 / 6.0 | (C30 draft: 25.5, 6.0, 8.1 mm from the VDD pins) | inside the channel window above; the MagINC/MagDEC pull-ups and TP30–32 go on top |
@@ -173,11 +176,13 @@ USB-C VBUS ─ ESD/TVS ─ BQ25180 (VIN) ─┬─ SYS → VSYS ─┬─ TPS638
   32 mW at TJ 125 °C. At a full cell (VGS −4.2 V) ≤ 30 mV / 15 mW. Charging at 250 mA: ≤ 21 mV / 5 mW; the charger
   regulates VBAT at its own pin, so in CC the cell sits up to 21 mV lower and in CV the drop fades with the current.
   The fuel gauge reads the cell through Q1, so under load it reads up to the same drop low (TVP).
-  **Board copper on top of Q1 (as routed 2026-11-08, estimate):** VBAT runs from Q1's source to U2 BAT / C3 as a
-  0.30 mm track, ≈ 1.7 mm F.Cu, 18.9 mm B.Cu, 10.3 mm In2 (0.5 oz) and ≈ 9 mm F.Cu, with three layer changes on one
-  0.25 mm via each: ≈ 0.09 Ω, so ≈ 45 mV more between the cell and the charger's BAT/SYS path at 0.5 A (hwtools
-  boardcheck + hand trace). The whole system current takes this path when USB is absent. A later layout pass should
-  pre-route VBAT like VBUS (0.5–0.8 mm on the outer layers, ≥ 2 vias per layer change, no 0.5 oz In2 leg); open (§11).
+  **Board copper on top of Q1 (pre-routed 2026-11-08, §13; estimate, not measured):** VBAT runs from Q1's source to
+  U2 BAT / C3 as a locked trunk: Q1's source pad on F.Cu, 3 vias, a 2.0 mm B.Cu riser to a 2.1 mm B.Cu band along
+  the top edge (a 1.3 mm F.Cu strip in parallel over x 28…48.6), a 1.9 mm B.Cu riser down x 58.4 between J1's shell
+  tabs (band and riser doubled on 0.5 oz In2), 4 vias beside U2, F.Cu to C3 and the BAT ball (0.25 mm neck, 0.15 mm inside the ball's mask opening).
+  Resistor-network estimate from the board copper (35 µm outer, 15.2 µm inner, 20 µm via plating): **≈ 12 mΩ** Q1 →
+  BAT ball (was ≈ 0.095 Ω as a 0.30 mm track with three single-via layer changes), ≈ 6 mV at 0.5 A on top of Q1's
+  ≤ 43 mV. J2 → Q1 (VBAT_RAW, 0.60 mm) ≈ 2 mΩ. The whole system current takes this path when USB is absent.
   **Reversed cell with USB present:** the charger tries to charge; VBAT cannot rise above |VGS(th)| (≈ 0.5–1.3 V)
   before Q1 turns on into the reversed cell, which keeps VBAT below the BQ25180's VBATSC (1.6–2.0 V), so it stays in
   trickle charge at IBATSC ≈ 8 mA (SLUSE99C) and times out on its precharge safety timer. Q1 then dissipates
@@ -312,8 +317,15 @@ The authoritative copy is `nets.py: MCU_PINS`. The constraints behind it:
   (metal at y ≥ 41); a battery door replaces the back cover (§11).
 - **RF (D4):** within 5 mm of the antenna area (board x 0.15…15.55, y 29.5…34 with the module as placed; slider u 8.15…23.55) nothing metal and
   nothing carbon-filled: in rev A that means the PA-CF body is opened under and beside the antenna (or the body
-  is printed in unfilled PA/PETG), and the PA-CF moving inside jaw keeps 5.15 mm in plan from the antenna area: its root flank is relieved on an
-  R 5.15 arc round the antenna corner (it was 4.70 mm, a clash check RISK; docs/mechanical.md §12). In rev B the 6061 body needs a non-metal window there and the front shell must be printed.
+  is printed in unfilled PA/PETG), and the PA-CF moving inside jaw keeps 5.15 mm in plan from the antenna area: since its stiffening (below)
+  its root runs under the antenna corner, and the part of it within 5.15 mm prints in unfilled PA through the same modifier (it was first an
+  R 5.15 relief arc on the old 2.4 mm plate's flank, after a 4.70 mm clash check RISK; docs/mechanical.md §12). In rev B the 6061 body needs a
+  non-metal window there and the front shell must be printed.
+- **Moving inside jaw (2026-11-08):** stiffened from a 2.4 mm plate (≈ 9.5 µm/N on PA-CF at the measuring face) to **≈ 2.0 µm/N** (FEA with
+  the local body, datasheet E; 2.3 with the 0.85 FDM knock-down, so at the 2 µm/N target, not under it; PETG 4.1): the measuring face (u 0, y 31…37), the tip's z (−8.6…−6.2) and its 3.0 mm end width are unchanged; the tip
+  tapers to 4.0 mm at its base, a shoulder block fills u −4…6.4 under it up to y 31, and a full-height gusset (z −8.6…+2.4) fills the part
+  the fixed inside jaw never reaches (0.4 mm clear). An inside reading over a 2–8 N touch still moves ≈ 22 µm with both PA-CF inside jaws
+  (the fixed one is 1.7 µm/N, unchanged). Designed, not built or measured; detail in docs/mechanical.md §9.
 - The slider housing straddles the beam: printed PETG/PA-CF in rev A, CNC 6061 in rev B. Brass gibs with
   M2 set screws + springs set the 0.3 mm (magnetic) and 0.15 mm (capacitive) gaps. The fixed jaw is
   bolted and dowelled to the beam end. The moving jaw is part of the slider housing.
@@ -434,18 +446,15 @@ mechanics and the firmware now do where they differ from the first-draft section
   The keep-out rule area on the board starts at y 29.2, not 29.0.
 * **Open layout items:** USB D+/D- are a B.Cu pair with part of their length not directly over a plane (full-speed
   only). The module decoupling, H5, the SMT standoff part and the J50 land were closed on 2026-11-08 (§12). From
-  the hwtools run on the re-routed board (2026-11-08), still open, for the next layout pass: the long, thin VBAT run
-  from Q1 to U2 (≈ 0.09 Ω, §3); U6 (+3V3_UI switch) has no input capacitor of its own (C5 is 12.5 mm away by copper;
-  add a 1 µF at its pin 1 or place it by C5/C6); one VBUS pad pair of J1 reaches U2 before D1 (the router's second
-  feed from A9/B4); CAP_RX is a 60 mm track beside digital lines with its filter (R85/C44) at the far end from GPIO1;
-  the board file carries no stack-up (KiCad falls back to its default); the re-route added a bypass around U1 on
-  each USB line. Backlight: up to ≈ 31 mA through R50 15 Ω at the VF-min / +3V3-max corner against a 20 mA typical
-  rating (R50 18–22 Ω or a firmware duty cap; owner decision).
+  the hwtools run on the re-routed board (2026-11-08), fixed the same day (§13): the long, thin VBAT run, U6's missing
+  input capacitor, the VBUS feed that skipped D1, CAP_RX's long run with its filter at the far end, the missing
+  stack-up, the bypass around U1 on each USB line. Still open: backlight up to ≈ 31 mA through R50 15 Ω at the
+  VF-min / +3V3-max corner against a 20 mA typical rating (R50 18–22 Ω or a firmware duty cap; owner decision).
 * **Mechanics (§7):** closed back web over the beam with the back plungers (u 14 and 64, y 5, 2.5 N each); Y plungers
   u 14 / 24 (4 N each) and the lock u 19 left of the battery pocket; housing end face u 77.4, roller rim u 78.0; the
   end stop is an M2×6 socket screw in a tapped hole; tab clamps use 0.3 mm shim washers bedded in epoxy on 0.150 mm
   foil; a shimmed ledge under the board's top edge at board x 29…57.5, y 32.6…34 (keep it free of bottom parts, test
-  pads and exposed copper); inside jaws in z: moving −8.6…−6.2, fixed −6.0…+2.5. Detail in docs/mechanical.md.
+  pads and exposed copper; the VBAT band runs under it, under mask with tented vias, so the shim keeps at least one Kapton layer); inside jaws in z: moving −8.6…−6.2, fixed −6.0…+2.5. Detail in docs/mechanical.md.
 * **Firmware (§4, §8):** D1 tolerance 12 LSB / 3 edges (§4.1); cap drive 5.04 kHz at 80 645 S/s (§4.2); the cap
   reading is aligned to the magnetic reading at its first valid burst after boot and whole 2.54 mm slips are
   corrected against it (no cap zero is kept across sleep); LIVE flag bit 6 REZERO; CSV flags `H P F E Z`; on-flash
@@ -481,3 +490,27 @@ added the same day: `release.py` now writes the CPL with jlcplace (`jlcplace cpl
 design change: the netlists are identical (the library renamed J1's shield pin S1 → SH), the committed routed
 boards were only re-saved (copper, pads and nets identical, J1's four shield pads renumbered to SH), the Gerbers are
 geometrically identical and the jlcplace result is unchanged. Evidence: docs/electronics.md §7.12.
+
+## 13. Phase-4 review fixes (2026-11-08)
+Designed, not built. Found by the hwtools run on the routed board and the phase-4 review (§11); each fix is in the
+generators (`sheets/*.py`, `layout.py`, `tools/`) and on the reworked board (`layout.py --rework`: the routing of
+every unchanged net kept). Numbers are calculations on the board files (docs/electronics.md §7.13), not measurements.
+
+| # | Change | Before → after |
+|---|---|---|
+| R1 | **VBAT trunk** Q1 → U2 BAT / C3 pre-routed (§3): 2.0 / 2.1 / 1.9 mm B.Cu along the top edge and down between J1's shell tabs, In2 and F.Cu copper in parallel where nothing has to cross, 3–4 vias per layer change; J2 → Q1 0.60 mm | Q1 → BAT ≈ 95 → ≈ 12 mΩ (≈ 48 → 6 mV at 0.5 A); J2 → Q1 4 → 2 mΩ |
+| R2 | **VSYS** U2 SYS → C2 → C4 → TPS63802 VIN pre-routed (0.80 mm trunk) | ≈ 21 → ≈ 12 mΩ |
+| R3 | **C13** 1 µF 0402 at U6 VIN (C52923, Basic), placed under its VIN / GND pins | U6 had no input cap of its own (C5 12.5 mm away) |
+| R4 | **D1 on the VBUS trunk**: D1 (52.7, 19.95) 180°, both J1 VBUS pad pairs land on its pad, the run to C1 / U2 IN leaves from it | J1's A9/B4 no longer reaches U2 without passing the TVS |
+| R5 | **CAP_RX filter at the ADC**: R85 / C44 on the bottom under the module beside GPIO1 (§2.1 bottom exception now y 22.7…27.0); the long run is CAP_LP1 (pre-routed, Analog net class 0.2 mm); TP42 on CAP_LP1 | CAP_RX copper 60 → 2.9 mm; sicalc crosstalk into CAP_RX worst 11 → 0.14 mV (1 mV budget) |
+| R6 | **Stack-up JLC04101H-3313** written into the board (3313 prepreg 0.0994 mm, εr 4.1) and named in ORDER-NOTES; USB pair 0.16 / 0.16 mm gap | USB Zdiff ≈ 97 → ≈ 89 Ω (90 Ω target) |
+| R7 | **USB through U1**: J1 → U1 pre-routed straight; U1's I/O pins as jumper pad groups (1/6, 3/4) so no router adds a bypass | the loop round U1 on each line is gone |
+| R8 | Schematic packing: the power sheet fits A3 (was a half-empty A2) | |
+
+Open: CAP_LP1 itself still runs broadside to BTN_MODE_N for 5.7 mm (sicalc upper bound 20 mV on a terminated line;
+the node is held by C43 1 nF and filtered again by R85 / C44); R50 is drawn ≈ 45 mm of wire from J50 on the UI sheet.
+
+**Gates after these changes (2026-11-08):** wiring check and ERC as before; DRC + schematic parity 0 / 0 / 0 (7
+`lib_footprint_mismatch`, 2 `track_dangling` warnings); `release.py` passes for both boards; jlcplace slider 102 rows,
+0 red, 0 yellow, 102 green; `check_contract.py` OK; firmware pin tables up to date; mechanics extract + clash check
+0 clashes. Evidence: docs/electronics.md §7.13.

@@ -5,7 +5,7 @@
       "Application": "Pcbnew",
       "Version": "10.0.8-10.0.8~ubuntu24.04.1"
     },
-    "CreationDate": "2026-11-08T16:44:41-08:00"
+    "CreationDate": "2026-11-09T02:01:55-08:00"
   },
   "GeneralSpecs": {
     "ProjectId": {
@@ -19,7 +19,7 @@
     },
     "LayerNumber": 4,
     "BoardThickness": 1.0,
-    "Finish": "None"
+    "Finish": "ENIG"
   },
   "DesignRules": [
     {
@@ -109,7 +109,7 @@
     },
     {
       "Type": "SolderMask",
-      "Thickness": 0.01,
+      "Thickness": 0.015,
       "Name": "Top Solder Mask"
     },
     {
@@ -119,32 +119,32 @@
     },
     {
       "Type": "Dielectric",
-      "Thickness": 0.28,
-      "Material": "FR4",
+      "Thickness": 0.0994,
+      "Material": "3313 RC57%",
       "Name": "F.Cu/In1.Cu",
       "Notes": "Type: dielectric layer 1 (from F.Cu to In1.Cu)"
     },
     {
       "Type": "Copper",
-      "Thickness": 0.035,
+      "Thickness": 0.0152,
       "Name": "In1.Cu"
     },
     {
       "Type": "Dielectric",
-      "Thickness": 0.28,
+      "Thickness": 0.6708,
       "Material": "FR4",
       "Name": "In1.Cu/In2.Cu",
       "Notes": "Type: dielectric layer 2 (from In1.Cu to In2.Cu)"
     },
     {
       "Type": "Copper",
-      "Thickness": 0.035,
+      "Thickness": 0.0152,
       "Name": "In2.Cu"
     },
     {
       "Type": "Dielectric",
-      "Thickness": 0.28,
-      "Material": "FR4",
+      "Thickness": 0.0994,
+      "Material": "3313 RC57%",
       "Name": "In2.Cu/B.Cu",
       "Notes": "Type: dielectric layer 3 (from In2.Cu to B.Cu)"
     },
@@ -155,7 +155,7 @@
     },
     {
       "Type": "SolderMask",
-      "Thickness": 0.01,
+      "Thickness": 0.015,
       "Name": "Bottom Solder Mask"
     },
     {

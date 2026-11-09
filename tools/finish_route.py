@@ -131,6 +131,30 @@ def _is_via(t):
     return t.Type() == pcbnew.PCB_VIA_T
 
 
+_JUMPERS = {}
+
+
+def jumper_groups(b):
+    """{reference: [set of pad numbers, ...]} of the footprints with jumper pad groups (pads joined inside the part,
+    KiCad 9+). pcbnew's Python API cannot iterate them, so they are read from the board file."""
+    path = b.GetFileName()
+    if not path or not os.path.exists(path):
+        return {}
+    key = (path, os.path.getmtime(path))
+    if key not in _JUMPERS:
+        import re
+        s = open(path, encoding="utf-8").read()
+        out = {}
+        for m in re.finditer(r"\(jumper_pad_groups((?:\s*\([^()]*\))+)\s*\)", s):
+            j = s.rfind("(footprint ", 0, m.start())
+            ref = re.search(r'\(property "Reference" "([^"]*)"', s[j:])
+            if ref:
+                out[ref.group(1)] = [set(re.findall(r'"([^"]*)"', g)) for g in re.findall(r"\(([^()]*)\)", m.group(1))]
+        _JUMPERS.clear()
+        _JUMPERS[key] = out
+    return _JUMPERS[key]
+
+
 def net_clusters(b, netcode, plane_layers=()):
     """Connected clusters of a net's pads, tracks and vias. Items touching a zone of the net on one of
     `plane_layers` (vias, through-hole pads) join through it."""
@@ -173,6 +197,14 @@ def net_clusters(b, netcode, plane_layers=()):
                 elif lay is None or o.GetLayer() == lay:
                     if o.HitTest(pt, tol):
                         union(k, idx[id(o)])
+    # pads joined inside the part (jumper pad groups, e.g. a USBLC6's I/O pins)
+    groups_by_ref = jumper_groups(b)
+    for i, p in enumerate(pads):
+        grps = groups_by_ref.get(p.GetParentFootprint().GetReference(), ())
+        for q in pads[i + 1:]:
+            if q.GetParentFootprint().GetReference() == p.GetParentFootprint().GetReference():
+                if any(p.GetNumber() in g and q.GetNumber() in g for g in grps):
+                    union(idx[id(p)], idx[id(q)])
     if plane_layers:
         planes = [z for z in b.Zones() if not z.GetIsRuleArea() and z.GetNetCode() == netcode
                   and any(z.IsOnLayer(lay) for lay in plane_layers)]
@@ -660,7 +692,10 @@ def anchor_end(b, net, pt, layer, w, exclude=()):
     for o in olds:
         if o.Type() == pcbnew.PCB_VIA_T or o.GetLayer() != layer or not o.HitTest(pt, 0):
             continue
-        a, c = o.GetStart(), o.GetEnd()
+        # copies: pcbnew's GetStart() / GetEnd() return references to the track's own points, so after o.SetEnd(q)
+        # below `c` would read q and the tail would be a zero-length stub (the far part of the track lost; review
+        # 2026-11-09: it cut the locked VBAT trunk and the VBUS feeds wherever the grid router tapped them)
+        a, c = pcbnew.VECTOR2I(o.GetStart()), pcbnew.VECTOR2I(o.GetEnd())
         if (a - pt).EuclideanNorm() <= tol or (c - pt).EuclideanNorm() <= tol:
             return []
         q = pcbnew.SEG(a, c).NearestPoint(pt)
@@ -767,6 +802,12 @@ def drc_uuids(path):
         b = pcbnew.LoadBoard(path)
         pcbnew.ZONE_FILLER(b).Fill(b.Zones())
         pcbnew.SaveBoard(tmp, b)
+        # the rules live in the project: use the board's own .kicad_pro. SaveBoard writes the project pcbnew has
+        # attached to the board, which in a process that built a board in memory first is a default one (0.5 mm
+        # minimum via, no net classes): every via of the board would then be a DRC error
+        pro = os.path.splitext(path)[0] + ".kicad_pro"
+        if os.path.exists(pro):
+            shutil.copyfile(pro, os.path.splitext(tmp)[0] + ".kicad_pro")
         subprocess.run(["kicad-cli", "pcb", "drc", "--format", "json", "--severity-error", "-o", out, tmp],
                        capture_output=True, text=True)
         d = json.load(open(out))

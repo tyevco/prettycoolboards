@@ -421,11 +421,13 @@ def import_ses(pcb_path, ses_path, out_path=None):
 
 def trim_dangling(b, tol=2000):
     """Cut a segment's open end back to the last T-junction on it (the router often joins a pre-routed
-    stub part-way along instead of at its end)."""
+    stub part-way along instead of at its end). Locked (pre-routed) copper is never cut."""
     segs = [t for t in b.GetTracks() if t.Type() == pcbnew.PCB_TRACE_T]
     vias = [t for t in b.GetTracks() if t.Type() == pcbnew.PCB_VIA_T]
     trimmed = 0
     for t in segs:
+        if t.IsLocked():
+            continue
         for end in ("start", "end"):
             p = t.GetStart() if end == "start" else t.GetEnd()
             q = t.GetEnd() if end == "start" else t.GetStart()
@@ -719,7 +721,8 @@ def fanout_vias(b, net_name="GND", pads=None, via=0.5, drill=0.25, track=0.25, c
 def dedupe_tracks(b):
     """Drop exact duplicate segments/vias (a re-route of an already routed board re-imports the old wiring)."""
     seen, dup = set(), []
-    for t in b.GetTracks():
+    # locked copper first, so of two identical items the pre-route (locked) one is kept
+    for t in sorted(b.GetTracks(), key=lambda t: not t.IsLocked()):
         s, e = t.GetStart(), t.GetEnd()
         ends = tuple(sorted(((s.x, s.y), (e.x, e.y))))
         via = t.Type() == pcbnew.PCB_VIA_T

@@ -93,6 +93,10 @@ What changed between KiCad 9 and 10 for this toolchain:
   `(net N "NAME")` / `(net N)` plus a table), so a script that reads a `.kicad_pcb` as text must not look nets up by
   number (the toolchain goes through `pcbnew`). `(setup)` writes tenting as `(tenting (front yes) (back yes))` and
   adds `covering` / `plugging` / `capping` / `filling` (all `no`); the HPGL plot parameters are gone.
+* pcbnew's `GetStart()` / `GetEnd()` return references to the item's own point (seen on 10.0.8; not checked on 9): copy them
+  (`pcbnew.VECTOR2I(t.GetEnd())`) before a `SetStart()` / `SetEnd()` on the same item. `finish_route.anchor_end`
+  did not, so every track the grid router joined part-way along lost its far part (a zero-length tail, then
+  pruned as dangling), locked pre-routes included (fixed 2026-11-09, `tests/test_finish_route.py`).
 * DRC: zero-length track segments next to another net are a `tracks_crossing` error; new rule keys in the project
   (`footprint_symbol_field_mismatch`, `missing_tuning_profile`, `track_not_centered_on_via`,
   `track_on_post_machined_layer`, `tuning_profile_track_geometries`); reports list the ignored checks.
@@ -100,6 +104,14 @@ What changed between KiCad 9 and 10 for this toolchain:
   footprint call the shield `SH` (9: `S1`), and that footprint's signal pads are rounded rectangles (9: rectangles);
   `TPS22917DBV` moved its pins; `Fiducial_1mm_Mask2mm` changed. A footprint already on a board keeps its 9.0 copy
   (`lib_footprint_mismatch`, a warning) until someone updates it from the library on purpose.
+* Project file: the net classes and design rules live in the `.kicad_pro`. pcbnew's `SaveBoard` writes the project of a
+  board it *loaded*, not of a `BOARD()` built in memory, and a process that built one in memory then attaches a default
+  project to boards it loads later (0.5 mm minimum via, no net classes). So a generator writes its net classes into
+  the `.kicad_pro` itself (caliper `layout.write_project_netclasses`), `finish_route.drc_uuids` runs DRC with the board's
+  own `.kicad_pro`, and caliper's `layout.py --rework` loads the old board only in a child process.
+* Jumper pad groups (KiCad 9+, `(jumper_pad_groups ("1" "6") ...)` in a footprint): pads joined inside the part, which
+  connectivity, DRC and the routers then treat as connected. pcbnew's Python API can read but not set them, so caliper's
+  `layout.set_jumper_pads` writes them into the board text (the USBLC6's I/O pins).
 * The user library tables live in `~/.config/kicad/10.0/` (`cp /usr/share/kicad/template/{sym,fp}-lib-table`); the
   stock libraries are `${KICAD10_SYMBOL_DIR}` / `${KICAD10_FOOTPRINT_DIR}` (`/usr/share/kicad/...`).
 

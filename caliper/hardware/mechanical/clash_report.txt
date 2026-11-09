@@ -1,5 +1,5 @@
 clash_check.py -- board envelope from board_parts.json (../kicad/slider/prettycool-caliper-slider.kicad_pcb)
-6207 intersections, 0 not clear; gap/board/RF rules: 0 FAIL, 0 RISK; body webs: 0 BREAK/THIN
+6255 intersections, 0 not clear; gap/board/RF rules: 0 FAIL, 0 RISK; body webs: 0 BREAK/THIN
 
 == not clear ==
 (intended contact, not counted: oring  x  beam)
@@ -92,9 +92,9 @@ OK   tab_clamp_5: 53.52 mm from the antenna area in plan
 OK   front_pad_2: 55.86 mm from the antenna area in plan
 OK   pad_insert_u74_y0.95: 56.17 mm from the antenna area in plan
 OK   stop_screw: 205.13 mm from the antenna area in plan
-OK   PA-CF moving inside jaw: 5.15 mm in plan, 8.97 mm in 3D from the antenna (it sits behind the beam plane; root flank relieved on an R 5.15 arc round the antenna corner)
+OK   PA-CF moving inside jaw: 5.15 mm in plan, 5.15 mm in 3D from the antenna; its shoulder block and gusset within 5.15 mm (0.19 cm^3, 1.75 mm at the closest) print in unfilled PA (the modifier)
 OK   PA-CF fixed jaw (its inside jaw tip) at R = 0: 5.15 mm in plan from the antenna; further at any R > 0
-OK   body within 5 mm of the antenna: 3.03 cm^3, printed in unfilled PA through the slicer modifier stl/slider_body_rf_modifier.stl
+OK   body within 5 mm of the antenna: 3.21 cm^3, printed in unfilled PA through the slicer modifier stl/slider_body_rf_modifier.stl
 
 == all ==
 CLEAR  R0     BZ50  x  beam
@@ -122,6 +122,11 @@ CLEAR  R0     C12  x  fixed_jaw
 CLEAR  R0     C12  x  scale_pcb
 CLEAR  R0     C12  x  stop_screw
 CLEAR  R0     C12  x  tape
+CLEAR  R0     C13  x  beam
+CLEAR  R0     C13  x  fixed_jaw
+CLEAR  R0     C13  x  scale_pcb
+CLEAR  R0     C13  x  stop_screw
+CLEAR  R0     C13  x  tape
 CLEAR  R0     C2  x  beam
 CLEAR  R0     C2  x  fixed_jaw
 CLEAR  R0     C2  x  scale_pcb
@@ -826,6 +831,11 @@ CLEAR  R151   C12  x  fixed_jaw
 CLEAR  R151   C12  x  scale_pcb
 CLEAR  R151   C12  x  stop_screw
 CLEAR  R151   C12  x  tape
+CLEAR  R151   C13  x  beam
+CLEAR  R151   C13  x  fixed_jaw
+CLEAR  R151   C13  x  scale_pcb
+CLEAR  R151   C13  x  stop_screw
+CLEAR  R151   C13  x  tape
 CLEAR  R151   C2  x  beam
 CLEAR  R151   C2  x  fixed_jaw
 CLEAR  R151   C2  x  scale_pcb
@@ -1530,6 +1540,11 @@ CLEAR  R75    C12  x  fixed_jaw
 CLEAR  R75    C12  x  scale_pcb
 CLEAR  R75    C12  x  stop_screw
 CLEAR  R75    C12  x  tape
+CLEAR  R75    C13  x  beam
+CLEAR  R75    C13  x  fixed_jaw
+CLEAR  R75    C13  x  scale_pcb
+CLEAR  R75    C13  x  stop_screw
+CLEAR  R75    C13  x  tape
 CLEAR  R75    C2  x  beam
 CLEAR  R75    C2  x  fixed_jaw
 CLEAR  R75    C2  x  scale_pcb
@@ -2374,6 +2389,39 @@ CLEAR  board  C12  x  tab_clamp_6
 CLEAR  board  C12  x  tab_clamp_7
 CLEAR  board  C12  x  thumb_roller
 CLEAR  board  C12  x  y_gib
+CLEAR  board  C13  x  back_gib
+CLEAR  board  C13  x  battery
+CLEAR  board  C13  x  battery_door
+CLEAR  board  C13  x  button_cap_HOLD
+CLEAR  board  C13  x  button_cap_MODE
+CLEAR  board  C13  x  button_cap_ZERO
+CLEAR  board  C13  x  display
+CLEAR  board  C13  x  front_pad_0
+CLEAR  board  C13  x  front_pad_1
+CLEAR  board  C13  x  front_pad_2
+CLEAR  board  C13  x  front_pad_3
+CLEAR  board  C13  x  front_shell
+CLEAR  board  C13  x  lock_screw
+CLEAR  board  C13  x  oring
+CLEAR  board  C13  x  plunger_hw_0
+CLEAR  board  C13  x  plunger_hw_1
+CLEAR  board  C13  x  plunger_hw_2
+CLEAR  board  C13  x  plunger_hw_3
+CLEAR  board  C13  x  pusher_lock_u19
+CLEAR  board  C13  x  pusher_u14
+CLEAR  board  C13  x  pusher_u24
+CLEAR  board  C13  x  ref_strip
+CLEAR  board  C13  x  slider_body
+CLEAR  board  C13  x  tab_clamp_0
+CLEAR  board  C13  x  tab_clamp_1
+CLEAR  board  C13  x  tab_clamp_2
+CLEAR  board  C13  x  tab_clamp_3
+CLEAR  board  C13  x  tab_clamp_4
+CLEAR  board  C13  x  tab_clamp_5
+CLEAR  board  C13  x  tab_clamp_6
+CLEAR  board  C13  x  tab_clamp_7
+CLEAR  board  C13  x  thumb_roller
+CLEAR  board  C13  x  y_gib
 CLEAR  board  C2  x  back_gib
 CLEAR  board  C2  x  battery
 CLEAR  board  C2  x  battery_door

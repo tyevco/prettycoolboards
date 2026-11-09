@@ -110,11 +110,15 @@ def build(d):
 
     d.group("2nd-order RC low-pass (~408 kHz per pole) -> CAP_RX (ADC1_CH0)",
             "390R/1n then 3.9k/100p C0G (second stage 10x the impedance, so it barely loads the first).\n"
-            "Anti-alias + kills the op-amp's HF noise; the synchronous demodulation is done in firmware.")
+            "Anti-alias + kills the op-amp's HF noise; the synchronous demodulation is done in firmware.\n"
+            "Layout: R84/C43 at U40, R85/C44 at the ESP32's GPIO1 pad (bottom, under the module): the long run\n"
+            "is CAP_LP1 (390R + 1n at the source end) and CAP_RX is a few mm from the ADC pin.")
     res(d, "R84", "390", "CAP_AMP_OUT", "CAP_LP1")
     cap(d, "C43", "1n", "CAP_LP1", "GND")
     res(d, "R85", "3.9k", "CAP_LP1", "CAP_RX")
     cap(d, "C44", "100p C0G", "CAP_RX", "GND")
 
-    d.group("Test points", "Charge-amp output and VREF for scope probing")
-    testpoints(d, 40, ["CAP_AMP_OUT", "CAP_VREF", "CAP_RX"])
+    d.group("Test points", "Charge-amp output, VREF and the filter's first stage (CAP_LP1) for scope probing.\n"
+            "TP42 is on CAP_LP1, not CAP_RX: CAP_RX ends at the ESP32 (R85/C44 there), and a pad in the\n"
+            "test-pad row would hang a 30 mm stub on the ADC node.")
+    testpoints(d, 40, ["CAP_AMP_OUT", "CAP_VREF", "CAP_LP1"])

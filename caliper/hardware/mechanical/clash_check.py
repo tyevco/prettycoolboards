@@ -142,12 +142,14 @@ def rf_check(parts):
         res.append(("OK  " if d >= P.RF_CLEAR - 1e-6 else "FAIL", f"{n}: {d:.2f} mm from the antenna area in plan"))
     res.sort(key=lambda t: float(t[1].split(": ")[1].split()[0]))
     # carbon-filled material
-    jaw = M.prism(M.moving_inside_jaw_pts(), *P.IJ_MOVING_Z)
+    jaw = M.moving_inside_jaw_pa_cf()
     ant3 = M.box(bu(a[0]), bu(a[2]), a[1], a[3], P.BOARD_Z1, P.BOARD_Z1 + 2.55)
     dj = jaw.distance_to(ant)
+    whole = M.moving_inside_jaw()
     res.append(("OK  " if dj >= P.RF_CLEAR - 1e-6 else "RISK", f"PA-CF moving inside jaw: {dj:.2f} mm in plan, "
-                        f"{jaw.distance_to(ant3):.2f} mm in 3D from the antenna (it sits behind the beam plane; "
-                        f"root flank relieved on an R {P.RF_CLEAR + P.IJ_RF_MARGIN:g} arc round the antenna corner)"))
+                        f"{jaw.distance_to(ant3):.2f} mm in 3D from the antenna; its shoulder block and gusset within "
+                        f"{P.RF_CLEAR + P.IJ_RF_MARGIN:g} mm ({(whole.volume - jaw.volume) / 1000:.2f} cm^3, "
+                        f"{whole.distance_to(ant):.2f} mm at the closest) print in unfilled PA (the modifier)"))
     df = M.fixed_jaw().distance_to(ant)          # closest at R = 0 (the antenna moves away with the slider)
     res.append(("OK  " if df >= P.RF_CLEAR - 1e-6 else "RISK", f"PA-CF fixed jaw (its inside jaw tip) at R = 0: "
                         f"{df:.2f} mm in plan from the antenna; further at any R > 0"))

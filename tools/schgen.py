@@ -530,10 +530,44 @@ class SheetPlan:
                 x += w + gap
                 line_h = max(line_h, h)
             return pos, y + line_h
+        def pack_ffdh(page_w, page_h):
+            """First-fit decreasing height: tallest clusters first, each into the first row with room. Packs a
+            sheet of many short groups and a few tall ones much tighter than the in-order rows."""
+            usable_w = page_w - 2 * margin_x
+            order = sorted(range(len(frames)), key=lambda k: -frames[k][5])
+            rows = []                                   # [y, height, next x]
+            pos = [None] * len(frames)
+            for k in order:
+                w, h = frames[k][4], frames[k][5]
+                row = next((r for r in rows if r[2] + w <= margin_x + usable_w or r[2] == margin_x), None)
+                if row is None:
+                    y = (rows[-1][0] + rows[-1][1] + gap) if rows else margin_y
+                    row = [y, h, margin_x]
+                    rows.append(row)
+                pos[k] = (row[2], row[0])
+                row[2] += w + gap
+            return pos, (rows[-1][0] + rows[-1][1]) if rows else margin_y
+
+        tb_w = 115.0   # the title block (bottom right); a cluster may use the bottom band left of it
+
+        def on_page(pos, pw, ph):
+            for (c, bb, head, hh, w, h), (x, y) in zip(frames, pos):
+                if x + w > pw - margin_x or y + h > ph - margin_y:
+                    return False
+                if y + h > ph - margin_y - tb_h and x + w > pw - margin_x - tb_w:
+                    return False
+            return True
+
         for paper, pw, ph in PAPERS:
             pos, bottom = pack(pw, ph)
-            if bottom <= ph - margin_y - tb_h and all(f[4] <= pw - 2 * margin_x for f in frames):
+            if all(f[4] <= pw - 2 * margin_x for f in frames) and bottom <= ph - margin_y - tb_h:
                 break
+            # the in-order rows do not fit this paper: try the tighter packing (whose last, shortest row may sit
+            # left of the title block) before going up a size; the power sheet was an A2 more than half empty
+            pos, bottom = pack_ffdh(pw, ph)
+            if on_page(pos, pw, ph):
+                break
+            pos, bottom = pack(pw, ph)
         self.paper, self.page_w, self.page_h = paper, pw, ph
         for (c, bb, head, hh, w, h), (x, y) in zip(frames, pos):
             x, y = snap(x), snap(y)

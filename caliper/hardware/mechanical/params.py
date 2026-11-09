@@ -296,17 +296,40 @@ IJ_TIP_W = 3.0
 # support.  The slider prints back face down (z -7.4 on the bed), the fixed jaw front face down
 # (z +2.5 on the bed); the tips cross 0.2 apart in z.
 IJ_MOVING_Z = (Z_BACK, Z_BACK + 2.4)
-# RF relief (2026-11-08).  The module moved 0.45 mm toward the jaw in layout, which put the moving
-# inside jaw's root flank 4.70 mm (plan) from the antenna corner (SPEC D4: >= 5 for carbon fill).
-# The flank now steps round that corner on an arc of RF_CLEAR + IJ_RF_MARGIN (a scallop <= 0.45 deep,
-# ~4 mm long, on the root flank; the tip and its measuring face u 0, y 31..37 are untouched), and the
-# root's left end moves from u 1.5 to the housing end face, u 0.5, which gives the root section back.
-# fea_inside_jaw.py compares the old and new outlines.
+# RF relief (2026-11-08, first pass).  The module moved 0.45 mm toward the jaw in layout, which put the moving
+# inside jaw's root flank 4.70 mm (plan) from the antenna corner (SPEC D4: >= 5 for carbon fill).  The 2.4
+# plate's flank was then stepped round that corner on an arc of RF_CLEAR + IJ_RF_MARGIN and its root started at
+# u 0.5 (moving_inside_jaw_outline(), kept for the FEA comparison).  The stiffened jaw below replaced that
+# outline: its PA-CF keeps the same RF_CLEAR + IJ_RF_MARGIN, the rest of it prints in unfilled PA.
 IJ_RF_MARGIN = 0.15
 IJ_ROOT_U0 = H_U0
 IJ_ROOT_U0_OLD = 1.5
 IJ_FLANK = ((0.0, IJ_TIP_Y0), (STEP_U1, 24.6))   # root flank, from the tip's measuring edge to the step
 IJ_FIXED_Z = (Z_BACK + 2.6, 2.5)
+# The fixed inside jaw's right flank (x 3 at the tip's lower corner down to x -0.6 at y 24.2): the
+# moving jaw may only grow above IJ_MOVING_Z where it stays right of this line at every R >= 0.
+FIXED_IJ_FLANK = ((IJ_TIP_W, IJ_TIP_Y0), (-0.6, 24.2))
+# Stiffening (2026-11-08, second pass).  The RF-relieved 2.4 plate deflected 8.0 um/N (PA-CF) at the
+# measuring face, ~48 um over a 2-8 N thumb spread.  The measuring face (u 0, y 31..37), the tip's z
+# (-8.6..-6.2: the 0.2 crossing gap and the crossed tips' z stack) and its 3.0 width at the end (y 37) are
+# unchanged.  Below and beside it:
+#  * the tip's back (left) edge tapers from 3.0 wide at y 37 to IJ_TIP_BASE_W at y 31, so a gap or bore
+#    narrower than IJ_TIP_BASE_W takes less than the full 6 mm of tip (3.0 at the very end, as before);
+#  * the plate fills a shoulder block u -IJ_TIP_BASE_W..6.4 under the tip, its top level with the face's
+#    lower end (y 31; was a 45 deg flank from there and a left edge sloping in to u 0.5).  Its left part
+#    (u < 0.5) hangs IJ_LEFT_Y0 - STEP_Y1 over the fixed block's top at R = 0 and passes under the fixed
+#    inside jaw 0.2 apart in z, as the tip does;
+#  * a full-height gusset (z Z_BACK..IJ_GUSSET_Z1) fills the part of the block that the fixed inside jaw
+#    can never reach: right of FIXED_IJ_FLANK offset by IJ_FIXED_CLR (perpendicular).  It sits on the
+#    step top (y 22.9) and against the full-height housing's left face (u 6.4) up to y 31;
+#  * the block and gusset within RF_CLEAR + IJ_RF_MARGIN of the antenna area print in unfilled PA (the
+#    slicer modifier, models.rf_modifier), so the PA-CF keeps >= 5.15 mm (plan) from it as before.
+# Nothing is added above y 31 right of the face, so a bore still takes the full 6 mm tip.
+# fea_inside_jaw.py compares it with the 2.4 plate.
+IJ_TIP_BASE_W = 4.0
+IJ_LEFT_Y0 = STEP_Y1 + 0.4
+IJ_FIXED_CLR = 0.4
+IJ_GUSSET_Z1 = 2.4
 
 # Fixed jaw block
 FJ_X0, FJ_X1 = -18.0, -0.5
@@ -363,10 +386,42 @@ def _rf_arc(p0, p1, n=10):
     return [(cx + rv * math.cos(a0 + span * i / n), cy + rv * math.sin(a0 + span * i / n)) for i in range(n + 1)]
 
 
+def fixed_flank_offset_u(y, clr=None):
+    """u of FIXED_IJ_FLANK at height y, moved IJ_FIXED_CLR perpendicular toward +u (the slider side)."""
+    clr = IJ_FIXED_CLR if clr is None else clr
+    (xb, yb_), (xa, ya) = FIXED_IJ_FLANK
+    L = math.hypot(xb - xa, yb_ - ya)
+    nx, ny = (yb_ - ya) / L, -(xb - xa) / L          # unit normal toward +u
+    x0, y0 = xa + clr * nx, ya + clr * ny
+    return x0 + (xb - xa) / (yb_ - ya) * (y - y0)
+
+
+def moving_inside_jaw_block_outline():
+    """Plan outline (u, y) of the moving inside jaw's 2.4 plate as built: the tip (face u 0, y 31..37; 3.0
+    wide at y 37, IJ_TIP_BASE_W at y 31) on a shoulder block u -IJ_TIP_BASE_W..STEP_U1, y IJ_LEFT_Y0 (left
+    part) / 22.9 (root on the step) .. 31."""
+    t0, t1, w, wb = IJ_TIP_Y0, IJ_TIP_Y1, IJ_TIP_W, IJ_TIP_BASE_W
+    yb = STEP_Y1 - 0.1
+    return [(-w, t1), (0.0, t1), (0.0, t0), (STEP_U1, t0), (STEP_U1, yb),
+            (IJ_ROOT_U0, yb), (IJ_ROOT_U0, IJ_LEFT_Y0), (-wb, IJ_LEFT_Y0), (-wb, t0)]
+
+
+def moving_inside_jaw_gusset_outline():
+    """Plan outline (u, y) of the full-height gusset (z Z_BACK..IJ_GUSSET_Z1): the block right of the fixed
+    inside jaw's right flank + IJ_FIXED_CLR, so the fixed jaw never reaches it at any R >= 0."""
+    yb, s = STEP_Y1 - 0.1, IJ_TIP_Y0
+    (xb, yb_), (xa, ya) = FIXED_IJ_FLANK
+    u_low = xa + IJ_FIXED_CLR                          # beside the fixed jaw's vertical root side (x -0.6)
+    # where the offset flank meets u = u_low
+    y_low = ya + (u_low - fixed_flank_offset_u(ya)) * (yb_ - ya) / (xb - xa)
+    return [(IJ_ROOT_U0, yb), (STEP_U1, yb), (STEP_U1, s), (fixed_flank_offset_u(s), s),
+            (u_low, y_low), (u_low, IJ_LEFT_Y0), (IJ_ROOT_U0, IJ_LEFT_Y0)]
+
+
 def moving_inside_jaw_outline(rf_relief=True, root_u0=None):
-    """Plan outline (u, y) of the moving inside jaw.  rf_relief=False gives the phase-3 outline
-    (straight root flank, root from u 1.5) for comparison (fea_inside_jaw.py); root_u0 overrides
-    the root's left end."""
+    """Plan outline (u, y) of the moving inside jaw's 2.4 plate BEFORE the stiffening (fea_inside_jaw.py
+    compares them): rf_relief=True the RF-relieved outline (R 5.15 arc, root from u 0.5); rf_relief=False
+    the phase-3 outline (straight root flank, root from u 1.5); root_u0 overrides the root's left end."""
     t1, w = IJ_TIP_Y1, IJ_TIP_W
     yb = STEP_Y1 - 0.1
     (u0, y0), (u1, y1) = IJ_FLANK

@@ -167,19 +167,35 @@ def test_yaw_preload_margin():
 
 
 def test_rf_carbon_filled_jaws_clear_the_antenna():
-    """SPEC D4: the PA-CF moving inside jaw (relieved root flank) and the fixed jaw at R = 0 keep
-    >= RF_CLEAR from the antenna area in plan; the relief leaves the measuring tip alone."""
+    """SPEC D4: the PA-CF part of the moving inside jaw and the fixed jaw at R = 0 keep >= RF_CLEAR from the
+    antenna area in plan; the jaw's material nearer than that is inside the unfilled-PA modifier."""
     a = P.ANTENNA
     ant = M.box(P.bu(a[0]), P.bu(a[2]), a[1], a[3], -60, 60)
-    jaw = M.prism(M.moving_inside_jaw_pts(), *P.IJ_MOVING_Z)
-    assert jaw.distance_to(ant) >= P.RF_CLEAR - 1e-6
+    assert M.moving_inside_jaw_pa_cf().distance_to(ant) >= P.RF_CLEAR - 1e-6
     assert M.fixed_jaw().distance_to(ant) >= P.RF_CLEAR - 1e-6
+    near = M.moving_inside_jaw() - M.moving_inside_jaw_pa_cf()
+    rest = near - M.rf_modifier()
+    assert rest is None or not rest.solids() or rest.volume < 1e-3
+
+
+def test_inside_jaw_stiffening_keeps_the_tip_and_clears_the_fixed_jaw():
+    """The measuring face and the tip's end are unchanged; nothing is added right of the face above y 31 (a
+    bore takes the full tip); the gusset stays IJ_FIXED_CLR clear of the fixed inside jaw at every R, and the
+    plate keeps the 0.2 z gap under it; the left part clears the fixed block at R = 0."""
     pts = M.moving_inside_jaw_pts()
-    for p in [(-P.IJ_TIP_W, P.IJ_TIP_Y1), (0, P.IJ_TIP_Y1), (0, P.IJ_TIP_Y0), (-P.IJ_TIP_W, P.IJ_TIP_Y0)]:
+    for p in [(-P.IJ_TIP_W, P.IJ_TIP_Y1), (0, P.IJ_TIP_Y1), (0, P.IJ_TIP_Y0)]:
         assert p in pts
-    # the scallop stays shallow, and the root is not narrower than the phase-3 one
-    old = M.prism(P.moving_inside_jaw_outline(rf_relief=False), *P.IJ_MOVING_Z)
-    assert (old - jaw).volume <= (jaw - old).volume
+    assert max(y for u, y in pts if u > 1e-9) <= P.IJ_TIP_Y0 + 1e-9
+    assert max(y for u, y in P.moving_inside_jaw_gusset_outline()) <= P.IJ_TIP_Y0 + 1e-9
+    jaw, fj = M.moving_inside_jaw(), M.fixed_jaw()
+    for R in (0.0, 1.0, 3.0, 5.0, 8.0):
+        assert (M.Pos(R, 0, 0) * jaw).distance_to(fj) >= P.IJ_FIXED_Z[0] - P.IJ_MOVING_Z[1] - 1e-6
+    g = M.prism(P.moving_inside_jaw_gusset_outline(), P.IJ_MOVING_Z[0], P.IJ_GUSSET_Z1)
+    fij = M.prism(M.fixed_inside_jaw_pts(), *P.IJ_FIXED_Z)
+    for R in (0.0, 0.5, 1.0, 2.0, 3.0, 4.0):
+        assert (M.Pos(R, 0, 0) * g).distance_to(fij) >= 0.9 * P.IJ_FIXED_CLR
+    assert P.IJ_LEFT_Y0 - P.FJ_Y1 >= 0.3
+    assert M.slider_body().is_valid and jaw.is_valid
 
 
 def test_fixed_jaw_bolt_engages_the_nut():

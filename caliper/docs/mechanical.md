@@ -15,7 +15,7 @@ the prototype; section 13 collects them.
 * **Real board:** [`extract_board_parts.py`](../hardware/mechanical/extract_board_parts.py) reads the routed
   `caliper/hardware/kicad/slider/prettycool-caliper-slider.kicad_pcb` (KiCad 10 `pcbnew`) into
   [`board_parts.json`](../hardware/mechanical/board_parts.json): the Edge.Cuts outline with the end tabs,
-  the five holes, 101 part envelopes (Fab outline × datasheet height), plus the four SMT standoffs,
+  the five holes, 102 part envelopes (Fab outline × datasheet height), plus the four SMT standoffs,
   the H1 screw head and the mated JST plug.
 * **Calculations:** [`calcs.py`](../hardware/mechanical/calcs.py) writes everything quoted here to
   [`calcs_output.txt`](../hardware/mechanical/calcs_output.txt). The FEA uses the `print-stress` solver
@@ -23,7 +23,7 @@ the prototype; section 13 collects them.
   inside jaw in [`fea_inside_jaw.py`](../hardware/mechanical/fea_inside_jaw.py), and the whole slider
   body plus the board in [`fea_slider.py`](../hardware/mechanical/fea_slider.py).
 * **Interference check:** [`clash_check.py`](../hardware/mechanical/clash_check.py) intersects the B-rep
-  solids exactly, 6207 pairs, against the **routed board**. It writes
+  solids exactly, 6255 pairs, against the **routed board**. It writes
   [`clash_report.txt`](../hardware/mechanical/clash_report.txt). The result is in section 12.
 
 ---
@@ -65,8 +65,9 @@ Key numbers (from `params.py`, `calcs_output.txt` and the FEA outputs):
 | AS5311 gap | 0.300 nominal; **±0.034 RSS, ±0.097 worst** after the per-unit shim, inside the SPEC window of ±0.10 |
 | Sliding force | **3.9 N** at μ 0.15 (oiled brass on ground steel), 5.2 N at μ 0.20; was 8.0 N |
 | Moving-jaw flex at the tip, 5 N | PETG 15 µm, PA-CF 6.1 µm, 6061 0.3 µm (beam theory); FEA 14.3 / 5.8 / 0.4 µm |
+| Moving inside jaw, at the face | **1.98 µm/N** PA-CF, 4.05 µm/N PETG (FEA with the local body; the 2.4 mm plate was 9.5 / 23 µm/N) |
 | Back web under the back preload | 1.7 µm at the plunger seat (FEA); the old back cover bent 0.6–1.1 mm |
-| Masses (solid) | beam 124 g, slider body 32 g PA-CF / 76 g 6061, back gib 9 g |
+| Masses (solid) | beam 124 g, slider body 33 g PA-CF / 76 g 6061, back gib 9 g |
 
 ## 2. Stack-up and sections
 
@@ -118,7 +119,7 @@ the model does this:
 | D3: H1 is a support, "printed low and shimmed" | H1 boss printed 0.1 low and shimmed with Kapton; M2 tapped in the print for the nylon screw (no brass insert, which would sit 4 mm from the antenna) |
 | Open item: support under the button band over the battery | A **button-band ledge** (u 37…65.5, y 32.6…34.4) cantilevered from the cavity wall under the board's top edge, shimmed to contact (section 5) |
 | D4: the right Y plunger and the lock move out of the battery pocket | Both Y plungers (u 14, 24) and the lock (u 19) now sit **left** of the pocket. They pass under the antenna, so each pushes the gib through a **Ø2 GFRP rod**; the springs, screws and inserts sit at y ≥ 41 (section 4) |
-| D4 / 7: no metal or carbon fibre within 5 mm of the antenna | Checked in plan for every metal item (section 12). The body region u 6.4…28.55, y 24.5…39 prints in **unfilled PA** through a slicer modifier (`stl/slider_body_rf_modifier.stl`). The PA-CF moving inside jaw's root flank is **relieved on an R 5.15 arc round the antenna corner**, so it is 5.15 mm from the antenna in plan (was 4.70; section 12) |
+| D4 / 7: no metal or carbon fibre within 5 mm of the antenna | Checked in plan for every metal item (section 12). The body region u 6.4…28.55, y 24.5…39 prints in **unfilled PA** through a slicer modifier (`stl/slider_body_rf_modifier.stl`). The stiffened moving inside jaw (section 9) reaches the housing face at u 6.4 under the antenna corner: its material within **5.15 mm** of the antenna area (a round-cornered zone) is in the same modifier, so its **PA-CF stays 5.15 mm away in plan** (section 12). The first fix, an R 5.15 relief arc on the old 2.4 mm plate's flank, was replaced by it |
 | 7: lead channel + JST plug relief past the top edge, sound port, light pipe | Plug relief at u 29.5…36.5, y 33.6…41, open into the battery pocket; Ø1.5 piezo port at u 48, y 24.3; Ø2.0 light pipe at u 59.5, y 32 |
 | 2.1: lid end ribs x 16.15…17.5 and 48.5…49.85 | Those two, plus a rib along the glass's top edge (y 18.8…20.15) to locate it in y, inside SPEC's 2.6 mm zone |
 
@@ -131,6 +132,13 @@ Two choices are the mechanics' own and are not SPEC items:
   the moving one is at z −8.6…−6.2, the fixed one at −6.0…+2.5. The tips still cross with a 0.2 mm
   gap. A bore must still be at least ~2.6 mm deep for both tips to engage (inserted back face first),
   the same as before.
+* **The moving inside jaw is stiffened** (2026-11-08, section 9): the old 2.4 mm plate flexed 8 µm/N. The
+  measuring face (u 0, y 31…37), the tip's z (−8.6…−6.2) and its 3.0 mm width at the end are unchanged. The
+  tip's back edge now tapers to **4.0 mm at its base**, the plate fills a **shoulder block** under the tip
+  (u −4…6.4, its top level with the face's lower end, y 31), and a **full-height gusset** (z −8.6…+2.4)
+  fills the part of that block the fixed inside jaw can never reach at any reading (0.4 mm clear of its
+  flank). Trade-off: a gap narrower than 4.0 mm takes less than the full 6 mm of tip (it was 3.0 mm; the
+  tip's last millimetre is still 3.0 wide).
 
 Placement deviations reported by the layout track (U4, the TX ladder, FID3, U1, module x 7.85, J2 y
 30.6, J50 y 7.5, SW20 rotation, C8/C10/C30) are all in the extracted envelope. None of them clashes
@@ -278,7 +286,8 @@ just inside. The firmware field check (section 7, step 7) still accepts or rejec
    with the four pad screws (M2 × 0.4: 0.1 mm = 90°), lock them with Loctite 222, and re-bed if a
    corner is out.
 6. **H1 and the ledge:** shim the H1 boss and the button-band ledge with Kapton until each just
-   touches (a 0.02 feeler drags). Fit the nylon H1 screw last; the indicator at H1 must not move more
+   touches (a 0.02 feeler drags). Keep at least one Kapton layer on the ledge even if it already touches: the
+   board's VBAT band runs under it on B.Cu (under mask; electronics §7.13). Fit the nylon H1 screw last; the indicator at H1 must not move more
    than 0.01.
 7. **Check in firmware** at R = 0, 75 and 150:
    * AS5311 MagINCn and MagDECn both high (field in range);
@@ -336,18 +345,61 @@ plane. Interlayer stress is 0.10 MPa (FEA), so strength is not the issue; stiffn
 
 The fixed jaw (PA-CF) adds about the same again.
 
-**Inside jaw** (calcs §1; FEA in `fea_inside_jaw_output.txt`). The moving inside jaw is 2.4 thick
-(z), with a 3 mm tip over y 31…37. The FEA puts 5 N in −u on its measuring face with the root fixed,
-using datasheet E:
+**Inside jaw** (calcs §1; FEA in `fea_inside_jaw_output.txt`). The old moving inside jaw was a 2.4 mm
+plate (z −8.6…−6.2) with a 3 mm tip over y 31…37 on a 45° flank, and flexed **7.9 µm/N** on PA-CF. It is now
+stiffened (2026-11-08, `params.py` "Stiffening"):
 
-| Outline | PA-CF | PETG |
+* **Unchanged:** the measuring face (u 0, y 31…37), the tip's z (it still crosses the fixed tip 0.2 apart and
+  adds nothing to the crossed tips' z stack) and the tip's 3.0 mm width at its end.
+* **Tip taper:** the tip's back edge runs from 3.0 mm wide at y 37 to **4.0 mm at its base**, y 31.
+* **Shoulder block:** the plate fills the region under the tip, u −4…6.4, up to y 31, level with the face's
+  lower end. Nothing is added right of the face above y 31, so a bore still takes the whole 6 mm tip. The
+  block's left part hangs 0.4 mm over the fixed block's top at R = 0.
+* **Gusset:** a full-height gusset (z −8.6…+2.4) fills the part of the block the fixed inside jaw can never
+  reach at any reading. It stays right of the fixed jaw's flank, 0.4 mm clear (perpendicular), and sits on
+  the step top and against the housing's left face (u 6.4) up to y 31.
+* **RF:** the block and gusset run under the antenna corner. Their material within 5.15 mm of the antenna
+  area prints in **unfilled PA** (the body's RF modifier, section 12).
+
+The FEA puts 5 N in −u on the measuring face. It uses datasheet E (PA-CF 4.2 GPa; unfilled PA 1.5 GPa, TVP;
+PETG 1.7 GPa) and two supports. **Rigid root** fixes the faces against the body, as the first run did.
+**Local body** fuses the jaw to the body round its root (u 0.5…14, y 15…36: the step over the tunnel, the
+1.2 mm wall beside the board cavity and the back web) and fixes only the cut faces:
+
+| Moving inside jaw, µm/N at the face | PA-CF, rigid root | PA-CF, local body | PETG, local body |
+|---|---|---|---|
+| 2.4 mm plate (before) | 7.86 | 9.48 | 23.2 |
+| shoulder block + taper, plate only | 1.86 | 2.27 | 4.3 |
+| **as built: + full-height gusset** | **1.72** | **1.98** | **4.05** |
+
+So the jaw is about **4.8× stiffer**. On PA-CF with the local body it reaches the ≤ 2 µm/N target on datasheet
+E, with no margin: with the 0.85 FDM knock-down it is 2.3 µm/N, and linear tets read a few % stiff, so treat
+it as at the target, not under it (review 2026-11-09; a hand beam check of the tip plus block, ≈ 1.5 µm/N with a
+rigid root, agrees with the FEA's 1.72). The plate's compliance was mostly the 45° flank and the narrow root. What remains is mostly
+the 3 × 2.4 mm tip itself: the tip taper is worth about 0.6 µm/N. The gusset matters most once the body's own
+give is counted. Stresses are low: von Mises 1.8 MPa, interlayer 0.16 MPa, SF > 20.
+
+Options looked at and not taken (rigid root, scratch runs):
+
+* A thicker tip (3.4 mm in z, with the fixed tip 1 mm thinner, same stack): 1.9 µm/N. It deepens the bore
+  needed to engage both tips (2.6 → 3.6 mm) and weakens the fixed jaw.
+* A taper to 4.5 mm: 1.55 µm/N, at a wider minimum gap.
+* A bonded hardened-steel tip blade (ideal bond): 1.6 µm/N, with an insert, bonding and a metal part 8 mm
+  from the antenna.
+* A gusset up to the body front face (z 5.4): no gain over z 2.4.
+
+**Inside-measurement budget** (PA-CF, 2–8 N thumb spread, datasheet E):
+
+| Contribution | per N | over 2–8 N |
 |---|---|---|
-| phase 3 (straight root flank, root from u 1.5) | 52.0 µm | 128.0 µm |
-| RF arc alone | 57.5 µm (+10.6 %) | 141.6 µm |
-| **as built** (RF arc, root from u 0.5) | **39.9 µm (−23 %), 8.0 µm/N** | 98.3 µm, 19.7 µm/N |
+| moving inside jaw, as built (local body) | 1.98 µm/N | **11.9 µm** (14.0 with the 0.85 FDM knock-down) |
+| fixed inside jaw (unchanged, 8.5 thick; rigid root) | 1.70 µm/N | 10.2 µm |
+| **inside reading, both jaws** | 3.68 µm/N | **22 µm** (was 67 µm with the 2.4 mm plate) |
+| outside reading, both jaws (for comparison) | 2.4 µm/N | 14.7 µm |
 
-The RF relief (section 12) therefore costs no stiffness. Even so, the inside jaw is about 7× as
-compliant as the outside one (section 13, item 12).
+The moving inside jaw alone is now about the size of the 10 µm share that one jaw gets in the 30 µm budget
+(12 µm). The **fixed inside jaw is now as compliant as the moving one** and was never stiffened. The inside
+reading still needs a light, steady touch (section 13, item 12).
 
 **Fixed-jaw bolts** (calcs §9). With the nut trap 3.6 deep, the M3 × 10 engages the whole 2.4 mm nut
 and ends 1.1 mm under the back face. The old 2.5 mm trap gave 1.4 mm of engagement.
@@ -416,11 +468,12 @@ A 1.4301 beam adds 0.7 µm/K at 150 mm against steel workpieces. Zero after warm
 From `clash_report.txt`. The board envelope comes from `board_parts.json`, extracted from
 `caliper/hardware/kicad/slider/prettycool-caliper-slider.kicad_pcb`.
 
-* **6207 intersections, 0 not clear** (re-run 2026-11-08 on the re-routed board with Q1/R10, the bottom-side
-  module caps C21/C23 and the C2911931 J50 land; re-run again after the inside-jaw RF relief and the
-  deeper fixed-jaw nut traps). The only overlap is the intended one: the O-ring tyre
-  squeezed 0.15 onto the beam.
-  * **Board vs housing:** the board with its tabs, the 101 part envelopes, the four standoffs, the H1
+* **6255 intersections, 0 not clear** (re-run 2026-11-08 on the re-routed board with Q1/R10, the bottom-side
+  module caps C21/C23 and the C2911931 J50 land; again after the inside-jaw RF relief and the deeper
+  fixed-jaw nut traps; and again after the inside-jaw stiffening, on the board in the working tree at the
+  time, which had gained C13 and moved R85/C44: 102 part envelopes). The only overlap is the intended one:
+  the O-ring tyre squeezed 0.15 onto the beam.
+  * **Board vs housing:** the board with its tabs, the 102 part envelopes, the four standoffs, the H1
     screw head and the mated JST plug, against the body, lid, door, caps, roller, gibs, pads, GFRP rods,
     display, battery, lock and the clamp hardware. All clear.
   * **Travel:** the slider and the board against the beam, fixed jaw, tape, scale and stop screw at
@@ -451,20 +504,19 @@ From `clash_report.txt`. The board envelope comes from `board_parts.json`, extra
   taken where the layout placed the module (U10 origin x 7.85, so the antenna spans board x 0.15…15.55;
   the SPEC table's x 8.3 gave 0.6…16.0). The closest are the battery cell (6.45), the J2 plug (6.75),
   J2 (6.95), the Y-plunger springs and screws (7.5), the Y gib (8.5) and the beam (9.5). **The PA-CF
-  moving inside jaw is 4.70 mm in plan (8.73 mm in 3D, behind the beam plane): inside the 5 mm, so
-  the clash check flagged it RISK.** It was 5.02 mm against the SPEC module position; the module moved
-  0.45 mm toward it in layout. **Fixed (2026-11-08) by reshaping the jaw**, not by extending the
-  modifier: the root flank now steps round the antenna corner on an arc of RF_CLEAR + 0.15 = 5.15 mm
-  (a scallop at most 0.45 mm deep and about 4 mm long, on the root flank; the tip and its measuring
-  face are untouched), and the root's left end moves from u 1.5 to the housing end face at u 0.5.
-  The jaw is now **5.15 mm** from the antenna in plan (8.97 mm in 3D). The fixed jaw's PA-CF inside
-  tip, checked at R = 0 where it is closest, is also 5.15 mm.
-  * Why not the modifier: the jaw material inside 5 mm was a lens only 0.3 mm deep, thinner than one
-    extrusion line, so a slicer region there is unreliable, and a PA strip at the root's edge would
-    still cost stiffness. The reshape costs none: the FEA (`fea_inside_jaw.py`, 5 N on the measuring
-    face, PA-CF) gives 52.0 µm for the old outline, 57.5 µm with the arc alone (+10.6 %), and
-    **39.9 µm as built** (arc plus the wider root, −23 %). See section 9.
-  * The 3.03 cm³ of body within 5 mm still prints in unfilled PA through the modifier.
+  moving inside jaw keeps 5.15 mm in plan.**
+  * History: with the module as placed, the old 2.4 mm plate's root flank was 4.70 mm away (clash check
+    RISK). The first fix stepped that flank round the antenna corner on an R 5.15 arc, because the jaw
+    material inside 5 mm was a lens only 0.3 mm deep: too thin for a slicer region.
+  * The stiffened jaw (section 9) fills that corner. It runs under the antenna corner to the housing face
+    at u 6.4, 1.75 mm from the antenna area at the closest.
+  * So the RF modifier now also takes the jaw's material within **5.15 mm** of the antenna area. On the
+    jaw (u < 6.4) the zone is the area grown by 5.15 mm with round corners, not a box. That is
+    0.19 cm³, a solid region several millimetres across, which a slicer region holds reliably. The jaw's
+    **PA-CF is 5.15 mm** from the antenna in plan and in 3D (the gusset reaches the beam's front plane).
+  * The FEA counts that zone as unfilled PA (E 1.5 GPa, TVP).
+  * The fixed jaw's PA-CF inside tip, checked at R = 0 where it is closest, is also 5.15 mm.
+  * The modifier (`stl/slider_body_rf_modifier.stl`) now holds **3.21 cm³** of body in unfilled PA (was 3.03).
   * The clash check now counts RISK lines in its summary: **0 FAIL, 0 RISK**.
 
 The first model's two findings are gone with the new placement: MODE cap × USB-C, and U_MCU × SW_MODE.
@@ -479,7 +531,8 @@ The first model's two findings are gone with the new placement: MODE cap × USB-
    case (±0.097) is only just inside the window, so the firmware field check decides each unit.
    Board flatness (≤ 0.03, inspected) and the tape thickness along its length are TVP.
 3. **Jaw accuracy with a printed body:** PETG flexes 18 µm at the tip over a 2–8 N thumb spread;
-   PA-CF 7 µm per jaw. Judge rev A on PA-CF parts, measured near the jaw root.
+   PA-CF 7 µm per jaw. Judge rev A on PA-CF parts, measured near the jaw root. Inside readings: 22 µm
+   over 2–8 N on PA-CF for both inside jaws together (section 9).
 4. **Springs:** 4 N and 2.5 N in about 1 mm, OD ≤ 2.0 / ≤ 1.5, are not sourced (TVP). The sliding
    force is 3.9 N only with the beam oiled (μ 0.15); 5.2 N at μ 0.20.
 5. **Yaw at the right end:** a −y push above 1.9 N on the slider's right end lifts the reference strip
@@ -487,8 +540,8 @@ The first model's two findings are gone with the new placement: MODE cap × USB-
 6. **Supports** are still needed in three non-functional places on the body (section 8). The roller
    roof and the tower strips are inside the part, so check that the supports come out.
 7. **Antenna:** the clearance is SPEC D4's 5 mm (not Espressif's 15). The modifier volume, the GFRP
-   rods, the nylon H1 screw and the relieved inside-jaw root (5.15 mm, section 12) keep metal and
-   carbon away. The RF range test at bring-up decides.
+   rods, the nylon H1 screw and the unfilled-PA zone on the inside jaw's root (its PA-CF 5.15 mm away,
+   section 12) keep metal and carbon away. The RF range test at bring-up decides.
 8. **Slim USB-C cable** (≤ 10.4 × 5.8 overmold) is a usage constraint (TVP: check common cables).
 9. **Tape:** the ams strip's width and thickness are unconfirmed. A magnetic (O1) beam under the tape
    may change the field the AS5311 sees (TVP: check MagINC/MagDEC on both beam materials).
@@ -498,15 +551,40 @@ The first model's two findings are gone with the new placement: MODE cap × USB-
     0.95 mm. The nut clamps it against the beam's back face, so it only sees compression (TVP: no
     creep at the clamp load).
 11. **Inside-jaw usage:** the moving inside jaw is now the back one. For a shallow bore, insert the
-    jaws back face first (about 2.6 mm of depth for both tips, as before).
-12. **Inside-jaw stiffness (new finding, 2026-11-08).** The moving inside jaw is only 2.4 mm thick
-    (it prints on the slider's bed and crosses the fixed one 0.2 mm apart in z). The FEA gives
-    8.0 µm/N on PA-CF (19.7 µm/N on PETG), against 1.2 µm/N for the outside jaw. Over a 2–8 N thumb
-    spread that is about 48 µm, well outside a 10 µm share of the budget. Inside readings need a light,
-    steady touch until a rev B jaw is thicker or machined. The RF reshape made it 23 % stiffer, not
-    weaker.
+    jaws back face first (about 2.6 mm of depth for both tips, as before). Since the stiffening, the
+    moving tip is 4.0 mm wide at its base (3.0 at its end): a gap under 4 mm takes less than the full
+    6 mm of tip.
+12. **Inside-jaw stiffness:** improved but not closed (2026-11-08). The moving inside jaw was a 2.4 mm
+    plate at 7.9–9.5 µm/N. It now has a tapered tip, a shoulder block and a full-height gusset, at
+    **1.98 µm/N** on PA-CF with the local body (4.05 on PETG). That is at the 2 µm/N target, with no margin:
+    11.9 µm over a 2–8 N spread, 14 µm (2.3 µm/N, just over the target) with the FDM knock-down. PA-CF also
+    loses stiffness as it takes up moisture; the dial-indicator test below settles it.
+    * The **fixed inside jaw** (8.5 thick, never stiffened) is 1.70 µm/N, so an inside reading moves
+      about 22 µm over 2–8 N, against about 15 µm for an outside one. A light, steady touch still matters.
+    * Next steps if that is not enough: stiffen the fixed inside jaw too, the thicker-tip or steel-tip options in section 9, or rev B metal jaws.
+    * TVP: the unfilled-PA modulus (1.5 GPa assumed), the PA/PA-CF bond across the modifier boundary in
+      the jaw root, and the jaw's real stiffness: push the tip with a known weight under a dial indicator.
 
 ## 14. Change record
+
+**Inside-jaw stiffening, 2026-11-08 (second pass).**
+* The moving inside jaw's 2.4 mm plate became:
+  * a tip tapered to 4.0 mm at its base, with the measuring face, the tip's z and its end width unchanged;
+  * a shoulder block under the tip, u −4…6.4, up to y 31;
+  * a full-height gusset (z −8.6…+2.4), 0.4 mm clear of the fixed inside jaw at every reading.
+* Its material within 5.15 mm of the antenna moved into the unfilled-PA modifier. The modifier is now
+  3.21 cm³; the PA-CF stays 5.15 mm away.
+* `fea_inside_jaw.py` now compares the plate, the block and the jaw as built:
+  * rigid root and with the local body around the root;
+  * per-element E for the PA zone;
+  * the fixed inside jaw is added for the budget.
+* Result on PA-CF with the local body: 9.48 → **1.98 µm/N**.
+* Clash check: 6255 intersections, 0 not clear, 0 FAIL, 0 RISK, 0 BREAK/THIN.
+* `printcheck` on the slider body: the same findings as before (the jaw adds none).
+* Tests: 36 pass (new: the stiffened jaw keeps the tip and clears the fixed jaw; the RF test now checks the
+  PA-CF part and the modifier).
+* Fixed-jaw bolts re-checked: the 3.6 mm trap and M3 × 10 are in the model, calcs §9 and the BOM.
+* `fea_slider.py` (body under the preloads) was not re-run; the body changed only at the inside jaw.
 
 **Mechanics against the 2026-11-08 board changes.**
 * Re-extracted the re-routed slider board: Q1 (SOT-23, 1.15) and R10 beside J2, RT1/C7 moved,

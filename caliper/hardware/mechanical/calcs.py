@@ -125,17 +125,31 @@ say("Mitigation in rev A: PA-CF body; measure near the jaw root; a constant-forc
 
 ij_path = os.path.join(HERE, "fea_inside_jaw_output.txt")
 say()
-say(f"Moving inside jaw (FEA only, fea_inside_jaw.py): {P.IJ_MOVING_Z[1] - P.IJ_MOVING_Z[0]:.1f} thick, tip "
-    f"{P.IJ_TIP_W:g} wide over y {P.IJ_TIP_Y0:g}..{P.IJ_TIP_Y1:g}, {F:g} N in -u on the measuring face; root fixed:")
+say(f"Moving inside jaw (FEA only, fea_inside_jaw.py): tip {P.IJ_MOVING_Z[1] - P.IJ_MOVING_Z[0]:.1f} thick (z), "
+    f"{P.IJ_TIP_W:g} wide at y {P.IJ_TIP_Y1:g} and {P.IJ_TIP_BASE_W:g} at y {P.IJ_TIP_Y0:g}, on a shoulder block with a "
+    f"full-height gusset (to z {P.IJ_GUSSET_Z1:g}); {F:g} N in -u on the measuring face:")
+IJ = {}
 if os.path.exists(ij_path):
-    ij = re.findall(r"^RESULT (\S+) face deflection: phase 3 ([\d.]+) um, arc only ([\d.]+) um \(([-+\d.]+) %\), "
-                    r"as built ([\d.]+) um \(([-+\d.]+) %\); ([\d.]+) um/N", open(ij_path).read(), re.M)
-    for mat, d0, d1, p1, d2, p2, k in ij:
-        say(f"  {mat:<6} phase 3 {float(d0):5.1f} um; RF arc alone {float(d1):5.1f} um ({p1} %); as built (arc + root from "
-            f"u {P.IJ_ROOT_U0:g}) {float(d2):5.1f} um ({p2} %) = {float(k):4.1f} um/N -> {float(k) * 6:4.0f} um over a 6 N spread")
-    say("  (datasheet E, no FDM knock-down.)  The RF relief costs no stiffness: the wider root more than pays for the")
-    say("  scallop.  But the inside jaw is several times as compliant as the outside one: inside readings need a light,")
-    say("  steady touch, and the inside-jaw error is NOT inside a 10 um share of the budget (TVP, docs section 13).")
+    ij = re.findall(r"^RESULT (\S+) (rigid|body): plate ([\d.]+) um \(([\d.]+) um/N\), block ([\d.]+) um, "
+                    r"as built ([\d.]+) um \(([\d.]+) um/N, ([\d.]+)x stiffer\)", open(ij_path).read(), re.M)
+    for mat, sup, d0, k0, d1, d2, k2, x in ij:
+        IJ[(mat, sup)] = float(k2)
+        say(f"  {mat:<6} {'rigid root' if sup == 'rigid' else 'with the local body':<20} 2.4 plate {float(k0):5.2f} um/N -> "
+            f"as built {float(k2):5.2f} um/N ({x}x stiffer) = {float(k2) * 6:4.1f} um over a 6 N spread")
+    say("  (datasheet E, no FDM knock-down; unfilled PA E 1.5 GPa (TVP) within 5.15 mm of the antenna.)")
+    k = IJ.get(("PA-CF", "body"))
+    if k is not None:
+        say(f"  PA-CF with the local body: {k * 6:.1f} um over 2-8 N, "
+            f"{'inside' if k * 6 <= 10.0 + 1e-9 else 'NOT inside'} a 10 um share of the 30 um budget"
+            f"{'' if k <= 2.0 else ' (above the 2 um/N target)'}; /0.85 for the FDM knock-down: {k / FDM_KD * 6:.1f} um.")
+    fx = dict(re.findall(r"^RESULT FIXED (\S+): [\d.]+ um \(([\d.]+) um/N\)", open(ij_path).read(), re.M))
+    if fx:
+        say(f"  Fixed inside jaw (unchanged, 8.5 thick, rigid root): PA-CF {float(fx['PA-CF']):.2f} um/N, PETG "
+            f"{float(fx['PETG']):.2f} um/N.")
+        if k is not None:
+            kk = k + float(fx["PA-CF"])
+            say(f"  Inside reading, both jaws (PA-CF): {kk:.2f} um/N -> {kk * 6:.1f} um over 2-8 N "
+                f"(outside reading, both jaws: {2 * JAW[('PA-CF', -37.0)] / F * 6e3:.1f} um).")
 else:
     say("  (fea_inside_jaw_output.txt missing: run `py fea_inside_jaw.py`)")
 

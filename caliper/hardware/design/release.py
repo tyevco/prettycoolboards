@@ -52,13 +52,15 @@ FAB_NOTES = {
     "slider": [
         "**PCB:** 4 layers, **1.0 mm** finished thickness, FR-4, **ENIG** (flat pads for the 0.4 mm-pitch DSBGA, "
         "the LGA module and the bare electrode copper), green mask, white silk, 1 oz outer / 0.5 oz inner copper.",
-        "**Stack-up:** JLC's standard symmetric 1.0 mm 4-layer impedance stack (the layout assumed a ~0.1 mm L1-L2 "
-        "prepreg; read the exact stack ID and dielectric thickness from JLC's impedance calculator when ordering). "
-        "Symmetric is required by the flatness callout. L1 F.Cu signals, L2 In1 solid GND, L3 In2 +3V3 pour / signals "
-        "/ electrode phase buses, L4 B.Cu sensors. **No impedance control** (it would buy nothing): USB_DP/USB_DM "
-        "are full-speed USB (12 Mb/s); they run as a pair of 0.14 mm tracks with a 0.18 mm gap mostly on L4 over a GND strip on L3 "
-        "(an L4-over-L3 pair, not the L1-over-L2 microstrip the 0.14 mm class width was estimated for), so there is "
-        "no specified structure for JLC to tune (layout review 2026-11-08, docs/electronics.md §7.5).",
+        "**Stack-up: JLC04101H-3313** (select it in the order's layer stack-up option): JLC's symmetric 4-layer "
+        "1.0 mm construction with one 3313 prepreg (0.0994 mm, er 4.1) between each outer and inner layer, 35 um "
+        "outer / 15.2 um inner copper. The board file carries this stack (layout.py `SLIDER_STACKUP`; the core is set so "
+        "the stack adds up to 1.0 mm). Symmetric is required by the flatness callout. L1 F.Cu signals, L2 In1 solid "
+        "GND, L3 In2 +3V3 pour / signals / electrode phase buses, L4 B.Cu sensors, the VBAT trunk. **No impedance "
+        "control ordered** (it would buy nothing for full-speed USB, 12 Mb/s): USB_DP/USB_DM are a pair of 0.16 mm "
+        "tracks with a 0.16 mm gap, mostly on L4 over a GND strip on L3, 89 ohm differential on this stack (hwtools "
+        "sicalc field solve with mask and JLC's etch; docs/electronics.md §7.1). Another stack (e.g. the 7628 one) "
+        "changes nothing but that number.",
         "**Flatness callout (SPEC D3):** bow/twist <= 0.03 mm over y 0-20 mm (the beam band, x -6...68 incl. the end "
         "tabs), assembled board on a surface plate, 100 % inspected, reject above. IPC-6012 class 2 (0.75 %) would allow "
         "0.55 mm: put this in the order remark and agree it before ordering; it may need a quote.",
@@ -69,9 +71,10 @@ FAB_NOTES = {
         "plugging needed; epoxy-filled + capped is acceptable if JLC prefers).",
         "**Bottom side, beam band (y 0-20):** only U30 (AS5311) and C30/C31 are assembled there (<= 1.30 mm). The E40 "
         "electrode copper is bare (mask open per finger, no paste, no part).",
-        "**Assembly:** both sides. Top = everything else; bottom = U30, C30, C31 (beam band) and C21, C23 (0402, under "
-        "the module's 3V3 pad, upper band); nothing else is placed on the bottom (the 19 test pads are bare). If "
-        "two-sided assembly is not wanted, these five can be hand-soldered (U30 is TSSOP-20, 0.65 mm pitch).",
+        "**Assembly:** both sides. Top = everything else; bottom = U30, C30, C31 (beam band) and C21, C23, R85, C44 "
+        "(0402, under the module: its 3V3 decoupling and the ADC input's RC filter, upper band); nothing else is placed "
+        "on the bottom (the 19 test pads are bare). If two-sided assembly is not wanted, these seven can be "
+        "hand-soldered (U30 is TSSOP-20, 0.65 mm pitch).",
         "**AS5311 supply:** U30 AS5311-ATST (LCSC C22459687) had only 80 pcs at LCSC on 2026-11-07. Check stock when "
         "ordering; if it is gone, order the board with U30 as DNP and consign/hand-fit the part (Mouser/DigiKey stock "
         "it as AS5311-ATST / AS5311-ATSU).",

@@ -3,6 +3,8 @@
 
 usage: python3 caliper/hardware/design/layout.py [--board slider|scale] [--route] [--minutes N] [--attempts N]
                                                  [--finish | --complete | --resume]
+       python3 caliper/hardware/design/layout.py --board slider --rework [--rip NET,...] [--minutes N]
+                                                 (keep the routing of the unchanged nets, see rework())
 
 Adapted from dial-me-spinner's hardware/design/layout.py (same toolchain, repo-root tools/).
 
@@ -24,6 +26,7 @@ design), the back is one solid GND zone, two Ø1.0 alignment holes, two fiducial
 from __future__ import annotations
 
 import argparse
+import json
 import math
 import os
 import re
@@ -315,12 +318,22 @@ def slider_fixed(comps):
         "SW20": (27.0, 15.7, 90.0, "F"),
         # U1 1.2 left of SPEC's 53.0 (its VBUS pin would sit under the D+/D- crossover behind J1's pads)
         "U1": (50.2, 26.3, 0.0, "F"),
-        "D1": (51.3, 22.0, 90.0, "F"),
+        # D1 (TVS) on the VBUS trunk (2026-11-08 phase-4 review: J1's A9/B4 pads reached U2 without passing it):
+        # turned 180 so its VBUS pad 1 faces east, where both J1 feeds land on it and the run to C1 / U2 leaves it
+        # (preroute_vbus). Below J1's courtyard (y >= 21.16), left of C1
+        "D1": (52.7, 19.95, 180.0, "F"),
+        # BTN_HOLD_N debounce cap: was left at (53.72, 19.6) by the placer's fallback, now D1's spot
+        "C53": (51.3, 23.0, 0.0, "F"),
+        # BQ25180 caps fixed where the placer had put them: the VBUS / VBAT / VSYS pre-routes are drawn to these pads
+        "C1": (56.8993, 19.1936, 0.0, "F"), "C2": (59.9, 16.6, 90.0, "F"), "C3": (58.2683, 13.8556, 0.0, "F"),
         "R1": (53.4, 23.7, 90.0, "F"), "R2": (53.4, 29.0, 90.0, "F"),
         # U4 (fuel gauge) by the battery connector J2, not in the charger cluster (SPEC lists it there): its CELL/VDD
         # pins sense VBAT at the cell's connector, its I2C / ALRT lines stay short, and the cluster has no room to let
         # them out (the electrode ring blocks In2/B.Cu up to x 52.4)
         "U4": (29.6, 27.2, 0.0, "F"), "U5": (52.2, 4.6, 90.0, "F"), "U6": (53.0, 12.9, 90.0, "F"),
+        # U6's own input cap (review 2026-11-08: C5 was 12.5 mm away by copper): under pins 1 (+3V3) / 2 (GND),
+        # clear of U6's and U3's courtyards
+        "C13": (52.25, 10.3, 0.0, "F"),
         # U5 (TPS22917) input / output caps at its pins (review 2026-11-08: the pin-anchored placer could not find room
         # inside the SPEC cluster box and left them 6.5 / 7.0 mm away). C8 sits below U5 (y 1.55, 0.95 under the SPEC
         # cluster box's y 2.5; the 4.2 mm height rule still holds), GND pad next to U5's GND pin; C10 left of U5
@@ -342,6 +355,10 @@ def slider_fixed(comps):
         # (2.0, 25.95): C21 100n above, C23 10u below, +3V3 pad (1) toward the via. 0402, 0.5 mm tall, in the upper
         # band where the housing floor is 0.75 mm below the board (SPEC §2.1); clear of the antenna rule area (y >= 29.2)
         "C21": (3.1, 26.5, 0.0, "B"), "C23": (3.1, 25.3, 0.0, "B"),
+        # CAP_RX anti-alias RC (3.9k / 100p) at the ADC pin (review 2026-11-08: it sat at U40, 40 mm of track from
+        # GPIO1): bottom, under the module, below C23, beside GPIO1's escape via (2.0, 24.25); R85 pad 2 (CAP_RX)
+        # and C44 pad 1 (CAP_RX) face the via. 0.2 mm from every other net (the Analog class), 0.5 mm tall
+        "R85": (3.3, 24.25, 180.0, "B"), "C44": (3.3, 23.25, 0.0, "B"),
         # FID3 (SPEC 60.5, 32.8) would sit inside J1's courtyard (it reaches y 31.9 over x 54-63): top middle instead
         "FID1": (2.0, 1.5, 0.0, "F"), "FID2": (60.5, 1.2, 0.0, "F"), "FID3": (33.0, 27.6, 0.0, "F"),
         "E40": (SEED_FC[0], SEED_FC[1], 0.0, "B"),
@@ -374,7 +391,7 @@ SLIDER_PIN_ANCHORS = {
     "C40": ("U40", "CAP_RX_IN", 3.0), "R81": ("U40", "CAP_RX_IN", 3.5),
     "C42": ("U40", "+3V3_SNS", 2.5), "R82": ("U40", "CAP_VDIV", 3.5), "R83": ("U40", "CAP_VDIV", 3.5),
     "C41": ("U40", "CAP_VDIV", 3.5), "R84": ("U40", "CAP_AMP_OUT", 3.5), "C43": ("U40", "CAP_AMP_OUT", 5.0),
-    "R85": ("U40", "CAP_AMP_OUT", 5.0), "C44": ("U40", "CAP_AMP_OUT", 6.0),
+    # (R85 / C44 are fixed at the ESP32's GPIO1 in slider_fixed)
     # display
     "C50": ("J50", "+3V3_UI", 3.0), "C51": ("J50", "+3V3_UI", 3.5),
     "C55": ("D50", "+3V3_UI", 3.0), "R55": ("D50", "RGB_DIN", 4.0),
@@ -439,11 +456,17 @@ def slider_keepouts():
         x, y = B(X, Y)
         return 52.2 <= x <= 55.4 and 24.6 <= y <= 28.4
 
-    def vbus_preroute(X, Y):       # preroute_vbus(): x 54.2 from J1's A4 pad down to C1
+    def vbus_preroute(X, Y):       # preroute_vbus(): x 54.15 from J1's A4 pad down to D1, x 57.65 from A9
         x, y = B(X, Y)
-        return 53.75 <= x <= 54.65 and 19.8 <= y <= 24.4
+        return (53.75 <= x <= 54.55 and 19.8 <= y <= 24.4) or (57.2 <= x <= 58.1 and 20.6 <= y <= 28.0)
 
-    return [("F", via_band), ("F", tx_array), ("F", rx_feed), ("F", usb_preroute), ("F", vbus_preroute)]
+    def power_preroute(X, Y):      # preroute_vbat() / preroute_vsys(): the F.Cu ends near U2, C2, C3, C4
+        x, y = B(X, Y)
+        return ((55.3 <= x <= 61.4 and 12.1 <= y <= 13.2) or (60.3 <= x <= 61.4 and 12.1 <= y <= 16.4)
+                or (57.5 <= x <= 59.3 and 13.9 <= y <= 16.3))
+
+    return [("F", via_band), ("F", tx_array), ("F", rx_feed), ("F", usb_preroute), ("F", vbus_preroute),
+            ("F", power_preroute)]
 
 
 def slider_outline_pts():
@@ -653,7 +676,8 @@ def usb_ref_stitch(b, pitch=2.0, clearance=0.16):
             continue
         ux, uy = (c.x - a.x) / L, (c.y - a.y) / L
         for side in (-1, 1):
-            off = MM(0.07 + clearance + 0.2 + 0.30 + 0.03)  # past the other line of the pair (0.30), 0.03 spare
+            # past the other line of the pair (centre 0.32 away, USB_W wide), 0.03 spare
+            off = MM(USB_W / 2 + clearance + 0.2 + USB_W + USB_GAP + 0.03)
             n = int(L // MM(0.5))
             for k in range(n + 1):
                 pt = pcbnew.VECTOR2I(int(a.x + ux * k * MM(0.5) - side * uy * off),
@@ -952,7 +976,13 @@ BOARDS = {
                    # the module peaks at ~0.36 A) in a class the grid router may rip up and re-route
                    rail_nets=("+3V3",),
                    light_power=("+3V3_SNS", "+3V3_UI", "LCD_LEDA", "LCD_LEDK"),
-                   gnd_fanout=True, route=True, edge=0.25, stitch_pitch=2.5),
+                   # CAP_RX (GPIO1, ADC) and the long run to its filter's first stage (review 2026-11-08)
+                   analog_nets=("CAP_RX", "CAP_LP1"),
+                   gnd_fanout=True, route=True, edge=0.25, stitch_pitch=2.5, stackup="slider",
+                   # USBLC6-2SC6: I/O1 (pins 1/6) and I/O2 (3/4) are one conductor inside the part. As jumper pad
+                   # groups KiCad's connectivity knows it, so no router joins the two pads around the part again
+                   # (the 2026-11-08 re-route had added such a bypass on each USB line)
+                   jumper_pads={"U1": (("1", "6"), ("3", "4"))}),
     "scale": dict(layers=2, fixed=scale_fixed, build=build_scale, post_fixed=scale_post_fixed,
                   pours=pours_scale, inside=scale_inside, keepouts=lambda: [], power_track=0.3,
                   rules=dict(track=0.2, clearance=0.2, via=0.6, via_drill=0.3), power_nets=(), light_power=(),
@@ -972,6 +1002,58 @@ def pcb_path(board):
     return os.path.join(project_dir(board), project_name(board) + ".kicad_pcb")
 
 
+def netclasses(bb, cfg, allnets):
+    """The board's net classes and their net patterns, set on the board and returned as a spec for
+    write_project_netclasses(): KiCad 10 keeps them in the project (.kicad_pro), and pcbnew's SaveBoard does not
+    write the project of a board built in memory, so the next load would bring back the old classes."""
+    rules = cfg["rules"]
+    clr = rules["clearance"]
+    v, vd = rules["via"], rules["via_drill"]
+    pick = lambda names: [n for n in allnets if net_short(n) in names]  # noqa: E731
+    spec = [  # name, nets, track, clearance, via, drill, (diff pair width, gap)
+        ("Power", pick(cfg["power_nets"]), cfg["power_track"], clr, 0.5, 0.25, None),
+        ("Supply", pick(cfg["light_power"]), 0.2, clr, v, vd, None),
+        ("Ground", pick(("GND",)), cfg["power_track"], clr, 0.5, 0.25, None),
+        ("Rail3V3", pick(cfg.get("rail_nets", ())), 0.2, clr, v, vd, None),
+        # 90-ohm differential geometry for the JLC04101H-3313 stack (see USB_W and docs/electronics.md §7.1)
+        ("USB", pick(("USB_DP", "USB_DM")), USB_W, USB_S, v, vd, (USB_W, USB_GAP)),
+        # the ADC line and its filter: 0.2 mm (2x the default) from every other net (0.3 would not cross the electrode
+        # via field), and the GND pour follows it at 0.25
+        ("Analog", pick(cfg.get("analog_nets", ())), 0.15, 0.2, v, vd, None),
+    ]
+    spec = [s_ for s_ in spec if s_[1]]
+    bb.board.GetDesignSettings().m_NetSettings.ClearNetclassPatternAssignments()
+    for name, nets_, track, c, via, drill, dp in spec:
+        bb.netclass(name, nets_, track=track, clearance=c, via=via, via_drill=drill)
+        if dp:
+            nc = bb.board.GetDesignSettings().m_NetSettings.GetNetClassByName(name)
+            nc.SetDiffPairWidth(MM(dp[0]))
+            nc.SetDiffPairGap(MM(dp[1]))
+    return spec
+
+
+def write_project_netclasses(pro, spec):
+    """Put the net classes of `spec` (netclasses()) into the project file, replacing the classes of those names and
+    every net pattern."""
+    with open(pro, encoding="utf-8") as f:
+        d = json.load(f)
+    ns = d.setdefault("net_settings", {})
+    classes = ns.setdefault("classes", [])
+    base = dict(next((c for c in classes if c.get("name") == "Default"), {}))
+    for name, nets_, track, c, via, drill, dp in spec:
+        e = next((x for x in classes if x.get("name") == name), None)
+        if e is None:
+            e = dict(base)
+            classes.append(e)
+        e.update({"name": name, "track_width": track, "clearance": c, "via_diameter": via, "via_drill": drill})
+        if dp:
+            e.update({"diff_pair_width": dp[0], "diff_pair_gap": dp[1]})
+    ns["netclass_patterns"] = [{"netclass": name, "pattern": n} for name, nets_, *_ in spec for n in sorted(nets_)]
+    with open(pro, "w", encoding="utf-8") as f:
+        json.dump(d, f, indent=2)
+        f.write("\n")
+
+
 def generate(board, pours=True):
     cfg = BOARDS[board]
     pdir = project_dir(board)
@@ -984,22 +1066,7 @@ def generate(board, pours=True):
     bb.rules(edge=cfg["edge"], **rules)
     bb.set_origin(OX, OY)
     allnets = [n for n in nets if not n.startswith("unconnected-")]
-    power = [n for n in allnets if net_short(n) in cfg["power_nets"]]
-    light = [n for n in allnets if net_short(n) in cfg["light_power"]]
-    clr = rules["clearance"]
-    if power:
-        bb.netclass("Power", power, track=cfg["power_track"], clearance=clr, via=0.5, via_drill=0.25)
-    if light:
-        bb.netclass("Supply", light, track=0.2, clearance=clr, via=rules["via"], via_drill=rules["via_drill"])
-    gnd = [n for n in allnets if net_short(n) == "GND"]
-    if gnd:
-        bb.netclass("Ground", gnd, track=cfg["power_track"], clearance=clr, via=0.5, via_drill=0.25)
-    rail = [n for n in allnets if net_short(n) in cfg.get("rail_nets", ())]
-    if rail:
-        bb.netclass("Rail3V3", rail, track=0.2, clearance=clr, via=rules["via"], via_drill=rules["via_drill"])
-    usb = [n for n in allnets if net_short(n) in ("USB_DP", "USB_DM")]
-    if usb:   # 90-ohm differential geometry for the JLC 4-layer 1.0 mm stack (see docs/electronics.md §7)
-        bb.netclass("USB", usb, track=USB_W, clearance=USB_S, via=rules["via"], via_drill=rules["via_drill"])
+    nc_spec = netclasses(bb, cfg, allnets)
     fixed_b = cfg["fixed"](comps)
     fixed = {r: (*P(x, y), rot, side) for r, (x, y, rot, side) in fixed_b.items()}
     bb.place_from_netlist(comps, nets, fixed, default=(*P(31.0, 40.0), 0.0, "F"))
@@ -1041,6 +1108,11 @@ def generate(board, pours=True):
         others = sum(escape_signal_pads(bb, r, lambda pd, xy: net_short(pd.GetNetname()) not in power)
                      for r in ("U60", "U4"))
         preroute_vbus(bb)
+        preroute_vbat(bb)
+        preroute_vbat_raw(bb)
+        preroute_vsys(bb)
+        preroute_cap_rx(bb)
+        preroute_cap_lp1(bb)
         # U1's VBUS pin sits between the D+/D- pins: give it a via so VBUS need not thread the pair
         others += escape_signal_pads(bb, "U1", lambda pd, xy: pd.GetNumber() == "5")
         print(f"[slider] signal escapes: module right column {right_col}, U60/U4 {others}")
@@ -1056,13 +1128,26 @@ def generate(board, pours=True):
     if pours:
         cfg["pours"](bb)
     out = pcb_path(board)
+    write_project_netclasses(out.replace(".kicad_pcb", ".kicad_pro"), nc_spec)
     bb.save(out)
     set_layer_types(out, cfg["layers"])
+    if cfg.get("stackup") == "slider":
+        set_stackup(out, SLIDER_STACKUP)
+    if cfg.get("jumper_pads"):
+        set_jumper_pads(out, cfg["jumper_pads"])
     return out
 
 
 # --------------------------------------------------------------------------- pre-routes
-USB_W, USB_S = 0.14, 0.15   # 90-ohm edge-coupled microstrip over In1 on a ~0.1 mm prepreg (docs/electronics.md §7)
+# USB pair: 0.16 mm tracks 0.32 mm apart (0.16 mm gap) = 89 ohm differential as an edge-coupled microstrip over its
+# reference plane on JLC04101H-3313's 0.0994 mm 3313 prepreg (er 4.1), 35 um copper, 15 um mask, JLC's 17.8 um etch:
+# hwtools sicalc 2D field solve, 2026-11-08 (0.14 / 0.18 gave 96.7 ohm). The pair runs on B.Cu over its In2 GND strip,
+# the same structure as F.Cu over In1 in this symmetric stack. The class clearance (0.15) is below the 0.16 gap.
+USB_W, USB_S, USB_GAP = 0.16, 0.15, 0.16
+
+
+# DSBGA ball lands (0.23 NSMD, mask opening r 0.14): track width inside the opening, and where the wider neck starts
+BGA_PAD_TRACE_MAX, BGA_NECK_IN = 0.15, 0.27
 
 
 def preroute_bga_escape(bb, ref):
@@ -1108,18 +1193,40 @@ def preroute_bga_escape(bb, ref):
     neck = 0.35
     for k in ("A1", "B1", "C1", "D1"):
         add(k, [(-0.8, 0)], 0.12)
+    # (first leg, rest, via, neck width, rest width). IN / SYS / BAT carry the 0.5 A Wi-Fi peaks (review 2026-11-08):
+    # 0.25 mm necks (0.16 mm from the neighbouring 0.23 mm balls at 0.4 mm pitch; 0.15 mm inside the ball's mask
+    # opening, BGA_PAD_TRACE_MAX) and 0.30 / 0.25 mm beyond. BAT's
+    # first outer leg stays 0.25 so it keeps 0.125 mm from SYS's 0.30 run 0.4 mm above it
     power_routes = {
-        "A2": ((0, -neck), [(0, -0.45)], False),
-        "B2": ((neck, 0), [(1.05, 0)], False),
-        "C2": ((neck, 0), [(0.35, 0), (0.45, 0.45)], False),
-        "D2": ((0, neck), [(0, 0.6)], True),
+        "A2": ((0, -neck), [(0, -0.45)], False, 0.25, 0.3),
+        "B2": ((neck, 0), [(1.05, 0)], False, 0.25, 0.3),
+        "C2": ((neck, 0), [(0.35, 0)], False, 0.25, 0.25),
+        "D2": ((0, neck), [(0, 0.6)], True, 0.12, 0.2),
     }
-    for k, (first, rest, via) in power_routes.items():
-        add(k, [first], 0.12)
+    for k, (first, rest, via, w_neck, w_rest) in power_routes.items():
+        if w_neck > BGA_PAD_TRACE_MAX:
+            # inside the ball's mask opening (r 0.14) the track stays at most 2/3 of the 0.23 pad (TI's DSBGA land
+            # rule for NSMD pads: a wider trace widens the wetted land and pulls the joint off-centre; review
+            # 2026-11-09: the 0.25 necks were wider than the pad). The wide part starts BGA_NECK_IN out, where its
+            # round end stays clear of the opening (0.27 - 0.125 = 0.145 > 0.14)
+            f = BGA_NECK_IN / neck
+            inner = (first[0] * f, first[1] * f)
+            add(k, [inner], BGA_PAD_TRACE_MAX)
+            x0, y0 = Pp[k]
+            Pp[k + "_i"] = (x0 + MM(inner[0] * col[0] + inner[1] * row[0]), y0 + MM(inner[0] * col[1] + inner[1] * row[1]))
+            pads[k + "_i"] = pads[k]
+            add(k + "_i", [(first[0] - inner[0], first[1] - inner[1])], w_neck)
+        else:
+            add(k, [first], w_neck)
         x0, y0 = Pp[k]
         Pp[k + "_n"] = (x0 + MM(first[0] * col[0] + first[1] * row[0]), y0 + MM(first[0] * col[1] + first[1] * row[1]))
         pads[k + "_n"] = pads[k]
-        add(k + "_n", rest, 0.2, via)
+        add(k + "_n", rest, w_rest, via)
+    # BAT's diagonal toward its via array (preroute_vbat), 0.30
+    x, y = Pp["C2_n"]
+    Pp["C2_m"] = (x + MM(0.35 * col[0]), y + MM(0.35 * col[1]))
+    pads["C2_m"] = pads["C2"]
+    add("C2_m", [(0.45, 0.45)], 0.3)
 
 
 def escape_module(bb):
@@ -1207,23 +1314,187 @@ def preroute_mag(bb):
     return n
 
 
+def pad_xy(fp, num=None, net=None):
+    """Board-mm position of a footprint's pad, by number or by (short) net name."""
+    for p in fp.Pads():
+        if (num is not None and p.GetNumber() == num) or (net is not None and net_short(p.GetNetname()) == net):
+            return bxy(p)
+    raise KeyError(f"{fp.GetReference()} has no pad {num or net}")
+
+
+def add_path(board, pts, layer, net, width):
+    for a_, c_ in zip(pts, pts[1:]):
+        add_track(board, a_, c_, layer, net, width)
+
+
+def add_vias(board, pts, net, dia=0.5, drill=0.25):
+    for p in pts:
+        add_via(board, p, net, dia, drill)
+
+
+# Copper sheet resistance (mOhm per square) for the resistance budget in the docstrings: 35 um outer (1 oz finished),
+# 15.2 um inner (0.5 oz), rho 17.2 nOhm m at 25 C.
+RS_OUTER, RS_INNER = 0.49, 1.13
+
+
 def preroute_vbus(bb):
-    """Locked 0.30 mm VBUS from J1's lower VBUS pad pair (A4/B9) down the strip between J1's shell tab and R1/C7 to
-    the charger's input cap C1, with a branch to the TVS D1. That corner is tight enough (J1's shell tab, the CC
-    pull-down, the gauge cap) that the routers kept failing it."""
+    """Locked VBUS from J1 through the TVS D1 to C1 and U2 IN (review 2026-11-08: J1's A9/B4 pads reached U2 along
+    x 57.5 without passing D1, which hung off the A4/B9 run). D1 sits with its VBUS pad 1 east, and both feeds end on
+    that pad: A4/B9 down x 54.15 (0.40 mm: J1's A1/B12 GND pads are at x >= 54.53, R1 at x <= 53.72), A9/B4 east
+    under the receptacle, down x 57.65 (0.50 mm: between the shell tab at x <= 57.22 and the peg hole) and west along
+    y 21.0 to it. The run on to C1 (0.60) and U2's IN ball (0.50) leaves pad 1 on its own, so no copper path from J1
+    to U2 skips the TVS. U1's VBUS pin (ESD reference) and TP1 are left to the routers."""
     fps = bb.footprints
-    if not all(r in fps for r in ("J1", "C1", "D1")):
+    if not all(r in fps for r in ("J1", "C1", "D1", "U2")):
         return
     net = bb.net("VBUS")
-    a4 = bxy(next(p for p in fps["J1"].Pads() if p.GetNumber() == "A4"))
-    c1 = bxy(next(p for p in fps["C1"].Pads() if net_short(p.GetNetname()) == "VBUS"))
-    d1 = bxy(next(p for p in fps["D1"].Pads() if net_short(p.GetNetname()) == "VBUS"))
-    x = 54.2                      # clear of J1's A1/B12 GND pads (x >= 54.53) under A4
     b = bb.board
-    add_track(b, a4, (x, a4[1]), pcbnew.F_Cu, net, 0.3)
-    add_track(b, (x, a4[1]), (x, d1[1]), pcbnew.F_Cu, net, 0.3)
-    add_track(b, (x, d1[1]), c1, pcbnew.F_Cu, net, 0.3)
-    add_track(b, (x, d1[1]), d1, pcbnew.F_Cu, net, 0.3)
+    j1 = fps["J1"]
+    a4, a9 = pad_xy(j1, "A4"), pad_xy(j1, "A9")
+    c1 = pad_xy(fps["C1"], net="VBUS")
+    d1 = pad_xy(fps["D1"], net="VBUS")
+    d1_gnd = pad_xy(fps["D1"], net="GND")
+    assert d1[0] > d1_gnd[0] + 2.0, "D1's VBUS pad must face east (toward J1 / C1)"
+    u2_in = pad_xy(fps["U2"], "A2")
+    xa, xb, yb = 54.15, 57.65, 21.0
+    # A4/B9: the horizontal 0.1 below the pad centre keeps 0.2 mm from USB_CC1's via at (54.2, 24.55)
+    add_path(b, [(a4[0], a4[1] - 0.1), (xa, a4[1] - 0.1), (xa, yb), (xa, d1[1] + 0.25)], pcbnew.F_Cu, net, 0.40)
+    # A9/B4: east 0.75, 45 degrees down under the shell (clear of the B5 pad and the peg at (56.7, 29.39))
+    add_path(b, [a9, (a9[0] + 0.75, a9[1]), (xb, a9[1] - (xb - a9[0] - 0.75)), (xb, yb), (xa + 0.55, yb),
+                 (xa + 0.55, d1[1] + 0.25)], pcbnew.F_Cu, net, 0.50)
+    # D1 pad 1 -> C1 -> U2 IN (the BGA escape ends 0.8 above the ball)
+    add_path(b, [d1, c1], pcbnew.F_Cu, net, 0.60)
+    add_path(b, [c1, (u2_in[0], u2_in[1] + 0.8)], pcbnew.F_Cu, net, 0.50)
+
+
+def preroute_vbat(bb):
+    """Locked VBAT trunk Q1 -> U2 BAT / C3 (review 2026-11-08: a 0.30 mm track over F.Cu, B.Cu and 0.5 oz In2 with
+    three single-via layer changes, ~0.09 ohm). Q1's source pad and C7 on F.Cu, 3 vias (0.5/0.25) to a 2.0 mm B.Cu
+    riser up to a 2.1 mm B.Cu band along the top edge (y 31.5-33.6, under the mechanical ledge: copper under mask
+    only), with a 1.3 mm F.Cu strip in parallel over x 28-48.6 (2 x 2 vias at each end), a 1.9 mm B.Cu riser down
+    x 58.4 between J1's two shell tabs, 4 vias up beside U2, and F.Cu to C3 and the BAT ball's escape; band and right
+    riser doubled on In2. About 15 mOhm from Q1's source pad to the BAT ball (t/rnet-style network estimate,
+    docs/electronics.md §7.13). The B.Cu riser above Q1 crosses the signal lines that ran across it; they go round
+    on the other layers (rework)."""
+    fps = bb.footprints
+    if not all(r in fps for r in ("Q1", "U2", "C3", "C7")):
+        return
+    net = bb.net("VBAT")
+    b = bb.board
+    q1s = pad_xy(fps["Q1"], net="VBAT")
+    c3 = pad_xy(fps["C3"], net="VBAT")
+    c7 = pad_xy(fps["C7"], net="VBAT")
+    # Q1 end: source pad -> 3 vias -> C7
+    qv = [(26.75, 24.75), (27.35, 24.75), (27.95, 24.75)]
+    add_path(b, [q1s, (26.45, q1s[1]), qv[0], qv[1], qv[2]], pcbnew.F_Cu, net, 0.6)
+    add_path(b, [qv[1], c7], pcbnew.F_Cu, net, 0.4)
+    add_vias(b, qv, net)
+    add_path(b, [qv[0], qv[2]], pcbnew.B_Cu, net, 0.6)
+    # B.Cu: riser, top band, riser down to U2. The band and the right riser have a 0.5 oz In2 copy under them (nothing
+    # has to cross them: the band is the board's top edge, the riser runs under J1 between its shell tabs), tied in
+    # by every via array on the way
+    xq, yt, xr, yr = 27.35, 32.55, 58.4, 16.2
+    add_path(b, [(xq, 25.3), (xq, yt)], pcbnew.B_Cu, net, 2.0)
+    add_path(b, [(xq, 24.75), (xq, 25.3)], pcbnew.B_Cu, net, 0.6)
+    for lay in (pcbnew.B_Cu, pcbnew.In2_Cu):
+        add_path(b, [(xq, yt), (xr, yt)], lay, net, 2.1)
+        add_path(b, [(xr, yt), (xr, yr)], lay, net, 1.9)
+    # F.Cu strip in parallel with the top band, between J2's fitting nail and D50
+    sv0 = [(28.4, 32.65), (28.4, 33.25), (29.0, 32.65), (29.0, 33.25)]
+    sv1 = [(48.0, 32.65), (48.0, 33.25), (48.6, 32.65), (48.6, 33.25)]
+    add_path(b, [(28.4, 32.95), (48.6, 32.95)], pcbnew.F_Cu, net, 1.3)
+    add_vias(b, sv0 + sv1, net)
+    # U2 end: 4 vias between the BAT escape, C2 and C3
+    uv = [(58.25, 15.35), (58.85, 15.35), (58.25, 15.95), (58.85, 15.95)]
+    add_vias(b, uv, net)
+    for lay in (pcbnew.B_Cu, pcbnew.In2_Cu):
+        add_path(b, [(xr, yr), (58.55, 15.65)], lay, net, 1.0)
+    add_path(b, [(58.55, 15.75), (58.55, 15.35)], pcbnew.F_Cu, net, 0.9)
+    add_path(b, [(58.45, 15.35), (c3[0] + 0.41, c3[1] + 0.39)], pcbnew.F_Cu, net, 0.6)
+    add_path(b, [(c3[0] + 0.41, c3[1] + 0.39), c3], pcbnew.F_Cu, net, 0.6)
+
+
+def preroute_vbat_raw(bb):
+    """J2 pin 1 -> Q1 drain: 0.60 mm (the pads' width) instead of the 0.30 mm Power class (4.2 -> 2.1 mOhm)."""
+    fps = bb.footprints
+    if not all(r in fps for r in ("J2", "Q1")):
+        return
+    net = bb.net("VBAT_RAW")
+    j2, q1d = pad_xy(fps["J2"], net="VBAT_RAW"), pad_xy(fps["Q1"], net="VBAT_RAW")
+    add_path(bb.board, [j2, (j2[0], j2[1] - 1.0), q1d], pcbnew.F_Cu, net, 0.6)
+
+
+def preroute_vsys(bb):
+    """Locked VSYS from U2 SYS to C2, then 0.80 mm to C4 and U3 VIN / EN (review 2026-11-08: 0.30 mm throughout).
+    SYS's escape (0.30) passes over C2's two pads and drops into pad 1; the trunk leaves pad 1 down the east side,
+    runs west along y 12.65 between C3 / C4 and into C4's pad 1, then 0.60 / 0.25 into U3 pin 10 and 0.20 to pin 1."""
+    fps = bb.footprints
+    if not all(r in fps for r in ("U2", "C2", "C4", "U3")):
+        return
+    net = bb.net("VSYS")
+    b = bb.board
+    c2, c4 = pad_xy(fps["C2"], net="VSYS"), pad_xy(fps["C4"], net="VSYS")
+    u3_vin, u3_en = pad_xy(fps["U3"], "10"), pad_xy(fps["U3"], "1")
+    sys_end = (58.8, 16.6)                                   # preroute_bga_escape's B2 run ends here
+    add_path(b, [sys_end, (59.5, 16.6), (c2[0], 16.2), c2], pcbnew.F_Cu, net, 0.3)
+    add_path(b, [c2, (60.9, c2[1] - 1.0), (60.9, 13.25), (60.3, 12.65), (56.2, 12.65), c4], pcbnew.F_Cu, net, 0.8)
+    add_path(b, [c4, (u3_vin[0], u3_vin[1] + 0.35)], pcbnew.F_Cu, net, 0.6)
+    add_path(b, [(u3_vin[0], u3_vin[1] + 0.35), u3_vin], pcbnew.F_Cu, net, 0.25)
+    add_path(b, [u3_en, u3_vin], pcbnew.F_Cu, net, 0.2)
+
+
+def preroute_cap_rx(bb):
+    """GPIO1's escape via -> R85 pad 2 -> C44 pad 1 on B.Cu (the anti-alias RC under the module, slider_fixed)."""
+    fps = bb.footprints
+    if not all(r in fps for r in ("R85", "C44", "U10")):
+        return
+    net = _elnet(bb, "CAP_RX")
+    r85, c44 = pad_xy(fps["R85"], net="CAP_RX"), pad_xy(fps["C44"], net="CAP_RX")
+    gpio1 = pad_xy(fps["U10"], net="CAP_RX")
+    via = (gpio1[0] + 1.15, gpio1[1])                      # escape_module()'s via
+    assert r85[0] < pad_xy(fps["R85"], net="CAP_LP1")[0], "R85's CAP_RX pad must face the escape via (west)"
+    add_path(bb.board, [via, r85, c44], pcbnew.B_Cu, net, 0.2)
+
+
+# CAP_LP1: the long run from the RC's first stage at U40 (R84 / C43) to R85 under the module (review 2026-11-08), pre-
+# routed: the grid router, given the Analog class's wider clearance, could not cross the electrode via field and took
+# a 120 mm detour. The upper half follows the corridor the routers had found for CAP_RX (B.Cu under the module, an In2
+# hop before Q1 instead of the squeeze between Q1's pads, In2 between the In1 GND plane and B.Cu to TP42's column);
+# the lower half is F.Cu over the In1 plane, down to U40's filter. The Analog class keeps 0.2 mm from other nets.
+CAP_LP1_PATH = [
+    # under the module, past the right column's RGB_DIN escape via, over H1's pad, up between R20 / C22 and H1
+    ("B", [(4.6, 24.70), (16.0, 26.35), (17.3, 27.0), (18.75, 26.95)]),
+    ("via", (18.75, 26.95)),
+    ("F", [(18.75, 26.95), (20.6, 26.6)]),
+    ("via", (20.6, 26.6)),
+    ("In2", [(20.6, 26.6), (27.575, 21.275), (31.0, 21.425), (31.6, 21.7), (35.75, 21.8)]),
+    ("via", (35.75, 21.8)),
+    ("B", [(35.75, 21.8), (35.2, 22.6)]),                          # TP42
+    # down between the USB strip's stitching vias (x 34.75 / 36.75) and R57, west under the guard ring's vias, then
+    # across the electrode via field along the channel between two phase staircases (parallel to them, 1.47 mm from
+    # either), down between the inner guard's and the ring's stitching vias at x 38.9, to R84 / C43 west of R80
+    ("F", [(35.75, 21.8), (35.75, 18.4), (33.9, 18.4), (33.9, 16.75), (38.91, 13.2), (38.91, 8.75), (38.0, 8.75),
+           (37.37, 8.1)]),
+    ("F", [(38.91, 8.75), (40.6, 8.75), (41.13, 8.2)]),
+]
+
+
+def preroute_cap_lp1(bb):
+    fps = bb.footprints
+    if not all(r in fps for r in ("R85", "R84", "C43")):
+        return
+    net = _elnet(bb, "CAP_LP1")
+    b = bb.board
+    r85, r84, c43 = (pad_xy(fps[r], net="CAP_LP1") for r in ("R85", "R84", "C43"))
+    layers = {"F": pcbnew.F_Cu, "B": pcbnew.B_Cu, "In2": pcbnew.In2_Cu}
+    for kind, pts in CAP_LP1_PATH:
+        if kind == "via":
+            add_via(b, pts, net)
+        else:
+            add_path(b, pts, layers[kind], net, 0.15)
+    add_path(b, [r85, CAP_LP1_PATH[0][1][0]], pcbnew.B_Cu, net, 0.15)
+    add_path(b, [(37.37, 8.1), r84], pcbnew.F_Cu, net, 0.15)
+    add_path(b, [(41.13, 8.2), c43], pcbnew.F_Cu, net, 0.15)
 
 
 # USB D+/D- from the module's escape vias to U1, as one locked pair (layout review 2026-11-08). The routers had run
@@ -1237,17 +1508,26 @@ def preroute_vbus(bb):
 # The first stretch, under the module's escape-via field, is the router's earlier path frozen.
 USB_PAIR = {
     "USB_DP": {"B": [(8.7, 15.95), (8.7, 18.938), (10.306, 20.544), (14.416, 20.544), (15.391, 19.568), (42.468, 19.568),
-                     (46.95, 24.05), (46.95, 27.0), (47.4, 27.45), (47.85, 27.45)],
+                     # split at (42.82, 19.92), where TP22's stub joins, so the stub's end meets a segment end
+                     (42.82, 19.92), (46.95, 24.05), (46.95, 27.0), (47.4, 27.45), (47.85, 27.45)],
                "tp": [(42.82, 19.92), (42.82, 22.6)],
                "F": [(47.85, 27.45), (48.05, 27.25), (49.062, 27.25)],
                "via": (47.85, 27.45)},
     "USB_DM": {"B": [(7.85, 15.95), (8.282, 15.518), (8.944, 15.518), (9.175, 15.749), (9.175, 18.217), (9.088, 18.305),
                      (9.088, 18.75), (9.714, 19.376), (13.228, 19.376), (13.492, 19.64), (14.855, 19.64), (15.248, 19.247),
-                     (42.571, 19.247), (45.924, 22.6), (47.9, 22.6), (48.175, 23.097)],
+                     # 45-degree leg 0.32 mm from D+'s (was 0.30 at 0.14 mm tracks)
+                     (42.5995, 19.247), (45.9525, 22.6), (47.9, 22.6), (48.175, 23.097)],
                "tp": [],
-               "F": [],
+               # via -> between R53's pads -> U1 pin 3 (the router's path, now locked)
+               "F": [(48.175, 23.097), (48.2, 23.122), (48.2, 24.49), (49.062, 25.35)],
                "via": (48.175, 23.097)},
 }
+# J1 -> U1, straight past U1's pads (review 2026-11-08: the routers had added a second path on each line around U1,
+# D+ on In2 from J1's via (53.58, 27.25) to the climb via, D- from TP23 to U1 pin 4). D+ leaves J1's B6 via on F.Cu
+# straight into pin 6; D- leaves the corner of preroute_usb's F.Cu U behind J1's pads into pin 4. Inside U1 pins 6/1
+# and 4/3 are one conductor, so each line passes the clamp with no branch.
+USB_J1_U1 = {"USB_DP": [(53.58, 27.25), (51.338, 27.25)],
+             "USB_DM": [(52.58, 25.75), (52.18, 25.35), (51.338, 25.35)]}
 
 
 USB_U1_GND = [(49.062, 26.3), (48.0, 26.5)]   # U1 pin 2 (GND) -> its via, between the D+ climb and U1
@@ -1266,6 +1546,9 @@ def preroute_usb_pair(bb):
             for a_, c_ in zip(pts, pts[1:]):
                 add_track(b, a_, c_, layer, net, USB_W)
         add_via(b, legs["via"], net)
+        pts = USB_J1_U1.get(name, [])
+        for a_, c_ in zip(pts, pts[1:]):
+            add_track(b, a_, c_, pcbnew.F_Cu, net, USB_W)
     bad = []
     for fp in b.GetFootprints():
         for pd in fp.Pads():
@@ -1501,6 +1784,91 @@ def add_pours(board, path):
     bb.save(path)
 
 
+# The ordered slider stack: JLCPCB JLC04101H-3313 (4 layers, 1.0 mm, 3313 prepreg), the one ORDER-NOTES names.
+# Prepreg 3313 (RC 57 %) 0.0994 mm, er 4.1 (JLC's impedance tables; the hwtools run assumed the same); outer copper
+# 35 um, inner 15.2 um (JLC's finished 0.5 oz); mask 15 um, er 3.8. JLC publishes the core of this construction only
+# inside its order / impedance pages; it is set here so the stack adds up to 1.0 mm (FR-4, er 4.6). Nothing on this
+# board depends on the core: every controlled line is an outer layer over its neighbouring plane through the prepreg.
+SLIDER_STACKUP = [
+    ("F.SilkS", "Top Silk Screen", None, None, None),
+    ("F.Paste", "Top Solder Paste", None, None, None),
+    ("F.Mask", "Top Solder Mask", 0.015, None, 3.8),
+    ("F.Cu", "copper", 0.035, None, None),
+    ("dielectric 1", "prepreg", 0.0994, "3313 RC57%", 4.1),
+    ("In1.Cu", "copper", 0.0152, None, None),
+    ("dielectric 2", "core", 0.6708, "FR4", 4.6),
+    ("In2.Cu", "copper", 0.0152, None, None),
+    ("dielectric 3", "prepreg", 0.0994, "3313 RC57%", 4.1),
+    ("B.Cu", "copper", 0.035, None, None),
+    ("B.Mask", "Bottom Solder Mask", 0.015, None, 3.8),
+    ("B.Paste", "Bottom Solder Paste", None, None, None),
+    ("B.SilkS", "Bottom Silk Screen", None, None, None),
+]
+SLIDER_STACK_ID = "JLC04101H-3313"
+
+
+def stackup_sexpr(items, finish="ENIG"):
+    out = ["\t\t(stackup"]
+    for name, typ, t, mat, er in items:
+        s = f'\t\t\t(layer "{name}"\n\t\t\t\t(type "{typ}")'
+        if t is not None:
+            s += f"\n\t\t\t\t(thickness {t:g})"
+        if mat is not None:
+            s += f'\n\t\t\t\t(material "{mat}")'
+        if er is not None:
+            s += f"\n\t\t\t\t(epsilon_r {er:g})"
+            if typ in ("prepreg", "core"):
+                s += "\n\t\t\t\t(loss_tangent 0.02)"
+        out.append(s + "\n\t\t\t)")
+    out.append(f'\t\t\t(copper_finish "{finish}")\n\t\t\t(dielectric_constraints no)\n\t\t)')
+    return "\n".join(out)
+
+
+def set_stackup(path, items):
+    """Write the fab stack-up into the board's (setup) (the board had none, so KiCad, sicalc and pcbroute fell back to
+    KiCad's default stack: the USB pair read 125 ohm there). pcbnew keeps it through every later load / save."""
+    with open(path, encoding="utf-8") as f:
+        s = f.read()
+    i = s.find("(setup")
+    if i < 0:
+        raise RuntimeError("no (setup) in " + path)
+    j = s.find("(stackup", i)
+    end = _sexpr_end(s, i)
+    if 0 <= j < end:                                   # replace an existing one
+        s = s[:j].rstrip(" \t") + stackup_sexpr(items).lstrip("\t") + s[_sexpr_end(s, j):]
+    else:
+        nl = s.index("\n", i)
+        s = s[:nl + 1] + stackup_sexpr(items) + "\n" + s[nl + 1:]
+    total = sum(t for _, _, t, _, _ in items if t)
+    s = re.sub(r"\(general\s*\(thickness [0-9.]+\)", f"(general\n\t\t(thickness {total:g})", s, count=1)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(s)
+    return total
+
+
+def set_jumper_pads(path, groups):
+    """Give footprint instances jumper pad groups (KiCad 9+: pads joined inside the part), written into the board
+    file text (pcbnew's Python API only reads them). pcbnew keeps them through later loads and saves."""
+    with open(path, encoding="utf-8") as f:
+        s = f.read()
+    for ref, grp in groups.items():
+        i = s.find(f'(property "Reference" "{ref}"')
+        j = s.rfind("(footprint ", 0, i)
+        if i < 0 or j < 0:
+            continue
+        end = _sexpr_end(s, j)
+        fp = s[j:end]
+        fp = re.sub(r"\s*\(jumper_pad_groups(?:\s*\([^()]*\))*\s*\)", "", fp)
+        k = fp.find("(duplicate_pad_numbers_are_jumpers")
+        if k < 0:
+            k = fp.find("(attr")
+        text = "(jumper_pad_groups " + " ".join("(" + " ".join(f'"{p}"' for p in g) + ")" for g in grp) + ")\n\t\t"
+        fp = fp[:k] + text + fp[k:]
+        s = s[:j] + fp + s[end:]
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(s)
+
+
 def set_layer_types(path, layers):
     if layers != 4:
         return
@@ -1731,6 +2099,353 @@ def complete_routing(board, out):
 TEMP_KEEPOUT = "ROUTER_ONLY_ELECTRODES"
 
 
+# --------------------------------------------------------------------------- rework: keep the routing, redo some nets
+# A fresh route of the whole slider does not reliably close on KiCad 10 (§7.12 of docs/electronics.md: Freerouting ran
+# VBUS through the CC2 gap, CHG_INT_N found no way out of the DSBGA). A layout change therefore re-places and re-draws
+# the pre-routes from this script (the regeneration), keeps the routed copper of every net it did not change, and
+# routes only what is open: `layout.py --board slider --rework [--rip NET,...]`.
+def _xy_key(p, q=1000):
+    return (round(p.x / q), round(p.y / q))
+
+
+def _copper_key(t):
+    if t.Type() == pcbnew.PCB_VIA_T:
+        return ("via", t.GetNetname(), _xy_key(t.GetPosition()), round(t.GetWidth(pcbnew.F_Cu) / 1000),
+                round(t.GetDrillValue() / 1000))
+    ends = tuple(sorted((_xy_key(t.GetStart()), _xy_key(t.GetEnd()))))
+    return ("trk", t.GetNetname(), t.GetLayer(), ends, round(t.GetWidth() / 1000))
+
+
+def changed_parts(src, new):
+    """Refs that are new, or moved / turned / flipped, between two boards; and their nets (short names)."""
+    old = {fp.GetReference(): fp for fp in src.GetFootprints()}
+    refs, nets = [], set()
+    for fp in new.GetFootprints():
+        o = old.get(fp.GetReference())
+        same = o is not None and (o.GetPosition() - fp.GetPosition()).EuclideanNorm() < 1000 and \
+            abs(o.GetOrientationDegrees() - fp.GetOrientationDegrees()) < 0.01 and o.IsFlipped() == fp.IsFlipped()
+        if same and all(net_short(p.GetNetname()) == net_short(q.GetNetname())
+                        for p, q in zip(sorted(o.Pads(), key=lambda p: p.GetNumber()),
+                                        sorted(fp.Pads(), key=lambda p: p.GetNumber()))):
+            continue
+        refs.append(fp.GetReference())
+        nets |= {net_short(p.GetNetname()) for p in fp.Pads() if p.GetNetname()}
+        if o is not None:
+            nets |= {net_short(p.GetNetname()) for p in o.Pads() if p.GetNetname()}
+    return refs, nets
+
+
+def transplant_routing(out, src, rip):
+    """Copy the routed tracks / vias of `src` onto the freshly generated board `out`, except those of the nets in
+    `rip` (short names) and the locked signal copper the generator no longer draws (a changed pre-route). Locked GND
+    copper (fan-outs, stitching) is kept. Returns the UUIDs of the copied items."""
+    b, o = pcbnew.LoadBoard(out), pcbnew.LoadBoard(src)
+    # the finished board pruned the escape stubs / vias its routing did not use (prune_dangling), and the routers
+    # used that room: on an unchanged net the old board's copper is the reference, so drop the regenerated locked
+    # copper it does not have
+    old_keys = {_copper_key(t) for t in o.GetTracks()}
+    pruned = 0
+    for t in list(b.GetTracks()):
+        n = net_short(t.GetNetname())
+        if t.IsLocked() and n not in rip and n != "GND" and _copper_key(t) not in old_keys:
+            b.Delete(t)
+            pruned += 1
+    have = {_copper_key(t) for t in b.GetTracks()}
+    new_vias = [t.GetPosition() for t in b.GetTracks() if t.Type() == pcbnew.PCB_VIA_T]
+    added, skipped, stale = [], 0, 0
+    for t in o.GetTracks():
+        name = t.GetNetname()
+        if net_short(name) in rip or name.startswith("unconnected-") or not name:
+            skipped += 1
+            continue
+        if _copper_key(t) in have:
+            continue
+        # locked copper of an unchanged net that the generator no longer draws: an old pre-route, or router copper
+        # that stayed locked; copied unlocked, so the clean-up removes it if nothing uses it
+        relock = t.IsLocked() and net_short(name) == "GND"
+        if t.Type() == pcbnew.PCB_VIA_T and any((t.GetPosition() - v).EuclideanNorm() < MM(0.1) for v in new_vias):
+            stale += 1
+            continue
+        net = b.FindNet(name)
+        if net is None:
+            skipped += 1
+            continue
+        if t.Type() == pcbnew.PCB_VIA_T:
+            n = pcbnew.PCB_VIA(b)
+            n.SetPosition(t.GetPosition())
+            n.SetWidth(t.GetWidth(pcbnew.F_Cu))
+            n.SetDrill(t.GetDrillValue())
+        elif t.Type() == pcbnew.PCB_ARC_T:
+            n = pcbnew.PCB_ARC(b)
+            n.SetStart(t.GetStart())
+            n.SetMid(t.GetMid())
+            n.SetEnd(t.GetEnd())
+            n.SetWidth(t.GetWidth())
+            n.SetLayer(t.GetLayer())
+        else:
+            n = pcbnew.PCB_TRACK(b)
+            n.SetStart(t.GetStart())
+            n.SetEnd(t.GetEnd())
+            n.SetWidth(t.GetWidth())
+            n.SetLayer(t.GetLayer())
+        n.SetNet(net)
+        n.SetLocked(relock)
+        b.Add(n)
+        added.append(n.m_Uuid.AsString())
+    pcbnew.SaveBoard(out, b)
+    print(f"[rework] copied {len(added)} routed items, {skipped} on re-done nets, {stale} old vias on a new one; "
+          f"{pruned} regenerated escape items the old board had pruned left out")
+    return set(added)
+
+
+def transplant_step(board, src, rip_extra, res):
+    """Child process of rework(): which parts changed, which nets to re-do, copy the rest of the routing."""
+    out = pcb_path(board)
+    b, o = pcbnew.LoadBoard(out), pcbnew.LoadBoard(src)
+    refs, nets = changed_parts(o, b)
+    big = {net_short(n.GetNetname()) for n in b.GetNetsByName().values()
+           if sum(1 for fp in b.GetFootprints() for p in fp.Pads() if p.GetNetCode() == n.GetNetCode()) > 10}
+    rip = (nets - big - {"GND", ""}) | set(rip_extra)
+    print(f"[rework] parts new / moved: {', '.join(sorted(refs, key=refnum)) or 'none'}")
+    print(f"[rework] nets re-done: {', '.join(sorted(rip))}")
+    del b, o
+    kept = transplant_routing(out, src, rip)
+    pcbgen.unique_uuids(out)
+    b = pcbnew.LoadBoard(out)
+    ids = {t.m_Uuid.AsString() for t in b.GetTracks()}
+    gone = geometric_conflicts(b, kept & ids)
+    pcbnew.SaveBoard(out, b)
+    ids -= gone
+    print(f"[rework] removed {len(gone)} old items overlapping the new placement / pre-routes")
+    with open(res, "w", encoding="utf-8") as f:
+        json.dump({"refs": refs, "rip": sorted(rip), "kept": sorted(kept & ids)}, f)
+
+
+def geometric_conflicts(b, kept):
+    """Delete the copied items whose copper comes closer than the clearance to a new (regenerated) item of another
+    net: a pad, a pre-route. Bounding boxes first, then pcbnew's shape collision. Returns the deleted UUIDs."""
+    tracks = list(b.GetTracks())
+    new = [t for t in tracks if t.m_Uuid.AsString() not in kept]
+    old = [t for t in tracks if t.m_Uuid.AsString() in kept]
+    obst = new + [p for fp in b.GetFootprints() for p in fp.Pads()]
+    grow = MM(0.6)
+
+    def box(it):
+        r = it.GetBoundingBox()
+        return r.GetX(), r.GetY(), r.GetRight(), r.GetBottom()
+
+    ob = [(box(o), o) for o in obst]
+    cu = [pcbnew.F_Cu, pcbnew.In1_Cu, pcbnew.In2_Cu, pcbnew.B_Cu]
+    gone = set()
+    for t in old:
+        x0, y0, x1, y1 = box(t)
+        layers = cu if t.Type() == pcbnew.PCB_VIA_T else [t.GetLayer()]
+        hit = False
+        for (a0, b0, a1, b1), o in ob:
+            if a1 < x0 - grow or a0 > x1 + grow or b1 < y0 - grow or b0 > y1 + grow:
+                continue
+            if o.GetNetCode() == t.GetNetCode():
+                continue
+            for lay in layers:
+                if not o.IsOnLayer(lay):
+                    continue
+                # a via / through-hole pad has no copper on an inner layer it does not connect to
+                if any(it.Type() in (pcbnew.PCB_VIA_T, pcbnew.PCB_PAD_T) and not it.FlashLayer(lay) for it in (t, o)):
+                    continue
+                clr = max(t.GetOwnClearance(lay), o.GetOwnClearance(lay))
+                if t.GetEffectiveShape(lay).Collide(o.GetEffectiveShape(lay), clr - MM(0.001)):
+                    hit = True
+                    break
+            if hit:
+                break
+        if hit:
+            gone.add(t.m_Uuid.AsString())
+            b.Delete(t)
+    return gone
+
+
+def drop_conflicts(out, kept, rounds=20):
+    """Delete the copied (old) items that DRC finds in a violation with the new placement / pre-routes, until none is
+    left. A violation among new items only is a generator error and stops the rework."""
+    for _ in range(rounds):
+        bad, _, _ = finish_route.drc_uuids(out)
+        hit = bad & kept
+        if not hit:
+            fresh = bad - kept
+            if fresh:
+                rpt, counts = drc(out)
+                raise SystemExit(f"[rework] DRC errors among the regenerated items ({counts}); see {rpt}")
+            return
+        b = pcbnew.LoadBoard(out)
+        nets = set()
+        for t in list(b.GetTracks()):
+            if t.m_Uuid.AsString() in hit:
+                nets.add(net_short(t.GetNetname()))
+                b.Delete(t)
+        pcbnew.SaveBoard(out, b)
+        kept -= hit
+        print(f"[rework] removed {len(hit)} old items in conflict (nets: {', '.join(sorted(nets))})")
+
+
+def snapshot_locked(path):
+    """The locked copper (pre-routes, fan-outs) as plain data, to put back whatever a router changed."""
+    b = pcbnew.LoadBoard(path)
+    out = []
+    for t in b.GetTracks():
+        if not t.IsLocked():
+            continue
+        if t.Type() == pcbnew.PCB_VIA_T:
+            out.append(("via", t.GetNetname(), (t.GetPosition().x, t.GetPosition().y), t.GetWidth(pcbnew.F_Cu),
+                        t.GetDrillValue()))
+        elif t.Type() == pcbnew.PCB_TRACE_T:
+            out.append(("trk", t.GetNetname(), (t.GetStart().x, t.GetStart().y), (t.GetEnd().x, t.GetEnd().y),
+                        t.GetWidth(), t.GetLayer()))
+    return out
+
+
+def restore_locked(path, snap):
+    """Put back locked copper that a router dropped or altered (Freerouting re-writes every wire on import)."""
+    b = pcbnew.LoadBoard(path)
+    have = {_copper_key(t) for t in b.GetTracks()}
+    n = 0
+    for item in snap:
+        net = b.FindNet(item[1])
+        if item[0] == "via":
+            t = pcbnew.PCB_VIA(b)
+            t.SetPosition(pcbnew.VECTOR2I(*item[2]))
+            t.SetWidth(item[3])
+            t.SetDrill(item[4])
+        else:
+            t = pcbnew.PCB_TRACK(b)
+            t.SetStart(pcbnew.VECTOR2I(*item[2]))
+            t.SetEnd(pcbnew.VECTOR2I(*item[3]))
+            t.SetWidth(item[4])
+            t.SetLayer(item[5])
+        t.SetNet(net)
+        if _copper_key(t) in have:
+            continue
+        t.SetLocked(True)
+        b.Add(t)
+        n += 1
+    pcbnew.SaveBoard(path, b)
+    return n
+
+
+def lock_for_freerouting(path):
+    """Lock every unlocked track / via (Freerouting keeps protected wires) and return their keys to unlock later."""
+    b = pcbnew.LoadBoard(path)
+    keys = set()
+    for t in b.GetTracks():
+        if not t.IsLocked():
+            keys.add(_copper_key(t))
+            t.SetLocked(True)
+    pcbnew.SaveBoard(path, b)
+    return keys
+
+
+def unlock_after_freerouting(path, keys, snap=None):
+    """Unlock what was locked only for Freerouting: the items in `keys`, or (with `snap`, the locked copper from
+    before) everything that is not one of the original locked items (Freerouting splits and rewrites wires, so a key
+    match alone misses some)."""
+    b = pcbnew.LoadBoard(path)
+    keep = None
+    if snap is not None:
+        keep = set()
+        for item in snap:
+            if item[0] == "via":
+                keep.add(("via", item[1], _xy_key(pcbnew.VECTOR2I(*item[2])), round(item[3] / 1000), round(item[4] / 1000)))
+            else:
+                ends = tuple(sorted((_xy_key(pcbnew.VECTOR2I(*item[2])), _xy_key(pcbnew.VECTOR2I(*item[3])))))
+                keep.add(("trk", item[1], item[5], ends, round(item[4] / 1000)))
+    n = 0
+    for t in b.GetTracks():
+        if not t.IsLocked():
+            continue
+        k = _copper_key(t)
+        if (keep is not None and k not in keep) or (keep is None and k in keys):
+            t.SetLocked(False)
+            n += 1
+    pcbnew.SaveBoard(path, b)
+    return n
+
+
+def rework(board, minutes, rip_extra=(), src=None, freerouting=True):
+    out = pcb_path(board)
+    # the source board is staged next to the project with a copy of its .kicad_pro: pcbnew loads a board's project
+    # with it, and a board without one (a copy elsewhere) gets default rules (0.5 mm min via ...), which then leak
+    # into the DRC runs of this process
+    stage = os.path.join(project_dir(board), project_name(board) + "-rework-src.kicad_pcb")
+    if src and os.path.abspath(src) != os.path.abspath(stage):
+        shutil.copyfile(src, stage)
+    elif not os.path.exists(stage):
+        shutil.copyfile(out, stage)
+    else:   # an unfinished rework left its source (the board on disk is that run's partial result)
+        print(f"[rework] reusing the routing source an unfinished rework left: {stage} (delete it, or pass "
+              f"--rework-from, to start from the board on disk)")
+    src = stage
+    print(f"[rework] routing source: {src}")
+    # generate() in a child process: a process that built a board in memory has pcbnew's default project attached
+    # to the boards it loads afterwards (default rules and net classes in every DSN / DRC / router run of it)
+    subprocess.run([sys.executable, os.path.abspath(__file__), "--board", board, "--place-only"], check=True)
+    # (after generate, so both projects carry the same, new rules)
+    shutil.copyfile(out.replace(".kicad_pcb", ".kicad_pro"), stage.replace(".kicad_pcb", ".kicad_pro"))
+    # the old board is only ever loaded in a child process: pcbnew keeps the projects of every board a process loaded,
+    # and the DRC runs below (which save a copy with its project) then picked up the wrong rules
+    res = out + ".transplant.json"
+    subprocess.run([sys.executable, os.path.abspath(__file__), "--board", board, "--transplant-from", src,
+                    "--rip", ",".join(rip_extra), "--transplant-out", res], check=True)
+    with open(res, encoding="utf-8") as f:
+        t = json.load(f)
+    os.remove(res)
+    refs, kept = t["refs"], set(t["kept"])
+    drop_conflicts(out, kept)
+    # GND vias for the pads of the new / moved parts (the rest keep their fan-out)
+    b = pcbnew.LoadBoard(out)
+    pads = [p for fp in b.GetFootprints() if fp.GetReference() in refs for p in fp.Pads()
+            if net_short(p.GetNetname()) == "GND" and p.GetAttribute() == pcbnew.PAD_ATTRIB_SMD]
+    done, left = pcbgen.fanout_vias(b, "GND", pads=pads)
+    pcbnew.SaveBoard(out, b)
+    print(f"[rework] GND fan-out: {done} pads, {len(left)} without room")
+    drop = ("GND",) + tuple(str(n) for n in b.GetNetsByName().keys() if "CAP_EL_" in str(n))
+    _, counts = drc(out)
+    print(f"[rework] before routing: {counts.get('[unconnected_items]', 0)} unconnected")
+    if freerouting and counts.get("[unconnected_items]", 0):
+        snap = snapshot_locked(out)
+        keys = lock_for_freerouting(out)
+        backup = out + ".pre-freerouting"
+        shutil.copyfile(out, backup)
+        ok = route(out, minutes, drop_nets=drop)
+        n = unlock_after_freerouting(out, keys, snap) if ok else 0
+        if ok:
+            print(f"[rework] {restore_locked(out, snap)} locked pre-route items put back after Freerouting")
+        _, counts = drc(out)
+        print(f"[rework] Freerouting: {counts.get('[unconnected_items]', 0)} unconnected; {n} of {len(keys)} items "
+              f"unlocked again")
+        if not ok or n < len(keys) * 0.95:
+            print("[rework] Freerouting did not keep the routing intact: back to the board before it")
+            shutil.copyfile(backup, out)
+            unlock_after_freerouting(out, keys)
+        os.remove(backup)
+    left = None
+    for _ in range(3):
+        _, counts = drc(out)
+        left = counts.get("[unconnected_items]", 0)
+        if left:
+            complete_routing(board, out)
+        add_pours(board, out)
+        finish(board, out)
+        _, counts = drc(out)
+        left = counts.get("[unconnected_items]", 0)
+        if not left:
+            break
+    print(f"[rework] {left} unconnected")
+    if not left:
+        for ext in (".kicad_pcb", ".kicad_pro", ".kicad_prl"):
+            if os.path.exists(stage.replace(".kicad_pcb", ext)):
+                os.remove(stage.replace(".kicad_pcb", ext))
+    return left
+
+
 def report(board, path):
     warn = {}
     rpt, counts = drc(path, warn)
@@ -1748,12 +2463,29 @@ def main():
     ap.add_argument("--resume", action="store_true")
     ap.add_argument("--complete", action="store_true")
     ap.add_argument("--place-only", action="store_true", help="place and save without pours (no routing)")
+    ap.add_argument("--rework", action="store_true",
+                    help="regenerate placement + pre-routes, keep the routing of every unchanged net, route the rest")
+    ap.add_argument("--rip", default="", help="--rework: more nets (short names, comma separated) to re-route")
+    ap.add_argument("--rework-from", help="--rework: the routed board to keep the copper of (default: the board on "
+                                          "disk, copied to <board>-rework-src.kicad_pcb first; an unfinished rework's "
+                                          "copy is reused). A changed pre-route on a net needs that net in --rip: the "
+                                          "old board's copper of an unripped net wins")
+    ap.add_argument("--no-freerouting", action="store_true", help="--rework: grid router only")
+    ap.add_argument("--transplant-from", help=argparse.SUPPRESS)
+    ap.add_argument("--transplant-out", help=argparse.SUPPRESS)
     a = ap.parse_args()
     for board in BOARDS:
         if a.board and board != a.board:
             continue
         cfg = BOARDS[board]
         out = pcb_path(board)
+        if a.transplant_from:
+            transplant_step(board, a.transplant_from, [n for n in a.rip.split(",") if n], a.transplant_out)
+            continue
+        if a.rework:
+            rework(board, a.minutes, [n for n in a.rip.split(",") if n], a.rework_from, not a.no_freerouting)
+            report(board, out)
+            continue
         if a.finish:
             finish(board, out)
             report(board, out)

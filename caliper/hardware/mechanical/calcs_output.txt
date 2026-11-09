@@ -27,12 +27,15 @@ What matters for accuracy is the force *variation*: a thumb gives 2-8 N, so the 
 Fixed jaw (printed PA-CF in rev A) has the same outline: add the same again for the closed loop.
 Mitigation in rev A: PA-CF body; measure near the jaw root; a constant-force (slip-clutch) roller is a rev B item.
 
-Moving inside jaw (FEA only, fea_inside_jaw.py): 2.4 thick, tip 3 wide over y 31..37, 5 N in -u on the measuring face; root fixed:
-  PETG   phase 3 128.0 um; RF arc alone 141.6 um (+10.6 %); as built (arc + root from u 0.5)  98.3 um (-23.2 %) = 19.7 um/N ->  118 um over a 6 N spread
-  PA-CF  phase 3  52.0 um; RF arc alone  57.5 um (+10.6 %); as built (arc + root from u 0.5)  39.9 um (-23.2 %) =  8.0 um/N ->   48 um over a 6 N spread
-  (datasheet E, no FDM knock-down.)  The RF relief costs no stiffness: the wider root more than pays for the
-  scallop.  But the inside jaw is several times as compliant as the outside one: inside readings need a light,
-  steady touch, and the inside-jaw error is NOT inside a 10 um share of the budget (TVP, docs section 13).
+Moving inside jaw (FEA only, fea_inside_jaw.py): tip 2.4 thick (z), 3 wide at y 37 and 4 at y 31, on a shoulder block with a full-height gusset (to z 2.4); 5 N in -u on the measuring face:
+  PA-CF  rigid root           2.4 plate  7.86 um/N -> as built  1.72 um/N (4.6x stiffer) = 10.3 um over a 6 N spread
+  PETG   rigid root           2.4 plate 19.42 um/N -> as built  3.71 um/N (5.2x stiffer) = 22.3 um over a 6 N spread
+  PA-CF  with the local body  2.4 plate  9.48 um/N -> as built  1.98 um/N (4.8x stiffer) = 11.9 um over a 6 N spread
+  PETG   with the local body  2.4 plate 23.24 um/N -> as built  4.05 um/N (5.7x stiffer) = 24.3 um over a 6 N spread
+  (datasheet E, no FDM knock-down; unfilled PA E 1.5 GPa (TVP) within 5.15 mm of the antenna.)
+  PA-CF with the local body: 11.9 um over 2-8 N, NOT inside a 10 um share of the 30 um budget; /0.85 for the FDM knock-down: 14.0 um.
+  Fixed inside jaw (unchanged, 8.5 thick, rigid root): PA-CF 1.70 um/N, PETG 4.21 um/N.
+  Inside reading, both jaws (PA-CF): 3.68 um/N -> 22.1 um over 2-8 N (outside reading, both jaws: 14.7 um).
 
 2. Slider yaw under the measuring force -> Y-gib preload
 ---------------------------------------------------------

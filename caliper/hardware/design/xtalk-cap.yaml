@@ -1,0 +1,16 @@
+# CAP_RX crosstalk scan (caliper slider): the ADC line and its filter node as 1 mV victims, the digital lines that
+# switch while the cap front-end is sampled as aggressors (3.3 V, 2 ns edges), on top of sicalc's defaults.
+extend: true
+victims:
+  - class: ANALOG
+    budget_mv: 1.0
+    patterns: ["CAP_RX", "*/CAP_RX", "CAP_LP1", "*/CAP_LP1", "CAP_AMP_OUT", "*/CAP_AMP_OUT"]
+aggressors:
+  - class: digital
+    model: wave
+    amplitude_v: 3.3
+    tr_ns: 2.0
+    freq_hz: 1000000.0
+    why: "GPIO / I2C / SPI / LED data lines that can switch during a capacitive measurement"
+    patterns: ["RGB_DIN", "I2C_*", "MAG_*", "LCD_*", "BTN_*", "BUZZ*", "IMU_*", "CHG_INT_N", "FG_ALRT_N",
+               "SNS_PWR_EN", "BOOT_N", "MCU_EN", "CAP_TX*", "USB_D*"]

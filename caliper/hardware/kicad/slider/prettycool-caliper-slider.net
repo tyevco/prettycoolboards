@@ -2,7 +2,7 @@
 	(version "E")
 	(design
 		(source "/mnt/c/source/tyevco/prettycoolboards/caliper/hardware/kicad/slider/prettycool-caliper-slider.kicad_sch")
-		(date "2026-11-08T16:41:44")
+		(date "2026-11-09T00:00:54")
 		(tool "Eeschema 10.0.8-10.0.8~ubuntu24.04.1")
 		(sheet
 			(number "1")
@@ -1192,6 +1192,78 @@
 				(tstamps "/8b8d7e2d-ec91-5520-bcb3-8e934148e707/")
 			)
 			(tstamps "82188288-e9e0-5622-a8a4-9ae4cefd15bb")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C13")
+			(value "1u")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(description "Unpolarized capacitor")
+			(fields
+				(field
+					(name "MPN") "CL05A105KA5NQNC")
+				(field
+					(name "Manufacturer") "Samsung Electro-Mechanics")
+				(field
+					(name "LCSC") "C52923")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "MPN")
+				(value "CL05A105KA5NQNC")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Samsung Electro-Mechanics")
+			)
+			(property
+				(name "LCSC")
+				(value "C52923")
+			)
+			(property
+				(name "Sheetname")
+				(value "Power: USB-C, charger, 3V3, rails")
+			)
+			(property
+				(name "Sheetfile")
+				(value "power.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/Power: USB-C, charger, 3V3, rails/")
+				(tstamps "/8b8d7e2d-ec91-5520-bcb3-8e934148e707/")
+			)
+			(tstamps "2728af6e-bde9-5994-8adb-fa2115c143d9")
 			(units
 				(unit
 					(name "A")
@@ -7409,7 +7481,7 @@
 		)
 		(comp
 			(ref "TP42")
-			(value "CAP_RX")
+			(value "CAP_LP1")
 			(footprint "TestPoint:TestPoint_Pad_D1.0mm")
 			(description "test point")
 			(fields
@@ -11341,6 +11413,11 @@
 				(pintype "passive")
 			)
 			(node
+				(ref "C13")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
 				(ref "C20")
 				(pin "1")
 				(pintype "passive")
@@ -11814,7 +11891,7 @@
 		(net
 			(code "14")
 			(name "/Capacitive front-end (experimental)/CAP_LP1")
-			(class "Default")
+			(class "Analog")
 			(node
 				(ref "C43")
 				(pin "1")
@@ -11828,6 +11905,12 @@
 			(node
 				(ref "R85")
 				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "TP42")
+				(pin "1")
+				(pinfunction "1_1")
 				(pintype "passive")
 			)
 		)
@@ -12421,7 +12504,7 @@
 		(net
 			(code "45")
 			(name "CAP_RX")
-			(class "Default")
+			(class "Analog")
 			(node
 				(ref "C44")
 				(pin "1")
@@ -12430,12 +12513,6 @@
 			(node
 				(ref "R85")
 				(pin "2")
-				(pintype "passive")
-			)
-			(node
-				(ref "TP42")
-				(pin "1")
-				(pinfunction "1_1")
 				(pintype "passive")
 			)
 			(node
@@ -12633,6 +12710,11 @@
 			)
 			(node
 				(ref "C12")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C13")
 				(pin "2")
 				(pintype "passive")
 			)

@@ -2,7 +2,7 @@
 	(version "E")
 	(design
 		(source "/mnt/c/source/tyevco/prettycoolboards/caliper/hardware/kicad/scale/prettycool-caliper-scale.kicad_sch")
-		(date "2026-11-08T16:41:56")
+		(date "2026-11-09T00:01:13")
 		(tool "Eeschema 10.0.8-10.0.8~ubuntu24.04.1")
 		(sheet
 			(number "1")
