@@ -266,12 +266,20 @@ def SEED_RUN_Y(n):
 RX_FEED = (42.0, 11.70)
 SEED_FC = (EL_X0 + EL_FW / 2, (EL_FY0 + EL_FY1) / 2)           # finger 0 centre = E40 origin
 
-# test pads by proximity (x 22.5 + 2.54 i): MCU / USB next to the module, sensor and UI in the middle, the rails at
-# the right end next to the charger cluster (a VBUS pad at x 22.5 dragged a 0.3 mm trace across the board)
+# test pads by proximity (x 22.5 + 2.54 i): sensor and UI in the middle, the rails at the right end next to the charger
+# cluster (a VBUS pad at x 22.5 dragged a 0.3 mm trace across the board)
 # TP22 (D+) and TP23 (D-) sit at the east end of the lower row, on the two sides of the USB pair's 45-degree leg
 # (preroute_usb_pair): D+ taps TP22 with a 2.7 mm stub, D- runs through TP23. None = an empty grid spot.
-TP_ROW1 = ["TP20", "TP21", None, None, "TP50", "TP51", "TP7", "TP4", "TP2", "TP3", "TP1"]
-TP_ROW2 = ["TP30", "TP31", "TP32", "TP40", "TP41", "TP42", "TP5", "TP6", "TP22", None, "TP23"]
+# 2026-11-09 slim housing: J2 moved to the bottom over x 21.2..27.0, y 21.6..28.2 (its courtyard), where TP20 / TP21
+# (y 25.14) and TP30 / TP31 (y 22.6) were: they moved to a third row, y 30.22 (the same 2.54 grid), x 32.66..40.28,
+# below the buttons and clear of the mechanics' ledge (y >= 32.6)
+TP_ROW1 = [None, None, None, None, "TP50", "TP51", "TP7", "TP4", "TP2", "TP3", "TP1"]
+TP_ROW2 = [None, None, "TP32", "TP40", "TP41", "TP42", "TP5", "TP6", "TP22", None, "TP23"]
+TP_ROW3 = [None, None, None, None, "TP20", "TP21", "TP30", "TP31"]
+TP_ROWS = ((TP_ROW1, 25.14), (TP_ROW2, 22.6), (TP_ROW3, 30.22))
+# H1's lid tube (2026-11-09 slim housing): the lid's Ø4.4 tube ends 0.1 mm above the board around H1, in place of the
+# old Ø3.8 screw head, so a Ø4.6 circle round H1 stays free of top-side parts (check_h1_tube)
+H1_XY, H1_TUBE_D = (18.75, 24.0), 4.6
 
 
 def finger_x(k):
@@ -299,13 +307,17 @@ def slider_fixed(comps):
         "J1": (59.3, 26.5, 90.0, "F"),
         "SW50": (31.0, 31.0, 0.0, "F"), "SW51": (38.5, 31.0, 0.0, "F"), "SW52": (46.0, 31.0, 0.0, "F"),
         "D50": (51.5, 32.0, 0.0, "F"),
-        # 30.6 (SPEC 31.4): at 31.4 the front fitting-nail pads (MP) cross the top edge
-        "J2": (24.5, 30.6, 180.0, "F"),
-        # RT1 2.2 left of SPEC's (24.5, 26.5) (still beside J2, over the cell) so the reverse-polarity FET Q1 sits
-        # right under J2 pin 1 (drain pad 3 up, toward it)
+        # 2026-11-09 slim housing (owner decision): J2 on the BOTTOM, hanging into the battery pocket's J2 bay (board
+        # x 21.5..27.6, y 22.4..35.1), mating face toward +y (the top edge), signal pads toward -y (pad row y 22.9,
+        # pin 1 VBAT_RAW at x 23.6). Body x 22.1..26.1, y 23.2..27.5, 2.95 below the board; the mated plug x 21.9..26.3,
+        # y 27.5..32.1. Was (24.5, 30.6) rot 180 on top, mouth over the top edge (plug relief past y 34 in the housing).
+        # >= 6.3 mm in plan from the antenna area, >= 0.9 mm from H1's boss
+        "J2": (24.1, 24.9, 0.0, "B"),
+        # RT1 2.2 left of SPEC's (24.5, 26.5) (over the cell) so the reverse-polarity FET Q1 sits where J2 pin 1 was
+        # on top (drain pad 3 up); since J2 went to the bottom, both sit over it (preroute_vbat_raw)
         "RT1": (22.3, 26.75, 0.0, "F"),
         "Q1": (25.1, 25.1, 90.0, "F"),
-        # the gauge's VBAT cap between Q1 and U4's VBAT pins 2/3 (x 28.61), under J2's courtyard
+        # the gauge's VBAT cap between Q1 and U4's VBAT pins 2/3 (x 28.61)
         "C7": (27.37, 26.3, 90.0, "F"),
         "BZ50": (40.0, 24.3, 0.0, "F"),
         "U60": (30.0, 23.5, 0.0, "F"),
@@ -366,7 +378,7 @@ def slider_fixed(comps):
     for i in range(8):                       # the TX ladder: one column per phase under its seed finger
         P_[f"R7{i}"] = (LADDER_X(i), R7_Y, 90.0, "F")
         P_[f"R6{i}"] = (LADDER_X(i), R6_Y, 90.0, "F")
-    for row, y in ((TP_ROW1, 25.14), (TP_ROW2, 22.6)):
+    for row, y in TP_ROWS:
         for i, ref in enumerate(row):
             if ref:
                 P_[ref] = (22.5 + 2.54 * i, y, 0.0, "B")
@@ -381,7 +393,7 @@ SLIDER_PIN_ANCHORS = {
     # TPS63802 feedback divider at FB
 
     # gauge
-    # gate resistor of the battery reverse-polarity P-FET Q1 (fixed under J2 pin 1)
+    # gate resistor of the battery reverse-polarity P-FET Q1 (fixed over J2, which is on the bottom)
     "R10": ("Q1", "BATFET_G", 2.5),
     # load switches
     # (C8 / C10 are fixed next to U5 in slider_fixed)
@@ -488,6 +500,10 @@ def slider_post_fixed(bb, comps, fixed):
         if ref in fps:
             d = local_dir_board(fps[ref], lx, ly)
             assert abs(d[0] - want[0]) < 0.05 and abs(d[1] - want[1]) < 0.05, f"{ref} opens toward {d}, want {want}"
+    if "J2" in fps:      # bottom side; a bottom part is mirrored, so pin 1 (VBAT_RAW) is the -x one of the pair
+        assert fps["J2"].IsFlipped(), "J2 must be on the bottom (SPEC §2.1)"
+        p1, p2 = pad_xy(fps["J2"], "1"), pad_xy(fps["J2"], "2")
+        assert abs(p1[1] - 22.9) < 0.01 and p1[0] < p2[0], f"J2 pins at {p1} / {p2}, want the row at y 22.9, pin 1 -x"
     for i in range(8):   # ladder resistors: pad 2 on top (toward the finger)
         for ref in (f"R7{i}", f"R6{i}"):
             if ref in fps:
@@ -500,6 +516,22 @@ def slider_post_fixed(bb, comps, fixed):
     for ref in ("H2", "H3", "H4", "H5"):
         if ref in fps:
             tab_hole(fps[ref])
+
+
+def check_h1_tube(board):
+    """SPEC §2.1: no top-side courtyard inside the Ø4.6 circle round H1 (the lid's Ø4.4 tube ends 0.1 mm above the
+    board there). Returns the clearance (mm) from the circle to the nearest top-side courtyard."""
+    c, r = V(*H1_XY), MM(H1_TUBE_D / 2)
+    best = float("inf")
+    for fp in board.GetFootprints():
+        if fp.GetReference() == "H1" or fp.IsFlipped():
+            continue
+        cy = fp.GetCourtyard(pcbnew.F_CrtYd)
+        if cy.OutlineCount() == 0:
+            continue
+        assert not cy.Collide(c, r), f"{fp.GetReference()}'s courtyard enters the Ø{H1_TUBE_D} circle round H1"
+        best = min(best, TO(int(math.sqrt(cy.SquaredDistance(c)))) - H1_TUBE_D / 2)
+    return best
 
 
 def edit_module(fp):
@@ -773,7 +805,7 @@ def build_slider(bb, comps, nets):
     bb.text(pcbnew.B_Fab, "BEAM BAND y 0-20: FLATNESS 0.03 mm", *P(31.0, 19.2), 0.8, mirror=True)
     # silk
     bb.text(pcbnew.F_SilkS, "PrettyCool Caliper slider rA", *P(9.0, 2.6), 0.8)
-    bb.text(pcbnew.B_SilkS, "BAT+ J2", *P(24.5, 33.0), 0.8, mirror=True)
+    bb.text(pcbnew.B_SilkS, "BAT+ J2", *P(24.1, 20.9), 0.8, mirror=True)   # J2 (bottom) is the cell, pin 1 BAT+
     bb.text(pcbnew.F_SilkS, "ZERO", *P(31.0, 33.3), 0.8)
     bb.text(pcbnew.F_SilkS, "HOLD", *P(38.5, 33.3), 0.8)
     bb.text(pcbnew.F_SilkS, "MODE", *P(46.0, 33.3), 0.8)
@@ -1097,6 +1129,8 @@ def generate(board, pours=True):
             X, Y = TO(u2.GetPosition().x), TO(u2.GetPosition().y)
             placer.occupied["F"].append(("U2_esc", (X - 1.6, Y - 1.6, X + 1.6, Y + 1.6)))
         place_rest_slider(bb, comps, fixed, placer)
+        print(f"[slider] H1 lid tube: nearest top-side courtyard {check_h1_tube(bb.board):.2f} mm outside the "
+              f"Ø{H1_TUBE_D} circle")
         for ref, c in comps.items():
             if "BQ25180" in mpn(c):
                 preroute_bga_escape(bb, ref)
@@ -1397,7 +1431,9 @@ def preroute_vbat(bb):
     # has to cross them: the band is the board's top edge, the riser runs under J1 between its shell tabs), tied in
     # by every via array on the way
     xq, yt, xr, yr = 27.35, 32.55, 58.4, 16.2
-    add_path(b, [(xq, 25.3), (xq, yt)], pcbnew.B_Cu, net, 2.0)
+    # the riser: 1.6 mm at x 27.55 (x 26.75..28.35; was 2.0 at 27.35), 0.25 mm clear of J2's +x fitting nail on the
+    # bottom since 2026-11-09 (x 25.3..26.5), the right edge where it was
+    add_path(b, [(27.55, 25.3), (27.55, yt)], pcbnew.B_Cu, net, 1.6)
     add_path(b, [(xq, 24.75), (xq, 25.3)], pcbnew.B_Cu, net, 0.6)
     for lay in (pcbnew.B_Cu, pcbnew.In2_Cu):
         add_path(b, [(xq, yt), (xr, yt)], lay, net, 2.1)
@@ -1417,14 +1453,24 @@ def preroute_vbat(bb):
     add_path(b, [(c3[0] + 0.41, c3[1] + 0.39), c3], pcbnew.F_Cu, net, 0.6)
 
 
+VBAT_RAW_VIA = (23.6, 21.6)
+
+
 def preroute_vbat_raw(bb):
-    """J2 pin 1 -> Q1 drain: 0.60 mm (the pads' width) instead of the 0.30 mm Power class (4.2 -> 2.1 mOhm)."""
+    """J2 pin 1 -> Q1 drain, 0.60 mm (the pads' width) instead of the 0.30 mm Power class. J2 is on the bottom since
+    2026-11-09 with Q1 above it on top: B.Cu from pin 1 (23.6, 22.9) straight down (away from CAP_LP1's In2 stretch,
+    which passes 1.1 mm above the pad centre: the stub stays out of its B.Cu shield band) to a via at (23.6, 21.6),
+    then F.Cu at 45 degrees and up x 25.1 between Q1's gate and source pads into the drain pad."""
     fps = bb.footprints
     if not all(r in fps for r in ("J2", "Q1")):
         return
     net = bb.net("VBAT_RAW")
     j2, q1d = pad_xy(fps["J2"], net="VBAT_RAW"), pad_xy(fps["Q1"], net="VBAT_RAW")
-    add_path(bb.board, [j2, (j2[0], j2[1] - 1.0), q1d], pcbnew.F_Cu, net, 0.6)
+    v = VBAT_RAW_VIA
+    assert abs(j2[0] - v[0]) < 0.01, f"J2 pin 1 at {j2}: the VBAT_RAW via column assumes x {v[0]}"
+    add_path(bb.board, [j2, v], pcbnew.B_Cu, net, 0.6)
+    add_vias(bb.board, [v], net)
+    add_path(bb.board, [v, (q1d[0], v[1] + (q1d[0] - v[0])), q1d], pcbnew.F_Cu, net, 0.6)
 
 
 def preroute_vsys(bb):
@@ -2537,6 +2583,46 @@ def drop_conflicts(out, kept, rounds=20):
         print(f"[rework] removed {len(hit)} old items in conflict (nets: {', '.join(sorted(nets))})")
 
 
+def drop_vias_in_new_pads(out, kept, refs, tol=2000):
+    """Old (copied) same-net vias that an SMD pad of a new / moved part now covers: DRC allows them, but an open via in
+    a pad wicks the solder (pcbgen.fanout_vias never puts one there). Seen 2026-11-09: J2 moved onto the GND fan-out
+    vias of R10 and C7, inside its fitting nails. Deletes them with the copied tracks that end on them and returns the
+    (ref, pad) pairs those tracks served, to be fanned out again."""
+    b = pcbnew.LoadBoard(out)
+    smd = (pcbnew.PAD_ATTRIB_SMD, pcbnew.PAD_ATTRIB_CONN)
+    newpads = [p for fp in b.GetFootprints() if fp.GetReference() in refs for p in fp.Pads() if p.GetAttribute() in smd]
+    tracks = list(b.GetTracks())
+    vias = [t for t in tracks if t.Type() == pcbnew.PCB_VIA_T and t.m_Uuid.AsString() in kept
+            and any(p.GetNetCode() == t.GetNetCode() and p.HitTest(t.GetPosition(), t.GetWidth(pcbnew.F_Cu) // 2)
+                    for p in newpads)]
+    if not vias:
+        return set()
+    doomed, refan = list(vias), set()
+    allpads = [p for fp in b.GetFootprints() for p in fp.Pads()]
+    for t in tracks:
+        if t.Type() != pcbnew.PCB_TRACE_T or t.m_Uuid.AsString() not in kept:
+            continue
+        for v in vias:
+            if t.GetNetCode() != v.GetNetCode():
+                continue
+            ends = (t.GetStart(), t.GetEnd())
+            near = [k for k, e in enumerate(ends) if (e - v.GetPosition()).EuclideanNorm() < tol]
+            if not near:
+                continue
+            doomed.append(t)
+            far = ends[1 - near[0]]
+            refan |= {(p.GetParentFootprint().GetReference(), p.GetNumber()) for p in allpads
+                      if p.GetNetCode() == t.GetNetCode() and p.IsOnLayer(t.GetLayer()) and p.HitTest(far)}
+            break
+    for t in doomed:
+        kept.discard(t.m_Uuid.AsString())
+        b.Delete(t)
+    pcbnew.SaveBoard(out, b)
+    print(f"[rework] removed {len(vias)} old vias inside a new / moved part's pad (and {len(doomed) - len(vias)} "
+          f"tracks to them); fanning out again: {sorted(refan)}")
+    return refan
+
+
 def snapshot_locked(path):
     """The locked copper (pre-routes, fan-outs) as plain data, to put back whatever a router changed."""
     b = pcbnew.LoadBoard(path)
@@ -2649,10 +2735,13 @@ def rework(board, minutes, rip_extra=(), src=None, freerouting=True):
     os.remove(res)
     refs, kept = t["refs"], set(t["kept"])
     drop_conflicts(out, kept)
-    # GND vias for the pads of the new / moved parts (the rest keep their fan-out)
+    refan = drop_vias_in_new_pads(out, kept, refs)
+    # GND vias for the pads of the new / moved parts (the rest keep their fan-out), and for the pads whose fan-out via
+    # a new / moved part's pad now covers
     b = pcbnew.LoadBoard(out)
-    pads = [p for fp in b.GetFootprints() if fp.GetReference() in refs for p in fp.Pads()
-            if net_short(p.GetNetname()) == "GND" and p.GetAttribute() == pcbnew.PAD_ATTRIB_SMD]
+    pads = [p for fp in b.GetFootprints() for p in fp.Pads()
+            if (fp.GetReference() in refs or (fp.GetReference(), p.GetNumber()) in refan)
+            and net_short(p.GetNetname()) == "GND" and p.GetAttribute() == pcbnew.PAD_ATTRIB_SMD]
     done, left = pcbgen.fanout_vias(b, "GND", pads=pads)
     pcbnew.SaveBoard(out, b)
     print(f"[rework] GND fan-out: {done} pads, {len(left)} without room")

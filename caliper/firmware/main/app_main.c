@@ -43,6 +43,8 @@ static const char *TAG = "app";
 #define BACKLIGHT_DIM_PCT 10
 #define DIM_AFTER_MS      30000
 #define LOW_BATTERY_PCT   3
+/* Wi-Fi off below the start floor minus this, without USB (wifi.c, docs/firmware.md §12.6) */
+#define WIFI_STOP_HYST_MV 100
 #define CAP_FAIL_LIMIT    50 /* consecutive failed bursts before the cap sensor is shut down */
 
 static esp_pm_lock_handle_t s_awake_lock;
@@ -236,6 +238,14 @@ static void app_task(void *arg)
             if (s.auto_off_s && !keep_awake && idle > s.auto_off_s * 1000u) {
                 ESP_LOGI(TAG, "auto-off after %lu s idle", (unsigned long)(idle / 1000));
                 enter_sleep();
+            }
+            if (ps.gauge_ok && ps.vcell_mv > 0 && !ps.vbus && caliper_wifi_active() &&
+                ps.vcell_mv < CONFIG_CALIPER_WIFI_MIN_MV - WIFI_STOP_HYST_MV) {
+                ESP_LOGW(TAG, "battery %u mV: Wi-Fi off", (unsigned)ps.vcell_mv);
+                uint32_t off = CAL_WIFI_OFF;
+                bus_post(CAL_EVT_WIFI, &off, sizeof(off));
+                char m[32] = "Battery low: Wi-Fi off";
+                bus_post(CAL_EVT_TOAST, m, sizeof(m));
             }
             if (ps.gauge_ok && ps.vcell_mv > 0 && ps.soc_pct < LOW_BATTERY_PCT && !ps.vbus) {
                 char m[32] = "Battery empty";

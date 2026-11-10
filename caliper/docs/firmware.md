@@ -3,7 +3,7 @@
 > **Status: builds for the target, not run on hardware.** The ESP-IDF project in
 > [`caliper/firmware`](../firmware/README.md) **builds with `idf.py build` on ESP-IDF v5.4.2** for the
 > esp32s3 (4 MB / N4R2 layout, clean build, **0 warnings**). With the bring-up commands (§10.1) the image is
-> **1 688 432 B and fits the 1 728 KB app slot with 81 040 B (4.6 %) to spare**; `CONFIG_CALIPER_BRINGUP=n`
+> **1 689 152 B and fits the 1 728 KB app slot with 80 320 B (4.5 %) to spare**; `CONFIG_CALIPER_BRINGUP=n`
 > gives 23 520 B of that back (§13). No binary has been flashed: nothing has run on a
 > chip. The portable core (units, rounding, tolerance, statistics, the SETTLE / SWEEP capture modes, log
 > records, GATT codecs, settings JSON, CSV, button gestures, the AS5311 frame logic, the SSI fine
@@ -685,16 +685,17 @@ commit, so the power-loss guarantee itself rests on LittleFS (**not tested here*
 ### 12.1 BQ25180 register table
 
 The dial-me-spinner table (its `docs/firmware.md` §13.1), changed for
-this board's 250 mA charge current (SPEC §1). Written in this order at boot and again whenever IC_CTRL reads
-back wrong (a BQ reset), checked at 1 Hz.
+this board's cell: a Renata ICP501230PS-03, 135 mAh (2026-11-09: the slim housing; it replaced the 500 mAh
+402535), charged at 70 mA (SPEC §1; the reasons for each value are in §12.6). Written in this order at boot and
+again whenever IC_CTRL reads back wrong (a BQ reset), checked at 1 Hz.
 
 | Order | Register | Value | Setting |
 |---|---|---|---|
 | 1 | IC_CTRL 0x07 | **0x97** | TS_EN, VLOWV 3.0 V, VRCH 100 mV, 2× timer, 6 h, **watchdog off** (first transaction: the watchdog starts with it) |
 | 2 | VBAT_CTRL 0x03 | 0x46 | 4.20 V |
-| 3 | ICHG_CTRL 0x04 | **0x34** | ICHG = 40 + (52 − 31) × 10 = **250 mA** (`CONFIG_CALIPER_CHARGE_MA`); bit 7 CHG_DIS from the guards |
-| 4 | CHARGECTRL0 0x05 | 0x20 | IPRECHG 2 × ITERM, ITERM 10 %, VINDPM 4.2 V, TREG 100 °C |
-| 5 | CHARGECTRL1 0x06 | 0x92 | BATOCP 1.5 A, BUVLO 3.0 V, CHG_STATUS int on, ILIM int masked |
+| 3 | ICHG_CTRL 0x04 | **0x22** | ICHG = 40 + (34 − 31) × 10 = **70 mA** = 0.52C (`CONFIG_CALIPER_CHARGE_MA`, range 10–135, so at most the cell's 1C); bit 7 CHG_DIS from the guards (0xA2) |
+| 4 | CHARGECTRL0 0x05 | 0x20 | IPRECHG 2 × ITERM = **14 mA** (0.1C), ITERM 10 % = **7 mA** (0.05C), VINDPM 4.2 V, TREG 100 °C |
+| 5 | CHARGECTRL1 0x06 | **0x52** | IBAT_OCP **1 A** (the reset value; it was 0x92 = 1.5 A for the 500 mAh cell), BUVLO 3.0 V, CHG_STATUS int on, ILIM int masked |
 | 6 | TMR_ILIM 0x08 | 0xC9 → 0xCD | 100 mA until USB is configured (or 3 s of VBUS with no host), then 500 mA |
 | 7 | SHIP_RST 0x09 | **0x08** | **EN_PUSH = 0** (dial-me-spinner has a button on TS/MR and writes 0x09; rev A has only the NTC there). The push-button scan costs 1 µA on battery: SLUSE99C IQ_BAT is 3 µA with it disabled, 4 µA enabled, and SPEC §3 budgets 3 µA. Long press = reset, WAKE1 300 ms, WAKE2 2 s (unused) |
 | 8 | SYS_REG 0x0A | 0x20 | SYS 4.4 V on USB (the buck-boost takes anything from 1.3 V) |
@@ -727,6 +728,15 @@ back wrong (a BQ reset), checked at 1 Hz.
   sleep. `power_init` undoes all three (CONFIG.SLEEP = 0, MODE = 0, HIBRT = 0x8030) at every boot. The
   charger starts charging on the plug-in a few hundred ms before the firmware wakes the gauge: a small SOC
   error the datasheet warns about ("wake up the IC before charging"). **TVP** on the bench. Below 3 % without VBUS the caliper shows "Battery empty" and sleeps.
+* **MAX17048 with the 135 mAh cell:** nothing to change. ModelGauge works from the cell voltage alone, with no
+  capacity or sense resistor to configure, and the default model (RCOMP 0x97) is the generic 4.2 V LiPo one
+  (19-6171). The automatic hibernate thresholds (HIBRT POR 0x8030: HibThr 0x80 × 0.208 %/h = 26.6 %/h, ActThr
+  0x30 × 1.25 mV = 60 mV) now keep the gauge **active while the caliper is awake** (56–71 mA is 41–53 %/h of
+  135 mAh; with the 500 mAh cell it was 11–14 %/h, below the threshold) and let it hibernate in deep sleep
+  (33 µA = 0.02 %/h), as the sleep budget assumes. The ALRT thresholds (ATHD 4 % default) stay unused: nothing
+  reads FG_ALRT_N (§12.5). The "Battery empty" threshold stays at **3 %** SOC. The small cell's higher
+  resistance makes VCELL, and so SOC, read low under load, which can end a session early but never late. 3 %
+  is now ≈ 4 mAh, about 3–4 min awake. The MAX17048's accuracy on this cell is **TVP**.
 * **LIS2DW12 (0x19)**: WHO_AM_I 0x44; 12.5 Hz low-power mode 1, ±2 g; wake-up threshold 2 × 31.25 mg =
   62.5 mg, duration 0; wake-up routed to INT1, **latched, active low, push-pull** (CTRL3 = 0x18), interrupts
   enabled. The latch is cleared right before sleeping, and INT1 is armed as a wake source only if it then
@@ -743,6 +753,7 @@ stateDiagram-v2
   Dim --> Active: button, movement > 20 µm, BLE/USB/web command
   Dim --> DeepSleep: auto_off_s without use (default 300 s),<br/>unless a USB host or Wi-Fi is up
   Active --> DeepSleep: HOLD+MODE, menu "Sleep", CLI "sleep",<br/>battery < 3 %
+  Active --> Active: no USB and VCELL < 3.40 V: Wi-Fi off (§12.6)
   DeepSleep --> Active: IMU INT1 / ZERO / HOLD / MODE / CHG_INT_N (ext1, any low)
 ```
 
@@ -923,6 +934,79 @@ python3 caliper/firmware/tools/export_pinstate.py -o caliper/firmware/test/hwtoo
 python -m pullaudit run --netir slider.netir.json --rails rails.yaml --pins pinstate.json --pads pads -o out/
 ```
 
+### 12.6 The 135 mAh cell: charging and the Wi-Fi peaks
+
+The slim housing (2026-11-09) holds a **Renata ICP501230PS-03**: a 1S LiPo with a protection circuit (PCM),
+3.7 V nominal, **135 mAh typ / 130 min**. It charges at 0.5C (67 mA) standard and 1C (135 mA) maximum, CC/CV to
+**4.2 V**, and discharges at **1C (135 mA) continuous, 2C (270 mA) pulse** (Renata ICP family manual). The
+mechanics chose the cell ([Mechanics](mechanical.md) §15). This is the design; nothing here has been measured.
+
+**Charger (§12.1).**
+
+| Setting | Value | Why |
+|---|---|---|
+| VBATREG | 4.20 V (0x46, unchanged) | the cell's charge voltage |
+| ICHG | **70 mA** (code 34) | the BQ25180 step nearest the 0.5C standard charge (67 mA): 0.52C of 135 mAh, 0.54C of a 130 mAh cell. With the ±10 % ICHG accuracy (SLUSE99C) it is at most 77 mA = 0.59C, well under the 1C maximum. 60 mA (0.44C) was the alternative. At 70 mA a day's use (36 mAh) charges back in under an hour |
+| ITERM | 10 % = **7 mA** (0.05C), unchanged code | a common cell cut-off. 5 % (3.5 mA) would lengthen the CV tail for about 1 % more capacity |
+| IPRECHG | 2 × ITERM = **14 mA** (0.1C), unchanged code | precharge below VLOWV 3.0 V at about 0.1C |
+| Safety timer | 6 h, doubled in DPM/thermal regulation (IC_CTRL 0x97, unchanged) | a full charge takes ≈ 2–2.5 h (CC ≈ 1.6 h, then the CV tail; *estimate*). 3 h would be tight for an aged cell with a long tail |
+| IBAT_OCP | **1 A** (was 1.5 A) | see below |
+| BUVLO | 3.0 V (unchanged) | the cell's discharge cut-off; 60 µs deglitch (SLUSE99C tBUVLO) |
+| Input current limit | **unchanged**: 100 mA until USB is configured (or after 3 s of VBUS without a host), then 500 mA | |
+
+**IBAT_OCP.** The BQ25180 offers 0.5, 1 or 1.5 A, or off (SLUSE99C Table 8-15). None is near the cell's 2C
+pulse rating, so the charger cannot enforce that rating and the firmware does (below). 1 A, the reset value, is
+the fault limit (7C): two thirds of the old 1.5 A, and still at least 2× any Wi-Fi peak. The 500 mA step was
+rejected. It is still 3.7C, and an uncapped Wi-Fi burst from a low cell (0.42–0.49 A) would come within a few
+percent of it. Four to seven trips in 2 s **latch the BATFET off until USB is plugged in** (§8.3.7.5), which
+would strand the caliper away from a charger.
+
+**Wi-Fi peaks.** The battery-side peak is (module + ≈ 45 mA for the AS5311, display logic, backlight at 70 %,
+AFE and LED) × 3.3 V / (VBAT × 0.9):
+
+| | Module peak | From a 4.2 V cell | 3.5 V | 3.0 V | Against 2C (270 mA) |
+|---|---|---|---|---|---|
+| Wi-Fi 802.11b at 20.5 dBm (uncapped) | 355 mA (datasheet Table 6-4) | 349 mA | 419 mA | 489 mA | 2.6–3.6C: **over** |
+| **Wi-Fi capped at 10 dBm** | ≈ 195 mA (*estimate*) | 210 mA | 251 mA | 293 mA | 1.6–2.2C |
+| BLE at 9 dBm (the controller default, unchanged) | 204 mA (Table 6-5) | 217 mA | 261 mA | 304 mA | 1.6–2.3C |
+
+The capped Wi-Fi figure is an interpolation. Espressif publishes the Wi-Fi TX current only at full power, and
+its BLE curve (340, 204, 189 and 118 mA at 20, 9, 0 and −15 dBm) shows the PA current levelling off below about
+9 dBm. So the firmware does two things:
+
+* **TX power cap of 10 dBm.** `CONFIG_ESP_PHY_MAX_WIFI_TX_POWER=10` (sdkconfig.defaults; the lowest value the
+  option takes) puts the cap in the PHY init data, so it holds from `esp_wifi_start()` on. `wifi.c` applies it
+  again after each start (`esp_wifi_set_max_tx_power(40)`, in 0.25 dBm units). The cost is 10.5 dB against
+  20.5 dBm, about a third of the free-space range, on an antenna that already has only 5 mm of side clearance
+  (SPEC D4). Range is a bring-up test (TVP). Receive sensitivity is unchanged.
+* **Voltage floor.** Without VBUS, Wi-Fi does not start while the MAX17048 reads VCELL below **3.50 V**
+  (`CONFIG_CALIPER_WIFI_MIN_MV`). This covers the station, the setup AP and the bring-up scan, which then fails
+  with "battery below the Wi-Fi floor". `app_main` switches Wi-Fi off below **3.40 V** (100 mV hysteresis,
+  because VCELL reads lower while Wi-Fi runs), and a toast says so. The reason: the cell, its PCM and Q1 are
+  taken as ≈ 1 Ω for millisecond pulses (*estimate*: Renata gives < 420 mΩ at 50 % charge for the ICP501230PS-02; it is higher
+  at DC, at low charge and in the cold, and the PCM and Q1 add to it). A 0.27 A burst on top of the ≈ 60 mA awake load then sags VBAT by
+  ≈ 0.2 V. From a 3.40 V reading the burst sees ≈ 3.2 V, still ≈ 0.2 V above the BQ25180's 3.0 V BUVLO
+  (60 µs deglitch). A dip below BUVLO would cut SYS and reset the caliper. On battery, Wi-Fi is therefore
+  unavailable for roughly the last 10–15 % of the charge (*estimate*); on USB it always works.
+* **BLE stays at 9 dBm.** Its peak is about the same as capped Wi-Fi (1.6–2.3C), but its connection events last well
+  under 1 ms. Going to 0 dBm would save only 15 mA (189 vs 204 mA) and cost 9 dB of range.
+* The averages are inside the 1C (135 mA) rating: 56–71 mA awake (0.41–0.53C), and about 100 mA (0.74C) for the
+  few seconds of a Wi-Fi sync.
+
+At the low end of the charge, both radios still take the cell to about its 2C pulse rating, not well inside it.
+The bursts last milliseconds on top of an average well under 1C, which is how small-cell pulse ratings are
+usually applied. To verify on the prototype: VBAT on a scope during a sync at 3.5 V, and no BAT_OCP or BUVLO flag
+in STAT1 / FLAG0 afterwards.
+
+**Bulk capacitance.** A Wi-Fi frame lasts 0.1–12 ms (12 ms is 1500 B at 1 Mbit/s). Holding even 1 ms of a
+0.2 A step to 0.1 V of droop takes C = I·t/ΔV = 2 mF. No ceramic bank comes close, so the cell carries the
+burst, and the voltage floor is what keeps VBAT clear of BUVLO. The existing capacitors do the job they can do.
+About 78 µF nominal on +3V3 (C5, C6 and C20 at 22 µF, C23 at 10 µF; perhaps half that under DC bias) holds the
+3.3 V rail through the TPS63802's load-step response: ≈ 0.2 A × 20 µs / 40 µF ≈ 0.1 V (*estimate*). C2 + C4
+(20 µF on VSYS) and C3 (4.7 µF on VBAT) are the converter's and the charger's input capacitors. Bridging just
+the 60 µs BUVLO deglitch would take 0.27 A × 60 µs / 0.2 V ≈ 80 µF on VBAT, and that does nothing for bursts
+lasting milliseconds. **No board change.**
+
 ## 13. Build, flash, test
 
 ```sh
@@ -979,9 +1063,15 @@ BQ25180 table as a function) and 23 520 B are the commands and the helpers only 
 strings, about 4 KB of Wi-Fi scan code in `libnet80211.a`. With `CONFIG_CALIPER_BRINGUP=n` (built the same way,
 0 warnings): *"caliper.bin binary size 0x196790 bytes ... 0x19870 bytes (6%) free."*: the linker drops all of it.
 
+**With the 135 mAh cell changes** (§12.6: charger values, the Wi-Fi TX cap and voltage floor; 2026-11-09, a
+copy of `caliper/firmware` in WSL `/tmp`, `set-target` and `build` from an empty build directory, 0 compiler
+warnings): *"caliper.bin binary size 0x19c640 bytes. Smallest app partition is 0x1b0000 bytes. 0x139c0 bytes
+(5%) free."*, 720 B more than the line above. The host tests pass unchanged (6 CTest targets; 1276, 2589 and
+443 checks, 0 failures).
+
 | `idf.py size` (4 MB / N4R2, bring-up on) | Used | Of |
 |---|---|---|
-| Image (.bin) | **1 688 432 B** | 1 769 472 B app slot (`ota_0`/`ota_1`): **81 040 B (4.6 %) free** (104 560 B with `CONFIG_CALIPER_BRINGUP=n`) |
+| Image (.bin) | **1 689 152 B** (with the cell changes; the rows below are from the build before them) | 1 769 472 B app slot (`ota_0`/`ota_1`): **80 320 B (4.5 %) free** (104 560 B with `CONFIG_CALIPER_BRINGUP=n` before the cell changes) |
 | Flash code (.text) | 1 155 156 B | |
 | Flash data (.rodata) | 382 436 B | |
 | DIRAM (.text + .data + .bss) | 218 995 B (64.1 %) | 341 760 B, 122 765 B free (the capture state is about 1.7 KB) |
@@ -1068,6 +1158,9 @@ host tests; `./gen_vectors` prints LIVE v3, LOG and COMMAND bytes):
   mirror flags, the backlight curve, the piezo level, the WS2812 colour order, the IMU wake threshold, the
   BQ25180 ILIM strategy against real hosts, the die-temperature limits, HID typing speed per host, MSC
   behaviour on Windows/macOS, the ROM bootloader entry from the CLI, and the deep-sleep current.
+* **The 135 mAh cell (§12.6)** is designed for, not measured: the capped Wi-Fi peak (an interpolation), the
+  cell's pulse resistance (≈ 1 Ω assumed), the 3.50 / 3.40 V Wi-Fi floor, the Wi-Fi range at 10 dBm, the
+  MAX17048's accuracy on this cell, and a full charge at 70 mA to a 7 mA termination.
 * **The capacitive scale** is unproven end to end: front-end gain at 5 kHz, the ADC's true sample rate, the
   half-pitch ambiguity, the 25 mm/s tracking limit, electrode crosstalk.
 * **Not implemented:** OTA updates (the partitions are ready), IMU orientation (display flip), detecting a

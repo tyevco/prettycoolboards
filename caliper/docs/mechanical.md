@@ -15,15 +15,16 @@ the prototype; section 13 collects them.
 * **Real board:** [`extract_board_parts.py`](../hardware/mechanical/extract_board_parts.py) reads the routed
   `caliper/hardware/kicad/slider/prettycool-caliper-slider.kicad_pcb` (KiCad 10 `pcbnew`) into
   [`board_parts.json`](../hardware/mechanical/board_parts.json): the Edge.Cuts outline with the end tabs,
-  the five holes, 102 part envelopes (Fab outline × datasheet height), plus the four SMT standoffs,
-  the H1 screw head and the mated JST plug.
+  the five holes, 102 part envelopes (Fab outline × datasheet height), plus the four SMT standoffs
+  and the mated JST plug. The routed board has J2 on the bottom side since 2026-11-09 (section 15), so
+  [`board_envelope.py`](../hardware/mechanical/board_envelope.py) has no pending board change to apply over it.
 * **Calculations:** [`calcs.py`](../hardware/mechanical/calcs.py) writes everything quoted here to
   [`calcs_output.txt`](../hardware/mechanical/calcs_output.txt). The FEA uses the `print-stress` solver
   (linear tets): the moving outside jaw in [`fea_jaw.py`](../hardware/mechanical/fea_jaw.py), the moving
   inside jaw in [`fea_inside_jaw.py`](../hardware/mechanical/fea_inside_jaw.py), and the whole slider
   body plus the board in [`fea_slider.py`](../hardware/mechanical/fea_slider.py).
 * **Interference check:** [`clash_check.py`](../hardware/mechanical/clash_check.py) intersects the B-rep
-  solids exactly, 6255 pairs, against the **routed board**. It writes
+  solids exactly, 6837 pairs, against the **routed board** (J2 on the bottom side). It writes
   [`clash_report.txt`](../hardware/mechanical/clash_report.txt). The result is in section 12.
 
 ---
@@ -49,9 +50,9 @@ where R is the reading; board x = u − 8.
 |---|---|---|
 | Beam | ground flat stock 20 × 4 × 250, O1 (preferred) or 1.4301, two pockets, five holes, one M2 tapped stop hole | same, to drawing PCC-M-02 |
 | Fixed jaw | printed PA-CF block clamping the beam end with 2 × M3 + 2 × Ø3 dowels; **prints front face down** | 6061-T6 or tool steel |
-| Slider body | printed **PAHT-CF**, with an unfilled-PA modifier volume near the antenna (PETG for fit trials). A closed tunnel round the beam with a 3.2 mm back web; the outside and inside moving jaws are integral; the board's end tabs are clamped in the two towers | CNC 6061-T6, drawing PCC-M-01 |
-| Front shell | printed lid: landscape display window and bezel ribs, button holes, hex-key access to the pad screws, pockets for the tab-clamp screw heads, piezo port, LED light pipe | printed (RF) |
-| Battery door | printed; a 2.0 flange in a rebate in the body's back face plus a 1.2 plug down to the cell. **Replaces the old back cover** | printed |
+| Slider body | printed **PAHT-CF**, with an unfilled-PA modifier volume near the antenna (PETG for fit trials). A closed tunnel round the beam with a 3.2 mm back web; the outside and inside moving jaws are integral; the board's end tabs are clamped in the two towers. **Since 2026-11-09 it ends 1.3 mm above the battery pocket (y 36.4, was 49.2)**, with R 3.4 / R 3.0 plan radii at the top corners and a 1.2 × 45° bevel round the back face (section 15) | CNC 6061-T6, drawing PCC-M-01 |
+| Front shell | printed lid: landscape display window and bezel ribs, button holes, hex-key access to the pad screws, pockets for the tab-clamp screw heads, piezo port, LED light pipe, a 0.8 × 45° bevel on its outer edge and a tube onto H1 (its upper fastening, section 5) | printed (RF) |
+| Battery door | printed; a flat 1.6 mm plate in a rebate in the body's back face, held by two nylon M2 screws; its inside face is the pocket floor. **Replaces the old back cover** | printed |
 | Gibs | brass C360: back gib, Y gib, reference strip, 4 front pads | same |
 | Depth rod | **omitted in rev A** (section 8) | open |
 
@@ -59,7 +60,8 @@ Key numbers (from `params.py`, `calcs_output.txt` and the FEA outputs):
 
 | Quantity | Value |
 |---|---|
-| Housing envelope | **76.9 × 52.0 × 16.0 mm**; the thumb-roller rim at u 78.0 from the jaw face, 0.6 proud of the end face (SPEC 7: ≤ 78 × 52 × 16 with the roller) |
+| Housing envelope | **76.9 × 39.2 × 16.0 mm** (u × y × z; was 76.9 × 52.0 × 16.0 before the 2026-11-09 slim-down); the thumb-roller rim at u 78.0 from the jaw face, 0.6 proud of the end face; the inside-jaw tips reach y 37.0 (0.6 above the top face) and the lock's nylon knob 4 mm above it, as appendages (SPEC 7: ≤ 78 × 39.5 × 16 with the roller) |
+| Battery | **501230-class 1S LiPo, 135 mAh** (reference Renata ICP501230PS-03, ≤ 5.4 × 12.5 × 31.5 with its protection circuit), behind the board's upper band; was a 402535, ~500 mAh. Rated 1C (135 mA) continuous, 2C (270 mA) pulse: the firmware must keep the battery current inside that (section 15) |
 | Travel | 0–150 mm, hard stop at 151 (an M2 socket-head screw in the beam, removable) |
 | Capacitive gap | 0.150 nominal; **±0.029 RSS, ±0.064 worst** after the tab-clamp bedding |
 | AS5311 gap | 0.300 nominal; **±0.034 RSS, ±0.097 worst** after the per-unit shim, inside the SPEC window of ±0.10 |
@@ -68,8 +70,8 @@ Key numbers (from `params.py`, `calcs_output.txt` and the FEA outputs):
 | Moving inside jaw, at the face | **1.98 µm/N** PA-CF, 4.05 µm/N PETG (FEA with the local body; the 2.4 mm plate was 9.5 / 23 µm/N) |
 | Fixed inside jaw, at the face | **1.13 µm/N** PA-CF, 2.79 µm/N PETG (FEA with the fixed block's top part; 0.94 / 2.32 with a rigid root; the old triangle was 2.17 / 5.4 µm/N) |
 | Inside reading, both jaws, 2–8 N | **19 µm** PA-CF (3.11 µm/N; 22 µm with the 0.85 FDM knock-down); outside reading 15 µm |
-| Back web under the back preload | 1.7 µm at the plunger seat (FEA); the old back cover bent 0.6–1.1 mm |
-| Masses (solid) | beam 124 g, slider body 33 g PA-CF / 76 g 6061, back gib 9 g |
+| Back web under the back preload | 1.8 µm at the plunger seat (FEA); the old back cover bent 0.6–1.1 mm |
+| Masses (solid) | beam 124 g, slider body **23.0 g** PA-CF (was 33.0) / 53 g 6061 (was 77), front shell 4.5 g (6.1), battery door 1.1 g (4.2), back gib 9 g; the cell ≈ 3.6 g (the 402535 ≈ 9 g) |
 
 ## 2. Stack-up and sections
 
@@ -96,8 +98,10 @@ AS5311, and x = 4.5 through the left tower's two tab clamps.
 | **−1.25** | **tape face**: 0.30 below the AS5311 | SPEC 4.1 |
 | −2.00 | tape-channel floor (0.60 tape + 0.05 adhesive + 0.10 Kapton shim for a nominal package; 0–0.35 per unit) | SPEC D2 |
 | −4.00 | beam back face; back gib 1.2 thick, down to −5.2 | |
-| −5.4 | tunnel back = back-web inside face = battery-pocket floor | `Z_WEB_IN` |
-| −8.6 | body back face (print bed) = battery-door outside face | `Z_BACK` |
+| −1.6 | top of the cell's max envelope (5.4 thick), 1.0 under the button ledge / cavity floor (−0.6): swelling room | `Z_POCKET + BAT_T` |
+| −5.4 | tunnel back = back-web inside face | `Z_WEB_IN` |
+| −7.0 | battery-pocket floor = battery-door inside face (the door is a flat 1.6 plate) | `Z_POCKET` |
+| −8.6 | body back face (print bed) = battery-door outside face; 1.2 × 45° bevel round its edge | `Z_BACK` |
 
 Across the beam (y): reference strip at y −1…0 under the lower edge; front-pad lands at y 0…1.9 and
 17.55…20; **tape channel at y 1.9…10.1** (8.2 wide; the AS5311's 6.4 mm lead span runs inside it with
@@ -118,14 +122,23 @@ the model does this:
 | SPEC says | The mechanics chose |
 |---|---|
 | D3: the four clamp faces coplanar within 0.03; "faced washers, insert faces, or the rev B machined tower" | **Bedded shim washers**: each clamp face is a 2.2 × 4.0 × 0.3 washer bedded in epoxy while the board lies on 0.150 shim foil on the beam's lands. The clamp faces then copy the beam face, not a bridged printed surface (sections 5 and 7) |
-| D3: H1 is a support, "printed low and shimmed" | H1 boss printed 0.1 low and shimmed with Kapton; M2 tapped in the print for the nylon screw (no brass insert, which would sit 4 mm from the antenna) |
+| D3: H1 is a support, "printed low and shimmed" | H1 boss printed 0.1 low and shimmed with Kapton; M2 tapped in the print for the nylon screw (no brass insert, which would sit 4 mm from the antenna). Since 2026-11-09 the screw (nylon M2 × 10 flat head) comes from the lid's top face through a tube on the lid underside, so H1 also holds the lid's upper part (section 5) |
 | Open item: support under the button band over the battery | A **button-band ledge** (u 37…65.5, y 32.6…34.4) cantilevered from the cavity wall under the board's top edge, shimmed to contact (section 5) |
-| D4: the right Y plunger and the lock move out of the battery pocket | Both Y plungers (u 14, 24) and the lock (u 19) now sit **left** of the pocket. They pass under the antenna, so each pushes the gib through a **Ø2 GFRP rod**; the springs, screws and inserts sit at y ≥ 41 (section 4) |
+| D4: the right Y plunger and the lock move out of the battery pocket | Both Y plungers (u 14, 24) and the lock (u 19) sit **left** of the pocket. They pass under the antenna, so each pushes the gib through a **Ø2 GFRP rod**. Since 2026-11-09 the top face is only 2.4 mm above the antenna area, so the only metal, each Y plunger's spring, sits at the **bottom** of its bore (y 22.0–24.4, 5.15 mm from the antenna), and the set screws and the lock's thumb screw are **nylon M3** in threads tapped in the print (section 4) |
 | D4 / 7: no metal or carbon fibre within 5 mm of the antenna | Checked in plan for every metal item (section 12). The body region u 6.4…28.55, y 24.5…39 prints in **unfilled PA** through a slicer modifier (`stl/slider_body_rf_modifier.stl`). The stiffened moving inside jaw (section 9) reaches the housing face at u 6.4 under the antenna corner: its material within **5.15 mm** of the antenna area (a round-cornered zone) is in the same modifier, so its **PA-CF stays 5.15 mm away in plan** (section 12). The first fix, an R 5.15 relief arc on the old 2.4 mm plate's flank, was replaced by it |
-| 7: lead channel + JST plug relief past the top edge, sound port, light pipe | Plug relief at u 29.5…36.5, y 33.6…41, open into the battery pocket; Ø1.5 piezo port at u 48, y 24.3; Ø2.0 light pipe at u 59.5, y 32 |
+| 7: lead channel + JST plug relief past the top edge, sound port, light pipe | **No plug relief any more** (2026-11-09): J2 moves to the board's bottom side, mouth +y, so it, the plug and the cell leads sit in the battery pocket's left end (u 29.5…35.6, the J2 bay). The board has had that move since 2026-11-09 (section 15). Ø1.5 piezo port at u 48, y 24.3; Ø2.0 light pipe at u 59.5, y 32 |
 | 2.1: lid end ribs x 16.15…17.5 and 48.5…49.85 | Those two, plus a rib along the glass's top edge (y 18.8…20.15) to locate it in y, inside SPEC's 2.6 mm zone |
 
-Two choices are the mechanics' own and are not SPEC items:
+These choices are the mechanics' own and are not SPEC items:
+
+* **Outside shape (2026-11-09).** The body prints back face down and the lid face down, so their outer
+  edges on those faces are **45° bevels** (1.2 on the body's back, 0.8 on the lid's top), which print with no
+  support, and the plan corners at the top are radii (R 3.4 left, R 3.0 right). The cavity's top-left corner
+  follows the board's R 1 corner (0.4 clear), so the left radius keeps the 1.2 mm wall. The bevel stops
+  short of the jaws (the step, the inside-jaw root and the outside-jaw root keep their sharp back edges) and
+  the datum faces (the end faces, the tunnel, the clamp faces) are untouched. There is no taper: the top face
+  sits 1.3 mm over the cell pocket and 2.0 mm over the board cavity, and the end faces are datums (the stop,
+  the jaw), so nothing is left to taper without taking a function (section 15).
 
 * **Slim USB-C cable.** The cable-overmold relief is now 10.6 × 6.0, kept above the beam tunnel
   (y ≥ 21.2). The first relief (12.4 × 6.6) cut the right tower's front part off from the upper body.
@@ -165,12 +178,16 @@ Five brass contacts and three spring loads:
 
 * **Y (across the beam):** the brass **reference strip** (1.0 × 3 × 76.9, glued into the lower rail)
   rides on the beam's lower edge, which is reference edge E. Two **Y plungers** at **u 14 and 24** push
-  the brass **Y gib** onto the upper edge, which pulls the strip up onto edge E. Each plunger is:
-  * an M2 set screw in a heat-set insert at the top face (y 46…49);
-  * a spring (y 41…46), the only metal moving part;
-  * a **Ø2 GFRP rod**, which carries the push past the antenna down to the gib.
+  the brass **Y gib** onto the upper edge, which pulls the strip up onto edge E. Each plunger is, from
+  the gib up (2026-11-09; the top face is now 2.4 mm above the antenna area, too close for metal):
+  * a **GFRP tip pin** (Ø2 × 1, coned into the gib's dimple);
+  * the **spring** at the bottom of the bore (y 22.0…24.4 as compressed, ~2 N/mm, ~2 mm deflection for
+    4 N), the only metal, 5.15 mm below the antenna area in plan;
+  * a **Ø2 GFRP rod** up to
+  * a **nylon M3 × 4 set screw** in an M3 thread tapped in the print at the top face (y 31.4…36.4; no
+    insert). Before the slim-down it was an M2 set screw in a brass insert with the spring at y 41…46.
 
-  The bores run at z −2.3, 0.6 mm under the cavity floor. The 5 N measuring force at the jaw tip
+  The bores run at z −2.5 (was −2.3), so the M3 thread keeps 0.65 mm under the cavity floor. The 5 N measuring force at the jaw tip
   (y −37) and the thumb's drive force form a couple that lifts the strip's left end. Moving both
   plungers left raised their lever about the strip's right end from 81.5 to **116.8 mm**. Keeping the
   strip seated now needs **≥ 2.4 N each** with the roller drive and ≥ 3.1 N for a push on the end face
@@ -188,14 +205,16 @@ Five brass contacts and three spring loads:
   tunnel behind the beam and ties the lower rail to the upper body. They are at **(u 14, y 5) and
   (64, 5)**, **2.5 N each**. The first model put them in a back cover screwed only at y 44: a 34 mm
   cantilever that bent 0.6–1.1 mm in PA-CF and used up the plungers' travel. FEA of the whole body
-  (`fea_slider.py`, PA-CF, both preloads) gives **1.7 µm** at the plunger seats, and 0.1 µm at the
+  (`fea_slider.py`, PA-CF, both preloads; re-run on the slim body 2026-11-09, the Y loads now on the M3
+  threads at the top) gives **1.8 µm** at the plunger seats (1.7 before), and 0.1 µm at the
   tab-clamp ceilings. The reactions balance the loads (9.43 N). Stress is under 0.25 MPa (utilisation
   ≈ 0 in the figure). Moving the plungers from y 10 to y 5 raised their lever to the upper pad line
-  from 8.8 to 13.8 mm. A button press (2.5 N at y 31) now needs ≥ 1.1 N each. A grip on the battery
-  bay above **3.3 N at the top edge** lifts the lower pads while it lasts; the gaps then open, they
-  never close.
-* **Locking screw:** an M3 knurled thumb screw in an M3 insert at the top face, at **u 19**, pushes a
-  third GFRP rod onto the Y gib. Its head stands 4 mm above the top face.
+  from 8.8 to 13.8 mm. A button press (2.5 N at y 31) now needs ≥ 1.1 N each. A grip near the top
+  edge (y 34.4) above **4.4 N** lifts the lower pads while it lasts (3.3 N at y 40 on the 52 mm housing;
+  the lower edge has the shorter lever); the gaps then open, they never close.
+* **Locking screw:** a **nylon M3 knurled thumb screw** in an M3 thread tapped in the print at the top
+  face, at **u 19**, pushes a third GFRP rod onto the Y gib (it was steel in a brass insert). Its head
+  stands 4 mm above the top face.
 * **Thumb roller:** a printed Ø7 hub with an NBR O-ring (ID 6 × 0.8) on a Ø2 pin, rolling on the
   beam's upper edge with 0.15 mm squeeze. The rim is at **u 78.0**, 0.6 proud of the right end face,
   below the USB-C. The axle hole now runs through to the USB relief, so the pin can be pushed out.
@@ -210,7 +229,8 @@ Five brass contacts and three spring loads:
 The target is 2–5 N, as for a commercial caliper. μ 0.12–0.15 is brass on ground steel with a light
 oil film; dry brass on steel is 0.3–0.35, so keep the beam oiled. The lower preloads cost no seating
 margin, because both levers grew. The plunger set screws trim the force on the bench (0.4 mm per
-turn). The O-ring's rolling resistance is not included (TVP).
+turn on the back plungers, 0.5 mm on the Y plungers' nylon M3). The O-ring's rolling resistance is not
+included (TVP).
 
 The outside jaw is 11.0 thick (z −8.6…+2.4, on the print bed). Its centre is 1.1 mm off the beam's
 mid-plane, so the 5 N measuring force puts a 5.5 N·mm twist into the guide, which is small.
@@ -226,8 +246,14 @@ mid-plane, so the 5 N measuring force puts a 5.5 N·mm twist into the guide, whi
   So the washers are bedded while the board lies on 0.150 mm shim foil on the beam's ground lands
   (section 7). The four clamp faces then sit in the plane of beam face D, and the open-loop ±0.10
   clamp-height term drops out of the stack (section 6).
-* **H1** (18.75, 24): a nylon M2 screw into a boss printed 0.1 low and shimmed to contact. It is
-  tightened last, and the board must not move more than 0.01 when it is.
+* **H1** (18.75, 24): a boss printed 0.1 low and shimmed to contact. Since 2026-11-09 H1 is also the
+  lid's upper fastening: the old upper lid screws (an insert at (10.5, 46) and one at (74, 44)) have no
+  body left above the board, and the upper left one would now sit over the antenna. A Ø4.4 tube on the lid
+  underside ends 0.1 mm over the board around H1, and a **nylon M2 × 10 flat-head screw** from the lid's
+  top face runs through it and the board into the boss (M2 tapped in the print). The board is clamped
+  between the tube and the shimmed boss, so the boss still sets its height; the screw cannot pull the board
+  out of the tab plane. The lid's third steel screw moved to the right tower above the USB-C relief
+  (u 73.0, y 33.4). TVP: the lid's top-left corner is about 24 mm from the nearest screw (H1); check it lies flat.
 * **Button-band ledge.** HOLD and MODE sit over the battery pocket, with no body under the board.
   The FEA of the board (`fea_slider.py`) used the real outline and tabs, clamped at the four
   standoffs, resting on H1, with 3 N on one switch at a time. It gives these deflections:
@@ -280,8 +306,9 @@ just inside. The firmware field check (section 7, step 7) still accepts or rejec
    and lay 0–0.35 mm of Kapton shim (0.025 steps) under the tape until it predicts 0.30. Unshimmed,
    the tallest package (A max 1.20) gets 0.30. A shim only raises the tape, so every shorter package
    can be corrected.
-3. **Assemble the slider on the beam:** reference strip, front pads, Y gib, back gib, GFRP rods,
-   springs and set screws. Set the preloads to Y 4 N and back 2.5 N (TVP: by turns from contact, once
+3. **Assemble the slider on the beam:** reference strip, front pads, Y gib, back gib; in each Y bore
+   the GFRP tip pin, the spring, the GFRP rod and the nylon set screw (the spring goes in second, at the
+   bottom); the back plungers. Set the preloads to Y 4 N and back 2.5 N (TVP: by turns from contact, once
    the spring rates are known). Slide it on from the beam's right end, with the stop screw out. Set the
    four pad screws so the tower undersides sit about 0.1 over the beam.
 4. **Bed the clamp washers:**
@@ -298,14 +325,20 @@ just inside. The firmware field check (section 7, step 7) still accepts or rejec
    corner is out.
 6. **H1 and the ledge:** shim the H1 boss and the button-band ledge with Kapton until each just
    touches (a 0.02 feeler drags). Keep at least one Kapton layer on the ledge even if it already touches: the
-   board's VBAT band runs under it on B.Cu (under mask; electronics §7.13). Fit the nylon H1 screw last; the indicator at H1 must not move more
-   than 0.01.
+   board's VBAT band runs under it on B.Cu (under mask; electronics §7.13). With the lid off, press the board
+   at H1 with ~3 N: the indicator there must not move more than 0.01 (the boss shim is right). The H1 screw
+   now comes with the lid (step 8).
 7. **Check in firmware** at R = 0, 75 and 150:
    * AS5311 MagINCn and MagDECn both high (field in range);
    * SSI status OCF set, COF and LIN clear;
    * the capacitive RX amplitude varies by less than ±30 %.
 
    Record everything in the [bring-up](bringup.md) log. Fit the stop screw (Loctite 222).
+8. **Battery and lid:** with the door off, plug the cell's JST-SH plug into J2 on the board's bottom side
+   through the open back (it points +y, toward the top edge), lay the leads in the J2 bay (u 29.5…35.6), put
+   the cell in the pocket lead end first and fit the door (two nylon M2 × 4 flat-head screws, snug). Fit the
+   lid: the two tower screws and the right-tower screw, then the nylon M2 × 10 through the lid's H1 tube,
+   snug only.
 
 ## 8. Parts, print settings and orientation
 
@@ -316,10 +349,10 @@ slot; PAHT and PAHT-CF bond. Every printed part was run through the `bambu-p2s` 
 
 | Part | File | Material | Pose | Settings | Printability check |
 |---|---|---|---|---|---|
-| Slider body | [`stl/slider_body.stl`](../hardware/mechanical/stl/slider_body.stl) + [`rf_modifier`](../hardware/mechanical/stl/slider_body_rf_modifier.stl) | **PAHT-CF**; the modifier in PAHT (PETG for fit trials) | back face down | 6 walls, 40 % gyroid, solid jaws | FAIL without supports. **Paint-on supports in three places:** (1) the roller-slot roof (7 mm); (2) the battery-pocket ceiling over y 34…48 (14 mm, the plug relief breaks its bridge), from the build plate through the door rebate; (3) the tower undersides beside the tab pockets (3.3 and 4.5 mm strips), standing on the back web inside the tunnel and pulled out through the tunnel ends. The 22 mm tunnel-roof bridges at the towers WARN as before. **The inside jaw no longer needs support** |
+| Slider body | [`stl/slider_body.stl`](../hardware/mechanical/stl/slider_body.stl) + [`rf_modifier`](../hardware/mechanical/stl/slider_body_rf_modifier.stl) | **PAHT-CF**; the modifier in PAHT (PETG for fit trials) | back face down | 6 walls, 40 % gyroid, solid jaws | FAIL without supports. **Paint-on supports in two places** (three before the 2026-11-09 slim-down: the battery-pocket ceiling over y 34…48 is gone with the plug relief): (1) the roller-slot roof (7 mm); (2) the tower undersides beside the tab pockets (4.5 mm strips), standing on the back web inside the tunnel and pulled out through the tunnel ends. WARN: the 22 mm tunnel-roof bridges at the towers and a 4 mm² sub-0.8 mm feature at z 0.5, as before; the button ledge (2.5 mm shelf) and the two door-rebate ledges at the pocket ends (2.3 and 2.4 mm shelves). The back bevel and the plan radii add no finding. **The inside jaw no longer needs support** |
 | Fixed jaw | [`stl/fixed_jaw.stl`](../hardware/mechanical/stl/fixed_jaw.stl) | PA-CF | **front face down** (was back face down) | 6 walls, 60 % infill | the beam-slot roof flags as a 5.6 mm cantilever. It is bridged 20 mm between both side walls, as before. **The inside jaw no longer needs support**; its shoulder block and gusset (2026-11-09) are prisms standing on the bed and add no finding (re-checked) |
-| Front shell | [`stl/front_shell.stl`](../hardware/mechanical/stl/front_shell.stl) | PETG | top face down (textured) | 4 walls, 100 % | PASS |
-| Battery door | [`stl/battery_door.stl`](../hardware/mechanical/stl/battery_door.stl) | PETG | outside face down (textured) | 4 walls, 100 % | PASS |
+| Front shell | [`stl/front_shell.stl`](../hardware/mechanical/stl/front_shell.stl) | PETG | top face down (textured) | 4 walls, 100 % | PASS (re-checked 2026-11-09 with the edge bevel and the H1 tube) |
+| Battery door | [`stl/battery_door.stl`](../hardware/mechanical/stl/battery_door.stl) | PETG | outside face down (textured) | 4 walls, 100 % | PASS (re-checked 2026-11-09: now a flat 1.6 plate) |
 | Button cap × 3 | [`stl/button_cap.stl`](../hardware/mechanical/stl/button_cap.stl) | PETG | flange down | 100 % | PASS |
 | Thumb roller | [`stl/thumb_roller.stl`](../hardware/mechanical/stl/thumb_roller.stl) | PETG | flat | 100 % | PASS |
 
@@ -331,9 +364,10 @@ tower strips) are short and non-functional faces, so they get specified supports
 part.
 
 Clearances: sliding parts get 0.15–0.20 per side (`CLR_SLIDE`); the brass gibs and pads float in
-0.10–0.15 pockets. Heat-set inserts are M2 × 3 in Ø3.2 holes and M3 × 4 in Ø4.0; thread-forming screws
-go into Ø1.7 pilots. The STEP of every part is in [`step/`](../hardware/mechanical/step/), in assembly
-pose, plus [`step/caliper_assembly.step`](../hardware/mechanical/step/caliper_assembly.step) (40 named
+0.10–0.15 pockets. Heat-set inserts are M2 × 3 in Ø3.2 holes (pad screws, back plungers); thread-forming
+screws go into Ø1.7 pilots; the nylon screws go into threads tapped in the print: M3 in Ø2.5 (Y plungers,
+lock), M2 in Ø1.6 (H1, the battery door). The STEP of every part is in [`step/`](../hardware/mechanical/step/), in assembly
+pose, plus [`step/caliper_assembly.step`](../hardware/mechanical/step/caliper_assembly.step) (44 named
 solids at R = 0).
 
 ![parts in print pose](../hardware/mechanical/renders/parts.png)
@@ -483,9 +517,9 @@ A 1.4301 beam adds 0.7 µm/K at 150 mm against steel workpieces. Zero after warm
   and `step/slider_body_b.step`: the body in 6061-T6, stress-relieved plate, clear anodise with the
   channel and jaw face masked. Tapped M2 × 0.4 and M3 holes replace the inserts and pilots.
   * Datums: A = jaw measuring face, B = channel lower face (reference-strip seat), C = tower underside.
-  * The gib and lock bores (u 14 / 19 / 24, z −2.3) are at ±0.02 from A.
+  * The gib and lock bores (u 14 / 19 / 24, z −2.5) are at ±0.02 from A, M3 tapped 5 deep at the top.
   * The tab-clamp faces are machined coplanar within 0.02, with no bedding.
-  * **The 6061 body needs a non-metal window** under and beside the antenna (u 3.1…29, y 24.5…39):
+  * **The 6061 body needs a non-metal window** under and beside the antenna (u 3.2…28.6, y 24.5 to the top face):
     machine it open and bond in a printed or POM insert (SPEC D4).
 * **[`drawings/beam_pockets.pdf`](../hardware/mechanical/drawings/beam_pockets.pdf)** (PCC-M-02) and
   `step/beam_pockets.step`:
@@ -505,22 +539,24 @@ A 1.4301 beam adds 0.7 µm/K at 150 mm against steel workpieces. Zero after warm
 |---|---|---|
 | Beam | 1 | ground flat stock 20 × 4, O1 (1.2510 "gauge plate") or 1.4301, cut to 250 (TVP: exact SKU) |
 | Magnetic tape | 172 mm | ams AS5000-MS10-H075-100 or a generic 2 mm pole-pair tape, slit to 8.0 mm, ≤ 0.60 thick with backing (width and thickness TVP) |
-| Adhesive transfer tape | – | 3M 467MP (0.05) for the tape and the scale |
+| Adhesive transfer tape | – | 3M 467MP (0.05) for the tape and the scale, and a 30 × 10 piece to hold the cell on the battery door |
 | Kapton shim | – | 0.025 mm sheet: 0–14 layers under the tape; strips for the H1 boss and the button ledge |
 | Steel shim foil 0.150 | 4 strips | assembly tool for the bedding (step 4); reused |
 | Brass C360 | – | 1.2 × 14 × 64 (back gib), 1.0 × 3 × 60 (Y gib), 1.0 × 3 × 76.9 (reference strip), 1.0 sheet for 4 pads |
 | SMT M2 standoff, 2.0 tall, OD ≤ 4.0 | 4 | PEM SMTSO-M2-2ET class, on H2–H5 (schematics track picks the LCSC part; else hand-fitted) |
 | Shim washer 2.2 × 4.0 × 0.3 | 4 | precision shim washer (e.g. MISUMI); bedded in slow structural epoxy |
 | M2 × 4 low head (k ≤ 1.0) | 4 | tab clamps |
-| Nylon M2 × 5 pan head | 1 | H1 |
-| Heat-set inserts M2 × 3 | 10 | in the body: 4 pad screws, 2 Y plungers, 2 lid (upper), 2 back plungers |
-| Heat-set insert M3 × 4 | 1 | lock |
-| Thread-forming screw for plastics, 2.2 × 5 countersunk (WN 1452 / PT K20 class) | 4 | 2 lid (towers), 2 battery door |
-| M2 × 6 countersunk | 2 | lid, upper corners |
-| M2 set screws, cup point | 8 | 4 × M2 × 4 (front pads), 2 × M2 × 3 (Y plungers), 2 × M2 × 2 (back plungers) |
-| Compression springs | 4 | Y: ~4 N at ~1 mm, OD ≤ 2.0; back: ~2.5 N at ~1 mm, OD ≤ 1.5 (it passes through the M2 insert) (TVP: stock parts, e.g. Lee Spring LC series) |
-| GFRP rod Ø2 | 3 | 2 × 20 mm (Y plungers), 1 × 24 mm (lock); glass-fibre, non-conductive |
-| M3 × 6 knurled thumb screw | 1 | lock |
+| LiPo cell, 1S, 501230 class | 1 | Renata ICP501230PS-03 (135 mAh, ≤ 5.4 × 12.5 × 31.5 with its protection circuit, wire leads) or an equivalent protected cell inside that envelope (section 15) |
+| JST SHR-02V-S housing + 2 SSH-003T-P0.2 crimps | 1 | crimped onto the cell's leads for J2 (bottom side, section 15) |
+| Nylon M2 × 10 flat head (ISO 7046 class) | 1 | H1 + the lid's upper fastening (through the lid's tube) |
+| Nylon M2 × 4 flat head | 2 | battery door (M2 tapped in the print) |
+| Heat-set inserts M2 × 3 | 6 | in the body: 4 pad screws, 2 back plungers |
+| Thread-forming screw for plastics, 2.2 × 5 countersunk (WN 1452 / PT K20 class) | 3 | lid: 2 in the towers, 1 in the right tower above the USB-C |
+| M2 set screws, cup point | 6 | 4 × M2 × 4 (front pads), 2 × M2 × 2 (back plungers) |
+| Nylon M3 × 4 set screws | 2 | Y plungers (M3 tapped in the print) |
+| Compression springs | 4 | Y: ~4 N at ~2 mm (~2 N/mm), OD ≤ 2.0, ~4.4 free, at the bottom of the bore; back: ~2.5 N at ~1 mm, OD ≤ 1.5 (it passes through the M2 insert) (TVP: stock parts, e.g. Lee Spring LC series) |
+| GFRP rod Ø2 | 5 pieces | 2 × 8 mm (Y plungers), 2 × 1 mm tip pins, coned (Y plungers), 1 × 11.4 mm (lock); glass-fibre, non-conductive |
+| Nylon M3 knurled thumb screw (thread ≥ 4) | 1 | lock |
 | M2 × 6 socket head ISO 4762 | 1 | end stop, Loctite 222 |
 | Steel pin Ø2 × 6 m6 | 1 | roller axle |
 | Dowel pins Ø3 × 10 m6 | 2 | fixed jaw |
@@ -534,15 +570,21 @@ A 1.4301 beam adds 0.7 µm/K at 150 mm against steel workpieces. Zero after warm
 From `clash_report.txt`. The board envelope comes from `board_parts.json`, extracted from
 `caliper/hardware/kicad/slider/prettycool-caliper-slider.kicad_pcb`.
 
-* **6255 intersections, 0 not clear** (re-run 2026-11-08 on the re-routed board with Q1/R10, the bottom-side
+* **2026-11-09 slim-down: 6837 intersections, 0 not clear; 0 FAIL, 0 RISK, 0 BREAK/THIN** (re-run by the review on the
+  board with J2 on the bottom side: J2 and its plug are read from the routed board, 0.3 mm inside the pocket, so no
+  pending substitution is left; while the board still had J2 on top the report showed 1 PENDING). The new items: the cell
+  at its max envelope, J2 and its plug on the bottom side in the pocket, the lid's H1 tube, the Y-plunger tip pins,
+  springs and nylon screws, the closed door rebate, the bevels and radii. The extracted board no longer carries an
+  H1 screw head (the screw comes from the lid).
+* Before: **6255 intersections, 0 not clear** (re-run 2026-11-08 on the re-routed board with Q1/R10, the bottom-side
   module caps C21/C23 and the C2911931 J50 land; again after the inside-jaw RF relief and the deeper
   fixed-jaw nut traps; and again after the inside-jaw stiffening, on the board in the working tree at the
   time, which had gained C13 and moved R85/C44: 102 part envelopes; and again on 2026-11-09 after the fixed
   inside jaw's stiffening, re-extracted from the committed board: 0 FAIL, 0 RISK, 0 BREAK/THIN). The only overlap is the intended one:
   the O-ring tyre squeezed 0.15 onto the beam.
-  * **Board vs housing:** the board with its tabs, the 102 part envelopes, the four standoffs, the H1
-    screw head and the mated JST plug, against the body, lid, door, caps, roller, gibs, pads, GFRP rods,
-    display, battery, lock and the clamp hardware. All clear.
+  * **Board vs housing:** the board with its tabs, the 102 part envelopes, the four standoffs and the
+    mated JST plug (J2 and the plug as moved to the bottom side), against the body, lid, door, caps, roller,
+    gibs, pads, GFRP rods and tip pins, nylon screws, display, battery, lock and the clamp hardware. All clear.
   * **Travel:** the slider and the board against the beam, fixed jaw, tape, scale and stop screw at
     R = 0, 75 and 151. All clear; the right end face meets the stop-screw head at R = 151.0.
   * **Slider-internal pairs:** all clear.
@@ -554,6 +596,9 @@ From `clash_report.txt`. The board envelope comes from `board_parts.json`, extra
   * Bottom parts over the beam band are only U30, C30, C31, inside the window, ≤ 1.30.
   * Tallest top parts: SW20 at 2.00 under the glass (limit 2.6), J1 at 3.30 elsewhere (limit 4.2).
   * No parts in the antenna keep-out; H1–H5 all have their boss or standoff room.
+  * New rule (2026-11-09): bottom parts in the upper band (y > 20) must be the module's 0402 exception
+    (x 1.8…4.4, y 22.7…27.0, ≤ 0.55) or hang into the battery pocket 0.3 clear of its walls and, over the cell,
+    0.3 above it. C21/C23/C44/R85 and the moved J2 and its plug pass.
 * **Body walls:** no cut feature breaks into another, and no web is under 0.4 mm. Local webs under
   the 1.2 mm wall rule:
 
@@ -561,7 +606,8 @@ From `clash_report.txt`. The board envelope comes from `board_parts.json`, extra
   |---|---|
   | tab pocket / pad pocket | 0.45 |
   | tab clamps / pad inserts | 0.55 |
-  | door pilot / battery pocket | 0.75 |
+  | door pilot / battery pocket | 0.70 (0.75 before) |
+  | right-tower lid pilot / USB relief | 0.75 (new) |
   | pad insert / USB relief | 0.80 |
   | H1 pilot / Y bore | 0.85 |
   | pad screw / tunnel | 0.90 |
@@ -569,9 +615,11 @@ From `clash_report.txt`. The board envelope comes from `board_parts.json`, extra
 
 * **RF (SPEC D4): every metal item is ≥ 5 mm from the antenna area in plan.** The antenna area is
   taken where the layout placed the module (U10 origin x 7.85, so the antenna spans board x 0.15…15.55;
-  the SPEC table's x 8.3 gave 0.6…16.0). The closest are the battery cell (6.45), the J2 plug (6.75),
-  J2 (6.95), the Y-plunger springs and screws (7.5), the Y gib (8.5) and the beam (9.5). **The PA-CF
-  moving inside jaw keeps 5.15 mm in plan.**
+  the SPEC table's x 8.3 gave 0.6…16.0). The closest (2026-11-09) are the Y-plunger springs (5.15, now at
+  the bottom of their bores), the J2 plug (6.35) and J2 (6.86) on the bottom side, the Y gib (8.5), the beam
+  (9.5) and the cell (12.05). The nylon parts (Y set screws, lock, H1 / lid screw, door screws) are not
+  counted as metal; the steel lid screws are 19 mm and more away. Before: the cell 6.45, the J2 plug 6.75,
+  J2 6.95, the springs and screws 7.5. **The PA-CF moving inside jaw keeps 5.15 mm in plan.**
   * History: with the module as placed, the old 2.4 mm plate's root flank was 4.70 mm away (clash check
     RISK). The first fix stepped that flank round the antenna corner on an R 5.15 arc, because the jaw
     material inside 5 mm was a lens only 0.3 mm deep: too thin for a slicer region.
@@ -584,7 +632,8 @@ From `clash_report.txt`. The board envelope comes from `board_parts.json`, extra
   * The FEA counts that zone as unfilled PA (E 1.5 GPa, TVP).
   * The fixed jaw's PA-CF inside tip, checked at R = 0 where it is closest, is also 5.15 mm. Its stiffening
     (2026-11-09) adds material only to the left of the old outline (away from the antenna), so that is unchanged.
-  * The modifier (`stl/slider_body_rf_modifier.stl`) now holds **3.21 cm³** of body in unfilled PA (was 3.03).
+  * The modifier (`stl/slider_body_rf_modifier.stl`) now holds **2.39 cm³** of body in unfilled PA (3.21 before
+    the 2026-11-09 slim-down, which took the body above y 36.4 away; 3.03 before the jaw stiffening).
   * The clash check now counts RISK lines in its summary: **0 FAIL, 0 RISK**.
 
 The first model's two findings are gone with the new placement: MODE cap × USB-C, and U_MCU × SW_MODE.
@@ -601,15 +650,18 @@ The first model's two findings are gone with the new placement: MODE cap × USB-
 3. **Jaw accuracy with a printed body:** PETG flexes 18 µm at the tip over a 2–8 N thumb spread;
    PA-CF 7 µm per jaw. Judge rev A on PA-CF parts, measured near the jaw root. Inside readings: 19 µm
    over 2–8 N on PA-CF for both inside jaws together (22 µm with the FDM knock-down; section 9).
-4. **Springs:** 4 N and 2.5 N in about 1 mm, OD ≤ 2.0 / ≤ 1.5, are not sourced (TVP). The sliding
-   force is 3.9 N only with the beam oiled (μ 0.15); 5.2 N at μ 0.20.
+4. **Springs:** the Y springs (4 N at ~2 mm, OD ≤ 2.0, at the bottom of the bores) and the back ones
+   (2.5 N in about 1 mm, OD ≤ 1.5) are not sourced (TVP). The sliding force is 3.9 N only with the beam
+   oiled (μ 0.15); 5.2 N at μ 0.20. The Y preload is now held by nylon set screws in threads tapped in
+   PAHT-CF: check that it does not creep away (re-measure the sliding force after a week).
 5. **Yaw at the right end:** a −y push above 1.9 N on the slider's right end lifts the reference strip
    there (section 4); measuring loads never do.
-6. **Supports** are still needed in three non-functional places on the body (section 8). The roller
+6. **Supports** are still needed in two non-functional places on the body (section 8). The roller
    roof and the tower strips are inside the part, so check that the supports come out.
 7. **Antenna:** the clearance is SPEC D4's 5 mm (not Espressif's 15). The modifier volume, the GFRP
-   rods, the nylon H1 screw and the unfilled-PA zone on the inside jaw's root (its PA-CF 5.15 mm away,
-   section 12) keep metal and carbon away. The RF range test at bring-up decides.
+   rods, the nylon screws (H1 / lid, Y plungers, lock, door) and the unfilled-PA zone on the inside jaw's root
+   (its PA-CF 5.15 mm away, section 12) keep metal and carbon away. The top face is now 2.4 mm above the
+   antenna area, so a hand on the top edge is close to it. The RF range test at bring-up decides.
 8. **Slim USB-C cable** (≤ 10.4 × 5.8 overmold) is a usage constraint (TVP: check common cables).
 9. **Tape:** the ams strip's width and thickness are unconfirmed. A magnetic (O1) beam under the tape
    may change the field the AS5311 sees (TVP: check MagINC/MagDEC on both beam materials).
@@ -638,8 +690,54 @@ The first model's two findings are gone with the new placement: MODE cap × USB-
       moving jaw, the larger term), or rev B metal jaws.
     * TVP: the unfilled-PA modulus (1.5 GPa assumed), the PA/PA-CF bond across the modifier boundary in
       the jaw root, and the jaw's real stiffness: push the tip with a known weight under a dial indicator.
+13. **Battery (2026-11-09):** the 135 mAh cell is rated 1C continuous / 2C pulse; the ≈ 0.5 A Wi-Fi TX peak is
+    ≈ 3.7C. The firmware holds it inside the rating (section 15: Wi-Fi TX capped at 10 dBm, no Wi-Fi on battery
+    below 3.50 V; ≈ 0.21–0.29 A per burst, an *estimate*: TVP, VBAT on a scope during a Wi-Fi sync at 3.5 V). It
+    charges at 70 mA (0.52C). J2 is on the board's bottom side since 2026-11-09. The cell's 1.0 mm swelling room and the 0.2 mm width clearance assume
+    the datasheet maximum envelope (TVP: measure the cells bought). The pocket alone leaves the cell loose (1.0 mm
+    in z, 0.5 in length, 0.2 in width), which would rattle and work its AWG30 leads: bond it to the door's inside
+    face with a piece of the 0.05 mm 3M 467MP transfer tape already in the BOM (0.95 mm of swelling room left), and
+    leave enough lead slack in the J2 bay for the door to come off with the cell on it.
+14. **Lid fastening (2026-11-09):** the lid's upper part is held only through H1 (u 26.75, y 24) and the
+    right-tower screw; its top-left corner is about 24 mm from H1 (TVP: check it lies flat; if not, a bead of
+    B-7000 along the top edge).
 
 ## 14. Change record
+
+**Slim housing, 2026-11-09 (the owner's decision: the 77 × 52 × 16 housing looked bulky).** Designed, not built.
+* **Cell:** 402535 (~500 mAh, 4 × 25 × 35) → **501230 class, 135 mAh** (reference Renata ICP501230PS-03, ≤ 5.4 ×
+  12.5 × 31.5 with its protection circuit) behind the board's upper band (section 15). The owner accepted ~3–4 days
+  per charge on a typical shop day; no firmware power-saving pass was asked for. Two firmware limits follow from the
+  cell's rating (section 15).
+* **Housing:** top face y 49.2 → **36.4**: **76.9 × 39.2 × 16.0 mm** (was 76.9 × 52.0 × 16.0). Battery pocket u 29.5…67.6,
+  y 22.4…35.1, floor z −7.0 (was u 29.5…65.5, y 22.4…48, floor −5.4); a flat 1.6 mm door in a rebate closed all round
+  (was a 2.0 flange + 1.2 plug, open at the top), two nylon M2 screws (were thread-forming steel). Body 33.0 → 23.0 g,
+  lid 6.1 → 4.5 g, door 4.2 → 1.1 g.
+* **J2:** the plug relief past the top edge is gone; J2 moves to the board's bottom side into the pocket (board change
+  request, section 15, made on the board the same day). While the board still had J2 on top, `board_envelope.py`
+  applied the move over the extracted board (`PENDING`, now empty). The extractor finds a JST mouth from its signal
+  pads (either side).
+* **Y plungers and lock (RF):** the top face is 2.4 mm from the antenna area, so the springs moved to the bottom of the
+  bores (5.15 mm in plan), the set screws and the lock became nylon M3 in threads tapped in the print (no inserts),
+  and the bore axis moved 0.2 deeper (z −2.5). Positions and preloads unchanged.
+* **Lid:** the two upper lid screws (inserts at (10.5, 46) and (74, 44)) had no body left under them: H1 now holds the
+  lid (a tube on the lid underside, a nylon M2 × 10 through the lid, the tube and the board into the boss) and a
+  thread-forming screw sits in the right tower at (73.0, 33.4). The extracted board no longer has an H1 head.
+* **Shape:** R 3.4 / R 3.0 plan radii at the top corners (the cavity's top-left corner now follows the board's R 1
+  corner, keeping 1.2 mm of wall), a 1.2 × 45° bevel round the body's back face except at the jaws and the step, a
+  0.8 × 45° bevel round the lid's top edge. All print without support. No taper (section 3).
+* Clash check: 6837 intersections, 0 not clear, 0 FAIL, 0 RISK, 0 BREAK/THIN (1 PENDING, the J2 move, until the board
+  had it; none since). RF: closest metal the
+  Y springs at 5.15 mm; the modifier holds 2.39 cm³.
+* `printcheck`: body one FAIL fewer (the pocket ceiling over y 34…48 is gone: two support regions, not three); lid
+  and door PASS. All 13 STLs watertight.
+* `fea_slider.py` re-run on the slim body: back web 1.85 µm at the plunger seat (1.75 before), clamp ceilings
+  0.09 µm, reactions balance (9.43 N); the board under a button press is unchanged (the ledge stays).
+  `fea_inside_jaw.py` and `fea_jaw.py` were not re-run: the jaws, their roots and the body below y 33 are unchanged.
+* calcs: the top-edge grip that lifts the lower pads is now 4.4 N at y 34.4 (3.3 N at y 40); the cell top is 1.0 mm
+  under the ledge (0.8 before, for a 4.0 cell).
+* Tests: 41 pass (new: the cell in its pocket, J2 in the bay, the lid's H1 column, the outside shape, the Y-plunger
+  metal below the antenna; changed: envelope ≤ 78 × 39.5 × 16, the pocket span, the M3 threads).
 
 **Fixed inside jaw stiffening, 2026-11-09.**
 * The fixed inside jaw's triangle (the 3 mm tip on a sloping left edge) became:
@@ -712,3 +810,78 @@ The first model's two findings are gone with the new placement: MODE cap × USB-
 * the beam-drawing process order fixed;
 * found but not fixed then, and fixed now: the back cover, the unsupported lower band, the roller
   length, the stop pin.
+
+## 15. Battery cell and the slim housing (2026-11-09)
+
+**The decision.** The owner found the 77 × 52 × 16 mm housing bulky and chose the largest slim-down: a cell
+about 12 mm tall that fits behind the board's upper band (board y 20…34), so the housing ends just above the
+board, accepting about 3–4 days per charge on a typical shop day. No firmware power-saving pass was asked for.
+
+**The space** (behind the board's upper band, between the beam tunnel and the top face):
+* **y:** the tunnel's wall ends at y 21.2, plus 1.2 of wall → the pocket starts at y 22.4. A 12.5 mm cell with
+  0.2 clearance needs y 22.4…35.1; 0.1 for the door's clearance, then the 1.2 back bevel's foot → top face
+  **y 36.4** (the board's top edge is at 34.0, the cavity at 34.4).
+* **u:** the antenna area ends at u 23.55, so metal starts at u ≥ 28.55; the H1 boss needs the pocket at
+  u ≥ 29.5; the roller slot (u 69.65) needs a 1.2 wall, so the pocket could end at u 68.4; it ends at 67.6
+  (2.05 of wall). J2, its plug and the leads take the left end (the **J2 bay**, u 29.5…35.6), so the cell has
+  u 35.6…67.6: **32.0 mm**, a 31.5 mm-max cell plus 0.5 for length swelling.
+* **z:** the door is a flat 1.6 plate in the back face (z −8.6…−7.0), so the pocket floor is z −7.0; the
+  button ledge's underside (and the cavity floor) is at −0.6. That leaves 6.4 mm: a 5.4 mm-max cell with
+  **1.0 mm of swelling room** (≈ 18 %). A 6 mm cell (6.3 max) would have 0.1 mm.
+
+**Candidates** (all 3.7 V nominal, 4.2 V charge; the dimension codes read thickness × width × length):
+
+| Cell | Capacity | Max size incl. PCM (mm) | Discharge | Charge | Leads | Fits? | Source |
+|---|---|---|---|---|---|---|---|
+| **Renata ICP501230PS-03** (chosen) | 135 mAh typ / 130 min | 5.4 × 12.5 × 31.5 | 1C (135 mA) continuous, 2C (270 mA) pulse (the ICP501230PS family sheet) | 0.5C standard, 1C (135 mA) max | wire leads, AWG 30 | yes: 0.6 mm length margin incl. 0.5 swelling, 1.0 mm z swelling room | [ichome listing (-03, links the Renata sheet)](https://ichome.com/product-detail/chip/icp501230ps-03); ratings: [ICP501230PS-02 manual](https://www.manualsdir.com/manuals/258379/renata-sa-icp501230ps-02.html) |
+| EEMB LP501230 | 140 typ / 130 min | 5.3 × 12.5 × 31–32 | not published | not published | solder tabs (bare cell: needs a PCM and leads) | yes, if a PCM fits the length | [eemb.com product 122](https://eemb.com/product-122) |
+| Jia Xin Rui JXR401230 | 120 | 4.2 × 12.5 × 33.0 | 1C; PCM TYD-0840 over-current 1.3–3.0 A | 1C | AWG 28, 100 mm, JST-PH 2.0 | **no**: 33.0 mm > the 32.0 mm space (32.8 if the pocket grew to the roller-slot wall), and less capacity | [Melopero datasheet](https://www.melopero.com/wp-content/uploads/2023/12/401230.pdf) |
+| EEMB LP401230 | 100 (catalogue) | 4 × 12 × 30 nominal | 2C (200 mA) max | — | — | yes, less capacity | EEMB catalogue (search result; not opened) |
+| VTC LP501235 | 180 | 5.2 × 12.5 × 37 | — | — | — | **no**: 37 mm does not fit beside J2 | VTC Power listing (search result) |
+| E-flite EFLB1501S25 (RC) | 150 | 5.5 × 12.1 × 37.3 | 25C | 1C | JST-PH 1.25 (UMX) | **no**: too long, and no protection circuit | Horizon Hobby listing (search result) |
+
+The 401235 / 451235 / 301240 / 401240 classes were looked for: none had a published sheet with a size that fits
+(a 35–40 mm cell needs the J2 bay's length, and a 3 mm cell gives up a third of the capacity).
+
+**Choice: a 501230-class protected cell, reference Renata ICP501230PS-03**: the most capacity that fits
+(135 mAh; the EEMB bare cell is 140 typ but needs its own PCM), a maker's sheet with real limits, wire leads
+to crimp a JST-SH plug onto, and a distributor listing. Any protected cell inside 5.4 × 12.5 × 31.5 with its
+leads at one short end fits the pocket. **Designed, not bought or measured.**
+
+**What the cell's rating asks of the firmware** (SPEC §1 / §3; done in the firmware, docs/firmware.md §12.6):
+* **Discharge:** the ≈ 0.5 A uncapped Wi-Fi TX peak from a low cell (SPEC §3) is ≈ **3.7C**, above the cell's 2C
+  (270 mA) pulse rating. The firmware caps the Wi-Fi TX power at 10 dBm (≈ 0.21–0.29 A from the cell, an
+  *estimate*) and, on battery (no VBUS), does not start Wi-Fi below a 3.50 V cell reading and stops it below
+  3.40 V. BLE stays at 9 dBm (≈ 1.6–2.3C at its peaks). TVP: the burst current and sag on a scope. The old
+  500 mAh cell took the same peak at 1C.
+* **Charge:** the BQ25180 charges at **70 mA (0.52C)** (was 250 mA; the cell's standard rate is 0.5C, its maximum
+  1C = 135 mA, and the firmware setting stops at 135), terminating at 7 mA, about 2–2.5 h from empty. IBAT_OCP is
+  its 1 A reset value (was 1.5 A): the charger's discharge fault limit; the cell's own PCM protects the cell.
+* The fuel gauge (MAX17048) needs no capacity setting; the TS thermistor (RT1) now reads the board over the
+  J2 bay, not over the cell (it was "over the cell, not the cell itself" before as well).
+
+**Board change (requested by the mechanics, made on the board 2026-11-09, SPEC §15 L1).** J2 (JST SH SM02B-SRSS-TB, 2-pin side
+entry, footprint `JST_SH_SM02B-SRSS-TB_1x02-1MP_P1.00mm_Horizontal`) moves from the **top** side at (24.5, 30.6),
+mouth +y, to the **bottom** side: footprint origin **(24.1, 24.9)**, **mating face toward +y** (the board's top
+edge), signal pads toward −y (pads at y ≈ 22.9, body x 22.1…26.1, y 23.2…27.5, the mated plug y 27.5…32.1).
+Pin 1 stays VBAT_RAW (Q1's drain is directly above, through a via), pin 2 GND. Why: a top-side J2 needs its
+plug and leads to pass the board's top edge, and the top face is now only 2.4 mm above that edge (0.4 to the
+cavity wall, then 2.0 of wall). On the bottom, J2, the plug and the leads hang into the pocket's J2 bay: 0.4 mm clear of the pocket's
+left wall, 6.3 mm in plan from the antenna area, outside the antenna keep-out (x ≥ 21.9), 0.9 mm clear of the
+H1 boss, and the cell can be unplugged through the battery door without taking the board out. It also needs:
+SPEC §2.1's bottom-side rule extended ("Bottom in y 22…34: … except J2 on the bottom at (24.1, 24.9), 2.95 mm
+tall, hanging into the battery pocket"), the placement table row for J2, and two-sided assembly (the board
+already has bottom parts). All of that is now on the board and in SPEC (§2.1, §15); the clash check reads J2
+and its plug from the routed board (0.3 mm inside the pocket), and `board_envelope.PENDING` is empty.
+
+**What else moved with the top face** (sections 4 and 5): no metal fits at the top face any more (2.4 mm from the
+antenna area), so the Y-plunger springs went to the bottom of their bores and the screws became nylon; the two
+upper lid screws had nothing left under them, so H1 holds the lid; the door screws are nylon (the left one is
+within 5 mm of the antenna area in plan).
+
+**Shape.** Fillets on the bed-side edges would need support, so the body's back face and the lid's top face have
+45° bevels (1.2 and 0.8 mm) and the corners in plan have radii (R 3.4 top left, R 3.0 top right). The door's
+rebate stops at the bevel's foot, so the bevel runs on over the door and the top wall stands on it instead of
+bridging 44 mm over an open-topped rebate. A taper was looked at and left out: the top face is set by the cell
+pocket (1.3 mm over it) and the cavity (2.0 mm over it), the end faces are the stop and jaw datums, the back face
+is the print bed and the jaw roots stay as they are, so a taper would take a function or a wall.

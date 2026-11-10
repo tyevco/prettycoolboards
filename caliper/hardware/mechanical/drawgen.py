@@ -176,11 +176,15 @@ def sheet_slider_body(solid):
              "GIB AND LOCK BORE POSITIONS (u " + " / ".join(f"{u:.2f}" for u in P.YGIB_PLUNGERS_U + [P.LOCK_U])
              + ") ±0.02 FROM A, AXIS z " + f"{P.GIB_Z:.2f}" + ";",
              "FRONT-PAD SET-SCREW HOLES ±0.02 FROM B. ALL M2 HOLES TAPPED M2x0.4 6H, 4 DEEP;",
-             "LOCK HOLE M3x0.5 6H. CHANNEL (TUNNEL) 22.20 +0.02/0 x 5.50 +0.02/0, FLOOR Ra 0.8.",
+             f"GIB AND LOCK HOLES M3x0.5 6H, {P.Y_TAP_L:g} DEEP FROM THE TOP FACE (NYLON SCREWS). "
+             "CHANNEL (TUNNEL) 22.20 +0.02/0 x 5.50 +0.02/0, FLOOR Ra 0.8.",
              "TAB CLAMPS: 4x POCKET " + DIA + f"{P.STANDOFF_POCKET_D:.1f} TO z {P.CLAMP_CEIL_Z:.2f}, M2 THRU, FACE THE"
              " CLAMP FACES COPLANAR 0.02 (NO EPOXY BEDDING IN REV B).",
-             "RF (SPEC D4): NO METAL WITHIN 5 MM OF THE ANTENNA (u 3.1..29, y 24.5..39): MACHINE THAT REGION",
+             f"RF (SPEC D4): NO METAL WITHIN 5 MM OF THE ANTENNA (u {P.bu(P.ANTENNA[0]) - P.RF_CLEAR:.1f}.."
+             f"{P.bu(P.ANTENNA[2]) + P.RF_CLEAR:.1f}, y {P.ANTENNA[1] - P.RF_CLEAR:.1f}..TOP FACE): MACHINE THAT REGION",
              "  OPEN AND BOND IN A PRINTED / POM INSERT.",
+             f"OUTSIDE: R{P.CORNER_R['top_left']:g} / R{P.CORNER_R['top_right']:g} AT THE TOP CORNERS IN PLAN; "
+             f"{P.BACK_CHAMFER:g} x 45 ON THE BACK-FACE EDGES EXCEPT AT THE JAW ROOTS AND THE STEP.",
              "OPTIONAL: POCKET 2.0 DEEP IN THE JAW FACE FOR A HARDENED, GROUND JAW INSERT",
              "  (1.2379 / D2 60 HRC OR CARBIDE, 2.0 x 6 x 34), BONDED + 2 PINS, GROUND IN PLACE."]
     faces += _lines(COMMON + [""] + notes, -200, -88)

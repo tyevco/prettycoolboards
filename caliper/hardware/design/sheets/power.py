@@ -173,7 +173,7 @@ def build(d):
           fields={"MPN": "USBLC6-2SC6", "Manufacturer": "STMicroelectronics", "LCSC": "C7519"})
 
     d.group("Charger and power path: BQ25180 (I2C 0x6A)",
-            "ILIM / ICHG (250 mA) / SYS_REG / ship mode set over I2C: register init per dial-me-spinner docs/firmware.md §13.1.\n"
+            "ILIM / ICHG (70 mA) / SYS_REG / ship mode set over I2C: register init per dial-me-spinner docs/firmware.md §13.1.\n"
             "IN 2.2u/25V X7R 0805, SYS 10u/25V, BAT 4.7u: each within 1 mm of its ball and of the D2 GND ball.\n"
             "Ship mode exits only on a USB plug-in (TS/MR is not wired to a button in rev A).\n"
             "/INT -> CHG_INT_N (10k pull-up R8, GPIO3). RT1: 10k NTC next to J2 (board temperature, not the cell).")
@@ -188,12 +188,12 @@ def build(d):
           datasheet="https://www.murata.com/en-us/products/productdetail?partno=NCP15XH103F03RC",
           fields={"MPN": "NCP15XH103F03RC", "Manufacturer": "Murata", "LCSC": "C77131"})
 
-    d.group("LiPo connector J2 (402535, ~500 mAh, JST-SH 2-pin) + reverse-polarity P-FET Q1",
+    d.group("LiPo connector J2 (~135 mAh 1S, JST-SH 2-pin) + reverse-polarity P-FET Q1",
             "Pin 1 = BAT+, pin 2 = GND. Pack leads are not standardised: check every pack's polarity anyway.\n"
             "Q1 AO3401A in the BAT+ lead: drain to J2, source to VBAT, gate to GND via R10. The body diode conducts for a\n"
             "correct cell, then VGS = -VBAT turns the channel on (both directions, so charging works). A reversed cell\n"
             "leaves VGS = 0: off. VGS max +-12 V vs 4.4 V: no zener. 0.5 A: <= 43 mV / 21 mW (85 mOhm max at VGS -2.5 V).\n"
-            "The cell sits in the housing pocket behind the board (SPEC §2.1).", anchor="J2")
+            "J2 is on the bottom; it, the plug and the cell sit in the housing pocket behind the board (SPEC §2.1).", anchor="J2")
     d.add("J2", "Connector_Generic_MountingPin:Conn_01x02_MountingPin", "BATT",
           "Connector_JST:JST_SH_SM02B-SRSS-TB_1x02-1MP_P1.00mm_Horizontal",
           pins={"1": "VBAT_RAW", "2": "GND", "MP": "GND"},

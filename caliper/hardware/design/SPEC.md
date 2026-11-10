@@ -16,7 +16,7 @@ live in [nets.py](nets.py). If anything here changes, update `nets.py` and this 
 | Display | 1.14 in 240×135 ST7789 IPS, 13-pin 0.5 mm FPC, white LED backlight. **Landscape**: the 31.0 mm long axis (240 px) along the beam (§2.1, D4) |
 | UI | 3 buttons: ZERO, HOLD/SEND, MODE. RGB status LED, piezo |
 | IMU | LIS2DW12 (wake on pickup, auto-off, orientation), I2C 0x19 (SA0 high) |
-| Power | 1S LiPo 402535 (~500 mAh) on JST-SH 2-pin. USB-C (USB 2.0 device) charging at 250 mA |
+| Power | 1S LiPo, 501230 class: **Renata ICP501230PS-03** (with protection circuit; 135 mAh typ / 130 min; ≤ 5.4 × 12.5 × 31.5 mm including it; 1C = 135 mA continuous / 2C = 270 mA pulse discharge; 0.5C standard / 1C max charge, CC/CV to 4.2 V). Slim housing, owner decision 2026-11-09: was a 402535, ~500 mAh. On JST-SH 2-pin J2 (board bottom, §2.1; an SHR-02V-S plug crimped on the cell's AWG30 leads). USB-C (USB 2.0 device) charging at **70 mA** (0.52C; firmware `CONFIG_CALIPER_CHARGE_MA`, range ≤ 135 mA = 1C; was 250 mA). On battery (no VBUS) the firmware keeps the cell inside its 2C pulse rating: Wi-Fi TX capped at 10 dBm, and no Wi-Fi below a 3.50 V cell reading (off below 3.40 V) (§3) |
 | Storage | Readings in LittleFS on the module flash; exported as CSV over USB MSC, Wi-Fi or BLE |
 
 ## 2. Boards
@@ -40,8 +40,12 @@ y 1.2…20.15) parts ≤ **2.6 mm**; everywhere else ≤ **4.2 mm** (lid undersi
 two decoupling capacitors, inside y 2.4…9.6 and x 20…41, ≤ 1.30 mm tall** (they run in the beam's tape channel,
 y 1.9…10.1; x 20…41 is where the channel, beam x 28…200, stays under the board over the whole 0–151 mm travel),
 and **the electrodes** (§2.2 table) with their guard copper. Everything else on the bottom over y 0…20 is
-copper under solder mask, nothing proud of it. Bottom in y 22…34: flat test pads only (no parts; the battery is
-1.55 mm below), **except under the module** (x 1.8…4.4, y 22.7…27.0, left of the battery pocket): the module's
+copper under solder mask, nothing proud of it. Bottom in y 22…34: flat test pads only (no parts; the battery
+pocket is below), **except J2 and under the module**. **J2** (the cell's JST-SH receptacle) is on the bottom since
+2026-11-09 (slim housing, owner decision): footprint origin (24.1, 24.9), body x 22.1…26.1, y 23.2…27.5, **2.95 mm
+tall below the board**, mating face toward +y; it and the mated plug (x 21.9…26.3, y 27.5…32.1) hang into the
+battery pocket's J2 bay (board x 21.5…27.6, y 22.4…35.1), ≥ 6.3 mm in plan from the antenna area and ≥ 0.9 mm from
+H1's boss. Under the module (x 1.8…4.4, y 22.7…27.0, left of the battery pocket) sit the module's
 100 nF + 10 µF decoupling C21 / C23 and the ADC input's RC filter R85 / C44, 0402, ≤ 0.55 mm tall against the
 0.75 mm housing-floor gap there (§12, §13). The extension of this exception from y 24.8 down to y 22.7 for R85 / C44
 (§13 R5) was **accepted by the owner on 2026-11-09** (§11).
@@ -64,9 +68,9 @@ is given in the notes.
 | SW51 | HOLD/SEND | top | 38.5 | 31.0 | 0 | u 46.5. The mechanics' x 18.5 (DEV-5) only kept the cap off the old portrait glass; with the landscape glass that x is inside the antenna clearance, so it moves here (the cap still clears the glass rib, y ≥ 28 vs ≤ 20.15) |
 | SW52 | MODE | top | 46.0 | 31.0 | 0 | u 54; courtyard x ≤ 49, clear of J1 (x ≥ 53.7) and the antenna |
 | D50 | WS2812B-2020 RGB LED | top | 51.5 | 32.0 | 0 | light pipe in the lid at u 59.5 |
-| J2 | JST-SH SM02B-SRSS-TB, 2.95 tall | top | 24.5 | 30.6 | mating face toward +y (the top edge) | courtyard x 21.6…27.4: 0.6 clear of the antenna keep-out. The cell's leads come up past the top edge from the cell's −x end (the mechanics add a lead channel and a plug relief beyond y 34) |
-| RT1 | 10 k NTC (TS) | top | 22.3 | 26.75 | | next to J2, over the cell (draft 24.5, 26.5: moved for Q1) |
-| Q1, R10 | AO3401A battery reverse-polarity P-FET, 10 k gate resistor | top | 25.1 / 22.5 | 25.1 / 23.5 | Q1 90: drain pad up, under J2 pin 1 | §3. Q1's drain pad is 2.5 mm below J2 pin 1 (25.0, 28.6) |
+| J2 | JST-SH SM02B-SRSS-TB, 2.95 tall | **bottom** | 24.1 | 24.9 | 0 (flipped): mating face toward +y (the top edge), signal pads toward −y | footprint origin; pad row y 22.9, **pin 1 (VBAT_RAW) x 23.6**, pin 2 (GND) x 24.6; fitting nails (GND) x 22.3 / 25.9, y 26.8. Body x 22.1…26.1, y 23.2…27.5, 2.95 below the board; mated plug x 21.9…26.3, y 27.5…32.1, both in the battery pocket's J2 bay (bottom-side rule above). Courtyard x 21.2…27.0. Pin 1 reaches Q1's drain on top through a via at (23.6, 21.6) (§3). Was top (24.5, 30.6), rot 180, mouth over the top edge with a plug relief past y 34 in the housing (moved 2026-11-09 for the slim housing) |
+| RT1 | 10 k NTC (TS) | top | 22.3 | 26.75 | | over J2 (bottom) and the cell's lead end (draft 24.5, 26.5: moved for Q1) |
+| Q1, R10 | AO3401A battery reverse-polarity P-FET, 10 k gate resistor | top | 25.1 / 22.5 | 25.1 / 23.5 | Q1 90: drain pad up | §3. Q1 sits over J2 (bottom); VBAT_RAW runs from J2 pin 1 (23.6, 22.9) down to a via at (23.6, 21.6) and on F.Cu up between Q1's gate and source pads into the drain pad (25.1, 26.04) |
 | BZ50 | PKMCS0909E piezo, 1.9 tall | top | 40.0 | 24.3 | 0 | courtyard x 34.75…45.25, y 19.55…29.05; sound port in the lid at u 48 |
 | U60 | LIS2DW12 | top | 30.0 | 23.5 | | ≥ 15 mm from L1 |
 | U2, U3, L1, U5, U6, C1–C6, C8–C13, R3–R5 | charger / buck-boost / rail-switch cluster | top | 56.0 | 11.0 | | inside x 50.5…61.5, y 2.5…20.5 (not under the glass; ≤ 4.2), except C8 (51.3, 1.55) and C10 (49.75, 5.5), held ≤ 2 mm from U5 and up to 0.95 outside the box. L1 and the U3 switch nodes ≥ 10 mm from U40 and the RX feed |
@@ -84,8 +88,8 @@ is given in the notes.
 | SW20 | BOOT, TS-1088 | top | 27.0 | 15.7 | 90 | under the glass, no cap: used with the lid (and glass) off |
 | R50, Q50, R51 | backlight | top | 27.0 / 28.1 / 28.7 | 7.4 / 3.6 / 7.0 | | under the glass, beside J50 (draft: 25.5, 4.0) |
 | Q51, R56, R57 | piezo driver | top | 47.35 / 46.2 / 33.7 | 20.4 / 23.7 / 19.5 | | Q51 and R56 right of BZ50, R57 at its left (draft: 40.0, 18.0) |
-| TP1–7, TP20–23, TP30–32, TP40–42, TP50–51 | 19 × Ø1.0 test pads | **bottom** | 22.5…47.9 | 22.6 / 25.14 | 2.54 grid, two rows | bench bring-up with the board out of the housing; nothing in the antenna keep-out or on the H1 pad. TP22 / TP23 (USB) at x 42.82 / 47.9 in the y 22.6 row |
-| H1 | M2 plated hole, Ø4.4 pad | both | 18.75 | 24.0 | | **nylon** M2 × 4 screw (5 mm from the antenna corner) into a body boss (u 26.75). Support only, see "Board support" |
+| TP1–7, TP20–23, TP30–32, TP40–42, TP50–51 | 19 × Ø1.0 test pads | **bottom** | 27.58…47.9 | 22.6 / 25.14 / 30.22 | x 22.5 + 2.54 i, three rows | bench bring-up with the board out of the housing; nothing in the antenna keep-out, on the H1 pad, in J2's courtyard or under the mechanics' ledge (y ≥ 32.6). y 25.14: TP50, TP51, TP7, TP4, TP2, TP3, TP1 (x 32.66…47.9); y 22.6: TP32, TP40, TP41, TP42, TP5, TP6, TP22 (USB, x 42.82), TP23 (USB, x 47.9) from x 27.58; **y 30.22: TP20 MCU_EN, TP21 BOOT_N, TP30 MAG_A, TP31 MAG_B at x 32.66 / 35.2 / 37.74 / 40.28** (moved 2026-11-09 from x 22.5 / 25.04 of the two lower rows, where J2 now is) |
+| H1 | M2 plated hole, Ø4.4 pad | both | 18.75 | 24.0 | | **nylon** M2 × 10 flat-head screw (5 mm from the antenna corner) from the lid's top face through the lid's Ø4.4 tube and the board into a body boss (u 26.75); since 2026-11-09 it is also the lid's upper fastening. Support only, see "Board support". **Top side: a Ø4.6 circle round H1 stays free of parts** (2026-11-09: the lid's Ø4.4 tube ends 0.1 mm above the board there, in place of the old Ø3.8 screw head; `layout.py` `check_h1_tube` checks the courtyards, nearest 0.6 mm outside it). Bottom: J2's nearest nail pad edge is 0.75 mm from the pad |
 | H2, H3 | tab clamp holes | tab | −3.5 | 5.5 / 14.0 | | Ø2.2 plated (GND), top pad Ø4.4 for an SMT M2 standoff; bottom: no exposed copper (0.15 above the beam) |
 | H4, H5 | tab clamp holes | tab | 65.5 | 5.5 / 14.0 | | as H2/H3 (H5 is in the schematic since §12) |
 | FID1–3 | fiducials, Ø1 / mask Ø2 | top | (2.0, 1.5), (60.5, 1.2), (33.0, 27.6) | | | outside the antenna keep-out and every courtyard (FID3 draft (60.5, 32.8) was inside J1's courtyard) |
@@ -98,8 +102,10 @@ side and beyond the antenna) is: antenna at the board edge, nothing conductive u
 (board edges on two sides), with the all-layer keep-out above under it and 5.0 mm to its right (x 16…21). 15 mm
 sideways does not fit a 62 mm board that also carries a USB-C and three buttons along the same edge: that is a
 recorded deviation, to be checked by an RSSI/range test at bring-up. Every metal part keeps ≥ 5 mm in plan from
-the antenna area: the LiPo (the battery pocket moves to board x ≥ 21.5, D4/§7), J2, the USB-C (39 mm away), the
-H1 screw (nylon), the SMT standoffs. The beam's upper edge is 9.5 mm below the antenna.
+the antenna area: the LiPo (the battery pocket moves to board x ≥ 21.5, D4/§7; the cell itself starts 12 mm away),
+J2 and its plug (6.3 mm), the USB-C (39 mm away), the H1 screw (nylon), the SMT standoffs. The beam's upper edge is
+9.5 mm below the antenna. Since 2026-11-09 the firmware also caps Wi-Fi TX at 10 dBm for the small cell (§3), about
+10 dB less link margin than at full power: the bring-up range test covers both.
 
 **Board support (D3).** The **Z datum is the four tab clamps H2–H5**: each carries an SMT M2 threaded standoff
 (2.0 mm tall, OD ≤ 4.0 mm, soldered on the top pad; PEM SMTSO-M2-2ET class, **fitted by hand**: no LCSC/JLC part
@@ -109,14 +115,21 @@ clamp face in the tower (the left tower spans u 0.5…7.6, the right u 70.4…77
 These four points sit at the ends of the sensor band, 3.5 mm and 12 mm from the AS5311 and electrode rows.
 The four clamp faces must be coplanar within 0.03 mm (the mechanics choose how: faced brass washers, insert
 faces, or the rev B machined tower). **H1** in the upper band is a support against button and cable loads, not a
-datum: it is tightened last and must not pull the board out of the tab plane by more than 0.01 mm (dial
-indicator, docs/mechanical.md §7 step 6; the boss is printed low and shimmed). The mechanics' upper-band holes
+datum: it must not pull the board out of the tab plane by more than 0.01 mm (the boss is printed low and shimmed;
+with the lid off, a ~3 N press at H1 moves the board ≤ 0.01 mm on a dial indicator, docs/mechanical.md §7 step 6).
+Since 2026-11-09 its nylon M2 × 10 screw comes from the lid and also holds the lid's upper part; the lid's Ø4.4 tube
+ends 0.1 mm above the board, so the screw does not clamp the board against the boss. The mechanics' upper-band holes
 (3, 24.5) and (3, 31) are now under the MINI-1, and (59, 32.6) has its Ø4.4 pad crossing the top edge and its
 screw head over the USB-C, so all three are replaced by H1 and the tabs. No other upper-band hole fits: the
 battery pocket has no body under the board, and the USB-C fills the right end above y 22.
 
-**Battery**: a 402535 cell in the housing pocket behind the board's upper band (not on the beam), on J2. The pocket
-moves to **u 29.5…65.5 (board x 21.5…57.5)** so the cell is ≥ 5.5 mm from the antenna (D4).
+**Battery**: a 501230-class protected cell (reference Renata ICP501230PS-03, 135 mAh, ≤ 5.4 × 12.5 × 31.5 mm; §1) in
+the housing pocket behind the board's upper band (not on the beam), on J2. **Slim housing (2026-11-09, owner
+decision):** it replaces the 402535 (~500 mAh, 4 × 25 × 35), so the housing ends just above the board. The pocket is
+**u 29.5…67.6 (board x 21.5…59.6), y 22.4…35.1**, floor z −7.0 (was u 29.5…65.5, y 22.4…48); the cell lies at
+u 35.6…67.1, ≥ 12 mm from the antenna (D4), with 1.0 mm of thickness swelling room under the button ledge. J2 moves
+to the bottom (above) so the receptacle, the plug and the cell leads stay inside the pocket's J2 bay (u 29.5…35.6,
+board x 21.5…27.6) instead of passing the top edge.
 
 ### 2.2 Scale board and the electrode geometry
 - 200 × 7 mm. Front copper (toward the slider) carries the pattern; the back copper is a solid ground plane
@@ -174,16 +187,19 @@ USB-C VBUS ─ ESD/TVS ─ BQ25180 (VIN) ─┬─ SYS → VSYS ─┬─ TPS638
   TJ 125 °C; VGS(th) −0.5…−1.3 V; RθJA ≤ 125 °C/W.
   **At 0.5 A** (the Wi-Fi peak from a low cell) and a 3.0 V cell (VGS ≈ −3.0 V; the −2.5 V maximum is used as the
   bound): drop **≤ 43 mV** (≈ 28 mV typical), dissipation **≤ 21 mW** (≈ 14 mW typical), ≈ 3 °C rise; ≤ 64 mV /
-  32 mW at TJ 125 °C. At a full cell (VGS −4.2 V) ≤ 30 mV / 15 mW. Charging at 250 mA: ≤ 21 mV / 5 mW; the charger
-  regulates VBAT at its own pin, so in CC the cell sits up to 21 mV lower and in CV the drop fades with the current.
+  32 mW at TJ 125 °C. At a full cell (VGS −4.2 V) ≤ 30 mV / 15 mW. Charging at 70 mA (250 mA before 2026-11-09):
+  ≤ 6 mV / 0.4 mW; the charger regulates VBAT at its own pin, so in CC the cell sits up to 6 mV lower and in CV the drop fades with the current.
   The fuel gauge reads the cell through Q1, so under load it reads up to the same drop low (TVP).
   **Board copper on top of Q1 (pre-routed 2026-11-08, §13; estimate, not measured):** VBAT runs from Q1's source to
-  U2 BAT / C3 as a locked trunk: Q1's source pad on F.Cu, 3 vias, a 2.0 mm B.Cu riser to a 2.1 mm B.Cu band along
+  U2 BAT / C3 as a locked trunk: Q1's source pad on F.Cu, 3 vias, a 1.6 mm B.Cu riser (2.0 mm until 2026-11-09: it
+  now keeps 0.25 mm from J2's nail on the bottom) to a 2.1 mm B.Cu band along
   the top edge (a 1.3 mm F.Cu strip in parallel over x 28…48.6), a 1.9 mm B.Cu riser down x 58.4 between J1's shell
   tabs (band and riser doubled on 0.5 oz In2), 4 vias beside U2, F.Cu to C3 and the BAT ball (0.25 mm neck, 0.15 mm inside the ball's mask opening).
   Resistor-network estimate from the board copper (35 µm outer, 15.2 µm inner, 20 µm via plating): **≈ 12 mΩ** Q1 →
   BAT ball (was ≈ 0.095 Ω as a 0.30 mm track with three single-via layer changes), ≈ 6 mV at 0.5 A on top of Q1's
-  ≤ 43 mV. J2 → Q1 (VBAT_RAW, 0.60 mm) ≈ 2 mΩ. The whole system current takes this path when USB is absent.
+  ≤ 43 mV. J2 → Q1 (VBAT_RAW, 0.60 mm): ≈ 2 mΩ with J2 on top; with J2 on the bottom (2026-11-09) 1.3 mm of B.Cu,
+  one 0.5 / 0.25 via (≈ 1 mΩ) and 5.1 mm of F.Cu, ≈ 6 mΩ (≈ 3 mV at 0.5 A; estimate). The whole system current takes this path when
+  USB is absent.
   **Reversed cell with USB present:** the charger tries to charge; VBAT cannot rise above |VGS(th)| (≈ 0.5–1.3 V)
   before Q1 turns on into the reversed cell, which keeps VBAT below the BQ25180's VBATSC (1.6–2.0 V), so it stays in
   trickle charge at IBATSC ≈ 8 mA (SLUSE99C) and times out on its precharge safety timer. Q1 then dissipates
@@ -201,13 +217,21 @@ USB-C VBUS ─ ESD/TVS ─ BQ25180 (VIN) ─┬─ SYS → VSYS ─┬─ TPS638
   lets the low bus (internal IPD pull-downs, tSLEEP 1.75–2.5 s) put it to sleep. `power_init` undoes all three
   at the next boot. Not measured (TVP).
 - BQ25180: ILIM set by I2C. Ship mode is used in storage. The register init table follows
-  dial-me-spinner `docs/firmware.md §13.1`. /INT goes to CHG_INT_N. Keep `IBAT_OCP` at its 1 A reset value or
-  higher (SLUSE99C Table 8-15): the 500 mA setting would trip on the ≈ 0.5 A Wi-Fi peaks from a low cell.
+  dial-me-spinner `docs/firmware.md §13.1`. /INT goes to CHG_INT_N. `IBAT_OCP` = 1 A, its reset value (CHARGECTRL1 0x52; was 1.5 A):
+  a fault limit, not the cell's 2C rating. Not 500 mA (SLUSE99C Table 8-15): an uncapped Wi-Fi burst from a low cell
+  (0.42–0.49 A) comes within a few percent of it, and 4–7 trips in 2 s latch the BATFET off until USB is plugged in
+  (§8.3.7.5). Charge (since 2026-11-09, for the 135 mAh cell, §1): ICHG **70 mA** (0.52C; ICHG_CTRL 0x22), ITERM 10 % =
+  7 mA, precharge 2 × ITERM = 14 mA (CHARGECTRL0 0x20), VBATREG 4.20 V, 6 h safety timer; the input limit is unchanged
+  (100 mA until enumerated, then 500 mA). The cell's 2C (270 mA) pulse rating is kept by the firmware: Wi-Fi TX capped
+  at 10 dBm (`CONFIG_ESP_PHY_MAX_WIFI_TX_POWER`; ≈ 0.21–0.29 A from the cell, *estimate*) and, without VBUS, no Wi-Fi
+  below a 3.50 V cell reading (`CONFIG_CALIPER_WIFI_MIN_MV`; off below 3.40 V); BLE stays at 9 dBm
+  (docs/firmware.md §12.6). Not measured (TVP: VBAT on a scope during a Wi-Fi sync at 3.5 V, no BAT_OCP or BUVLO flag).
 - **TS (D8):** RT1, a 10 k B3435 NTC (Murata NCP15XH103F03RC, C77131) from TS/MR to GND, is **populated** (it is
   in the BOM and the netlist: net CHG_TSMR = U2 D1 + RT1 pin 1), and the firmware **enables TS** (IC_CTRL 0x97 with
-  TS_EN, TS_CONTROL 0x90 = HOT 50 °C / COLD 3 °C; `CONFIG_CALIPER_CHG_TS_ENABLE` defaults to y). RT1 sits next to
-  J2 over the cell, so it reads the board above the cell, not the cell itself (TVP: compare with a thermocouple on
-  the pouch while charging).
+  TS_EN, TS_CONTROL 0x90 = HOT 50 °C / COLD 3 °C; `CONFIG_CALIPER_CHG_TS_ENABLE` defaults to y). RT1 reads the
+  board, not the cell itself: since 2026-11-09 (J2 on the bottom) it sits over the pocket's J2 bay and the cell's lead
+  end, not over the cell (TVP: compare with a thermocouple on the pouch while charging; moving RT1 to x ≥ 28 would put
+  it over the cell).
 - Sleep budget: the first-draft target is **not reachable** with this buck-boost: its Iq (11 µA) plus its
   feedback divider (5.5 µA) plus the ESP32-S3 deep sleep (~8 µA) already reach 24.5 µA. The target is **≤ 35 µA**
   (≈ 33 µA estimated: ESP32-S3 8 + TPS63802 11 + divider 5.5 + BQ25180 3 + MAX17048 hibernate 3 + LIS2DW12 ~1 +
@@ -313,11 +337,18 @@ The authoritative copy is `nets.py: MCU_PINS`. The constraints behind it:
 - **Board support (D3):** the housing clamps the slider board at the two end tabs (§2.1): each tower carries two
   clamp faces (coplanar within 0.03 mm) and two M2 screws from its top face into the SMT standoffs on H2–H5. Tab
   pockets in the towers: x u 2…8 and 70…76, y 2.5…16.5, open to the bottom, clear of the front-pad pockets.
-- **Battery pocket (D4):** u 29.5…65.5 (board x 21.5…57.5), y 22.4…48: ≥ 5.5 mm from the antenna. Both Y-gib
-  plungers (u 14, 24) and the lock (u 19) sit left of that span and push through Ø2 GFRP rods under the antenna
-  (metal at y ≥ 41); a battery door replaces the back cover (§11).
+- **Battery pocket (D4; slim housing 2026-11-09):** u 29.5…67.6 (board x 21.5…59.6), y 22.4…35.1, floor z −7.0 (a
+  flat 1.6 mm door flush in the back face, two nylon M2 screws). The cell (≤ 5.4 × 12.5 × 31.5) lies at u 35.6…67.1,
+  12 mm from the antenna, 1.0 mm under the button ledge. J2 (bottom side), its plug and the leads are in the J2 bay
+  u 29.5…35.6, ≥ 6.3 mm from the antenna. Both Y-gib plungers (u 14, 24) and the lock (u 19) sit left of that span
+  and push through Ø2 GFRP rods under the antenna. The plunger springs sit at the bottom of the bores (y 22.0…24.4,
+  5.15 mm from the antenna); the set screws and the lock thumb screw are nylon M3 in threads tapped in the print (the
+  top face is 2.4 mm above the antenna area, so no metal there). A battery door replaces the back cover (§11). Was
+  u 29.5…65.5, y 22.4…48, with the plunger metal at y ≥ 41.
 - **RF (D4):** within 5 mm of the antenna area (board x 0.15…15.55, y 29.5…34 with the module as placed; slider u 8.15…23.55) nothing metal and
-  nothing carbon-filled: in rev A that means the PA-CF body is opened under and beside the antenna (or the body
+  nothing carbon-filled. The fasteners there are non-metal: the H1 screw (nylon; since 2026-11-09 it also holds the lid)
+  and the nylon Y-plunger, lock and battery-door screws (the Y springs sit at the bottom of their bores, 5.15 mm away).
+  In rev A that means the PA-CF body is opened under and beside the antenna (or the body
   is printed in unfilled PA/PETG), and the PA-CF moving inside jaw keeps 5.15 mm in plan from the antenna area: since its stiffening (below)
   its root runs under the antenna corner, and the part of it within 5.15 mm prints in unfilled PA through the same modifier (it was first an
   R 5.15 relief arc on the old 2.4 mm plate's flank, after a 4.70 mm clash check RISK; docs/mechanical.md §12). In rev B the 6061 body needs a
@@ -338,7 +369,11 @@ The authoritative copy is `nets.py: MCU_PINS`. The constraints behind it:
 - The slider housing straddles the beam: printed PETG/PA-CF in rev A, CNC 6061 in rev B. Brass gibs with
   M2 set screws + springs set the 0.3 mm (magnetic) and 0.15 mm (capacitive) gaps. The fixed jaw is
   bolted and dowelled to the beam end. The moving jaw is part of the slider housing.
-- Housing outside: ≤ 78 × 52 × 16 mm, including the thumb wheel/roller.
+- Housing outside: ≤ 78 × 39.5 × 16 mm, including the thumb wheel/roller (was ≤ 78 × 52 × 16 until the 2026-11-09
+  slim housing; as modelled 76.9 × 39.2 × 16.0 plus the roller rim to u 78.0). The inside-jaw tips reach 0.6 mm above
+  the top face and the lock knob 4 mm, as appendages. Outside shape: R 3.4 / R 3.0 plan radii at the top corners, a
+  1.2 × 45° bevel round the body's back face (sharp at the jaw roots and the step), a 0.8 × 45° bevel round the lid's
+  top edge; no taper (docs/mechanical.md §3).
 
 ## 8. Firmware contract (detail in `docs/firmware.md`)
 - The BLE GATT service UUIDs and the characteristic layout are defined once in
@@ -542,3 +577,30 @@ The §2.1 under-module bottom-side exception for R85 / C44 (y 22.7) was accepted
 **Gates (2026-11-09):** DRC + schematic parity 0 / 0 / 0 (7 `lib_footprint_mismatch` warnings); `release.py` PASS,
 jlcplace slider 102 rows, 0 red, 0 yellow, 102 green; `check_contract.py` OK; `tools/tests` 19 passed; mechanics
 extract + clash check 0 not clear (part envelopes identical to the committed extract).
+
+## 15. Slim-housing board changes (2026-11-09)
+Designed, not built. The owner chose the slimmest housing (77 × 52 × 16 mm → about 38 mm tall): a ≈ 12.5 mm-wide
+1S cell (501230 class, ≈ 135 mAh) behind the board's upper band, the housing ending just above the board. The board
+changes it needs (`layout.py`; the schematic only had its notes updated, the netlist is identical):
+
+| # | Change | Why / numbers |
+|---|---|---|
+| L1 | **J2 to the bottom side**, footprint origin (24.1, 24.9), mating face +y, pad row y 22.9 (pin 1 VBAT_RAW x 23.6, pin 2 GND x 24.6), nails x 22.3 / 25.9 (§2.1 bottom-side exception) | the receptacle, the plug and the cell leads stay in the battery pocket's J2 bay (x 21.5…27.6) instead of passing the top edge, which the shorter housing has no room for. Mechanics: 6.86 mm (J2) / 6.35 mm (plug) in plan from the antenna area, inside the pocket by 0.3 mm |
+| L2 | **VBAT_RAW** J2 pin 1 → Q1 drain re-drawn: B.Cu down to a via at (23.6, 21.6), F.Cu up between Q1's gate and source pads, 0.60 mm, locked | ≈ 2 → ≈ 6 mΩ (estimate). The B.Cu stub leaves the pad away from CAP_LP1's In2 stretch (its centre line passes 1.1 mm from the pad centre, 0.3 mm from its corner, on the next layer; the pad is DC battery copper) |
+| L3 | **VBAT riser** 2.0 → 1.6 mm, x 26.75…28.35 (right edge unchanged) | 0.25 mm from J2's +x nail; ≈ +0.4 mΩ on the ≈ 12 mΩ trunk |
+| L4 | **TP20 / TP21 / TP30 / TP31** to a third row, y 30.22, x 32.66 / 35.2 / 37.74 / 40.28 (same 2.54 grid) | their old spots (x 22.5 / 25.04, y 22.6 / 25.14) are under J2 |
+| L5 | **H1 top-side Ø4.6 circle** kept free of parts, checked by `layout.py` (`check_h1_tube`: nearest courtyard 0.60 mm outside) | the lid's Ø4.4 tube ends 0.1 mm above the board there, in place of the old Ø3.8 screw head. No part moved |
+| L6 | `layout.py --rework`: an old via that a moved part's SMD pad now covers is removed with its track and its pad fanned out again (`drop_vias_in_new_pads`) | R10's and C7's GND fan-out vias sat inside J2's nails; an open via in a pad wicks the solder |
+
+Re-routed with `layout.py --rework --rip VBAT,VBAT_RAW --no-freerouting` (grid router; only J2 and the four test
+pads moved): MCU_EN, BOOT_N, MAG_A, MAG_B, VBAT and VBAT_RAW re-done; the grid router also re-did short pieces of
+BUZZ, BTN_ZERO_N, BTN_HOLD_N, BTN_MODE_N, I2C_SDA, IMU_INT1, IMU_INT2 and +3V3 that the new copper displaced. hwtools
+`sicalc xtalk` (`design/xtalk-cap.yaml`): the analog victims stay under their 1 mV budget (worst CAP_LP1 ← BTN_MODE_N
+0.88 mV, unchanged); over-budget pairs 3 → 3: the USB pair itself and, in the slot where MAG_A was (25.5 mV),
+IMU_INT2 → D+ 26.9 mV against sicalc's 10 mV USB budget (full-speed USB, already open in §14).
+
+**Gates (2026-11-09):** `build.py` wiring check + ERC as before (2 waived TPS22917 pin_to_pin), netlist IDENTICAL to
+the previous one; DRC + schematic parity 0 / 0 / 0 (7 `lib_footprint_mismatch` warnings); `release.py` PASS for both
+boards, jlcplace slider 102 rows, 0 red, 0 yellow, 102 green; `check_contract.py` OK; `tools/tests` 19 passed;
+mechanics `run_all.sh`: extract from the routed board (J2 and its plug on the bottom, no pending substitution),
+41 tests passed, clash check 0 not clear, 0 FAIL / 0 RISK, 0 BREAK / THIN.

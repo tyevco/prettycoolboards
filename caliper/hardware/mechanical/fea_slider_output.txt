@@ -1,21 +1,21 @@
 FEA of the slider body under its gib preloads, and of the slider board under a button press.
 
-A. body mesh: 88007 tets, 22930 nodes (global 1.6, fine 0.7 at the towers and back plungers)
+A. body mesh: 79069 tets, 20889 nodes (global 1.6, fine 0.7 at the towers and back plungers)
    supports: pad ceilings 212 facets (z), reference-strip seat 1394 facets (x, y)
    back plunger u 14: 2.5 N -z on 168 facets (30.1 mm2)
-   back plunger u 64: 2.5 N -z on 166 facets (30.1 mm2)
-   Y plunger u 14: 4.0 N +y on 44 facets (29.5 mm2)
-   Y plunger u 24: 4.0 N +y on 42 facets (29.5 mm2)
-   reaction [0.0, 8.0, -5.0] N (applied 5 N z, 8 N y); von Mises 0.23 MPa, interlayer 0.12/0.08 MPa, SF in-layer 198.1, interlayer 144.5
+   back plunger u 64: 2.5 N -z on 168 facets (30.1 mm2)
+   Y plunger u 14: 4.0 N +y on 47 facets (29.3 mm2)
+   Y plunger u 24: 4.0 N +y on 46 facets (28.9 mm2)
+   reaction [-0.0, 8.0, -5.0] N (applied 5 N z, 8 N y); von Mises 0.23 MPa, interlayer 0.14/0.09 MPa, SF in-layer 193.8, interlayer 136.1
 RESULT body_reaction_N = 9.434
-   back plunger u 14: seat moves -0.97 um in z
-   back plunger u 64: seat moves -1.75 um in z
-RESULT web_plunger_um = 1.748
+   back plunger u 14: seat moves -0.93 um in z
+   back plunger u 64: seat moves -1.85 um in z
+RESULT web_plunger_um = 1.847
    clamp ceiling (-3.5, 5.5): 50 nodes, dz -0.09 um
-   clamp ceiling (-3.5, 14): 50 nodes, dz -0.06 um
-   clamp ceiling (65.5, 5.5): 50 nodes, dz -0.01 um
-   clamp ceiling (65.5, 14): 50 nodes, dz -0.01 um
-RESULT clamp_dz_um = 0.08624
+   clamp ceiling (-3.5, 14): 50 nodes, dz -0.05 um
+   clamp ceiling (65.5, 5.5): 50 nodes, dz +0.03 um
+   clamp ceiling (65.5, 14): 50 nodes, dz +0.03 um
+RESULT clamp_dz_um = 0.08608
    calibration: cantilever 40 x 6 x 1, 10237 tets: FEA 1217.9 um, theory 2134.3 um -> correction x1.75
 RESULT tet_correction = 1.752
 B. board mesh: 95929 tets, 27174 nodes (size 0.5, outline from board_parts.json)

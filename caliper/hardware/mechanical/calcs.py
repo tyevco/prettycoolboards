@@ -218,14 +218,15 @@ y_sp = P.BGIB_PLUNGERS[0][1]
 P_back = P.P_BACK
 say(f"Back plungers at y {y_sp:g} (review fix: were y 10), lever {y_hi - y_sp:.1f} mm to the upper pad line y {y_hi}.")
 NEED = {}
-for what, fy, Fp in (("ZERO/HOLD/MODE press (tact 1.6 N + finger)", 31.0, 2.5), ("grip on the battery bay", 40.0, 5.0)):
+Y_GRIP = P.H_Y1 - 2.0       # a grip on the top edge (2026-11-09: the top face is at y 36.4, was 49.2; the old figure used y 40)
+for what, fy, Fp in (("ZERO/HOLD/MODE press (tact 1.6 N + finger)", 31.0, 2.5), ("grip on the top edge", Y_GRIP, 5.0)):
     m = Fp * (fy - y_hi)
     need = m / (2 * (y_hi - y_sp))
     NEED[what] = need
     say(f"{what}: {Fp} N at y {fy:.0f} -> {m:.1f} N.mm about the upper pad line; the back plungers hold the lower "
         f"pads down if P >= {need:.2f} N each")
 say(f"Design: back plungers {P_back} N each (was 4 N at y 10): margin {P_back / NEED['ZERO/HOLD/MODE press (tact 1.6 N + finger)']:.2f}x "
-    f"for a button press.  A press beyond {2 * P_back * (y_hi - y_sp) / (40 - y_hi):.1f} N at the top edge (y 40)")
+    f"for a button press.  A press beyond {2 * P_back * (y_hi - y_sp) / (Y_GRIP - y_hi):.1f} N at the top edge (y {Y_GRIP:.1f})")
 say("lifts the lower pads -- the reading is then wrong only while pressed (the gaps open, they do not close).")
 say()
 say("Sliding force: every preload acts on two faces (the plunger side and the reaction side), brass on ground")
@@ -238,9 +239,10 @@ for what, n in (("first model: back 4 N, Y 6 N", N_old), (f"now: back {P_back} N
 say("Target 2-5 N (commercial calipers).  mu 0.12-0.15 is brass on ground steel with a light oil film, 0.20 the")
 say("conservative value the first model used; dry brass on steel is 0.3-0.35 (keep the beam oiled).")
 say(f"  -> {2 * N_tot * 0.15:.1f} N at mu 0.15 ({2 * N_tot * 0.20:.1f} N at 0.20), against {2 * N_old * 0.20:.1f} N before.")
-say("  Trade-off: the lower back preload accepts a pad lift above 3.3 N at the top edge (was 3.3 N too, because")
-say("  the lever grew), and the Y preload's margin stays above 1.3x; the sliding force can be trimmed further on")
-say("  the bench with the plunger set screws (0.4 mm per turn).")
+say(f"  Trade-off: the lower back preload accepts a pad lift above {2 * P_back * (y_hi - y_sp) / (Y_GRIP - y_hi):.1f} N at the top edge (3.3 N at y 40")
+say("  in the 52 mm housing; the lower top edge has a shorter lever), and the Y preload's margin stays above 1.3x; the")
+say("  sliding force can be trimmed on the bench with the plunger set screws (0.4 mm per turn on the back plungers,")
+say("  0.5 mm on the Y plungers' nylon M3).")
 say("  O-ring roller rolling resistance is not included (TVP: measure; NBR at 0.15 squeeze is well under 0.5 N).")
 say()
 say("Back web (review fix a).  The back plungers now sit in the BODY's 3.2 back web, which closes the beam")
@@ -395,7 +397,7 @@ say("(OCF, COF, LIN) flag an out-of-range gap.  Bring-up records them at R = 0, 
 # 7. Envelope ------------------------------------------------------------------
 head(7, "Envelope")
 say(f"Housing envelope (u, y, z): {P.HOUSING_SIZE[0]:.1f} x {P.HOUSING_SIZE[1]:.1f} x {P.HOUSING_SIZE[2]:.1f} mm "
-    f"(SPEC 7: <= 78 x 52 x 16, roller included).")
+    f"(SPEC 7: <= 78 x 39.5 x 16 since the 2026-11-09 slim-down, was <= 78 x 52 x 16; roller included).")
 say(f"Thumb roller rim at u {P.ROLLER_RIM_U:.1f} from the jaw face, {P.ROLLER_RIM_U - P.H_U1:.1f} proud of the end face "
     f"(review fix e: the end face moved 78.0 -> {P.H_U1}; the rim was at 78.6).")
 say(f"The lock's knurled head stands {4.0:.0f} mm above the top face (like the jaws, an appendage outside the box).")
@@ -429,8 +431,8 @@ if FS:
         f" toward the scale ({FS.get('press_noledge_band_um', 0) / 1.5:.0f} % of the 0.15 gap) and the button")
     say(f"     {FS.get('press_noledge_button_um', float('nan')):.0f} um; with it, about {FS.get('press_band_um', float('nan')):.1f} um + the ledge's"
         f" own {d_l * 1e3:.1f} um.  The ledge is kept.")
-    say(f"  battery: cell top z {P.Z_WEB_IN + P.BAT_T:+.2f}, {P.CAV_FLOOR - (P.Z_WEB_IN + P.BAT_T):.2f} below the ledge underside; the"
-        " board never reaches the cell.")
+    say(f"  battery: cell top z {P.Z_POCKET + P.BAT_T:+.2f} (max envelope), {P.CAV_FLOOR - (P.Z_POCKET + P.BAT_T):.2f} below the ledge"
+        " underside (swelling room); the board never reaches the cell.")
 else:
     say("  (fea_slider_output.txt missing: run `py fea_slider.py`)")
 

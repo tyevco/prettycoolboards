@@ -1,6 +1,6 @@
 # JLC preview checklist: prettycool-caliper-slider.kicad\_pcb
 
-CPL prettycool-caliper-slider-CPL-JLCPCB.csv, bottom reading `jlc-2022`, jlcplace 0.2.1; 2 items.
+CPL prettycool-caliper-slider-CPL-JLCPCB.csv, bottom reading `jlc-2022`, jlcplace 0.2.1; 3 items.
 
 Open the order's placement preview at JLC and look at each part below. Tick it when the part sits on its pads with pin 1 / polarity where the board wants it. An item for several parts names the one to look at.
 
@@ -12,4 +12,5 @@ Open the order's placement preview at JLC and look at each part below. Tick it w
 
 ## Bottom reading
 
+- [ ] **J2** (C160402, bottom, rot 180): if JLC read the bottom rotation another way: as ccw-from-top+180 or jlc-2022+180, pin 1 would land off copper (4 pins move)
 - [ ] **U30** (C22459687, bottom, rot 0): if JLC read the bottom rotation another way: as ccw-from-top+180 or jlc-2022+180, pin 1 would sit on pad 11 (20 pins move)

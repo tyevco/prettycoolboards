@@ -66,8 +66,8 @@ While seated, the yaw stiffness is the strip on the rail (brass on 1.8 mm printe
 -----------------------------------------------------------------------------------------
 Back plungers at y 5 (review fix: were y 10), lever 13.8 mm to the upper pad line y 18.8.
 ZERO/HOLD/MODE press (tact 1.6 N + finger): 2.5 N at y 31 -> 30.5 N.mm about the upper pad line; the back plungers hold the lower pads down if P >= 1.11 N each
-grip on the battery bay: 5.0 N at y 40 -> 106.0 N.mm about the upper pad line; the back plungers hold the lower pads down if P >= 3.84 N each
-Design: back plungers 2.5 N each (was 4 N at y 10): margin 2.26x for a button press.  A press beyond 3.3 N at the top edge (y 40)
+grip on the top edge: 5.0 N at y 34 -> 78.0 N.mm about the upper pad line; the back plungers hold the lower pads down if P >= 2.83 N each
+Design: back plungers 2.5 N each (was 4 N at y 10): margin 2.26x for a button press.  A press beyond 4.4 N at the top edge (y 34.4)
 lifts the lower pads -- the reading is then wrong only while pressed (the gaps open, they do not close).
 
 Sliding force: every preload acts on two faces (the plunger side and the reaction side), brass on ground
@@ -78,9 +78,10 @@ now: back 2.5 N, Y 4.0 N              13.0      3.1      3.9      5.2
 Target 2-5 N (commercial calipers).  mu 0.12-0.15 is brass on ground steel with a light oil film, 0.20 the
 conservative value the first model used; dry brass on steel is 0.3-0.35 (keep the beam oiled).
   -> 3.9 N at mu 0.15 (5.2 N at 0.20), against 8.0 N before.
-  Trade-off: the lower back preload accepts a pad lift above 3.3 N at the top edge (was 3.3 N too, because
-  the lever grew), and the Y preload's margin stays above 1.3x; the sliding force can be trimmed further on
-  the bench with the plunger set screws (0.4 mm per turn).
+  Trade-off: the lower back preload accepts a pad lift above 4.4 N at the top edge (3.3 N at y 40
+  in the 52 mm housing; the lower top edge has a shorter lever), and the Y preload's margin stays above 1.3x; the
+  sliding force can be trimmed on the bench with the plunger set screws (0.4 mm per turn on the back plungers,
+  0.5 mm on the Y plungers' nylon M3).
   O-ring roller rolling resistance is not included (TVP: measure; NBR at 0.15 squeeze is well under 0.5 N).
 
 Back web (review fix a).  The back plungers now sit in the BODY's 3.2 back web, which closes the beam
@@ -88,7 +89,7 @@ tunnel behind the beam and joins the lower rail to the upper body (the first mod
 screwed only at y 44: a 34 mm cantilever that bent 0.6-1.1 mm in PA-CF and lost the preload).
   PETG   web 3.2 thick, span 22.2 (rail to upper body), load 2.5 N at 6.0 from the rail, 20 mm strip:   0.89 um under the plunger
   PA-CF  web 3.2 thick, span 22.2 (rail to upper body), load 2.5 N at 6.0 from the rail, 20 mm strip:   0.36 um under the plunger
-  FEA (fea_slider.py, whole body from step/slider_body.step, PA-CF, both preloads): plunger seat moves 1.75 um relative to the pads; reaction check 9.43 N
+  FEA (fea_slider.py, whole body from step/slider_body.step, PA-CF, both preloads): plunger seat moves 1.85 um relative to the pads; reaction check 9.43 N
   -> the plunger travel (about 1 mm) is no longer used up by the housing: the preload is held as set.
 
 4. Thermal error (zeroed at T0, read at T0 + dT)
@@ -195,7 +196,7 @@ Field check in firmware: AS5311 MagINCn / MagDECn both high = field in range; th
 
 7. Envelope
 ------------
-Housing envelope (u, y, z): 76.9 x 52.0 x 16.0 mm (SPEC 7: <= 78 x 52 x 16, roller included).
+Housing envelope (u, y, z): 76.9 x 39.2 x 16.0 mm (SPEC 7: <= 78 x 39.5 x 16 since the 2026-11-09 slim-down, was <= 78 x 52 x 16; roller included).
 Thumb roller rim at u 78.0 from the jaw face, 0.6 proud of the end face (review fix e: the end face moved 78.0 -> 77.4; the rim was at 78.6).
 The lock's knurled head stands 4 mm above the top face (like the jaws, an appendage outside the box).
 Tape channel 2.00 deep leaves 2.00 mm of steel under it (cross-section area drops to 80 %; bending is not loaded in use).
@@ -217,7 +218,7 @@ x1.75 for bending (cantilever calibration in the same run):
   ledge compliance: 1.8 mm cantilever, 0.70 thick, ~10 mm engaged, PA-CF: 525 N/mm, 5.7 um under the full 3 N
   -> without the ledge the worst press (MODE) moved the electrode band 41.5 um toward the scale (28 % of the 0.15 gap) and the button
      129 um; with it, about 1.0 um + the ledge's own 5.7 um.  The ledge is kept.
-  battery: cell top z -1.40, 0.80 below the ledge underside; the board never reaches the cell.
+  battery: cell top z -1.60 (max envelope), 1.00 below the ledge underside (swelling room); the board never reaches the cell.
 
 9. Fixed-jaw bolts (M3 into a hex nut trap)
 --------------------------------------------

@@ -81,9 +81,10 @@ FAB_NOTES = {
         "against U2's 0.4 mm DSBGA, standard stack-ups only). Standard needs edge rails, fiducials and >= 70 x 70 mm: "
         "order it panelised by JLCPCB (1 x 2, rails on the long sides) with no break-off tabs on the end tabs "
         "(x < 0, x > 62: clamp faces). Top = everything else; bottom = U30, C30, C31 (beam band) and C21, C23, R85, C44 "
-        "(0402, under the module: its 3V3 decoupling and the ADC input's RC filter, upper band); nothing else is placed "
-        "on the bottom (the 19 test pads are bare). If two-sided assembly is not wanted, these seven can be "
-        "hand-soldered (U30 is TSSOP-20, 0.65 mm pitch).",
+        "(0402, under the module: its 3V3 decoupling and the ADC input's RC filter, upper band) and J2 (the battery's "
+        "JST-SH receptacle, upper band, mouth toward the top edge; on the bottom since 2026-11-09 for the slim housing, "
+        "SPEC 15); nothing else is placed on the bottom (the 19 test pads are bare). If two-sided assembly is not "
+        "wanted, these eight can be hand-soldered (U30 is TSSOP-20, 0.65 mm pitch).",
         "**AS5311 supply:** U30 AS5311-ATST (LCSC C22459687): 80 pcs at LCSC on 2026-11-07, 75 in JLC's parts "
         "library on 2026-11-09 (USD 12.64 at 1-9). Check stock when ordering; if it is gone, order the board with U30 as DNP and consign/hand-fit the part (Mouser/DigiKey stock "
         "it as AS5311-ATST / AS5311-ATSU).",

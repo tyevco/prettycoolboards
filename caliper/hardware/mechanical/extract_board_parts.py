@@ -20,7 +20,8 @@ What is written
             (courtyard shrunk 0.25 if it has no Fab outline), extruded by a height from
             HEIGHTS.  Plus the items that are not footprints but sit on the board:
               * the SMT M2 standoff on each tab hole (H2-H5, SPEC D3), 4.0 x 2.0
-              * the nylon screw head on H1
+              * (H1: nothing on the board since 2026-11-09: its nylon screw comes from the lid, through a
+                tube on the lid underside that the housing model carries)
               * the mated JST-SH plug in front of J2's mouth (side entry)
 Heights are datasheet maxima where known; the ones tagged "verify" are assumptions.
 """
@@ -69,7 +70,6 @@ HEIGHTS = [
 
 # Bodies that are not footprints (SPEC 2.1 / D3), added per hole or per part.
 STANDOFF = dict(d=4.0, h=2.0, note="SMT M2 standoff, PEM SMTSO-M2-2ET class (SPEC D3), on the tab's top pad")
-H1_HEAD = dict(d=3.8, h=1.4, note="nylon M2 pan head (SPEC 2.1 H1)")
 JST_PLUG = dict(w=4.4, depth=4.6, h=2.95, note="mated JST SHR-02V-S plug + crimp, verify")
 
 
@@ -189,11 +189,7 @@ def main(argv):
                 parts.append(dict(ref=f"{ref}_standoff", value="SMT M2 standoff", fp="(not a footprint)", side="T",
                                   aabb=[round(hx - r, 3), round(hx + r, 3), round(hy - r, 3), round(hy + r, 3)],
                                   h=STANDOFF["h"], note=STANDOFF["note"]))
-            else:                       # H1: nylon screw head
-                r = H1_HEAD["d"] / 2
-                parts.append(dict(ref=f"{ref}_screw", value="nylon M2", fp="(not a footprint)", side="T",
-                                  aabb=[round(hx - r, 3), round(hx + r, 3), round(hy - r, 3), round(hy + r, 3)],
-                                  h=H1_HEAD["h"], note=H1_HEAD["note"]))
+            # H1: no board-side body (the lid's tube and the nylon screw are housing parts)
         h, note = height_for(fpname)
         if h is None:
             continue
@@ -215,13 +211,18 @@ def main(argv):
         parts.append(dict(ref=ref, value=fp.GetValue(), fp=fpname, side=side,
                           aabb=[round(q, 3) for q in aabb], h=h, note=note))
         if re.search(r"JST_SH", fpname):
-            # mated plug: in front of the mouth.  The mouth faces the side the body extends least
-            # from the footprint origin (side entry: the pads are at the back).
-            cx, cy = wv(fp.GetPosition())
-            mouth = max(((aabb[3] - cy), "+y"), ((cy - aabb[2]), "-y"), ((aabb[1] - cx), "+x"), ((cx - aabb[0]), "-x"))
-            rot = round(fp.GetOrientationDegrees()) % 360
-            # KiCad JST SH horizontal: mouth toward board -y at 0 deg; rotation is CCW seen from the top
-            m = {0: "-y", 90: "+x", 180: "+y", 270: "-x"}.get(rot, mouth[1])
+            # mated plug: in front of the mouth.  Side entry: the signal pads (1, 2) are at the back, so the mouth
+            # faces from them through the body's centre.  Works on either side (a flipped footprint's rotation
+            # does not map to the same mouth as on the top).
+            sig = [wv(pd.GetPosition()) for pd in fp.Pads() if pd.GetNumber() in ("1", "2")]
+            bx, by = (aabb[0] + aabb[1]) / 2, (aabb[2] + aabb[3]) / 2
+            if sig:
+                dx = bx - sum(q[0] for q in sig) / len(sig)
+                dy = by - sum(q[1] for q in sig) / len(sig)
+                m = ("+x" if dx > 0 else "-x") if abs(dx) > abs(dy) else ("+y" if dy > 0 else "-y")
+            else:      # no numbered pads: KiCad JST SH horizontal faces board -y at 0 deg (top side, CCW)
+                rot = round(fp.GetOrientationDegrees()) % 360
+                m = {0: "-y", 90: "+x", 180: "+y", 270: "-x"}.get(rot, "+y")
             pw, pd = JST_PLUG["w"] / 2, JST_PLUG["depth"]
             mx = (aabb[0] + aabb[1]) / 2
             my = (aabb[2] + aabb[3]) / 2

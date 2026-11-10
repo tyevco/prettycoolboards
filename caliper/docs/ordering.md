@@ -36,7 +36,7 @@ Upload `caliper/hardware/fab/slider/gerbers.zip`, `prettycool-caliper-slider-BOM
 | Copper | 1 oz outer, 0.5 oz inner (the stack's own) | |
 | Remark | the flatness / electrode text from [Assembly §2](assembly.md#_2-jlcpcb-settings-slider-board) | |
 | PCBA type | **Standard** | Economic can't build this board (§2.2) |
-| Assembly side | **Both sides** | Bottom: U30, C30, C31 (beam band), C21, C23, R85, C44 (under the module) |
+| Assembly side | **Both sides** | Bottom: U30, C30, C31 (beam band), C21, C23, R85, C44 (under the module), J2 (the battery connector, since 2026-11-09) |
 | Panel / rails | **Panel by JLCPCB, 1 × 2, edge rails on the long sides** | Standard PCBA needs edge rails, fiducials and ≥ 70 × 70 mm per piece. Remark: "no break-off tabs on the end tabs (x < 0, x > 62): they are clamp faces". Whether a nub left on the long edges fits the body has not been checked **[unverified]**: file any nub flush |
 | Quantity | 5 boards (counted as panels on the form) | |
 | Parts | JLC parts library, all 44 lines | U30 stock: §4 |
@@ -67,11 +67,11 @@ could not be read from here. What could be confirmed:
 
 From JLC's [PCBA capabilities](https://jlcpcb.com/capabilities/pcb-assembly-capabilities):
 
-* Economic assembles **one side only**. The slider has 7 bottom parts.
+* Economic assembles **one side only**. The slider has 8 bottom parts.
 * Economic's minimum BGA pitch is **0.5 mm**. U2 (BQ25180, DSBGA) is 0.4 mm.
 * Economic builds **standard stack-ups only**, so JLC04101H-3313 is not available there.
 
-The fallback is a single-sided Standard order: top only, with the seven bottom parts hand-soldered. It saves about
+The fallback is a single-sided Standard order: top only, with the eight bottom parts hand-soldered. It saves about
 $34 (setup and stencil), but U30 is a 0.65 mm-pitch TSSOP-20 and four of the parts are 0402s under the module.
 
 ## 3. JLCPCB: scale, 2-layer PCB (no assembly)
@@ -91,7 +91,7 @@ The parts prices come from JLC's parts pages on 2026-11-09, at the quantity-5 pr
 | Feeder loading | ≈ $67 | Standard PCBA loads **every** line, basic and extended: 44 lines × $1.53 (the price page's Standard column, "$1.53 Basic/Extend"; $3.07 extended-only is the Economic rate). The page does not say the unit; per unique part is assumed **[unverified]**. 25 of the 44 lines are extended |
 | Setup, double-sided | $51.12 | Standard |
 | Stencil, double-sided | $16.42 | Standard |
-| Placement | ≈ $3 | 380 joints a board (348 top, 32 bottom) × 5 × $0.0016 |
+| Placement | ≈ $3 | 380 joints a board (344 top, 36 bottom) × 5 × $0.0016 |
 | X-ray (BGA, QFN and other leadless parts) | ≈ $8–21 | Charged per X-rayed component ("/pc"): $1.64 for 1–10 pcs, $0.82 for 11–50. Leadless parts on the slider: U2 DSBGA, U3 VSON, U4 TDFN, U10 module, U60 LGA = 5 a board, 25 for 5 boards ≈ $21 if JLC X-rays all of them; ≈ $8 if only one a board **[unverified]** |
 | **PCBA subtotal** | **≈ $280–295** | |
 | Slider PCB (4L, 1.0 mm, ENIG, 0.2 mm vias, panel) | **$40–130** | **[unverified]** range. The base price, the ENIG upgrade, the small-via / Kelvin-test charge and the panel all depend on JLC's live quote. JLC's 4-layer prices changed in August 2026 |
@@ -118,26 +118,27 @@ Quantities are per caliper. Buy for two builds plus spares. Full mechanical BOM:
 | ✓ | Item | Qty | Source | Check |
 |---|---|---|---|---|
 | ☐ | **LCD panel**, 1.14″ 240 × 135 IPS, ST7789, 13-pin 0.5 mm plug-in FPC, pin order as DM-TFT114-397 §3.1 | 1 (+1) | DisplayModule [DM-TFT114-397](https://www.displaymodule.com/products/1-14-inch-ips-display-240x135-with-spi) ($9.90). Its FPC pitch and type are not on the product page **[unverified]** | **Tail rule (SPEC §2.1):** 0.5 mm pitch, 0.3 mm-thick **plug-in** tail (not a solder tail), long enough to leave the glass at board x 17.5 and fold back under it into J50. Lay the panel flat, face up, tail toward −x. Then the tail's **contacts must be on the face (viewer) side** and its **pin 1 on the +y side** (toward the buttons): J50 is bottom-contact and the fold turns the tail over. Many 1.14″ 13-pin panels on the market have a 0.7 mm-pitch solder tail; those do not fit |
-| ☐ | **LiPo 402535**, 1S, ~400–500 mAh, JST-SH 2-pin plug (SHR-02V-S) | 1 (+1) | Generic. No 402535 with an SH plug was found at a distributor **[unverified]**. Alternative: Jauch [LP402535JU](https://uk.farnell.com/jauch/lp402535ju/battery-rechargeable-380mah-3/dp/4145400) (380 mAh, bare leads) plus a pre-crimped SH lead | Outline ≤ 4.0 × 25 × 35 mm, including the protection board; the pocket is 36 mm long (board x 21.5–57.5). **Polarity:** J2 pin 1 = BAT+ (bottom silk "BAT+"). Measure every pack with a meter before plugging it in. Q1 blocks a reversed pack, but a reversed pack still does not run the board. The leads leave the cell's −x end |
+| ☐ | **LiPo 1S, 501230 class, with protection circuit**: Renata **ICP501230PS-03** (135 mAh typ / 130 min, AWG30 wire leads) | 1 (+1) | [ichome listing](https://ichome.com/product-detail/chip/icp501230ps-03): $12.94 at qty 1, "In-Stock" with no quantity on 2026-11-09 **[unverified stock]**. Size and capacity from that listing and Renata's parts table; the ratings (1C = 135 mA continuous, 2C = 270 mA pulse; 0.5C standard / 1C max charge) from the [ICP501230PS-02 sheet](https://www.manualsdir.com/manuals/258379/renata-sa-icp501230ps-02.html); the -03's own Renata sheet was not opened **[unverified]**. Alternative: EEMB [LP501230](https://eemb.com/product-122) (140 mAh, 5.3 × 12.5 × 31–32), a **bare** cell: it needs its own protection board inside the same length | Outline **≤ 5.4 × 12.5 × 31.5 mm including the protection board**; the cell space is 32.0 × 12.7 × 6.4 mm (1.0 mm of swelling room in thickness): measure every cell bought. The leads leave the cell's −x end (toward J2). Charged at 70 mA (SPEC §1) |
+| ☐ | **JST SH plug** SHR-02V-S + 2 × SSH-003T-P0.2 crimps (AWG 32–28) | 1 (+1) | JST via DigiKey / Mouser; or a pre-crimped SH lead soldered to the cell's leads | Crimped onto the cell's AWG30 leads for J2 (board **bottom** side, mouth toward the board's top edge). **Polarity:** J2 pin 1 = BAT+ (bottom silk "BAT+ J2" under J2). Measure every pack with a meter before plugging it in. Q1 blocks a reversed pack, but a reversed pack still does not run the board |
 | ☐ | **Magnetic tape**, 1.0 mm pole length (2.0 mm pole pair), rubber-bonded ferrite on 0.3 mm stainless | 172 mm | ams AS5000-MS10-H075-100 (not found at Mouser or DigiKey on 2026-11-09), or Dexter Magnetic's ams-matched multipole strip kits ([article](https://magneticsmag.com/multipole-magnet-evaluation-kits-for-ams-magnetic-position-sensors/)) **[unverified source]** | Slit to **8.0 mm** wide (it comes 10 mm wide). **≤ 0.60 mm** thick including the backing (SPEC §7 D2) **[unverified for any source]** |
 | ☐ | **Beam**: ground flat stock 20 × 4 × 250, O1 (1.2510 gauge plate) or 1.4301 | 1 | Cromwell, Indexa O1 ground flat [4 mm × 500 range](https://cromwell.co.uk/shop/materials-maintenance-and-standard-parts/ground-flat-stock/precision-ground-flat-stock-o1-tool-steel-4mm-x-500mm/f/63502); the 20 mm width is **[unverified]** (UK) | Supplied annealed; rev B hardens it (Mechanical §10). Cut to 250 |
 | ☐ | **Brass**, C360 | – | Metric flats or 1.0 / 1.2 sheet **[unverified source]** | 1.2 × 14 × 64 (back gib), 1.0 × 3 × 60 (Y gib), 1.0 × 3 × 76.9 (reference strip), 1.0 sheet for 4 pads. A model-shop CuZn37 flat is softer than C360 (a deviation) |
-| ☐ | **Plungers** (built, not bought): compression springs, Ø2 GFRP rods, cup-point set screws | 4 springs, 3 rods, 8 set screws | Lee Spring LC series class **[unverified]**: Y ~4 N at ~1 mm, OD ≤ 2.0; back ~2.5 N at ~1 mm, OD ≤ 1.5. Set screws M2 × 4 (4), × 3 (2), × 2 (2) | Rates set the gib preloads (Mechanical §7 step 3) |
+| ☐ | **Plungers** (built, not bought): compression springs, Ø2 GFRP rod, set screws | 4 springs, 5 rod pieces, 6 + 2 set screws | Lee Spring LC series class **[unverified]**: Y ~4 N at ~2 mm (~2 N/mm), OD ≤ 2.0, ~4.4 free; back ~2.5 N at ~1 mm, OD ≤ 1.5. GFRP Ø2: 2 × 8 mm, 2 × 1 mm tip pins (coned), 1 × 11.4 mm. Steel cup-point set screws M2 × 4 (4, front pads), M2 × 2 (2, back plungers); **nylon** M3 × 4 set screws (2, Y plungers, beside the antenna) | Rates set the gib preloads (Mechanical §7 step 3) |
 | ☐ | **SMT M2 standoffs** PEM SMTSO-M2-2ET (2.0 mm tall) | 4 (+4) | Mouser 153-SMTSO-M2-2ET (about $0.9–1.2 each, in stock in search snapshots) | Fitted **by hand** on H2–H5 (not in the JLC BOM). OD ≤ 4.0 on the 6 mm tab: check the drawing **[unverified]** |
-| ☐ | **Screws** | | ISO metric | 4 × M2 × 4 low head (k ≤ 1.0), 1 × **nylon** M2 × 5 (H1, beside the antenna: no metal), 2 × M2 × 6 countersunk, 1 × M2 × 6 socket head, 4 × 2.2 × 5 thread-forming for plastic, 2 × M3 × 10 socket + 2 × M3 nut, 1 × M3 × 6 knurled thumb screw |
-| ☐ | **Heat-set inserts** | 10 × M2 × 3, 1 × M3 × 4 | Brass inserts for Ø3.2 (M2) and Ø4.0 (M3) holes **[unverified brand fit]** | The holes in the print are Ø3.2 and Ø4.0 |
+| ☐ | **Screws** | | ISO metric | 4 × M2 × 4 low head (k ≤ 1.0, tab clamps), 1 × **nylon** M2 × 10 flat head (H1 and the lid, beside the antenna: no metal), 2 × **nylon** M2 × 4 flat head (battery door), 1 × M2 × 6 socket head (end stop), 3 × 2.2 × 5 thread-forming countersunk for plastic (lid), 2 × M3 × 10 socket + 2 × M3 nut (fixed jaw), 1 × **nylon** M3 knurled thumb screw, thread ≥ 4 (lock) |
+| ☐ | **Heat-set inserts** | 6 × M2 × 3 | Brass inserts for Ø3.2 holes **[unverified brand fit]** | 4 pad screws, 2 back plungers. The holes in the print are Ø3.2. The Y plungers, the lock, H1 and the door use threads tapped in the print (nylon screws) |
 | ☐ | **Shim washers** 2.2 × 4.0 × 0.3, precision | 4 | MISUMI-type configurable shim ring **[unverified]** | Bedded in slow structural epoxy |
 | ☐ | **Kapton** 0.025 mm sheet | 1 sheet | any polyimide 1 mil sheet | 0–14 layers under the tape, strips for the H1 boss and the ledge |
 | ☐ | **Steel shim foil** 0.150 mm | 4 strips | any | Assembly tool, reusable |
-| ☐ | **3M 467MP** transfer tape (0.05 mm) | 1 sheet | 3M distributors | Bonds the tape and the scale |
+| ☐ | **3M 467MP** transfer tape (0.05 mm) | 1 sheet | 3M distributors | Bonds the tape and the scale, and holds the cell on the battery door (Mechanical §13) |
 | ☐ | Pins: Ø2 × 6 m6 (roller axle), 2 × Ø3 × 10 m6 dowels; O-ring NBR 6.0 × 0.8 | | any | |
 | ☐ | Epoxy (slow structural), Loctite 222 | | any | |
 | ☐ | **Filament** | | Bambu Lab **PAHT-CF** (slider body, needs the hardened nozzle, dry 80 °C / 8 h); **PA-CF** (fixed jaw); an **unfilled PA** for the body's antenna modifier, e.g. Polymaker PolyMide CoPA **[unverified: that it bonds to PAHT-CF]**; PETG (shell, door, buttons, roller; PETG body for fit trials) | [Mechanical §8](mechanical.md#_8-parts-print-settings-and-orientation) |
 
-## 6. The two placement-preview items
+## 6. The three placement-preview items
 
-The preview checklist (`caliper/hardware/fab/slider/jlcplace-checklist.md`) lists two parts. Check them in JLC's
-placement preview before you confirm the PCBA. The CPL you upload must be the committed one.
+The preview checklist (`caliper/hardware/fab/slider/jlcplace-checklist.md`) lists three parts: U30, J2 (both on the
+bottom) and BZ50. Check them in JLC's placement preview before you confirm the PCBA. The CPL you upload must be the committed one.
 
 **U30, AS5311 (bottom, CPL row 31.0, 6.0, rot 0).** This settles how JLC reads bottom-side angles.
 
@@ -150,7 +151,17 @@ placement preview before you confirm the PCBA. The CPL you upload must be the co
 * **Wrong:** the pin-1 mark at the **diagonally opposite** corner: the row next to the electrode comb, at the end away
   from C30/C31 (pad 11). That means JLC reads the bottom angle with an extra 180°, and every pin is on the wrong net.
   Rotate it 180° in the preview and count the key presses. A shift along the row is also wrong.
-* The other six bottom parts are two-pad, non-polar parts. If U30 is right, the bottom reading is settled for all of them.
+* The other bottom parts are C21, C23, C30, C31, C44, R85 (two-pad, non-polar) and J2 (below). If U30 is right, the
+  bottom reading is settled for all of them; still look at J2.
+
+**J2, battery JST-SH (bottom, CPL row 24.1, 24.84, rot 180; on the bottom since 2026-11-09).**
+
+* **Right:** the two signal pins on the two small pads of the row at board y 22.9 (toward the module side of the board,
+  away from the top edge), the two fitting nails on the large pads at y 26.8, and the receptacle's mouth facing the
+  board's **top edge** (+y). Pin 1 (BAT+, VBAT_RAW) is the pad at board x 23.6; in JLC's seen-from-below view it is
+  the right one of the pair.
+* **Wrong:** the mouth facing the beam (turned 180°: the nails land on the signal pads), or the body shifted off the
+  nail pads.
 
 **BZ50, piezo (top, row 40.0, 24.3, rot 0).**
 
@@ -181,6 +192,7 @@ jlcplace confirm caliper/hardware/kicad/slider/prettycool-caliper-slider.kicad_p
   impedance control.
 * The live PCB prices, the small-via / Kelvin charge, and whether the flatness remark is accepted.
 * The display panel's FPC (pitch, plug-in, contact side, pin 1, length).
-* A LiPo 402535 with an SH plug and its polarity.
+* The ICP501230PS-03's own sheet, stock and price (or an equivalent protected cell ≤ 5.4 × 12.5 × 31.5), and the
+  plug's polarity once crimped.
 * A 2 mm pole-pair tape source with a thickness ≤ 0.60 mm.
 * That mouse-bite nubs on the long edges clear the slider body.

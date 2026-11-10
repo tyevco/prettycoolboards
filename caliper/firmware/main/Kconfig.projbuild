@@ -55,7 +55,26 @@ menu "PrettyCool Caliper"
 
     config CALIPER_CHARGE_MA
         int "Charge current (mA)"
-        range 40 500
-        default 250
+        range 10 135
+        default 70
+        help
+            BQ25180 fast-charge current (ICHG). The cell is a Renata ICP501230PS-03 (135 mAh typ,
+            130 min): 0.5C (67 mA) standard and 1C (135 mA) maximum charge, so the range stops at
+            1C. 70 mA is the BQ25180 step nearest 0.5C (0.52C typ, 0.54C on a 130 mAh cell; +10 %
+            ICHG tolerance: 77 mA = 0.59C). Steps are 1 mA up to 35 mA and 10 mA from 40 mA
+            (SLUSE99C ICHG_CTRL); other values round down. Termination (10 %) and precharge
+            (2 x termination) follow it.
+
+    config CALIPER_WIFI_MIN_MV
+        int "Lowest cell voltage for Wi-Fi without USB (mV)"
+        range 3300 3800
+        default 3500
+        help
+            Without VBUS, Wi-Fi does not start while the MAX17048 reads VCELL below this value and
+            is switched off once VCELL drops 100 mV below it. The 135 mAh cell is rated for 2C
+            (270 mA) pulses; even with the TX power capped (CONFIG_ESP_PHY_MAX_WIFI_TX_POWER) a
+            Wi-Fi burst pulls about 0.27 A from it, and its resistance (about 1 ohm with the PCM
+            and Q1, estimate) sags VBAT by about 0.2 V. 3.5 V keeps that sag above the BQ25180
+            battery UVLO (3.0 V, 60 us deglitch) with margin. BLE stays on.
 
 endmenu

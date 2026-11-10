@@ -1,11 +1,8 @@
 ** Drc report for prettycool-caliper-slider.kicad_pcb **
-** Created on 2026-11-09T11:22:39 **
+** Created on 2026-11-09T19:11:45 **
 ** Report includes: Errors, Warnings, Exclusions **
 
 ** Found 7 DRC violations **
-[lib_footprint_mismatch]: Footprint 'MountingHole_2.2mm_M2_Pad_Via' does not match copy in library 'MountingHole'
-    Local override; warning
-    @(96.5000 mm, 86.0000 mm): Footprint H3
 [lib_footprint_mismatch]: Footprint 'USB_C_Receptacle_HRO_TYPE-C-31-M-12' does not match copy in library 'Connector_USB'
     Local override; warning
     @(159.3000 mm, 73.5000 mm): Footprint J1
@@ -14,13 +11,16 @@
     @(165.5000 mm, 86.0000 mm): Footprint H5
 [lib_footprint_mismatch]: Footprint 'MountingHole_2.2mm_M2_Pad_Via' does not match copy in library 'MountingHole'
     Local override; warning
+    @(96.5000 mm, 94.5000 mm): Footprint H2
+[lib_footprint_mismatch]: Footprint 'MountingHole_2.2mm_M2_Pad_Via' does not match copy in library 'MountingHole'
+    Local override; warning
     @(165.5000 mm, 94.5000 mm): Footprint H4
 [lib_footprint_mismatch]: Footprint 'ESP32-S2-MINI-1' does not match copy in library 'RF_Module'
     Local override; warning
     @(107.8500 mm, 75.7500 mm): Footprint U10
 [lib_footprint_mismatch]: Footprint 'MountingHole_2.2mm_M2_Pad_Via' does not match copy in library 'MountingHole'
     Local override; warning
-    @(96.5000 mm, 94.5000 mm): Footprint H2
+    @(96.5000 mm, 86.0000 mm): Footprint H3
 [lib_footprint_mismatch]: Footprint 'Caliper_CapTX_Electrode_Seed_8Phase_P0.635mm' does not match copy in library 'caliper'
     Local override; warning
     @(110.8300 mm, 84.5500 mm): Footprint E40

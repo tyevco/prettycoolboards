@@ -969,20 +969,6 @@
     "note": "2020 RGB LED"
    },
    {
-    "ref": "H1_screw",
-    "value": "nylon M2",
-    "fp": "(not a footprint)",
-    "side": "T",
-    "aabb": [
-     16.85,
-     20.65,
-     22.1,
-     25.9
-    ],
-    "h": 1.4,
-    "note": "nylon M2 pan head (SPEC 2.1 H1)"
-   },
-   {
     "ref": "H2_standoff",
     "value": "SMT M2 standoff",
     "fp": "(not a footprint)",
@@ -1056,12 +1042,12 @@
     "ref": "J2",
     "value": "BATT",
     "fp": "JST_SH_SM02B-SRSS-TB_1x02-1MP_P1.00mm_Horizontal",
-    "side": "T",
+    "side": "B",
     "aabb": [
-     22.5,
-     26.5,
-     28.925,
-     33.175
+     22.1,
+     26.1,
+     23.225,
+     27.475
     ],
     "h": 2.95,
     "note": "JST SH side entry"
@@ -1070,12 +1056,12 @@
     "ref": "J2_plug",
     "value": "JST SHR-02V-S",
     "fp": "(mated plug)",
-    "side": "T",
+    "side": "B",
     "aabb": [
-     22.3,
-     26.7,
-     33.175,
-     37.775
+     21.9,
+     26.3,
+     27.475,
+     32.075
     ],
     "h": 2.95,
     "note": "mated JST SHR-02V-S plug + crimp, verify, mouth +y"

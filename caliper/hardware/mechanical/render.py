@@ -207,7 +207,7 @@ def main():
     # stack-up section through the AS5311 (u = 8 + 31 = 39) at R = 0
     items = [(n, s, c) for n, s, c in M.assembly(0.0, with_hardware=True)]
     u_as = P.BOARD_U0 + P.AS_X
-    section_plot(items, u_as, os.path.join(OUT, "section.png"), xlim=(-45, 54), ylim=(-12, 12),
+    section_plot(items, u_as, os.path.join(OUT, "section.png"), xlim=(-5, 39), ylim=(-10.5, 8.5),
                  title=f"Section x = {u_as:g} (through the AS5311), reading 0", size=(11, 4.2))
     section_plot(items, u_as, os.path.join(OUT, "section_gaps.png"), xlim=(-2.5, 22.5), ylim=(-6, 2.5),
                  title="Section x = 39, detail: tape channel, scale pocket, gibs and gaps",

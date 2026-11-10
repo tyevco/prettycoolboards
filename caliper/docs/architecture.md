@@ -15,7 +15,7 @@ A 150 mm caliper whose slider carries one 4-layer board, 74 × 34 mm (a 62 × 34
 be cut out with jumpers, from an **8-phase capacitive scale** (a passive 200 × 7 mm PCB bonded into the beam). An
 **ESP32-S3-MINI-1** runs everything: the reading on a **1.14 in colour IPS** display, three buttons, an RGB LED and a
 piezo, a reading log in flash, **BLE** (HID keyboard + GATT) and **Wi-Fi**. A **LIS2DW12** accelerometer wakes it on
-pickup. Power is a 1S 500 mAh LiPo charged from **USB-C** by a BQ25180, regulated by a **TPS63802 buck-boost**, and
+pickup. Power is a 1S 135 mAh LiPo (Renata ICP501230PS-03, chosen 2026-11-09 for the slim housing) charged from **USB-C** by a BQ25180, regulated by a **TPS63802 buck-boost**, and
 measured by a **MAX17048** fuel gauge.
 
 ## 2. Block diagram
@@ -24,7 +24,7 @@ measured by a **MAX17048** fuel gauge.
 flowchart LR
   USB["USB-C (J1)<br/>ESD: USBLC6 + SMF5.0A"] -->|VBUS| CHG["BQ25180<br/>charger + power path<br/>I2C 0x6A"]
   USB -->|D+ / D−| MCU
-  BAT["LiPo 402535<br/>~500 mAh (J2)"] <-->|VBAT| CHG
+  BAT["LiPo 501230 (ICP501230PS-03)<br/>135 mAh (J2)"] <-->|VBAT| CHG
   BAT --> FG["MAX17048<br/>fuel gauge 0x36"]
   CHG -->|VSYS| BB["TPS63802<br/>buck-boost"]
   BB -->|+3V3| MCU["ESP32-S3-MINI-1-N4R2<br/>BLE 5 + Wi-Fi, PCB antenna"]
@@ -130,12 +130,14 @@ USB-C VBUS ─ SMF5.0A/USBLC6 ─ BQ25180 IN ─┬─ SYS → VSYS ─ TPS63802
                                           └─ BAT ─ LiPo (J2) ─ MAX17048 (VDD = CELL)
 ```
 
-Charging is 250 mA (≈ 0.5 C for the 500 mAh cell), set over I2C; the BQ25180 power path runs the system from USB
-while it charges.
+Charging is 70 mA (0.52C for the 135 mAh cell, whose standard charge is 0.5C and maximum 1C), set over I2C;
+the BQ25180 power path runs the system from USB while it charges. A full charge takes ≈ 2–2.5 h (*estimate*).
+The register values and the reasons for them: [Firmware §12.1 and §12.6](firmware.md#_12-6-the-135-mah-cell-charging-and-the-wi-fi-peaks).
 
 ## 5. Power budget and battery life
 
-Assumptions: cell 500 mAh nominal, **450 mAh usable** (*estimate*). Battery-side currents at VBAT ≈ 3.7 V; the
+Assumptions: cell 135 mAh typical (130 mAh minimum), **120 mAh usable** (*estimate*: about 90 %, as before,
+down to the firmware's 3 % "Battery empty" cut-off at the 0.4–0.5C awake load). Battery-side currents at VBAT ≈ 3.7 V; the
 buck-boost is taken as ~90 % efficient at tens of mA (*estimate*; TPS63802 efficiency curves), so a 3.3 V load
 of *I* draws ≈ *I* × 3.3 / (3.7 × 0.9) ≈ 1.0 × *I* from the cell. In deep sleep the converter's Iq dominates its
 efficiency, so the sleep column lists the quiescent currents directly, plus one line for the conversion loss on
@@ -157,26 +159,37 @@ the 3.3 V-side sleep loads (ESP32, LIS2DW12, divider: ≈ 14.5 µA at an assumed
 | WS2812B-2020-V6 | 0 | ~1 | ~1 | Idle current per LCSC listing (*to verify*); off in sleep |
 | **Total** | **≈ 33 µA** (≈ 35 µA if the firmware leaves the 4 µA defaults) | **≈ 56 mA** | **≈ 71 mA** | |
 
-Battery life (450 mAh usable, *estimates*):
+Battery life (120 mAh usable, *estimates*; the current budget above is unchanged, only the cell changed):
 
-| Scenario | Average | Runtime |
-|---|---|---|
-| Deep sleep only (storage, not ship mode) | 33 µA | ≈ 13 600 h ≈ **1.5 years** (the cell's self-discharge matters more) |
-| Ship mode (BQ25180 BATFET off) | ~3 µA + pack PCM | years; wake by plugging in USB |
-| Continuous measuring, display on | 71 mA | **≈ 6 h** |
-| Wi-Fi sync burst (TX ~300 mA peaks, ~100 mA average for a few s) | – | a few mAh per sync |
-| Typical shop day: 30 min awake measuring, 23.5 h asleep | ≈ 36 mAh/day | **≈ 12 days** |
-| Light use: 10 min/day | ≈ 13 mAh/day | ≈ 5 weeks |
+| Scenario | Average | Runtime | (was, 500 mAh cell) |
+|---|---|---|---|
+| Deep sleep only (storage, not ship mode) | 33 µA | ≈ 3 600 h ≈ **5 months** | 1.5 years |
+| Ship mode (BQ25180 shutdown, MAX17048 asleep) | ≈ 0.5 µA + the pack's PCM | set by the PCM's own drain (not on the sheets we have) and the cell's self-discharge, not by the caliper. Wake by plugging in USB | years |
+| Continuous measuring, display on | 71 mA (0.53C) | **≈ 1 h 40 min** | ≈ 6 h |
+| Awake, idle | 56 mA | ≈ 2 h 10 min | ≈ 8 h |
+| Wi-Fi sync burst (TX capped at 10 dBm: ≈ 0.27 A peaks from the cell, ~100 mA average for a few s) | – | ≈ 0.1–0.3 mAh per sync (0.1–0.25 % of the cell) | |
+| **Typical shop day: 30 min awake measuring, 23.5 h asleep** | 35.5 + 0.8 ≈ **36 mAh/day** | **≈ 3.3 days** (3.2 with a 130 mAh cell) | ≈ 12 days |
+| Light use: 10 min/day | 11.8 + 0.8 ≈ 12.6 mAh/day | ≈ 9.5 days | ≈ 5 weeks |
+
+A typical day's 36 mAh charges back in under an hour at 70 mA (about 30 min of constant current plus the CV tail). Wi-Fi on battery stops below a 3.40 V cell
+reading (it does not start below 3.50 V), roughly the last 10–15 % of the charge (*estimate*); BLE and
+measuring carry on to the 3 % cut-off.
 
 What dominates: awake, the ESP32-S3 (~50 %) and the AS5311 (~22 %); asleep, the buck-boost Iq and its divider
 (50 %) and the ESP32-S3 (24 %). The cheapest rev-B improvement is the auto-off delay (the IMU sees the caliper put
 down), then a lower-Iq buck-boost (e.g. TPS63900 class, 75 nA Iq, if it can supply the Wi-Fi peaks).
 
-Peak current: Wi-Fi TX 355 mA (802.11b, 20.5 dBm) + AS5311 21 mA + LCD/backlight ~30 mA ≈ 405 mA at 3.3 V, so
-≈ 405 × 3.3 / (3.0 × 0.9) ≈ 500 mA from a 3.0 V cell (≈ 350 mA from a full 4.2 V one). That is inside the TPS63802's 2 A
-rating, but it is about 1 C for a 500 mAh cell (for bursts only) and half of the BQ25180's default 1 A battery
-discharge limit (`IBAT_OCP`; the firmware must not lower it to 500 mA). The bulk 22 µF (C6) plus 22 µF at the module
-ride through the TX bursts.
+Peak current: uncapped, Wi-Fi TX 355 mA (802.11b, 20.5 dBm) + AS5311 21 mA + LCD/backlight ~30 mA ≈ 405 mA at
+3.3 V, so ≈ 405 × 3.3 / (3.0 × 0.9) ≈ 500 mA from a 3.0 V cell (≈ 350 mA from a full 4.2 V one). That is inside the
+TPS63802's 2 A rating, but 2.6–3.7C for the 135 mAh cell, whose pulse rating is **2C (270 mA)**. The firmware therefore
+caps the Wi-Fi TX power at 10 dBm (module peak ≈ 195 mA, *estimate*) and, on battery, keeps Wi-Fi off below a
+3.40 V cell reading, which brings the burst to ≈ 210–275 mA from the cell, about 2C at the low end (BLE at 9 dBm,
+204 mA module peak, is similar). The BQ25180's battery discharge limit (`IBAT_OCP`) is set to its 1 A reset value
+(was 1.5 A): a fault limit at least 2× any peak; its 500 mA step would come within a few percent of an uncapped
+burst, and repeated trips latch the battery off until USB is plugged in. A Wi-Fi frame lasts milliseconds,
+far longer than any practical ceramic bank can bridge (1 ms at 0.2 A and 0.1 V droop is 2 mF), so the cell carries
+the burst. The ≈ 78 µF on +3V3 (C5, C6, C20, C23) only rides through the buck-boost's load-step response.
+Details and the arithmetic: [Firmware §12.6](firmware.md#_12-6-the-135-mah-cell-charging-and-the-wi-fi-peaks).
 
 ## 6. References
 

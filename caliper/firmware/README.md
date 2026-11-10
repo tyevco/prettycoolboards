@@ -6,7 +6,7 @@ Information + HID keyboard), Wi-Fi with a web page and MQTT/HTTP push, TinyUSB C
 log, and the BQ25180 / MAX17048 / LIS2DW12 power side.
 
 > **Status:** **builds with `idf.py build` on ESP-IDF v5.4.2** (esp32s3, 4 MB layout, 0 warnings; image
-> 1 688 432 B, 4.6 % of the app slot free with the bring-up commands, 6 % with `CONFIG_CALIPER_BRINGUP=n`) but
+> 1 689 152 B, 4.5 % of the app slot free with the bring-up commands, 6 % with `CONFIG_CALIPER_BRINGUP=n`) but
 > has **never run on hardware**. The portable core passes its host tests (59 groups, 1276 checks, ASan + UBSan,
 > `-Werror`), and the log store its own (3 groups, 2589 checks).
 > Details, design, the 2026-11-07 review fixes and the list of unverified items:

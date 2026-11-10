@@ -18,8 +18,8 @@ A 150 mm digital caliper that remembers its readings and sends them wirelessly.
 | Wireless | BLE HID keyboard (types the reading into any spreadsheet), a companion GATT app, a Wi-Fi web page, MQTT/HTTP push |
 | Memory | Thousands of readings with timestamps and tolerance profiles; CSV export over USB, Wi-Fi or BLE |
 | Smarts | Tolerance / go-no-go, min/max/mean/σ stats, IMU wake-on-pickup and auto-hold |
-| Power | 500 mAh LiPo, USB-C charging (BQ25180), fuel gauge, buck-boost 3V3 |
-| Body | Rev A: printed slider on a ground 20 × 4 mm flat-stock beam. Rev B: CNC-machined drawings |
+| Power | 135 mAh LiPo (501230 class, behind the board), USB-C charging (BQ25180), fuel gauge, buck-boost 3V3. Estimated ≈ 3 days per charge on a typical shop day (30 min measuring a day), ≈ 1 h 40 min of continuous measuring ([architecture §5](docs/architecture.md)); not measured |
+| Body | Rev A: printed slider on a ground 20 × 4 mm flat-stock beam. Rev B: CNC-machined drawings. Slider housing 77 × 39 × 16 mm (slimmed from 77 × 52 × 16 on 2026-11-09) |
 
 ## Documentation
 

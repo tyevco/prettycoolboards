@@ -18,13 +18,15 @@ previous ones passed. Record every number in a per-unit log; B-17 is the summary
 
 ## Test pads
 
-All 19 pads are Ø1.0 mm on the **bottom**, in two rows on a 2.54 mm grid (SPEC §2.1; x is board x, as seen from
-the top: from below the rows read right to left).
+All 19 pads are Ø1.0 mm on the **bottom**, in three rows on a 2.54 mm grid (SPEC §2.1; x is board x, as seen from
+the top: from below the rows read right to left). Since 2026-11-09 J2 (the battery connector) sits on the bottom at
+x 22.1…26.1, so TP20, TP21, TP30 and TP31 moved from x 22.50 / 25.04 to the y 30.22 row.
 
-| x (mm) | 22.50 | 25.04 | 27.58 | 30.12 | 32.66 | 35.20 | 37.74 | 40.28 | 42.82 | 45.36 | 47.90 |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| **y 25.14** | TP20 MCU_EN | TP21 BOOT_N | – | – | TP50 LCD_BL | TP51 BUZZ | TP7 GND | TP4 +3V3 | TP2 VBAT | TP3 VSYS | TP1 VBUS |
-| **y 22.60** | TP30 MAG_A | TP31 MAG_B | TP32 MAG_IDX | TP40 CAP_AMP_OUT | TP41 CAP_VREF | TP42 CAP_LP1 | TP5 +3V3_SNS | TP6 +3V3_UI | TP22 USB_D+ | – | TP23 USB_D− |
+| x (mm) | 27.58 | 30.12 | 32.66 | 35.20 | 37.74 | 40.28 | 42.82 | 45.36 | 47.90 |
+|---|---|---|---|---|---|---|---|---|---|
+| **y 30.22** | – | – | TP20 MCU_EN | TP21 BOOT_N | TP30 MAG_A | TP31 MAG_B | – | – | – |
+| **y 25.14** | – | – | TP50 LCD_BL | TP51 BUZZ | TP7 GND | TP4 +3V3 | TP2 VBAT | TP3 VSYS | TP1 VBUS |
+| **y 22.60** | TP32 MAG_IDX | TP40 CAP_AMP_OUT | TP41 CAP_VREF | TP42 CAP_LP1 | TP5 +3V3_SNS | TP6 +3V3_UI | TP22 USB_D+ | – | TP23 USB_D− |
 
 There is no pad on the I2C lines, SNS_PWR_EN, the LCD lines or the AS5311 SSI lines: the firmware checks cover
 them (B-7, B-11, B-12).
@@ -40,7 +42,7 @@ them (B-7, B-11, B-12).
 | 12 Ω / 2 W resistor (dummy load) and an 82 Ω one | across the bench supply's terminals whenever USB is in too (B-1 item 3) |
 | µA meter with a bypass switch across it | sleep / ship current: closed while USB is in or the board boots |
 | JST-SH 2-pin pigtail (SHR-02V-S + leads) | supply / meter into J2: pin 1 = BAT+ (VBAT_RAW), pin 2 = GND |
-| Protected 1S LiPo, 400–500 mAh, LiPo bag | charging (B-7.4) |
+| Protected 1S LiPo: the caliper's own cell, Renata ICP501230PS-03 (135 mAh) or an equivalent ≤ 5.4 × 12.5 × 31.5 mm, with its SH plug crimped on; LiPo bag | charging (B-7.4) |
 | USB-C cable to a PC, inline USB-C power meter | power, flashing, the console |
 | Nordic PPK2 (optional) | sleep and ship currents in source mode (B-15, B-16) |
 | Oscilloscope, 2 channels | MAG_A/B/IDX, CAP_LP1, LCD_BL, BUZZ |
@@ -60,8 +62,8 @@ Type `bu help` for the command list.
    | B-4 first power, no firmware | bench → J2 pigtail | 3.70 V | 100 mA | 20–50 mA [TVP] |
    | B-5 USB, no firmware | PC USB (via the power meter) + bench on J2 | 5 V; 3.70 V | –; 100 mA | see B-5 |
    | B-6 on, firmware running | bench → J2 | 3.70 V | 150 mA | ≈ 56 mA idle awake (architecture §5) [TVP] |
-   | B-7 with USB | real cell on J2, or bench + 12 Ω dummy load | 3.70 V | 600 mA | ≈ 250 mA into the cell / the load |
-   | B-14 Wi-Fi scan | bench → J2 | 3.70 V | 600 mA | Wi-Fi peaks ≈ 0.5 A from the cell (SPEC §3) |
+   | B-7 with USB | real cell on J2, or bench + 12 Ω dummy load | 3.70 V | 600 mA | ≈ 70 mA into the cell / the load |
+   | B-14 Wi-Fi scan | bench → J2 | 3.70 V (Wi-Fi refuses below 3.50 V without USB) | 600 mA | Wi-Fi peaks ≈ 0.2–0.3 A from the cell with the 10 dBm TX cap (SPEC §3) [TVP] |
    | B-15, B-16 sleep / ship | real cell, or bench + 12 Ω load → µA meter (bypass closed until asleep) → J2 | 3.70 V | 600 mA | ≤ 35 µA / ≤ 3 µA |
 
 2. **Cold start on a bench "battery":** the BQ25180 only powers SYS from BAT alone above VBATPOR = 3.08 / 3.21 /
@@ -69,9 +71,9 @@ Type `bu help` for the command list.
    running, SYS stays up down to BUVLO (3.0 V).
 3. **Bench supply on J2 together with USB:** the charger charges whatever is on BAT, and most bench supplies
    cannot sink: their voltage is pushed up. Before the firmware runs the charge current is the BQ25180 power-on
-   default (small: an 82 Ω load across the supply, 45 mA, covers it [TVP]); once the firmware runs it is **250 mA**:
-   use a real cell, or a **12 Ω / 2 W** load across the supply's terminals (308 mA at 3.7 V, so the supply always
-   sources). Never leave a µA meter in that path with USB in: the charge current flows back through it.
+   default (small: an 82 Ω load across the supply, 45 mA, covers it [TVP]); once the firmware runs it is **70 mA**
+   (≤ 77 mA with the ±10 % tolerance): use a real cell, or the **12 Ω / 2 W** load across the supply's terminals
+   (308 mA at 3.7 V, so the supply always sources; the 82 Ω one also covers 70 mA, by a smaller margin). Never leave a µA meter in that path with USB in: the charge current flows back through it.
 4. **Polarity:** check every pack: pin 1 = BAT+. Q1 blocks a reversed cell (SPEC §3, B-4.4), but don't rely on it.
 5. **Display FPC:** fit or remove the panel only with the board unpowered. Lay the panel flat, glass up, with the
    tail toward −x (SPEC §2.1 J50 note: tail contacts facing up when the panel lies face up, pin 1 on +y).
@@ -217,7 +219,7 @@ the table the firmware wrote (Firmware §12.1). PASS: no fault, every init regis
 | Field | Expected here | Meaning if not |
 |---|---|---|
 | IC_CTRL 0x07 | 0x97 | 0x17 / POR value: the write failed or the BQ25180 reset (watchdog?) |
-| ICHG_CTRL 0x04 | 0x34 (250 mA); 0xB4 = charging disabled by the die-temperature guard | |
+| ICHG_CTRL 0x04 | 0x22 (70 mA); 0xA2 = charging disabled by the die-temperature guard | |
 | TMR_ILIM 0x08 | 0xC9 before a host configures USB, 0xCD after (or 3 s of VBUS with no host) | |
 | TS | normal at room temperature (RT1 10 k) | "TS open": RT1 missing / cracked; hot/cold: RT1 wrong value |
 | VIN | good with USB, absent without | |
@@ -225,10 +227,10 @@ the table the firmware wrote (Firmware §12.1). PASS: no fault, every init regis
 | FAULT VIN over-voltage | never on a USB port (VBUS > 5.5 V) | the source, or a plug-in overshoot; re-plug and re-read |
 
 **B-7.4 Charging** (a real cell, polarity checked, in a LiPo bag; meter in series in the J2 pigtail, 10 A range):
-plug USB from a PC. `bu bq` reports `charge CC`; the cell current is **250 mA ±10 %** [TVP: ICHG accuracy] once the
-PC has configured the device (TMR_ILIM 0xCD); before that the 100 mA input limit leaves less (`active: ILIM`).
-`bu rails` VBAT rises slowly. Leave it to `charge done` once (≈ 2–3 h from half charge [TVP]) and check the cell
-at 4.20 V ±1 %. Unplug USB: the system continues from the cell without a reset.
+plug USB from a PC. `bu bq` reports `charge CC`; the cell current is **70 mA ±10 %** (63–77 mA; SLUSE99C ICHG_ACC,
+specified from 40 mA) once the PC has configured the device (TMR_ILIM 0xCD); before that the 100 mA input limit
+may leave less while the system runs (`active: ILIM`). `bu rails` VBAT rises slowly. Leave it to `charge done` once
+(≈ 1–1.5 h from half charge, ≈ 2–2.5 h from empty [TVP]; it terminates at 7 mA) and check the cell at 4.20 V ±1 %. Unplug USB: the system continues from the cell without a reset.
 
 **B-7.5 Gauge:** `bu fg <mV>` (TP2 reading). PASS: VERSION 0x001x, VCELL within ±30 mV of the meter, VRESET.Dis
 set, HIBRT 0x8030, CONFIG.SLEEP clear (the firmware's settings: Firmware §12.2). SOC needs a few seconds after
@@ -357,7 +359,9 @@ fitted.
    dBm` (20 readings). `bu ble 10 -70` fails below −70 dBm (pick the limit from the reference's reading).
 3. **Wi-Fi:** `bu wifi` lists the networks with RSSI (strongest first); `bu wifi <ssid>` gives one access point's
    RSSI, `bu wifi <ssid> <min_dbm>` checks it. The same AP from the reference at the same spot (its scan example, or
-   the same firmware's `bu wifi`).
+   the same firmware's `bu wifi`). A scan measures reception only; the caliper transmits at most 10 dBm (the cap for
+   the 135 mAh cell, SPEC §3), so also check that its web page loads at the 3 m spot. If the range is short and the
+   battery peaks measure low, `CONFIG_ESP_PHY_MAX_WIFI_TX_POWER` is the knob (docs/firmware.md §12.6).
 
 | Check | Pass [TVP] |
 |---|---|
@@ -412,7 +416,7 @@ i.e. the firmware undid it). Plug USB: the board boots (`wake: power-on`).
 | B-4 | current at 3.70 V; TP2, TP3, TP4, TP5, TP6; TP4 at 3.05 V and 4.20 V | 20–50 mA; 3.25–3.37 V; TP5 / TP6 < 0.1 V |
 | B-5 | TP1, TP3, TP4 on USB; enumeration | 4.75–5.25 V; ≈ 4.5 V; 3.25–3.37 V; enumerates |
 | B-6 | boot log, awake current | three chips ok, display up, ADC 80 645 S/s; ≈ 56 mA |
-| B-7 | `bu i2c`, `bu rails <mV>`, `bu bq`, `bu fg <mV>`; charge current; full-charge voltage | PASS ×4; 250 mA ±10 %; 4.20 V ±1 % |
+| B-7 | `bu i2c`, `bu rails <mV>`, `bu bq`, `bu fg <mV>`; charge current; full-charge voltage | PASS ×4; 70 mA ±10 %; 4.20 V ±1 % |
 | B-8 | `bu lcd` | PASS |
 | B-9 | `bu btn`, `bu beep`, `bu led` | PASS ×3 |
 | B-10 | `bu imu`, `bu imu move` | PASS ×2 |

@@ -10,7 +10,7 @@ A. Body (step/slider_body.step, exported by export.py, the exact model): PA-CF.
    Supports: the four front-pad pocket ceilings (z), the reference-strip seat (y, x).
    Loads: the two back-gib plungers push the body away from the beam's back face
    (P_BACK each, -z, on their insert bores in the back web); the two Y plungers push it
-   up (P_Y each, +y, on their top inserts).  Reports the web deflection at the back
+   up (P_Y each, +y, on the M3 threads at the top face).  Reports the web deflection at the back
    plungers (preload held?), the z movement of the four tab-clamp ceilings (the board's
    Z datum) and the peak stresses with the print-layer check (layers normal to z).
 B. Board (FR4, E 20 GPa; outline + tabs from board_parts.json, 1.0 thick): clamped on the
@@ -84,8 +84,9 @@ def body():
         n, a = B.load(sel, (0.0, 0.0, -P.P_BACK))
         say(f"   back plunger u {u:g}: {P.P_BACK} N -z on {n} facets ({a:.1f} mm2)")
     for u in P.YGIB_PLUNGERS_U:
-        sel = (lambda u: lambda C, N: (np.abs(np.hypot(C[:, 0] - u, C[:, 2] - P.GIB_Z) - P.INSERT_M2_D / 2) < 0.2)
-               & (C[:, 1] > P.H_Y1 - P.INSERT_M2_L) & (np.abs(N[:, 1]) < 0.3))(u)
+        # the nylon set screw's thread reacts on the M3 thread tapped in the print at the top face (2026-11-09)
+        sel = (lambda u: lambda C, N: (np.abs(np.hypot(C[:, 0] - u, C[:, 2] - P.GIB_Z) - P.M3_TAP / 2) < 0.2)
+               & (C[:, 1] > P.H_Y1 - P.Y_TAP_L) & (np.abs(N[:, 1]) < 0.3))(u)
         n, a = B.load(sel, (0.0, P.P_Y, 0.0))
         say(f"   Y plunger u {u:g}: {P.P_Y} N +y on {n} facets ({a:.1f} mm2)")
     B.solve(E=E_PACF, nu=NU_PACF)

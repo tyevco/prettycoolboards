@@ -53,12 +53,13 @@ def test_params_match_spec_contract():
     assert k["bottom_parts_allowed"] == P.BOTTOM_WINDOW
     assert k["under_glass_max_2p6"] == P.UNDER_GLASS
     assert P.SCALE_X0 == 14.5 and P.TAPE_W == 8.0 and P.TAPE_CH_DEPTH == pytest.approx(2.0)
-    assert (P.BAT_POCKET["u0"], P.BAT_POCKET["u1"]) == (29.5, 65.5)
+    assert (P.BAT_POCKET["u0"], P.BAT_POCKET["u1"]) == (29.5, 67.6)       # 2026-11-09 slim-down (SPEC 7 to follow)
 
 
 def test_envelope_spec7():
     x, y, z = P.HOUSING_SIZE
-    assert x <= 78.0 + 1e-9 and y <= 52.0 + 1e-9 and z <= 16.0 + 1e-9
+    # 2026-11-09 slim-down (the owner's decision): <= 78 x 39.5 x 16 (was 52 tall)
+    assert x <= 78.0 + 1e-9 and y <= 39.5 + 1e-9 and z <= 16.0 + 1e-9
     assert P.ROLLER_RIM_U <= 78.0 + 1e-9          # SPEC 7 counts the roller, from the jaw face
     assert P.ROLLER_RIM_U > P.H_U1 + 0.3            # and it still stands proud of the end face
 
@@ -83,22 +84,84 @@ def test_walls_printable():
 
 def test_gib_bores_stay_under_the_cavity_floor():
     """Review fix e: the lock bore broke 0.3 mm into the cavity floor."""
-    assert P.CAV_FLOOR - (P.GIB_Z + max(P.PLUNGER_BORE_D, P.LOCK_BORE_D) / 2) >= 0.6 - 1e-9
+    assert P.CAV_FLOOR - (P.GIB_Z + max(P.PLUNGER_BORE_D, P.LOCK_BORE_D, P.M3_TAP) / 2) >= 0.6 - 1e-9
     # and the bores push the gib inside its height
     assert P.YGIB["z0"] < P.GIB_Z < P.YGIB["z1"]
 
 
 def test_gib_bores_clear_battery_and_roller():
-    """D4 moved the battery pocket to u 29.5..65.5: every y bore (with its top insert) lies left of it."""
+    """D4 moved the battery pocket to u >= 29.5: every y bore (with its top M3 thread) lies left of it."""
     for u in P.YGIB_PLUNGERS_U + [P.LOCK_U]:
-        assert u + P.INSERT_M3_D / 2 + P.WALL_MIN <= P.BAT_POCKET["u0"] + 1e-9
-        assert u - P.INSERT_M3_D / 2 >= P.STEP_U1
+        assert u + P.M3_TAP / 2 + P.WALL_MIN <= P.BAT_POCKET["u0"] + 1e-9
+        assert u - P.M3_TAP / 2 >= P.STEP_U1
 
 
-def test_rf_metal_above_pusher_top():
-    """Metal of the Y plungers / lock (springs, screws, inserts) keeps >= 5 mm from the antenna in plan."""
-    assert P.PUSHER_TOP_Y - P.ANTENNA[3] >= P.RF_CLEAR - 1e-9
-    assert P.H_Y1 - P.INSERT_M3_L - P.ANTENNA[3] >= P.RF_CLEAR - 1e-9
+def test_rf_y_plunger_metal_below_the_antenna():
+    """2026-11-09: the top face is 2.3 mm above the antenna area, so the Y plungers' only metal (the springs) sits at the
+    bottom of the bores, >= 5 mm below the antenna area in plan; the screws at the top are nylon (no inserts)."""
+    assert P.ANTENNA[1] - P.Y_SPRING[1] >= P.RF_CLEAR - 1e-9
+    assert P.Y_TIP[0] == pytest.approx(P.BEAM_W + P.YGIB_T) and P.Y_TIP[1] <= P.Y_SPRING[0] + 1e-9
+    assert P.H_Y1 - P.ANTENNA[3] < P.RF_CLEAR          # why: nothing metal fits at the top any more
+    assert all(k == "pt" for _x, _y, k in P.LID_SCREWS)
+    for x, y, _k in P.LID_SCREWS:                      # steel lid screws: >= 5 mm from the antenna area in plan
+        dx = max(P.bu(P.ANTENNA[0]) - x, 0, x - P.bu(P.ANTENNA[2]))
+        dy = max(P.ANTENNA[1] - y, 0, y - P.ANTENNA[3])
+        assert (dx * dx + dy * dy) ** 0.5 - 1.1 >= P.RF_CLEAR
+
+
+def test_cell_fits_its_pocket():
+    """The cell (max envelope incl. the PCM) sits on the door, 1.0 under the button ledge (swelling room), clear of the
+    pocket walls, its lead end right of the J2 bay; the pocket keeps WALL_MIN to the tunnel, the top face and the
+    roller slot; the cell keeps >= 5 mm from the antenna."""
+    b = P.BAT_POCKET
+    assert P.Z_POCKET == pytest.approx(P.Z_BACK + P.DOOR_T)
+    assert P.CAV_FLOOR - (P.Z_POCKET + P.BAT_T) >= 1.0 - 1e-9          # the ledge underside is the cavity floor
+    assert b["y1"] - b["y0"] - P.BAT_W >= 0.2 - 1e-9
+    assert b["u1"] - (P.BAT_U0 + P.BAT_L) >= 0.5 - 1e-9
+    assert P.BAT_U0 >= P.BOARD_U0 + P.J2_PLUG[1] + 1.0
+    assert P.BAT_U0 - P.bu(P.ANTENNA[2]) >= P.RF_CLEAR
+    assert b["y0"] - P.CH_Y1 >= P.WALL_MIN - 1e-9 and P.H_Y1 - b["y1"] >= P.WALL_MIN - 1e-9
+    assert P.ROLLER_U - P.ROLLER_D / 2 - P.ROLLER_SLOT_CLR - b["u1"] >= P.WALL_MIN
+    c = M.battery().bounding_box()
+    assert c.min.Z == pytest.approx(P.Z_POCKET) and c.max.Y <= b["y1"] + 1e-9 and c.min.Y >= b["y0"] - 1e-9
+
+
+def test_j2_moves_into_the_pocket():
+    """The board change request: J2 (bottom side) and its mated plug hang into the battery pocket's J2 bay, 0.3 clear of
+    its walls, left of the cell, >= 5 mm from the antenna, outside the antenna keep-out and clear of the H1 boss."""
+    b = P.BAT_POCKET
+    for x0, x1, y0, y1 in (P.J2_BODY, P.J2_PLUG):
+        assert P.bu(x0) >= b["u0"] + 0.2 and P.bu(x1) <= P.BAT_U0 - 1.0
+        assert y0 >= b["y0"] + 0.3 and y1 <= b["y1"] - 0.3
+        assert P.bu(x0) - P.bu(P.ANTENNA[2]) >= P.RF_CLEAR
+        assert x0 >= P.ANTENNA_KEEPOUT[2]
+        assert x0 - (P.H1[0] + P.BOSS_D / 2) >= 0.5
+    assert P.BOARD_Z0 - P.J2_H > P.Z_POCKET + 1.0      # lead loop room under J2
+
+
+def test_lid_h1_column():
+    """The lid's H1 tube ends H1_TUBE_GAP over the board; the nylon M2 x 10 reaches the tapped boss with thread to spare."""
+    tip = P.Z_LID - P.H1_SCREW_L
+    top = P.BOARD_Z0 - P.H1_BOSS_LOW
+    assert top - 4.0 + 0.5 <= tip <= top - 2.5
+    shell = M.front_shell()
+    assert shell.is_valid and len(shell.solids()) == 1
+    assert shell.bounding_box().min.Z == pytest.approx(P.BOARD_Z1 + P.H1_TUBE_GAP)
+
+
+def test_outside_shape_prints_flat():
+    """The back bevel and the plan radii keep the bed face the lowest face and the walls >= WALL_MIN at the rounded
+    top-left corner; the jaw roots keep their sharp back edges (BACK_CHAMFER_KEEP covers them)."""
+    hb = M.housing_block()
+    assert hb.bounding_box().min.Z == pytest.approx(P.Z_BACK)
+    cav = M.tunnel_and_cavity() & M.box(0, 80, P.CH_Y1 + 0.1, 40, P.CAV_FLOOR, P.Z_LID_IN - 0.01)
+    outside = M.box(-5, 20, 25, 50, P.Z_BACK - 1, P.Z_LID_IN - 0.01) - hb
+    assert cav.distance_to(outside) >= P.WALL_MIN - 0.01
+    for u0, u1, y0, y1 in P.BACK_CHAMFER_KEEP:
+        assert u1 >= P.STEP_U1 + 1.5
+    # the door rebate stops at the back bevel's foot (no 40 mm bridge over an open-topped rebate), and covers the pocket
+    assert P.BAT_DOOR["y1"] <= P.H_Y1 - P.BACK_CHAMFER + 1e-9
+    assert P.BAT_DOOR["y1"] >= P.BAT_POCKET["y1"] - 1e-9 and P.BAT_DOOR["y0"] <= P.BAT_POCKET["y0"] + 1e-9
 
 
 def test_tab_clamp_stack():

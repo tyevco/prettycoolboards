@@ -155,9 +155,10 @@ static esp_err_t fg_ship_prepare(bool vbus)
 
 static uint8_t ichg_code(int ma)
 {
-    /* ICHG = code + 5 mA for codes 0..31, = 40 + (code - 31) * 10 mA above (SLUSE99 ICHG_CTRL) */
-    if (ma <= 35) {
-        return (uint8_t)(ma < 5 ? 0 : ma - 5);
+    /* ICHG = code + 5 mA for codes 0..30 (5..35 mA), = 40 + (code - 31) * 10 mA from code 31 (SLUSE99
+     * ICHG_CTRL). Rounds down: 36..39 mA give 35 mA (code 30), never the 40 mA step above the request. */
+    if (ma < 40) {
+        return (uint8_t)(ma < 5 ? 0 : (ma > 35 ? 30 : ma - 5));
     }
     int code = 31 + (ma - 40) / 10;
     return (uint8_t)(code > 127 ? 127 : code);
@@ -177,9 +178,18 @@ size_t power_bq_table(power_reg_t *out, size_t max)
     const power_reg_t table[] = {
         {BQ_IC_CTRL, BQ_IC_CTRL_VAL},
         {BQ_VBAT_CTRL, 0x46},  /* 4.20 V */
-        {BQ_ICHG_CTRL, ichg_value()}, /* 250 mA (SPEC §1) -> code 52 = 0x34 */
-        {BQ_CHARGECTL0, 0x20}, /* IPRECHG 2 x ITERM, ITERM 10 %, VINDPM 4.2 V, TREG 100 degC */
-        {BQ_CHARGECTL1, 0x92}, /* BATOCP 1.5 A, BUVLO 3.0 V, CHG_STATUS int on, ILIM int masked */
+        /* Cell: Renata ICP501230PS-03, 135 mAh typ / 130 min, 0.5C standard / 1C max charge to 4.2 V,
+         * 1C continuous / 2C pulse discharge (SPEC §1, docs/architecture.md §5). */
+        {BQ_ICHG_CTRL, ichg_value()}, /* 70 mA = 0.52C (SPEC §1) -> code 34 = 0x22 */
+        /* ITERM 10 % = 7 mA (0.05C), precharge 2 x ITERM = 14 mA (0.1C), VINDPM 4.2 V, TREG 100 degC */
+        {BQ_CHARGECTL0, 0x20},
+        /* IBAT_OCP 1 A (the reset value; was 1.5 A for the 500 mAh cell), BUVLO 3.0 V, CHG_STATUS int
+         * on, ILIM int masked. 1 A is a fault limit (7C), not the cell's 2C pulse rating: that one
+         * is kept by the Wi-Fi TX cap and voltage floor (caliper_wifi). 500 mA, the only lower step,
+         * is still 3.7C and leaves no margin over an uncapped Wi-Fi peak (0.42-0.49 A from a 3.5-3.0 V
+         * cell, should the cap ever not apply); 4-7 trips in 2 s latch the BATFET off until USB is
+         * plugged in (SLUSE99C §8.3.7.5), so a near miss would strand the caliper. */
+        {BQ_CHARGECTL1, 0x52},
         {BQ_TMR_ILIM, s_ilim}, /* 100 mA until a host configures us, then 500 mA */
         /* EN_PUSH = 0: TS/MR carries the NTC and no button on rev A, and the push-button scan
          * costs 1 uA in battery mode (SLUSE99C IQ_BAT 3 uA with it disabled, 4 uA enabled; the

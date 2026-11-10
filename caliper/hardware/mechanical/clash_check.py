@@ -18,7 +18,8 @@ Checks
           scale (target CAP_GAP), the AS5311 inside the tape channel, the board rules
   wall    the web between every two cut features of the slider body (models.body_cuts):
           a pair that meets without being meant to is BREAK, a web under WALL_LOCAL_MIN is THIN
-  rf      every metal item's plan distance to the antenna area (SPEC D4: >= 5 mm)
+  rf      every metal item's plan distance to the antenna area (SPEC D4: >= 5 mm); nylon parts (Y set screws, lock,
+          H1 / lid screw, door screws) are not metal
 """
 import itertools
 import os
@@ -52,9 +53,9 @@ INTENDED = {("oring", "beam")}
 #: Body cut features that are meant to open into each other (wall check).
 JOINED = {frozenset(p) for p in [
     ("tunnel_cavity", "tab_clamps"), ("tunnel_cavity", "h1_pilot"), ("tunnel_cavity", "battery_pocket"),
-    ("tunnel_cavity", "plug_relief"), ("tunnel_cavity", "pad_pockets"), ("tunnel_cavity", "y_bores"),
+    ("tunnel_cavity", "pad_pockets"), ("tunnel_cavity", "y_bores"),
     ("tunnel_cavity", "back_plungers"), ("tunnel_cavity", "roller_slot"), ("tunnel_cavity", "usb"),
-    ("battery_pocket", "plug_relief"), ("battery_pocket", "door_rebate"), ("door_rebate", "door_pilots"),
+    ("battery_pocket", "door_rebate"), ("door_rebate", "door_pilots"),
     ("pad_pockets", "pad_screws"), ("roller_slot", "roller_axle"), ("roller_axle", "usb"),
     ("roller_slot", "usb"), ("tunnel_cavity", "roller_axle"),
 ]}
@@ -72,7 +73,6 @@ def housing_parts():
     h = {n: s for n, s, _c in M.slider_group(0.0, with_hardware=False)}
     h["display"] = M.display_module()
     h["battery"] = M.battery()
-    h["lock_screw"] = M.lock_screw()
     for i, s in enumerate(M.tab_clamp_hardware()):
         h[f"tab_clamp_{i}"] = s
     for i, s in enumerate(M.plunger_hardware()):
@@ -81,21 +81,20 @@ def housing_parts():
 
 
 def inserts():
-    """The brass heat-set inserts and steel pins that are not modelled as parts (RF check)."""
+    """The brass heat-set inserts and steel screws / pins that are not modelled as parts (RF check).  Not listed because
+    they are nylon (2026-11-09 slim-down): the Y-plunger set screws, the lock thumb screw, the H1 / lid screw and the two
+    battery-door screws; their threads are tapped in the print (no inserts)."""
     out = {}
     for x, y, kind in P.LID_SCREWS:
         if kind == "insert":
             out[f"lid_insert_u{x:g}"] = M.zcyl(x, y, 3.6, P.Z_LID_IN - P.INSERT_M2_L, P.Z_LID_IN)
+        else:      # steel thread-forming screw, 2.2 x 5 countersunk
+            out[f"lid_screw_u{x:g}_y{y:g}"] = M.zcyl(x, y, 2.2, P.Z_LID_IN - 3.0, P.Z_LID)
     for u, _y0, _y1, ys in P.FPADS:
         out[f"pad_insert_u{u:g}_y{ys:g}"] = M.zcyl(u, ys, 3.6, P.Z_LID_IN - P.INSERT_M2_L, P.Z_LID_IN)
-    for u in P.YGIB_PLUNGERS_U:
-        out[f"y_plunger_insert_u{u:g}"] = M.ycyl(u, P.GIB_Z, 3.6, P.H_Y1 - P.INSERT_M2_L, P.H_Y1)
-    out[f"lock_insert_u{P.LOCK_U:g}"] = M.ycyl(P.LOCK_U, P.GIB_Z, 4.5, P.H_Y1 - P.INSERT_M3_L, P.H_Y1)
     for u, y in P.BGIB_PLUNGERS:
         out[f"back_plunger_insert_u{u:g}"] = M.zcyl(u, y, 3.6, P.Z_BACK, P.Z_BACK + P.INSERT_M2_L)
     out["roller_axle_pin"] = M.zcyl(P.ROLLER_U, P.ROLLER_Y, P.ROLLER_AXLE_D, P.Z_BACK + 0.5, P.ROLLER_Z1 + 0.3)
-    for i, (x, y) in enumerate(P.DOOR_SCREWS):
-        out[f"door_screw_{i}"] = M.zcyl(x, y, 2.2, P.Z_BACK, P.Z_BACK + P.DOOR_T + 3.0)
     return out
 
 
@@ -128,7 +127,7 @@ def rf_check(parts):
     a = P.ANTENNA
     ant = M.box(bu(a[0]), bu(a[2]), a[1], a[3], -60, 60)
     metal = {n: s for n, s in parts.items()
-             if n.startswith(("back_gib", "y_gib", "ref_strip", "front_pad", "lock_screw", "tab_clamp", "plunger_hw"))}
+             if n.startswith(("back_gib", "y_gib", "ref_strip", "front_pad", "tab_clamp", "plunger_hw"))}
     metal.update(inserts())
     metal["beam"] = M.beam()
     metal["stop_screw"] = M.stop_screw()
@@ -226,9 +225,11 @@ def main():
     n_fail = sum(1 for s, _t in gaps + rf if s == "FAIL")
     n_risk = sum(1 for s, _t in rf if s == "RISK")
     n_wall = sum(1 for s, _t in walls if s in ("BREAK", "THIN"))
+    n_pend = sum(1 for s, _t in gaps if s == "PEND")
     rep = [f"clash_check.py -- board envelope from {src}",
            f"{len(out)} intersections, {n_bad} not clear; gap/board/RF rules: {n_fail} FAIL, {n_risk} RISK; "
-           f"body webs: {n_wall} BREAK/THIN", ""]
+           f"body webs: {n_wall} BREAK/THIN" + (f"; {n_pend} PENDING board change(s), see the board rules" if n_pend else ""),
+           ""]
     rep += ["== not clear =="] + (clashes or ["(none)"]) + [""]
     rep += ["== gaps and board rules =="] + [f"{s} {t}" for s, t in gaps] + [""]
     rep += ["== body walls (cut-feature pairs closer than WALL_MIN) =="] + [f"{s:<5} {t}" for s, t in walls] + [""]

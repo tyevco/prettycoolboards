@@ -28,6 +28,7 @@
 #include "esp_wifi.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
+#include "sdkconfig.h"
 
 static const char *TAG = "wifi";
 
@@ -75,6 +76,38 @@ static esp_err_t ensure_init(void)
     return ESP_OK;
 }
 
+/* ---- the 135 mAh cell (docs/firmware.md §12.6) ----
+ * The Renata ICP501230PS-03 is rated 1C (135 mA) continuous, 2C (270 mA) pulse. An uncapped Wi-Fi
+ * burst pulls 0.42-0.49 A from it (355 mA module peak at 20.5 dBm + ~45 mA of sensor and display,
+ * through the ~90 % buck-boost, from a 3.5-3.0 V cell), so:
+ *  - TX power is capped (CONFIG_ESP_PHY_MAX_WIFI_TX_POWER, 10 dBm, in the PHY init data from
+ *    esp_wifi_start() on, and again here at run time): ~0.27 A per burst (estimate);
+ *  - without USB, Wi-Fi refuses to start below CONFIG_CALIPER_WIFI_MIN_MV (VCELL from the
+ *    MAX17048) and app_main switches it off 100 mV lower: the burst sag (~0.2 V through ~1 ohm of
+ *    cell, PCM and Q1, estimate) must stay clear of the BQ25180 battery UVLO (3.0 V).
+ * battery_mv == 0 means no gauge reading (yet): allowed, the cap still applies. */
+static bool battery_refuses_wifi(void)
+{
+    cal_status_t st;
+    core_get_status(&st);
+    if (st.vbus || st.battery_mv == 0 || st.battery_mv >= CONFIG_CALIPER_WIFI_MIN_MV) {
+        return false;
+    }
+    ESP_LOGW(TAG, "battery %u mV < %d mV: Wi-Fi refused", (unsigned)st.battery_mv, CONFIG_CALIPER_WIFI_MIN_MV);
+    char m[32] = "Battery low: no Wi-Fi";
+    bus_post(CAL_EVT_TOAST, m, sizeof(m));
+    return true;
+}
+
+static void apply_tx_cap(void)
+{
+    /* unit 0.25 dBm; the PHY init data already holds the same cap, this keeps it explicit */
+    esp_err_t err = esp_wifi_set_max_tx_power((int8_t)(CONFIG_ESP_PHY_MAX_WIFI_TX_POWER * 4));
+    if (err != ESP_OK) {
+        ESP_LOGW(TAG, "TX power cap: %s", esp_err_to_name(err));
+    }
+}
+
 static void stop_radio(void)
 {
     push_stop();
@@ -89,7 +122,7 @@ static void stop_radio(void)
 static void start_ap(void)
 {
     stop_radio();
-    if (ensure_init() != ESP_OK) {
+    if (battery_refuses_wifi() || ensure_init() != ESP_OK) {
         return;
     }
     uint8_t mac[6];
@@ -118,6 +151,7 @@ static void start_ap(void)
         ESP_LOGE(TAG, "AP start failed");
         return;
     }
+    apply_tx_cap();
     s_state = W_AP;
     publish_state("192.168.4.1");
     web_start();
@@ -133,7 +167,7 @@ static void start_sta(void)
         return;
     }
     stop_radio();
-    if (ensure_init() != ESP_OK) {
+    if (battery_refuses_wifi() || ensure_init() != ESP_OK) {
         return;
     }
     wifi_config_t sta = {0};
@@ -155,7 +189,9 @@ static void start_sta(void)
         ESP_LOGE(TAG, "STA start failed");
         s_state = W_OFF;
         publish_state("");
+        return;
     }
+    apply_tx_cap();
 }
 
 void caliper_wifi_reconnect_sta(void)
@@ -225,7 +261,8 @@ static void on_cmd(void *arg, esp_event_base_t base, int32_t id, void *data)
 
 /* Bring-up ("bu wifi"): one blocking all-channel scan. With the radio off it starts the station
  * just for the scan (no connect: on_wifi only connects in W_CONNECTING) and stops it again; in
- * station mode it scans alongside; the provisioning AP refuses (ESP_ERR_INVALID_STATE). */
+ * station mode it scans alongside; the provisioning AP refuses (ESP_ERR_INVALID_STATE), and so does
+ * a cell below the Wi-Fi floor without USB (ESP_ERR_NOT_ALLOWED, battery_refuses_wifi()). */
 static int by_rssi(const void *a, const void *b)
 {
     return ((const wifi_ap_record_t *)b)->rssi - ((const wifi_ap_record_t *)a)->rssi;
@@ -239,12 +276,17 @@ esp_err_t caliper_wifi_scan(cal_wifi_ap_t *out, size_t max, size_t *n)
     bool started = false;
     if (s_state == W_AP || s_state == W_CONNECTING) {
         err = ESP_ERR_INVALID_STATE;
+    } else if (s_state == W_OFF && battery_refuses_wifi()) {
+        err = ESP_ERR_NOT_ALLOWED;
     } else if (s_state == W_OFF) {
         err = ensure_init();
         if (err == ESP_OK) {
             esp_wifi_set_mode(WIFI_MODE_STA);
             err = esp_wifi_start();
             started = err == ESP_OK;
+        }
+        if (started) {
+            apply_tx_cap();
         }
     }
     if (err == ESP_OK) {

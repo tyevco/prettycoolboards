@@ -554,6 +554,7 @@ static bool t_wifi(int argc, char **argv)
     esp_err_t err = caliper_wifi_scan(ap, 12, &n);
     if (err != ESP_OK) {
         return verdict(false, "wifi", err == ESP_ERR_INVALID_STATE ? "radio busy (setup AP or connecting): 'wifi off' first"
+                                      : err == ESP_ERR_NOT_ALLOWED ? "battery below the Wi-Fi floor: plug in USB"
                                                                     : esp_err_to_name(err));
     }
     int rssi = -128;

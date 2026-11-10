@@ -15,7 +15,7 @@ Parts (rev A unless noted):
                     web, the moving jaws integral, the board's tab clamps in the two towers
     slider_body_b   rev B: the same body in 6061-T6, tapped holes instead of inserts
     front_shell     printed lid: landscape display window + bezel ribs, button holes, adjuster access
-    battery_door    printed; closes the battery pocket in the body's back face (replaces the back cover)
+    battery_door    printed; a flat plate closing the battery pocket in the body's back face (replaces the back cover)
     button_cap      printed (x3)
     thumb_roller    printed hub + NBR O-ring tyre
     back_gib, y_gib, ref_strip, front_pad   brass (C360) strips
@@ -23,7 +23,9 @@ Parts (rev A unless noted):
 import math
 from types import SimpleNamespace
 
-from build123d import Box, Cone, Cylinder, Polygon, Pos, Rot, extrude
+from functools import lru_cache
+
+from build123d import Box, Cone, Cylinder, Face, Kind, Plane, Polygon, Pos, Rot, Vector, Wire, extrude, offset
 
 import params as P
 from params import bu
@@ -74,10 +76,40 @@ def csk_hole(x, y, z_face, d, d_head, depth, up=False):
         Pos(x, y, z_face + h / 2 - 0.005) * Cone(d_head / 2, d / 2, h + 0.01)
 
 
-def slider_footprint(z0, z1, u0=P.H_U0):
-    """Plan shape of the slider housing: low step at the left, full height after."""
-    return box(u0, P.H_U1, P.H_Y0, P.STEP_Y1, z0, z1) + \
-        box(P.STEP_U1, P.H_U1, P.STEP_Y1 - 0.01, P.H_Y1, z0, z1)
+def footprint_face():
+    """Plan outline (u, y) of the slider housing: the low step at the left, full height after, with the plan radii at
+    the two top corners (params.CORNER_R)."""
+    pts = [(P.H_U0, P.H_Y0), (P.H_U1, P.H_Y0), (P.H_U1, P.H_Y1), (P.STEP_U1, P.H_Y1), (P.STEP_U1, P.STEP_Y1),
+           (P.H_U0, P.STEP_Y1)]
+    f = Face(Wire.make_polygon([Vector(x, y) for x, y in pts], close=True))
+    for key, (u, y) in (("top_left", (P.STEP_U1, P.H_Y1)), ("top_right", (P.H_U1, P.H_Y1))):
+        v = [w for w in f.vertices() if abs(w.X - u) < 1e-6 and abs(w.Y - y) < 1e-6]
+        f = f.fillet_2d(P.CORNER_R[key], v)
+    return f
+
+
+def _bevel(face, c):
+    """The face's outline as a 45 degree bevel c tall: offset c inward at z 0, the full outline at z c."""
+    return extrude(offset(face, -c, kind=Kind.INTERSECTION), amount=c, taper=-45)
+
+
+def slider_footprint(z0, z1):
+    """Plan shape of the slider housing extruded z0..z1 (sharp edges)."""
+    return Pos(0, 0, z0) * extrude(footprint_face(), z1 - z0)
+
+
+@lru_cache(maxsize=None)
+def housing_block():
+    """The body's outside: the footprint z Z_BACK..Z_LID_IN with a BACK_CHAMFER x 45 deg bevel round the back face (the
+    print bed), kept sharp in BACK_CHAMFER_KEEP (the jaw roots, the step, the left end).  The battery door's rebate
+    stops at the bevel's foot, so the bevel runs on over the door."""
+    f, c, zb = footprint_face(), P.BACK_CHAMFER, P.Z_BACK
+    s = Pos(0, 0, zb + c) * extrude(f, P.Z_LID_IN - zb - c) + Pos(0, 0, zb) * _bevel(f, c)
+    keep = None
+    for u0, u1, y0, y1 in P.BACK_CHAMFER_KEEP:
+        k = box(u0, u1, y0, y1, zb, zb + c + 0.01)
+        keep = k if keep is None else keep + k
+    return s + (keep & (Pos(0, 0, zb) * extrude(f, c + 0.01)))
 
 
 # ---------------------------------------------------------------------------
@@ -202,15 +234,13 @@ def tab_clamp_cuts():
 
 
 def y_bores(rev="A"):
-    """Y-gib plunger and lock bores along -y from the top face, with their inserts / taps at the top."""
+    """Y-gib plunger and lock bores along -y from the top face, each with an M3 thread at the top (rev A: tapped in the
+    print for the nylon set screw / thumb screw; no inserts since the 2026-11-09 slim-down put the top face 2.3 mm
+    from the antenna area)."""
     s = None
-    for u, m in [(u, 2) for u in P.YGIB_PLUNGERS_U] + [(P.LOCK_U, 3)]:
+    for u in P.YGIB_PLUNGERS_U + [P.LOCK_U]:
         c = ycyl(u, P.GIB_Z, P.PLUNGER_BORE_D, P.CH_Y1 - 0.5, P.H_Y1 + 0.1)
-        if rev == "A":
-            d, L = (P.INSERT_M2_D, P.INSERT_M2_L) if m == 2 else (P.INSERT_M3_D, P.INSERT_M3_L)
-        else:
-            d, L = (P.M2_TAP, 4.0) if m == 2 else (P.M3_TAP, 5.0)
-        c += ycyl(u, P.GIB_Z, d, P.H_Y1 - L, P.H_Y1 + 0.1)
+        c += ycyl(u, P.GIB_Z, P.M3_TAP, P.H_Y1 - P.Y_TAP_L, P.H_Y1 + 0.1)
         s = c if s is None else s + c
     return s
 
@@ -230,15 +260,13 @@ def body_cuts(rev="A"):
     hx, hy = P.H1
     top = P.BOARD_Z0 - P.H1_BOSS_LOW
     add("h1_pilot", zcyl(bu(hx), hy, P.M2_TAP, top - 4.0, top + 0.01))
-    # battery pocket (cell z Z_WEB_IN .. +4, the door plug below it) and the door rebate in the back face
+    # battery pocket (the door's inside face Z_POCKET up to the cavity floor; J2, its plug and the cell leads in its left
+    # end) and the door rebate in the back face
     b, d = P.BAT_POCKET, P.BAT_DOOR
-    add("battery_pocket", box(b["u0"], b["u1"], b["y0"], b["y1"], zb + P.DOOR_T - 0.01, P.CAV_FLOOR + 0.01))
-    add("door_rebate", box(d["u0"] - 0.1, d["u1"] + 0.1, d["y0"] - 0.1, P.H_Y1 + 1, zb - 1, zb + P.DOOR_T))
-    for x, y in P.DOOR_SCREWS:
-        add("door_pilots", _pt_or_tap(rev, x, y, zb + P.DOOR_T, 3.0, direction=+1))
-    # battery-lead channel + JST plug relief past the board's top edge
-    r = P.PLUG_RELIEF
-    add("plug_relief", box(r["u0"], r["u1"], r["y0"], r["y1"], P.CAV_FLOOR - 0.01, zf + 1))
+    add("battery_pocket", box(b["u0"], b["u1"], b["y0"], b["y1"], P.Z_POCKET - 0.01, P.CAV_FLOOR + 0.01))
+    add("door_rebate", box(d["u0"] - 0.1, d["u1"] + 0.1, d["y0"] - 0.1, d["y1"] + 0.1, zb - 1, zb + P.DOOR_T))
+    for x, y in P.DOOR_SCREWS:     # nylon M2 screws: M2 tapped in the print (rev A) / tapped (rev B)
+        add("door_pilots", zcyl(x, y, P.M2_TAP, zb + P.DOOR_T - 0.01, zb + P.DOOR_T + 3.0))
     # front pads: pocket + set-screw hole + insert from the lid side
     for u, y0, y1, ys in P.FPADS:
         add("pad_pockets", box(u - P.FPAD_LEN / 2 - 0.1, u + P.FPAD_LEN / 2 + 0.1, y0 - 0.15, y1 + 0.15,
@@ -269,14 +297,19 @@ def body_cuts(rev="A"):
 
 def tunnel_and_cavity():
     """The beam tunnel (closed at the back by the 3.2 web) and the board cavity (open to the lid,
-    floor 0.75 under the board in the upper band)."""
+    floor 0.75 under the board in the upper band; its top-left corner follows the board's R1 corner, so the housing's
+    top-left plan radius keeps the 1.2 wall)."""
     t = box(-1, P.H_U1 + 1, P.CH_Y0, P.CH_Y1, P.CH_Z0, P.CH_Z1)
     bu0, bu1 = P.BOARD_U0 - 0.4, P.BOARD_U0 + P.BOARD_L + 0.4
-    return t + box(bu0, bu1, P.CH_Y0, P.BOARD_W + 0.4, P.CAV_FLOOR, P.Z_LID_IN + 1)
+    cav = box(bu0, bu1, P.CH_Y0, P.BOARD_W + 0.4, P.CAV_FLOOR, P.Z_LID_IN + 1)
+    cu, cy, cr = P.CAV_CORNER
+    cav -= box(bu0 - 0.1, cu, cy, P.BOARD_W + 0.5, P.CAV_FLOOR - 0.1, P.Z_LID_IN + 1.1)
+    cav += zcyl(cu, cy, 2 * cr, P.CAV_FLOOR, P.Z_LID_IN + 1)
+    return t + cav
 
 
 def slider_body(rev="A"):
-    s = slider_footprint(P.Z_BACK, P.Z_LID_IN)
+    s = housing_block()
     s -= tunnel_and_cavity()
     hx, hy = P.H1                      # H1 support boss, printed 0.1 low and shimmed
     s += zcyl(bu(hx), hy, P.BOSS_D, P.CAV_FLOOR - 0.01, P.BOARD_Z0 - P.H1_BOSS_LOW)
@@ -287,8 +320,8 @@ def slider_body(rev="A"):
     # jaws
     s += prism(outside_jaw_pts(+1), P.JAW_Z0, P.JAW_Z1)
     s += moving_inside_jaw()
-    # fillets are left to the slicer / the machinist: the model keeps sharp edges so
-    # that every face here is a datum the drawing can name.
+    # Outside shape: plan radii at the top corners and a 45 deg bevel round the back face (housing_block); the datum
+    # faces (end faces, the tunnel, the clamp faces, the jaws and their roots) stay sharp.
     return s
 
 
@@ -345,7 +378,9 @@ def display_rect():
 
 def front_shell():
     z0, z1 = P.Z_LID_IN, P.Z_LID
-    s = slider_footprint(z0, z1)
+    f, c = footprint_face(), P.LID_CHAMFER
+    # the lid's outer top edge: a LID_CHAMFER x 45 deg bevel (on the bed: the lid prints face down)
+    s = Pos(0, 0, z0) * extrude(f, z1 - z0 - c) + Pos(0, 0, z1) * _bevel(f, c).mirror(Plane.XY)
     cx, cy = bu(P.DISP_CX + P.DISP_AA_DX), P.DISP_CY
     m = P.DISP_WIN_MARGIN
     s -= box(cx - P.DISP_AA_W / 2 - m, cx + P.DISP_AA_W / 2 + m,
@@ -363,6 +398,11 @@ def front_shell():
         s -= zcyl(u, ys, 2.0, z0 - 1, z1 + 1)           # hex-key access to the gap set screws
     for x, y, _k in P.LID_SCREWS:
         s -= csk_hole(x, y, z1, P.M2_CLR, 4.0, z1 - z0 + 0.1)
+    # H1 column: a tube from the lid underside down to H1_TUBE_GAP over the board, the nylon M2 x 10 through it
+    hu, hy = bu(P.H1[0]), P.H1[1]
+    zt = P.BOARD_Z1 + P.H1_TUBE_GAP
+    s += zcyl(hu, hy, P.H1_TUBE_D, zt, z0 + 0.01)
+    s -= csk_hole(hu, hy, z1, P.M2_CLR, 4.0, z1 - zt + 0.1)
     for x, y in P.TAB_HOLES:                             # pockets for the tab-clamp screw heads
         s -= zcyl(bu(x), y, P.CLAMP_HEAD_D + 0.6, z0 - 0.01, z0 + P.LID_HEAD_POCKET)
     s -= zcyl(bu(P.PIEZO_PORT[0]), P.PIEZO_PORT[1], P.PIEZO_PORT_D, z0 - 1, z1 + 1)
@@ -372,11 +412,11 @@ def front_shell():
 
 
 def battery_door():
-    """2.0 flange in the body's back-face rebate + 1.2 plug that closes the pocket down to the cell."""
-    d, b = P.BAT_DOOR, P.BAT_POCKET
+    """A flat DOOR_T plate in the body's back-face rebate (closed all round), its inside face the pocket floor
+    (Z_POCKET); its top edge ends at the foot of the back bevel.  Two nylon M2 flat-head screws."""
+    d = P.BAT_DOOR
     zb = P.Z_BACK
-    s = box(d["u0"], d["u1"], d["y0"], P.H_Y1, zb, zb + P.DOOR_T)
-    s += box(b["u0"] + 0.2, b["u1"] - 0.2, b["y0"] + 0.2, b["y1"] - 0.2, zb + P.DOOR_T - 0.01, P.Z_WEB_IN)
+    s = box(d["u0"], d["u1"], d["y0"], d["y1"], zb, zb + P.DOOR_T)
     for x, y in P.DOOR_SCREWS:
         s -= csk_hole(x, y, zb, P.M2_CLR, 4.0, P.DOOR_T + 0.1, up=True)
     return s
@@ -467,29 +507,40 @@ def display_module():
 
 
 def battery():
+    """The cell at its max envelope (BAT_T x BAT_W x BAT_L incl. the PCM), on the door, its lead end at BAT_U0."""
     b = P.BAT_POCKET
-    uc, yc = (b["u0"] + b["u1"]) / 2, (b["y0"] + b["y1"]) / 2
-    return box(uc - P.BAT_L / 2, uc + P.BAT_L / 2, yc - P.BAT_W / 2, yc + P.BAT_W / 2,
-               P.Z_WEB_IN, P.Z_WEB_IN + P.BAT_T)
+    yc = (b["y0"] + b["y1"]) / 2
+    return box(P.BAT_U0, P.BAT_U0 + P.BAT_L, yc - P.BAT_W / 2, yc + P.BAT_W / 2, P.Z_POCKET, P.Z_POCKET + P.BAT_T)
 
 
 def pushers():
-    """GFRP rods from the Y gib up to y PUSHER_TOP_Y (non-metallic under the antenna, SPEC D4)."""
-    y0 = P.BEAM_W + P.YGIB_T
-    out = [ycyl(u, P.GIB_Z, P.PUSHER_D, y0, P.PUSHER_TOP_Y) for u in P.YGIB_PLUNGERS_U]
-    return out + [ycyl(P.LOCK_U, P.GIB_Z, P.PUSHER_D, y0, P.H_Y1 - P.INSERT_M3_L)]   # up to the M3 insert
+    """[(name, solid)] GFRP parts of the Y plungers and the lock (non-metallic under the antenna, SPEC D4): per Y plunger
+    a tip pin on the gib and a rod from the spring up to the set screw; the lock's rod from the gib to its screw."""
+    out = []
+    for u in P.YGIB_PLUNGERS_U:
+        out.append((f"pusher_tip_u{u:g}", ycyl(u, P.GIB_Z, P.PUSHER_D, *P.Y_TIP)))
+        out.append((f"pusher_u{u:g}", ycyl(u, P.GIB_Z, P.PUSHER_D, P.Y_SPRING[1], P.H_Y1 - P.Y_SCREW_L)))
+    out.append((f"pusher_lock_u{P.LOCK_U:g}", ycyl(P.LOCK_U, P.GIB_Z, P.PUSHER_D, P.Y_TIP[0], P.H_Y1 - P.Y_SCREW_L)))
+    return out
 
 
 def lock_screw():
-    """M3 knurled thumb screw in the top insert; its tip pushes the GFRP lock rod."""
-    s = ycyl(P.LOCK_U, P.GIB_Z, 2.5, P.H_Y1 - P.INSERT_M3_L + 0.05, P.H_Y1 + 1.0)
+    """Nylon M3 knurled thumb screw in the M3 thread at the top face; its tip pushes the GFRP lock rod.  (Thread
+    modelled at the tapped hole's 2.4 core so it does not read as a clash.)"""
+    s = ycyl(P.LOCK_U, P.GIB_Z, 2.4, P.H_Y1 - P.Y_SCREW_L + 0.05, P.H_Y1 + 1.0)
     s += ycyl(P.LOCK_U, P.GIB_Z, 6.0, P.H_Y1 + 1.0, P.H_Y1 + 4.0)   # knurled head
     return s
 
 
+def y_set_screws():
+    """Nylon M3 x 4 set screws of the two Y plungers, top flush with the top face."""
+    return [ycyl(u, P.GIB_Z, 2.4, P.H_Y1 - P.Y_SCREW_L + 0.05, P.H_Y1 - 0.05) for u in P.YGIB_PLUNGERS_U]
+
+
 def plunger_hardware():
-    """Steel set screws + springs of the two Y plungers (above PUSHER_TOP_Y) and the two back plungers."""
-    out = [ycyl(u, P.GIB_Z, 1.5, P.PUSHER_TOP_Y + 0.5, P.H_Y1 - 0.2) for u in P.YGIB_PLUNGERS_U]
+    """Steel springs: the two Y plungers' at the bottom of their bores (Y_SPRING, >= RF_CLEAR below the antenna area)
+    and the two back plungers' set screws + springs."""
+    out = [ycyl(u, P.GIB_Z, 1.8, P.Y_SPRING[0] + 0.05, P.Y_SPRING[1] - 0.05) for u in P.YGIB_PLUNGERS_U]
     out += [zcyl(u, y, 1.5, P.Z_BACK + 0.2, P.Z_WEB_IN - 0.05) for u, y in P.BGIB_PLUNGERS]
     return out
 
@@ -521,11 +572,13 @@ PARTS = {p.name: p for p in (
        "rev B: 6061-T6 or tool steel"),
     _p("slider_body", slider_body, "PA-CF", "FDM, back face (z-) on the bed", 1, (0, 0, 0),
        "PAHT-CF + unfilled-PA modifier near the antenna (or PETG for fit trials); 6 walls, 40 % gyroid; "
-       "8 M2 + 1 M3 heat-set inserts, 4 thread-forming pilots"),
+       "6 M2 heat-set inserts (4 pads, 2 back plungers), 3 thread-forming pilots (lid), M2 / M3 threads tapped in the print "
+       "(H1, door, Y plungers, lock)"),
     _p("slider_body_b", slider_body_b, "6061", "CNC 3-axis, two setups", 1, (0, 0, 0),
        "rev B, see drawing slider_body_b (needs a non-metal window under the antenna, SPEC D4)"),
     _p("front_shell", front_shell, "PETG", "FDM, top face (z+) on the bed (textured PEI)", 1, (180, 0, 0)),
-    _p("battery_door", battery_door, "PETG", "FDM, outside face (z-) on the bed (textured PEI)", 1, (0, 0, 0)),
+    _p("battery_door", battery_door, "PETG", "FDM, outside face (z-) on the bed (textured PEI)", 1, (0, 0, 0),
+       "1.6 plate, 2 nylon M2 flat-head screws"),
     _p("button_cap", button_cap, "PETG", "FDM, flange on the bed", 3, (0, 0, 0)),
     _p("thumb_roller", thumb_roller, "PETG", "FDM, flat", 1, (0, 0, 0)),
     _p("back_gib", back_gib, "brass", "C360 1.2 strip, saw + file, 2 dimples", 1, (0, 0, 0)),
@@ -561,15 +614,15 @@ def slider_group(R=0.0, with_hardware=True):
     out += [("back_gib", T * back_gib(), "brass"), ("y_gib", T * y_gib(), "brass"),
             ("ref_strip", T * ref_strip(), "brass")]
     out += [(f"front_pad_{i}", T * p, "brass") for i, p in enumerate(front_pads())]
-    names = [f"pusher_u{u:g}" for u in P.YGIB_PLUNGERS_U] + [f"pusher_lock_u{P.LOCK_U:g}"]
-    out += [(n, T * p, "gfrp") for n, p in zip(names, pushers())]
+    out += [(n, T * p, "gfrp") for n, p in pushers()]
+    out.append(("lock_screw", T * lock_screw(), "cap"))                  # nylon
+    out += [(f"y_set_screw_u{u:g}", T * p, "cap") for u, p in zip(P.YGIB_PLUNGERS_U, y_set_screws())]
     if with_hardware:
         import board_envelope
         out += [("board", T * board_envelope.board(), "pcb"),
                 ("board_parts", T * board_envelope.parts_solid(), "parts"),
                 ("display", T * display_module(), "glass"),
-                ("battery", T * battery(), "battery"),
-                ("lock_screw", T * lock_screw(), "steel")]
+                ("battery", T * battery(), "battery")]
         out += [(f"tab_clamp_{i}", T * p, "steel") for i, p in enumerate(tab_clamp_hardware())]
         out += [(f"plunger_hw_{i}", T * p, "steel") for i, p in enumerate(plunger_hardware())]
     return out

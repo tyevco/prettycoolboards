@@ -6081,7 +6081,7 @@
 		)
 		(uuid "a6d54145-79f8-5566-a7a5-eff5b9867429")
 	)
-	(text "ILIM / ICHG (250 mA) / SYS_REG / ship mode set over I2C: register init per dial-me-spinner docs/firmware.md §13.1.\nIN 2.2u/25V X7R 0805, SYS 10u/25V, BAT 4.7u: each within 1 mm of its ball and of the D2 GND ball.\nShip mode exits only on a USB plug-in (TS/MR is not wired to a button in rev A).\n/INT -> CHG_INT_N (10k pull-up R8, GPIO3). RT1: 10k NTC next to J2 (board temperature, not the cell)."
+	(text "ILIM / ICHG (70 mA) / SYS_REG / ship mode set over I2C: register init per dial-me-spinner docs/firmware.md §13.1.\nIN 2.2u/25V X7R 0805, SYS 10u/25V, BAT 4.7u: each within 1 mm of its ball and of the D2 GND ball.\nShip mode exits only on a USB plug-in (TS/MR is not wired to a button in rev A).\n/INT -> CHG_INT_N (10k pull-up R8, GPIO3). RT1: 10k NTC next to J2 (board temperature, not the cell)."
 		(exclude_from_sim no)
 		(at 275.59 19.05 0)
 		(effects
@@ -6091,11 +6091,11 @@
 			)
 			(justify left top)
 		)
-		(uuid "5dd6307a-e613-5153-b5b5-412e7b75db0d")
+		(uuid "141945c3-d81f-50c3-87f4-44fdadc1f53d")
 	)
 	(rectangle
 		(start 273.05 12.7)
-		(end 406.4 81.28)
+		(end 405.13 81.28)
 		(stroke
 			(width 0.1)
 			(type dash)
@@ -7735,7 +7735,7 @@
 		(color 0 0 0 0)
 		(uuid "1881d3c1-6f04-54ac-ab75-418dca218c0a")
 	)
-	(text "LiPo connector J2 (402535, ~500 mAh, JST-SH 2-pin) + reverse-polarity P-FET Q1"
+	(text "LiPo connector J2 (~135 mAh 1S, JST-SH 2-pin) + reverse-polarity P-FET Q1"
 		(exclude_from_sim no)
 		(at 138.43 182.88 0)
 		(effects
@@ -7745,9 +7745,9 @@
 			)
 			(justify left top)
 		)
-		(uuid "d970f094-f605-5b4b-8b5b-35fe9d851640")
+		(uuid "aa932f24-8f45-5805-a9ec-b0f9bd611d5b")
 	)
-	(text "Pin 1 = BAT+, pin 2 = GND. Pack leads are not standardised: check every pack's polarity anyway.\nQ1 AO3401A in the BAT+ lead: drain to J2, source to VBAT, gate to GND via R10. The body diode conducts for a\ncorrect cell, then VGS = -VBAT turns the channel on (both directions, so charging works). A reversed cell\nleaves VGS = 0: off. VGS max +-12 V vs 4.4 V: no zener. 0.5 A: <= 43 mV / 21 mW (85 mOhm max at VGS -2.5 V).\nThe cell sits in the housing pocket behind the board (SPEC §2.1)."
+	(text "Pin 1 = BAT+, pin 2 = GND. Pack leads are not standardised: check every pack's polarity anyway.\nQ1 AO3401A in the BAT+ lead: drain to J2, source to VBAT, gate to GND via R10. The body diode conducts for a\ncorrect cell, then VGS = -VBAT turns the channel on (both directions, so charging works). A reversed cell\nleaves VGS = 0: off. VGS max +-12 V vs 4.4 V: no zener. 0.5 A: <= 43 mV / 21 mW (85 mOhm max at VGS -2.5 V).\nJ2 is on the bottom; it, the plug and the cell sit in the housing pocket behind the board (SPEC §2.1)."
 		(exclude_from_sim no)
 		(at 138.43 186.69 0)
 		(effects
@@ -7761,7 +7761,7 @@
 	)
 	(rectangle
 		(start 135.89 180.34)
-		(end 289.56 228.6)
+		(end 279.4 228.6)
 		(stroke
 			(width 0.1)
 			(type dash)
@@ -7769,7 +7769,7 @@
 		(fill
 			(type none)
 		)
-		(uuid "8805c479-d134-56f1-a440-ef5ea10c56eb")
+		(uuid "77b251d8-81ab-5343-a71f-8cee78db3c8c")
 	)
 	(symbol
 		(lib_id "Connector_Generic_MountingPin:Conn_01x02_MountingPin")

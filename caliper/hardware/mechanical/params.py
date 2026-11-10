@@ -164,7 +164,17 @@ USB_PLUG_W, USB_PLUG_H = 10.6, 6.0
 FPC_CONN = dict(x0=19.5, x1=23.5, y0=4.5, y1=12.5, h=2.0)      # J50 FH12-13S, under the glass's -x end
 BTN_SW = (3.9, 2.9, 2.0)                                       # TS-1088-xR020 3.9 x 2.9 x 2.0 (SPEC 2.1)
 BUTTONS = {"ZERO": (31.0, 31.0), "HOLD": (38.5, 31.0), "MODE": (46.0, 31.0)}   # SPEC D4
-J_BAT = dict(x=24.5, y=31.4)       # JST-SH 2p side entry, mouth +y (the board's top edge)
+# J2 (JST-SH SM02B-SRSS-TB, 2p side entry, 2.95 tall).  2026-11-09 slim-down: J2 moved (board change, SPEC 15 L1, made
+# on the board the same day) from the top side (24.5, 30.6), mouth +y over the top edge, to the BOTTOM side, footprint
+# origin (24.1, 24.9), mating face toward +y, so the receptacle, the mated plug and the cell leads all sit in the battery
+# pocket behind the board (no plug relief past the top edge, which the 36.4 top no longer has room for).  Footprint
+# geometry (KiCad JST_SH_SM02B-SRSS-TB_1x02-1MP_P1.00mm_Horizontal): body 4.0 wide, origin -1.675 .. +2.575 toward the
+# mouth; signal pads 2.0 behind the origin; mated SHR-02V-S plug 4.4 wide, 4.6 in front of the mouth.  The clash check
+# reads J2 and its plug from the routed board; these boxes are the design intent (tests, docs).
+J_BAT = dict(x=24.1, y=24.9, side="B", mouth="+y")
+J2_H = 2.95
+J2_BODY = (J_BAT["x"] - 2.0, J_BAT["x"] + 2.0, J_BAT["y"] - 1.675, J_BAT["y"] + 2.575)   # x 22.1..26.1, y 23.225..27.475
+J2_PLUG = (J_BAT["x"] - 2.2, J_BAT["x"] + 2.2, J2_BODY[3], J2_BODY[3] + 4.6)          # y 27.475..32.075
 PIEZO_PORT = (40.0, 24.3)          # BZ50 sound port in the lid (board x, y)
 LED_PIPE = (51.5, 32.0)            # D50 light pipe in the lid (board x, y)
 LED_PIPE_D = 2.0
@@ -183,14 +193,25 @@ DISP_WIN_MARGIN = 0.25                   # window = active area + 0.25 per side
 DISP_RIB = 1.35                          # lid end ribs x 16.15..17.5 and 48.5..49.85 (SPEC 2.1)
 
 # ---------------------------------------------------------------------------
-# Battery 402535 (4.0 x 25 x 35, ~500 mAh); pocket behind the board's upper band, moved to
-# u 29.5..65.5 (board x >= 21.5) for the antenna (SPEC D4).  Closed by a battery door.
+# Battery (2026-11-09 slim-down, the owner's decision): a 501230-class 1S LiPo, reference Renata ICP501230PS-03
+# (135 mAh typ / 130 min; <= 5.4 x 12.5 x 31.5 including its protection circuit; AWG30 wire leads; 1C = 135 mA
+# continuous, 2C = 270 mA pulse, charge 0.5C standard / 1C max).  It lies behind the board's upper band, 12.5 tall in y,
+# so the housing ends 1.3 above its pocket: H_Y1 36.4 (was 49.2 with the 402535, ~500 mAh, 25 tall).  docs/mechanical.md
+# section 15 lists the candidates and why this one.  The receptacle J2 (bottom side, see J_BAT), the plug and the cell
+# leads take the pocket's left end (the J2 bay, u 29.5..35.6); the cell fills the rest.
 # ---------------------------------------------------------------------------
-BAT_T, BAT_W, BAT_L = 4.0, 25.0, 35.0
-BAT_POCKET = dict(u0=29.5, u1=65.5, y0=22.4, y1=48.0)   # 36 x 25.6: 1 mm swelling in length, 0.6 in width
-BAT_DOOR = dict(u0=26.5, u1=69.0, y0=22.4, y1=None)     # rebate in the body back face; y1 = H_Y1 (open top)
-DOOR_SCREWS = [(27.9, 44.0), (67.25, 44.0)]             # PT screws through the door ledges (>= 5 mm from the antenna)
-PLUG_RELIEF = dict(u0=29.5, u1=36.5, y0=33.6, y1=41.0)  # JST plug + battery leads past the board top edge
+BAT_T, BAT_W, BAT_L = 5.4, 12.5, 31.5   # max envelope incl. the PCM (modelled at max)
+BAT_MAH = 135
+BAT_U0 = 35.6             # the cell's left (lead / PCM) end; u 29.5..35.6 is the J2 bay
+DOOR_T = 1.6              # battery door: a flat 1.6 plate flush in a rebate in the back face (no plug any more)
+Z_POCKET = -8.6 + DOOR_T  # pocket floor = door inside face (-7.0); the cell's z -7.0 .. -1.6, 1.0 under the ledge
+BAT_POCKET = dict(u0=29.5, u1=67.6, y0=22.4, y1=35.1)   # 38.1 x 12.7: 0.5 for length swelling, 0.2 over the max width
+BAT_DOOR = dict(u0=26.5, u1=70.6, y0=22.4, y1=35.1)     # rebate in the body back face, closed at the top: the door's top
+                                                        # edge stops at the foot of the back bevel (H_Y1 - BACK_CHAMFER),
+                                                        # so the top wall reaches the bed on a 45 deg face, not a bridge
+DOOR_SCREWS = [(27.9, 31.0), (69.1, 31.0)]              # nylon M2 x 4 flat head into M2 tapped in the print (non-metal:
+                                                        # the left one is within 5 mm of the antenna area in plan)
+PLUG_RELIEF = None        # gone: the plug sits in the pocket (J2 on the bottom)
 
 # ---------------------------------------------------------------------------
 # Slider housing (rev A printed PA-CF / PETG; rev B 6061-T6)
@@ -198,7 +219,8 @@ PLUG_RELIEF = dict(u0=29.5, u1=36.5, y0=33.6, y1=41.0)  # JST plug + battery lea
 H_U0 = 0.5                # housing end faces stand back 0.5 from the jaw face
 H_U1 = 77.4               # review fix e: roller rim at u 78.0 = SPEC 7's 78 including the roller
 H_Y0 = -2.8               # lower rail outside face
-H_Y1 = 49.2               # top face   -> 52.0 tall (SPEC 7: <= 52)
+H_Y1 = BAT_POCKET["y1"] + 0.1 + 1.2   # top face 36.4 -> 39.2 tall (was 49.2 / 52.0): the door rebate (0.1 over the
+                                      # pocket) ends at the foot of the 1.2 back bevel; 1.3 of wall over the pocket
 STEP_U1 = 6.4             # left "step": the housing is only STEP_Y1 tall for u < 6.4
 STEP_Y1 = 23.0            # so the inside jaws sit low
 # Review fix a: the body now closes behind the beam.  Its back face (the print bed) is at
@@ -211,7 +233,6 @@ Z_LID_IN = 5.4            # lid underside = body front face
 Z_LID = 6.8               # lid top
 LID_T = Z_LID - Z_LID_IN
 WEB_T = Z_WEB_IN - Z_BACK
-DOOR_T = 2.0              # door flange; its plug fills the remaining 1.2 inside the pocket outline
 
 # Beam channel through the body (with the gib allowances): a closed tunnel now
 REF_STRIP_T = 1.0         # brass reference strip on the lower edge (fixed, glued)
@@ -238,33 +259,47 @@ FPADS = [  # (u centre, y0, y1, set-screw y)
     (74.0, 0.20, 1.70, 0.95), (74.0, 17.80, 19.80, 18.8),
 ]
 
-# Y gib: brass 1.0 x 3.0 on the upper edge.  Review fix c/D4: both spring plungers and the lock
-# now sit LEFT of the battery pocket (u 29.5..65.5), where they also have the best lever
-# against the measuring-force couple.  They pass under the antenna, so each is pushed through a
-# non-metallic GFRP rod (Dia 2) from a spring / set screw / thumb screw at y >= 41 (>= 5 mm
-# from the antenna area, SPEC D4).
+# Y gib: brass 1.0 x 3.0 on the upper edge.  Review fix c/D4: both spring plungers and the lock sit LEFT of the battery
+# pocket (u 29.5..), where they also have the best lever against the measuring-force couple.  They pass under the
+# antenna.  2026-11-09 slim-down: the top face (y 36.4) is now 2.4 mm above the antenna area, so no metal may sit at the
+# top any more (it was at y >= 41).  Each Y plunger is now, from the gib up: a GFRP tip pin (Dia 2 x 1, coned into the gib
+# dimple), the steel spring at the BOTTOM of the bore (y 22.0..24.4 as compressed: 5.1 below the antenna area, SPEC D4),
+# a GFRP rod, and a nylon M3 x 4 set screw in an M3 thread tapped in the print at the top face (no brass insert).  The
+# lock is a GFRP rod and a nylon M3 knurled thumb screw in the same kind of thread.  Positions, preloads and the gib are
+# unchanged; the bore axis moves 0.2 deeper (GIB_Z -2.5) so the M3 thread keeps 0.65 under the cavity floor.
 YGIB = dict(u0=9.0, u1=69.0, z0=-3.5, z1=-0.5)
 YGIB_PLUNGERS_U = [14.0, 24.0]
-LOCK_U = 19.0             # M3 thumb screw at the top face, pushes a GFRP rod onto the Y gib
+LOCK_U = 19.0             # nylon M3 thumb screw at the top face, pushes a GFRP rod onto the Y gib
 P_Y = 4.0                 # N each (spring rate TVP)
 PUSHER_D = 2.0            # GFRP (glass-fibre) rod
 PLUNGER_BORE_D = 2.2
 LOCK_BORE_D = 2.2
-GIB_Z = -2.3              # review fix e: bore top -1.2, 0.6 below the cavity floor (was 0.3 into it)
-PUSHER_TOP_Y = 41.0       # metal (spring, screws, inserts) only above this y
+GIB_Z = -2.5              # bore axis (was -2.3): the M3 thread's top at -1.25, 0.65 below the cavity floor
+Y_TIP = (21.0, 22.0)      # GFRP tip pin (y), on the gib's top face
+Y_SPRING = (22.0, 24.4)   # steel compression spring as compressed (y), OD <= 2.0, ~2 N/mm, ~4.4 free (TVP)
+Y_TAP_L = 5.0             # M3 thread tapped in the print, from the top face down (rev B: M3 tapped)
+Y_SCREW_L = 4.0           # nylon M3 x 4 set screw / the thumb screw's thread, top flush with the face
 
-# Board support H1 (nylon M2 x 5) into a boss printed 0.1 low and shimmed; tapped in the print.
+# Board support H1 into a boss printed 0.1 low and shimmed; tapped M2 in the print.  2026-11-09: H1 is also the lid's
+# upper fastening (the old upper lid screws at y 44 / 46 have no body left under them): a tube on the lid underside
+# (Dia H1_TUBE_D, its end H1_TUBE_GAP over the board top) and a nylon M2 x 10 flat-head screw from the lid's top face
+# through the tube and the board into the boss.  The board is clamped between the tube and the shimmed boss, so the lid
+# screw cannot pull it out of the tab plane (the boss sets its height, as before).
 BOSS_D = 4.5
 H1_BOSS_LOW = 0.10
+H1_TUBE_D = 4.4
+H1_TUBE_GAP = 0.10
+H1_SCREW_L = 10.0
 # Button-band ledge (open item from the contract review): HOLD and MODE sit over the battery pocket
 # with no body under the board.  A 1.8 mm ledge cantilevered from the cavity wall at y 34.4 runs
 # under the board's top edge (bottom side there: solder mask only), printed 0.05 low and shimmed to
 # contact with Kapton like H1, so it supports the board without pulling it out of the tab plane.
 BTN_LEDGE = dict(u0=37.0, u1=65.5, y0=32.6, low=0.05)
 
-# Lid screws: (u, y, kind).  The two tower screws are thread-forming (no insert room between
-# the tab clamps); the two upper ones use heat-set inserts.
-LID_SCREWS = [(4.5, 9.75, "pt"), (73.5, 9.75, "pt"), (10.5, 46.0, "insert"), (74.0, 44.0, "insert")]
+# Lid screws: (u, y, kind).  Thread-forming (no insert room): the two tower screws between the tab clamps and, since
+# the 2026-11-09 slim-down, one in the right tower above the USB-C relief (was an insert at (74, 44)); the upper-left
+# one (an insert at (10.5, 46)) is replaced by the nylon screw through H1 (no body is left above the antenna for it).
+LID_SCREWS = [(4.5, 9.75, "pt"), (73.5, 9.75, "pt"), (73.0, 33.4, "pt")]
 
 # Thumb roller: on the beam's upper edge at the right tower, axis along z.  Review fix e:
 # the roller drops 0.5 so the slot roof keeps >= 1.2 of material under the USB relief.
@@ -353,6 +388,18 @@ FJ_Y0, FJ_Y1 = H_Y0, STEP_Y1
 FIXED_IJ_SHOULDER_X0 = FJ_X0
 FIXED_IJ_GUSSET_X1 = -IJ_TIP_BASE_W - IJ_FIXED_CLR
 
+# Outside shape (2026-11-09 slim-down).  The back face is the print bed and the lid prints face down, so every edge on
+# those faces is a 45 deg chamfer (no overhang) and the corners in plan are radii (vertical edges print as outlines).
+CORNER_R = {"top_left": 3.4, "top_right": 3.0}     # plan radii at (STEP_U1, H_Y1) and (H_U1, H_Y1); 3.4 keeps
+                                                   # the 1.2 wall to the rounded cavity corner
+CAV_CORNER = (BOARD_U0 + 1.0, BOARD_W - 1.0, 1.4)  # cavity top-left corner round the board's R1 corner (+0.4 clearance)
+BACK_CHAMFER = 1.2        # 45 deg on the back-face perimeter (it runs on above the battery door, whose rebate stops at its foot) ...
+BACK_CHAMFER_KEEP = [     # ... except at the jaws: (u0, u1, y0, y1) regions where the back edge stays sharp
+    (-1.0, STEP_U1 + 2.0, -50.0, IJ_TIP_Y0 + 0.5),                    # step, inside-jaw root, left face to y 31.5
+    (-1.0, JAW_ROOT_W + 2.0, -50.0, H_Y0 + BACK_CHAMFER + 0.5),       # lower edge at the outside-jaw root
+]
+LID_CHAMFER = 0.8         # 45 deg on the lid's outer top edge (bed side when printed face down)
+
 # Depth rod: OMITTED in rev A (see docs/mechanical.md section 7)
 DEPTH_ROD = False
 
@@ -367,7 +414,7 @@ TAPE_SHIM_NOM = AS_H_MAX - AS_H_NOM
 TAPE_SHIM_MAX = AS_H_MAX - AS_H_MIN
 TAPE_CH_DEPTH = -(TAPE_TOP - TAPE_T - TAPE_ADH) + TAPE_SHIM_NOM   # channel floor depth below the beam face
 BOTTOM_CHANNEL_MAX_H = AS_H_NOM + MAG_GAP - 0.10  # any bottom part over the channel
-BAT_DOOR["y1"] = H_Y1
+assert abs(BAT_DOOR["y1"] + 0.1 - (H_Y1 - 1.2)) < 1e-9    # rebate top = BACK_CHAMFER's foot (BACK_CHAMFER below)
 HOUSING_SIZE = (H_U1 - H_U0, H_Y1 - H_Y0, Z_LID + 0.6 - Z_BACK)
 ROLLER_RIM_U = ROLLER_U + ROLLER_D / 2
 

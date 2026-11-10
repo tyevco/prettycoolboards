@@ -6,7 +6,8 @@ box per component, in the slider frame (u = BOARD_U0 + board x, y = board y, z f
 
 Source, in order of preference:
   1. board_parts.json, written by extract_board_parts.py from the routed .kicad_pcb
-     (outline, holes, Fab outline x datasheet height per part, standoffs, mated plug);
+     (outline, holes, Fab outline x datasheet height per part, standoffs, mated plug), with the
+     PENDING board changes applied over it (the housing is designed for them; see PENDING);
   2. otherwise PLACEHOLDER below: the SPEC 2.1 placement table (D4).
 
     python3 board_envelope.py      # list the envelope and run the board-rule check
@@ -38,10 +39,8 @@ PLACEHOLDER = [
      "USB-C HRO TYPE-C-31-M-12, right edge y 26.5, 1 mm overhang"),
     ("J50", "T", P.FPC_CONN["x0"], P.FPC_CONN["x1"], P.FPC_CONN["y0"], P.FPC_CONN["y1"], P.FPC_CONN["h"],
      "FH12-13S 0.5 mm FPC under the glass's -x end"),
-    ("J2", "T", P.J_BAT["x"] - 2.0, P.J_BAT["x"] + 2.0, P.J_BAT["y"] - 2.1, P.J_BAT["y"] + 2.1, 2.95,
-     "JST-SH 2p side entry, mouth +y"),
-    ("J2_plug", "T", P.J_BAT["x"] - 2.2, P.J_BAT["x"] + 2.2, P.J_BAT["y"] + 2.1, P.J_BAT["y"] + 6.7, 2.95,
-     "mated plug"),
+    ("J2", "B", *P.J2_BODY, P.J2_H, "JST-SH 2p side entry, BOTTOM side, mouth +y (since 2026-11-09, SPEC 15 L1)"),
+    ("J2_plug", "B", *P.J2_PLUG, P.J2_H, "mated plug, in the battery pocket"),
     ("BZ50", "T", 35.5, 44.5, 19.8, 28.8, 1.9, "PKMCS0909E"),
     ("U30", "B", P.AS_X - P.AS_BODY_X / 2, P.AS_X + P.AS_BODY_X / 2,
      P.AS_Y - P.AS_BODY_Y / 2, P.AS_Y + P.AS_BODY_Y / 2, P.AS_H_MAX, "TSSOP-20 body, A max 1.20"),
@@ -71,15 +70,49 @@ def _load():
     return None
 
 
+#: Board changes the housing is designed for but the routed board does not have yet.  While the extracted board still
+#: shows the old part, load_parts() substitutes the new envelope and pending() reports it, so the clash check tests the
+#: housing against the board as it will be.  Each: ref -> (old side, replacement rows, request), e.g. the 2026-11-09
+#: slim-down's J2 move:
+#:   "J2": ("T", [("J2", "B", *P.J2_BODY, P.J2_H, "..."), ("J2_plug", "B", *P.J2_PLUG, P.J2_H, "...")], "J2 to the bottom")
+#: Empty since the board has that move (SPEC 15 L1, 2026-11-09): J2 and its plug are read from the routed board.
+PENDING = {}
+
+
+def _apply_pending(parts):
+    """parts with every PENDING change applied; [(ref, request)] that were applied."""
+    applied = []
+    for ref, (old_side, rows, req) in PENDING.items():
+        cur = [p for p in parts if p[0] == ref]
+        if cur and cur[0][1] == old_side:
+            parts = [p for p in parts if p[0] not in (ref, ref + "_plug")] + list(rows)
+            applied.append((ref, req))
+    return parts, applied
+
+
+def pending():
+    """[(ref, request)] of the board changes still pending (substituted in the envelope)."""
+    d = _load()
+    if not d:
+        return []
+    raw = [(p["ref"], p["side"]) for p in d["slider"]["parts"]]
+    return _apply_pending(raw)[1]
+
+
 def load_parts():
-    """[(ref, side, x0, x1, y0, y1, h, note)] in board coordinates, and the source name."""
+    """[(ref, side, x0, x1, y0, y1, h, note)] in board coordinates, and the source name.  PENDING board changes are
+    applied over the extracted board."""
     d = _load()
     if d:
         out = []
         for p in d["slider"]["parts"]:
             x0, x1, y0, y1 = p["aabb"]
             out.append((p["ref"], p["side"], x0, x1, y0, y1, p["h"], p["note"] or p["fp"]))
-        return out, f"board_parts.json ({d['source']})"
+        out, applied = _apply_pending(out)
+        src = f"board_parts.json ({d['source']})"
+        if applied:
+            src += " + pending: " + ", ".join(r for r, _q in applied)
+        return out, src
     return PLACEHOLDER, "PLACEHOLDER (SPEC 2.1 placement table)"
 
 
@@ -173,6 +206,27 @@ def spec_sanity():
     for lim, (h, ref) in sorted(worst.items()):
         res.append(("OK  " if h <= lim + 1e-9 else "FAIL",
                     f"tallest top part {'under the glass' if lim < 4 else 'elsewhere'}: {ref} {h:.2f} (limit {lim})"))
+    # 1b. bottom side in the upper band (y > 20): only the module's decoupling / ADC filter exception (SPEC 2.1, h <= 0.55)
+    #     and parts that hang into the battery pocket (J2 and its plug since 2026-11-09), clear of its walls
+    mod_ex = (1.8, 4.4, 22.7, 27.0)
+    b = P.BAT_POCKET
+    pocket = (b["u0"] - P.BOARD_U0 + 0.3, b["u1"] - P.BOARD_U0 - 0.3, b["y0"] + 0.3, b["y1"] - 0.3)
+    for ref, side, x0, x1, y0, y1, h, note in parts:
+        if side != "B" or y1 <= P.BEAM_W:
+            continue
+        if _inside((x0, x1, y0, y1), (mod_ex[0], mod_ex[2], mod_ex[1], mod_ex[3])) and h <= 0.55 + 1e-9:
+            where = "the module exception x 1.8..4.4, y 22.7..27.0, <= 0.55"
+            ok = True
+        else:
+            cell = (P.BAT_U0 - P.BOARD_U0, P.BAT_U0 + P.BAT_L - P.BOARD_U0, b["y0"], b["y1"])
+            over_cell = _overlap((x0, x1, y0, y1), cell)
+            ok = _inside((x0, x1, y0, y1), (pocket[0], pocket[2], pocket[1], pocket[3])) and \
+                (not over_cell or P.BOARD_Z0 - h >= P.Z_POCKET + P.BAT_T + 0.3)
+            where = f"the battery pocket x {pocket[0]:.1f}..{pocket[1]:.1f}, y {pocket[2]:.1f}..{pocket[3]:.1f} (0.3 in)"
+        res.append(("OK  " if ok else "FAIL", f"bottom part {ref} in the upper band: x {x0:.2f}..{x1:.2f} y {y0:.2f}..{y1:.2f} "
+                    f"h {h:.2f} {'inside' if ok else 'NOT inside'} {where}"))
+    for ref, req in pending():
+        res.append(("PEND", f"board change request (not on the routed board yet; the envelope uses it): {req}"))
     # 3. antenna keep-out: no part on either side except the module itself
     ko = P.ANTENNA_KEEPOUT
     bad = [r for r, side, x0, x1, y0, y1, h, n in parts

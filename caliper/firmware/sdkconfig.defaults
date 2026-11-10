@@ -67,6 +67,13 @@ CONFIG_BT_NIMBLE_LOG_LEVEL_WARNING=y
 CONFIG_BT_NIMBLE_HID_SERVICE=n
 
 # ---- Wi-Fi, HTTP, MQTT --------------------------------------------------------------------
+# TX power cap for the 135 mAh cell (2C = 270 mA pulse rating): 10 dBm, the option's floor, set in
+# the PHY init data so it holds from esp_wifi_start() on; wifi.c applies it again at run time
+# (esp_wifi_set_max_tx_power). The module's PA current falls from 355 mA at 20.5 dBm to an
+# estimated ~195 mA at 10 dBm (Espressif publishes only the BLE curve: 340 / 204 / 189 mA at
+# 20 / 9 / 0 dBm), so a burst pulls ~0.27 A from the cell instead of 0.42-0.49 A. Costs range
+# (-10 dB, about a third of the free-space distance): docs/firmware.md §12.6.
+CONFIG_ESP_PHY_MAX_WIFI_TX_POWER=10
 CONFIG_ESP_WIFI_STATIC_RX_BUFFER_NUM=6
 CONFIG_ESP_WIFI_DYNAMIC_RX_BUFFER_NUM=16
 CONFIG_ESP_WIFI_AMPDU_TX_ENABLED=n
