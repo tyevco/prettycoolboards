@@ -3,12 +3,13 @@
 > **Status: builds for the target, not run on hardware.** The ESP-IDF project in
 > [`caliper/firmware`](../firmware/README.md) **builds with `idf.py build` on ESP-IDF v5.4.2** for the
 > esp32s3 (4 MB / N4R2 layout, clean build, **0 warnings**). With the bring-up commands (§10.1) the image is
-> **1 689 152 B and fits the 1 728 KB app slot with 80 320 B (4.5 %) to spare**; `CONFIG_CALIPER_BRINGUP=n`
-> gives 23 520 B of that back (§13). No binary has been flashed: nothing has run on a
-> chip. The portable core (units, rounding, tolerance, statistics, the SETTLE / SWEEP capture modes, log
+> **1 704 880 B and fits the 1 728 KB app slot with 64 592 B (3.7 %) to spare** (built 2026-11-10 with the LSM6DSO
+> driver, the orientation filter and the display flip: 15 728 B more than before); `CONFIG_CALIPER_BRINGUP=n`
+> gave 23 520 B back before that change and has not been rebuilt since (§13). No binary has been flashed: nothing
+> has run on a chip, and that includes the LSM6DSO driver, which is written from the datasheet text (§12.2). The portable core (units, rounding, tolerance, statistics, the SETTLE / SWEEP capture modes, log
 > records, GATT codecs, settings JSON, CSV, button gestures, the AS5311 frame logic, the SSI fine
-> interpolation, the capacitive demodulator and the bring-up pass/fail rules) is compiled and tested on the host:
-> **59 test groups, 1276 checks, 0 failures**, with `-Werror`,
+> interpolation, the capacitive demodulator, the orientation filter of §12.2 and the bring-up pass/fail rules) is
+> compiled and tested on the host: **67 test groups, 1723 checks, 0 failures**, with `-Werror`,
 > AddressSanitizer and UBSan (fatal: any undefined behaviour fails the run), and also compiled as strict ISO C11; the reading-log store (`store.c`) has its
 > own host test against stubbed LittleFS/NVS (**3 groups, 2589 checks, 0 failures**). Everything that
 > touches a peripheral is unverified. Numbers marked **TVP** are to be verified on the prototype. The
@@ -43,6 +44,7 @@ caliper/firmware/
   components/
     board/                   exposes main/board_pins.h + proto/ to every component; checks pin drift
     measure/                 PORTABLE: measure.c logrec.c gatt_codec.c settings.c csv.c buttons.c hid_keymap.c
+                             orient.c (orientation from the gyroscope + accelerometer, §12.2)
     sensor_mag/              AS5311: sensor_mag.c (PCNT, SSI, index) + as5311_proto.c (PORTABLE)
     sensor_cap/              EXPERIMENTAL: sensor_cap.c (bundle drive, ADC) + cap_demod.c (PORTABLE)
     caliper_core/            event bus, live state, commands, settings, profiles, stats
@@ -51,7 +53,7 @@ caliper/firmware/
     ble/                     NimBLE: custom service, BAS/DIS/HID, worker (log stream, typing)
     caliper_wifi/            STA / provisioning AP, HTTP server, MQTT + HTTP POST push
     caliper_usb/             TinyUSB CDC + MSC, CLI
-    power/                   BQ25180, MAX17048, LIS2DW12, temperature guard, LEDC, LED, deep sleep
+    power/                   BQ25180, MAX17048, LSM6DSO (imu.c), temperature guard, LEDC, LED, deep sleep
   test/host/                 CMake project: the PORTABLE files + tiny_test.h + test_main.c
 ```
 
@@ -90,7 +92,7 @@ flowchart LR
   CORE -- "RECORDED / SEND / STATE /<br/>SLEEP / WIFI / BEEP / TOAST" --> BUS
   BUS --> BLEW & PUSH & LV & APP
   CORE --> STORE["store<br/>LittleFS ring + NVS"]
-  APP --> PWR["power<br/>BQ25180, MAX17048,<br/>LIS2DW12, sleep"]
+  APP --> PWR["power<br/>BQ25180, MAX17048,<br/>LSM6DSO, sleep"]
   APP -- "ble_tick()" --> BLEGATT
 ```
 
@@ -114,6 +116,7 @@ flowchart LR
 | `buttons` | 0 | 7 | 100 Hz | sample 3 GPIOs, `btn_update()`, `ui_handle_button()` |
 | `app` | 0 | 3 | 10 Hz | `ble_tick()` (LIVE/battery notify); at 1 Hz: power poll, USB poll, dim, auto-off, low battery |
 | `bus` | 0 | 6 | events | commands, events |
+| `imu` | 0 | 5 | 50 Hz (`vTaskDelayUntil`) | one 14-byte I2C read of the LSM6DSO (temperature, gyroscope, accelerometer), the orientation filter (§12.2) |
 | `ble_wrk` | 0 | 5 | jobs | LOG_READ streaming, HID typing |
 | `push` | 0 | 3 | jobs | MQTT publish, HTTP POST |
 | `cli` | 0 | 3 | lines | USB console commands |
@@ -136,8 +139,9 @@ pin-plan test, §12.5), and a `BOARD_PINS_HASH` (SHA-256 of nets.py and the gene
 * The header is **committed**, so the firmware builds without the hardware tree.
 * The `board` component runs `gen_pins.py --check` at CMake configure time; a stale header **stops the
   build** with the command to regenerate it. CMake re-runs the check when nets.py changes.
-* It already paid off once: during capture the schematic moved the LIS2DW12 to **0x19** (SA0 high) and
-  added the +3V3_UI rail; the check flagged the stale header and the firmware followed (§12).
+* It already paid off once: during capture the schematic moved the accelerometer (then a LIS2DW12) to **0x19**
+  (SA0 high) and added the +3V3_UI rail; the check flagged the stale header and the firmware followed (§12).
+  The same path carried the change to the LSM6DSO at **0x6B** on 2026-11-10 (§12.2).
 
 ```sh
 python3 caliper/firmware/tools/gen_pins.py           # regenerate
@@ -359,7 +363,8 @@ or a reset drops it, like a hold.
 | SWEEP | the **selected extreme**, live while in contact, final when frozen; never the other extreme, which is a misalignment artefact, not a size | `GO (min)` / `GO (max)` |
 
 **Not built:** SET (multi-point sets, contract value 3 and the log's set bits are reserved), the CHART screen's
-min/max lines, the 5 ms contact tick, an IMU stillness gate.
+min/max lines, the 5 ms contact tick, an IMU stillness gate (the orientation filter of §12.2 now has a `steady`
+flag; SETTLE does not use it: its thresholds are untuned, and the slider can be still while the hand is not).
 
 **Host tests** (`test/host/test_capture.c`, 14 groups plus 11 from the review; the traces are analytic and quantised to the
 488.28125 nm SSI step, with deterministic Gaussian jitter σ = 0.3 µm from an LCG so every host gives the same
@@ -406,6 +411,18 @@ fails to initialise no longer aborts the firmware through the port's "init first
 button is pressed: the buttons then still zero / hold / record / send, without screen changes. `ui_sleep()`
 stops the LVGL task under the lock before sending the panel's off/sleep commands, so they never interleave
 with a frame flush on the same SPI device.
+
+**Display flip** (2026-11-10, `CONFIG_CALIPER_UI_AUTO_FLIP`, default on): when the caliper is held with its top
+(button) edge down, the picture turns 180° so that it still reads upright. The 25 Hz refresh timer asks the
+orientation filter (§12.2) for `up`: top edge at least ≈ 20° below the horizon (`up.y ≤ −0.35`) for 0.6 s turns
+it, ≥ +0.35 for 0.6 s turns it back, and anything between (lying flat, standing on end) keeps what is shown, so
+it does not flap on a bench. The turn is done in the panel, not in software: `lv_display_set_rotation(180)` makes
+`esp_lvgl_port` invert the ST7789's MX / MY bits and LVGL redraws everything, with no extra buffer. The port
+does not move the RAM offset, so `ui_flip_poll` sets the mirrored one first: 320 − 240 − 40 = **40** and
+240 − 135 − 53 = **52** (**TVP**, like 40/53; `bu lcd flip` shows the frame for it). All of it runs in the LVGL
+task between frames. The buttons do not swap: ZERO / HOLD / MODE keep their functions wherever they end up.
+Without an IMU, or before it has seen gravity, the picture stays as mounted. Thresholds are first guesses and the
+whole path is **designed, host-tested (the hysteresis rule), not run**.
 
 | Screen | Content |
 |---|---|
@@ -604,15 +621,17 @@ the console (`ask()` in `cli.c` reads the next line from the CLI queue while the
 
 | Command | Checks | Reads |
 |---|---|---|
-| `bu all` | rails, i2c, bq, fg, imu, mag, cap, ble (2 s), then `SUMMARY n PASS, m FAIL` | |
+| `bu all` | rails, i2c, bq, fg, imu, gyro, mag, cap, ble (2 s), then `SUMMARY n PASS, m FAIL` | |
 | `bu rails [vbat_mv]` | charger and gauge present; VBAT (MAX17048 VCELL) 2.5–4.5 V and within ±30 mV of the meter value given; VBUS, charge state, die temperature. VSYS and the 3.3 V rails have no ADC: the meter, at TP3–TP6 | `power_get_last()` (the app task's 1 Hz poll) |
-| `bu i2c` | `i2c_master_probe` 0x08–0x77: exactly 0x19, 0x36, 0x6A (the table is `board_pins.h`) | |
+| `bu i2c` | `i2c_master_probe` 0x08–0x77: exactly 0x36, 0x6A, 0x6B (the table is `board_pins.h`) | |
 | `bu bq` | STAT0 / STAT1 / FLAG0 decoded (fails on VIN OVP, safety timer, BAT_OCP, TS open / hot / cold); registers 0x00–0x0C dumped and compared with the init table (`power_bq_table()`, with the live ICHG and ILIM) | `power_diag_read()` |
 | `bu fg [vbat_mv]` | VERSION 0x001x, VCELL, SOC, and the settings §12.2 makes (VRESET.Dis, HIBRT 0x8030, CONFIG.SLEEP clear) | |
-| `bu imu` / `bu imu move [s]` | WHO_AM_I 0x44 and \|a\| 850–1150 mg at rest / a ≥ 500 mg swing and IMU_INT1 going low (the wake-up interrupt), latch cleared after | |
+| `bu imu` / `bu imu move [s]` | LSM6DSO WHO_AM_I 0x6C and \|a\| 850–1150 mg at rest, plus the orientation line (roll, pitch, face, steady, relative yaw) / a ≥ 500 mg swing and IMU_INT1 going low (the wake-up interrupt), latch cleared after | `power_diag_read()`, `power_orient_get()` |
+| `bu gyro` / `bu gyro turn [s]` | the gyroscope running (CTRL2_G), 2 s lying still: each axis' mean within ±3 dps and ≤ 2 dps peak-to-peak, with the filter's bias estimate and the chip temperature / some axis reaching 60 dps while turned by hand, each axis' extremes printed with their signs (the axis-mapping check) | `power_diag_read()`, `power_imu_last()` |
 | `bu sns off` / `on` | SNS_PWR_EN: the UI stopped, its lines low, rails off, operator reads TP5 / TP6 / rails back on and the AS5311 answering; then `reboot` | `sensor_mag_power()` |
 | `bu mag` / `bu mag move [s]` | one second of frames: ≥ 50, ≤ 1 % bad, last valid, field in range / the count vs SSI cross-check below | `sensor_mag_diag()` |
-| `bu lcd [off]` | colour bars, a 1 px frame, corner labels on LVGL's top layer (`ui_test_pattern()`), backlight dim and back; operator y / n | |
+| `bu lcd [off]` | colour bars, a 1 px frame, corner labels on LVGL's top layer (`ui_test_pattern()`), backlight dim and back; operator y / n. The picture is pinned as mounted for the test (`ui_set_flip`) | |
+| `bu lcd flip` | the same pattern turned 180° (§7): the frame proves the turned RAM offset; operator y / n | |
 | `bu btn [s]` | each button pressed and released (≥ 20 ms), none down at the start | GPIO levels |
 | `bu beep`, `bu led` | two beeps; red, green, blue, white; operator y / n | |
 | `bu cap [scale]` | DC level at the ADC 1700–2700 LSB, the last burst's raw I/Q and amplitudes; with `scale` ≥ 90 % valid and both amplitudes ≥ 8 LSB | `sensor_cap_diag()` |
@@ -733,16 +752,57 @@ again whenever IC_CTRL reads back wrong (a BQ reset), checked at 1 Hz.
   (19-6171). The automatic hibernate thresholds (HIBRT POR 0x8030: HibThr 0x80 × 0.208 %/h = 26.6 %/h, ActThr
   0x30 × 1.25 mV = 60 mV) now keep the gauge **active while the caliper is awake** (56–71 mA is 41–53 %/h of
   135 mAh; with the 500 mAh cell it was 11–14 %/h, below the threshold) and let it hibernate in deep sleep
-  (33 µA = 0.02 %/h), as the sleep budget assumes. The ALRT thresholds (ATHD 4 % default) stay unused: nothing
+  (38 µA = 0.03 %/h), as the sleep budget assumes. The ALRT thresholds (ATHD 4 % default) stay unused: nothing
   reads FG_ALRT_N (§12.5). The "Battery empty" threshold stays at **3 %** SOC. The small cell's higher
   resistance makes VCELL, and so SOC, read low under load, which can end a session early but never late. 3 %
   is now ≈ 4 mAh, about 3–4 min awake. The MAX17048's accuracy on this cell is **TVP**.
-* **LIS2DW12 (0x19)**: WHO_AM_I 0x44; 12.5 Hz low-power mode 1, ±2 g; wake-up threshold 2 × 31.25 mg =
-  62.5 mg, duration 0; wake-up routed to INT1, **latched, active low, push-pull** (CTRL3 = 0x18), interrupts
-  enabled. The latch is cleared right before sleeping, and INT1 is armed as a wake source only if it then
-  reads high: a LIS2DW12 that reset since boot is back to its active-high default and would otherwise wake
-  the caliper at once, over and over. Active low because ext1 on the S3 needs one level for all wake pins
-  and the buttons are active low.
+* **LSM6DSO (0x6B)**, a 6-axis IMU (3-axis gyroscope + 3-axis accelerometer) since 2026-11-10 (SPEC §16;
+  it replaced the LIS2DW12 accelerometer at 0x19). Driver: `components/power/imu.c`. Every register address,
+  bit and scale factor is from ST DS12140 Rev 3 and AN5192 Rev 5 and cited in the source. WHO_AM_I (0Fh) = 0x6C.
+  At boot: both sensors to power-down, software reset (CTRL3_C bit 0, polled), then
+  * **CTRL3_C (12h) = 0x64**: BDU, register auto-increment, **H_LACTIVE = 1 and PP_OD = 0: the interrupt pins
+    are push-pull and active low**. ext1 on the S3 needs one level for all wake pins and the buttons are active
+    low. Until this write INT1 is an input with a pull-down (DS Table 19), so the pin reads **low**;
+  * **CTRL9_XL (18h) = 0xE2**: the I3C interface off (I2C only on this bus);
+  * the wake-up interrupt: WAKE_UP_THS (5Bh) = 2 and WAKE_UP_DUR (5Ch) = 0 (threshold 2 × 31.25 mg = 62.5 mg
+    at ±2 g, no duration), TAP_CFG0 (56h) = 0x41 (**latched**, cleared by reading the source register),
+    MD1_CFG (5Eh) = 0x20 (wake-up on INT1), TAP_CFG2 (58h) = 0x80 (interrupts on). Nothing is routed to INT2.
+* **Awake**: accelerometer ±2 g and gyroscope ±1000 dps, both at **52 Hz in low-power mode** (CTRL1_XL 0x30,
+  CTRL2_G 0x38, XL_HM_MODE = G_HM_MODE = 1): **0.30 mA** typical against 0.55 mA in high-performance mode
+  (AN5192 Table 9, at VDD 1.8 V; not measured, and ST gives no figure at 3.3 V). The gyroscope's drive is most
+  of it (0.265 mA already at 12.5 Hz), so a slower rate would save little. The `imu` task (core 0, priority 5,
+  50 Hz) reads temperature, gyroscope and accelerometer in one 14-byte burst from OUT_TEMP_L (20h).
+* **Asleep** (`power_imu_sleep_prepare`, called by `power_deep_sleep`): the sampler stops, the gyroscope and
+  the accelerometer go to power-down, then XL_HM_MODE = 0 and **XL_ULP_EN = 1** (CTRL5_C bit 7; the order the
+  datasheet requires for ultra-low-power mode), the wake-up setup is written again, and the accelerometer
+  restarts at **12.5 Hz**: **5.5 µA** typical (AN5192 Table 9, at 1.8 V; not measured). After 300 ms for the
+  slope filter to settle, the latch is cleared by reading WAKE_UP_SRC and ALL_INT_SRC, and IMU_INT1 is armed as a
+  wake source **only if it then reads high**: an LSM6DSO that reset since boot has INT1 back as an input with a
+  pull-down and would otherwise wake the caliper at once, over and over. The log then says `pickup wake
+  disabled for this sleep`; buttons and USB still wake it. The boot after a wake reconfigures the awake mode.
+
+**Orientation** (`components/measure/orient.c`, portable C, host-tested; fed by the `imu` task):
+
+| | |
+|---|---|
+| Frame | the board's: **+x** along the beam toward the USB end, **+y** toward the buttons (top edge), **+z** out of the display. The chip → board mapping is one 3 × 3 table at the top of `imu.c` (the identity: U60 is on the top side at 0°); `power_imu_init` refuses a table that is not a rotation |
+| State | the unit vector `up` (opposite to gravity) in board coordinates, the gyroscope bias, the yaw integral |
+| Gyroscope step | `up` is turned by the bias-corrected rate over the sample interval (exact rotation, Rodrigues), so it follows a quick flip without waiting for the accelerometer |
+| Accelerometer step | a complementary filter pulls `up` toward a / \|a\| with τ = 0.5 s, only while \|\|a\| − 1 g\| ≤ 0.15 g (a shake is not gravity); it snaps instead of blending when the two point into opposite half-spaces |
+| **Roll, pitch, tilt** | **absolute** (gravity is the reference): roll about the beam (0 display up, +90° top edge up), pitch of the beam against the horizon (+90° USB end up), tilt of the display normal against vertical; plus the nearest face (`display up`, `top edge down`, …) |
+| **Yaw** | **relative, and it drifts.** There is no magnetometer, so nothing ties it to north. It is the integral of the turn rate about the vertical since power-on or `power_orient_zero_yaw()`, with `yaw_unc_deg` growing at 1 °/s before a bias is known and 0.05 °/s after (estimates, not measured); a clipped gyroscope sample or a gap above 100 ms sets it to "unknown" (180°). Good for "turned about a quarter since I zeroed it", not for a heading |
+| Angular rate | bias-corrected, dps, board axes, and its magnitude |
+| Bias | learned whenever the caliper lies still for 1 s (each gyro axis within 1 dps peak-to-peak and each accelerometer axis within 30 mg over the window, mean below 5 dps), low-passed over later windows, subtracted from then on. The datasheet's zero-rate level is ±1 dps typical with ±0.010 dps/°C drift |
+| `steady` | \|rate\| ≤ 6 dps and \|\|a\| − 1 g\| ≤ 0.06 g for 300 ms: "held still enough to read". Looser and quicker than "at rest" (a hand, not a table) |
+
+API (`power.h`): `power_orient_get(&out)` copies the latest `orient_out_t` (false until a gravity reference has
+been seen), `power_orient_zero_yaw()`, `power_imu_last()` (the last raw sample in g / dps, the chip temperature,
+sample and error counts). Every threshold above is a first guess from the datasheet's noise figures (**TVP**).
+
+Where it is used: the **display flip** (§7), `bu imu` and `bu gyro` (§10.1). Where it is deliberately not:
+the SETTLE capture (§6.1) keeps its position-only rule, movement of the caliper does not count as "use" for the
+dim / auto-off timers, and **no orientation goes over BLE, the web API or the log**: the LIVE record stays
+20 bytes (v3) and no wire format changed.
 
 ### 12.3 Power states
 
@@ -761,7 +821,8 @@ stateDiagram-v2
   A `NO_LIGHT_SLEEP` PM lock is held the whole time: light sleep would gate the PCNT clock and lose counts.
   DFS (40–160 MHz) and tickless idle still run. Light sleep is configured for a future standby state.
 * **Going to sleep:** Wi-Fi off, panel off, LCD and RGB lines driven low with no pull (they feed +3V3_UI),
-  cap phases low, AS5311 position saved and SNS_PWR_EN low (both switched rails off), then **every pad to its
+  cap phases low, AS5311 position saved and SNS_PWR_EN low (both switched rails off), the LSM6DSO from its
+  awake mode to the wake-up mode (gyroscope off, §12.2), then **every pad to its
   SLEEP state from the pin plan** (§12.5): gates, rail switch and the lines into the switched rails low and
   held, the other RTC pads isolated and held, ext1 armed on the plan's wake pins (IMU_INT1, the three buttons,
   CHG_INT_N: all external pull-ups or push-pull, so every pad and RTC pull is off and RTC peripherals can
@@ -782,13 +843,14 @@ off.
 | TPS63802 + divider | 16.5 µA | nothing it can do |
 | BQ25180 | ~3 µA | battery-only |
 | MAX17048 | ~3 µA | automatic hibernate |
-| LIS2DW12 | ~1 µA | 12.5 Hz low-power wake-up mode |
-| TPS22917 × 2 (off) | ~1 µA | SNS_PWR_EN held low |
+| LSM6DSO | 5.5 µA | gyroscope powered down, accelerometer in the 12.5 Hz ultra-low-power wake-up mode (§12.2). Typical at VDD 1.8 V (AN5192 Table 9); ST gives no figure at 3.3 V. It was ~1 µA with the LIS2DW12 |
+| TPS22917 × 2 (off) | 0.02 µA | SNS_PWR_EN held low |
 | AS5311, AFE, ST7789, WS2812 | 0 | on the switched rails, lines held low |
-| **Total** | **≈ 32–33 µA** | within the revised SPEC target of ≤ 35 µA; not measured |
+| Conversion loss | ≈ 2.2 µA | the 3.3 V loads seen from the battery through the TPS63802 |
+| **Total** | **≈ 38 µA** | within the SPEC target of ≤ 40 µA (≤ 35 µA and ≈ 33 µA before the LSM6DSO, SPEC §16); ≈ 40 µA with 4 µA for the BQ25180 and the MAX17048 each; not measured |
 
 The pad currents behind "lines held low" are what §12.5 checks: until the fix there, six of those held
-lines cost **≈ 440 µA**, thirteen times the whole budget.
+lines cost **≈ 440 µA**, more than eleven times the whole budget.
 
 ### 12.5 Pin plan and sleep leakage
 
@@ -826,7 +888,7 @@ board circuit on the net (`ext`: pull-up / pull-down / driven / load, its rail a
   (hwtools `schema/README.md` §3; committed copy `test/hwtools/pinstate.json`, kept current by a ctest).
   Every state is `source: "assumed: ..."` (design intent, not a pinsnap capture). U10 pins are keyed by the
   KiCad symbol names (IO0…IO48, TXD0/RXD0; pads 23/24 for USB D−/D+), plus EN. By default it also adds the
-  other chips' pins on the MCU nets as the firmware configures them (LIS2DW12 INT1/INT2 push-pull high, the
+  other chips' pins on the MCU nets as the firmware configures them (LSM6DSO INT1/INT2 push-pull high, the
   I2C targets released, BQ25180 /INT and MAX17048 ALRT released, AS5311 outputs in RUN); `--no-peers` exports
   U10 only.
 
@@ -847,8 +909,8 @@ board circuit on the net (`ext`: pull-up / pull-down / driven / load, its rail a
 | 12 | SNS_PWR_EN | R5 100k pull-down; U5 / U6 TPS22917 ON | in | out 1 (sensor_mag) | out 0, hold |
 | 13 | I2C_SDA | R6 2.2k pull-up; U2, U4, U60 | in | periph 1 (power: I2C0 master) | hi-Z, hold |
 | 14 | I2C_SCL | R7 2.2k pull-up; U2, U4, U60 | in | periph 1 (power: I2C0 master) | hi-Z, hold |
-| 15 | IMU_INT1 | U60 LIS2DW12 INT1, push-pull active low (CTRL3 0x18) | hi-Z | in (board) | in, **wake** |
-| 16 | IMU_INT2 | U60 LIS2DW12 INT2, push-pull (no source routed) | hi-Z | in (board) | hi-Z, hold |
+| 15 | IMU_INT1 | U60 LSM6DSO INT1, push-pull active low (CTRL3_C 0x64) | hi-Z | in (board) | in, **wake** |
+| 16 | IMU_INT2 | U60 LSM6DSO INT2, push-pull (no source routed) | hi-Z | in (board) | hi-Z, hold |
 | 17 | BTN_ZERO_N | R52 100k pull-up + C52 100n; SW50 to GND | in | in (buttons) | in, **wake** |
 | 18 | BTN_HOLD_N | R53 100k pull-up + C53 100n; SW51 to GND | in | in (buttons) | in, **wake** |
 | 19 | USB_DM | U1 USBLC6 ESD, J1 (host pull-downs only with a cable) | hi-Z | periph (USB PHY) | periph |
@@ -1069,17 +1131,30 @@ warnings): *"caliper.bin binary size 0x19c640 bytes. Smallest app partition is 0
 (5%) free."*, 720 B more than the line above. The host tests pass unchanged (6 CTest targets; 1276, 2589 and
 443 checks, 0 failures).
 
-| `idf.py size` (4 MB / N4R2, bring-up on) | Used | Of |
-|---|---|---|
-| Image (.bin) | **1 689 152 B** (with the cell changes; the rows below are from the build before them) | 1 769 472 B app slot (`ota_0`/`ota_1`): **80 320 B (4.5 %) free** (104 560 B with `CONFIG_CALIPER_BRINGUP=n` before the cell changes) |
-| Flash code (.text) | 1 155 156 B | |
-| Flash data (.rodata) | 382 436 B | |
-| DIRAM (.text + .data + .bss) | 218 995 B (64.1 %) | 341 760 B, 122 765 B free (the capture state is about 1.7 KB) |
-| IRAM | 16 383 B | 16 384 B: the S3's fixed IRAM block, which the linker always fills before using DIRAM |
-| RTC slow / fast | 52 B / 148 B | 8 KB each (the AS5311 position, the zero) |
+**With the LSM6DSO, the orientation filter and the display flip** (§12.2, §7; 2026-11-10, built in the working
+tree with the build directory and the sdkconfig outside it, `idf.py -B <dir> -D SDKCONFIG=<file> set-target
+esp32s3` then `build` from an empty build directory, `hardware/design/nets.py` present so the board component's
+generated-file check ran, 0 compiler warnings): *"caliper.bin binary size 0x1a03b0 bytes. Smallest app partition
+is 0x1b0000 bytes. 0xfc50 bytes (4%) free."* and ESP-IDF's notice *"The smallest app partition is nearly full (4%
+free space left)!"*. That is **15 728 B more** than the line above: by `esp_idf_size` the flash code grew
+13 072 B and the read-only data 3 112 B against the last full table (which predates the 720 B of the cell
+changes). In the image now: `orient.c` 2.9 KB, `libpower.a` 5.5 KB in all (the driver and sampler are new in it),
+`libbringup.a` 10.4 KB (was 8.6 KB of code), and whatever the filter's `sinf`, `cosf`, `atan2f`, `asinf` and
+`acosf` pull in from `libm` (14.1 KB in all now; how much of it is new was not measured).
+`CONFIG_CALIPER_BRINGUP=n` and the 8 MB overlay were **not** rebuilt with this change.
 
-The 4.6 % margin (6 % without the bring-up commands) is thin for one slot of a two-slot OTA layout: a release
-image can turn `CONFIG_CALIPER_BRINGUP` off, and the next big feature should look at the fonts (Montserrat 48 is the largest), the MQTT client (no Kconfig switch yet) or TinyUSB MSC first. The 8 MB
+| `idf.py size` (4 MB / N4R2, bring-up on, 2026-11-10) | Used | Of |
+|---|---|---|
+| Image (.bin) | **1 704 880 B** | 1 769 472 B app slot (`ota_0`/`ota_1`): **64 592 B (3.7 %) free** (it was 80 320 B before the LSM6DSO; 104 560 B with `CONFIG_CALIPER_BRINGUP=n` before the cell changes) |
+| Flash code (.text) | 1 168 228 B | |
+| Flash data (.rodata) | 385 548 B | |
+| DIRAM (.text + .data + .bss) | 219 339 B (64.2 %) | 341 760 B, 122 421 B free (the capture state is about 1.7 KB, the orientation state 0.3 KB; the `imu` task's 4 KB stack comes from the heap) |
+| IRAM | 16 383 B | 16 384 B: the S3's fixed IRAM block, which the linker always fills before using DIRAM |
+| RTC slow / fast | 52 B / 148 B (from the build before the cell changes; nothing was added to RTC memory) | 8 KB each (the AS5311 position, the zero) |
+
+The 3.7 % margin is thin for one slot of a two-slot OTA layout, and the orientation code took a fifth of what
+was left: a release image can turn `CONFIG_CALIPER_BRINGUP` off (it gave 23.5 KB back before this change), and the
+next big feature should look at the fonts (Montserrat 48 is the largest), the MQTT client (no Kconfig switch yet) or TinyUSB MSC first. The 8 MB
 overlay (`SDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.defaults.8mb"`, `partitions_8mb.csv`, 16 384-record
 log) also builds with 0 warnings (clean `build8` directory): *"caliper.bin binary size 0x1956b0 bytes. Smallest
 app partition is 0x280000 bytes. 0xea950 bytes (37%) free."*
@@ -1095,14 +1170,21 @@ They build with `-Wall -Wextra -Werror -Wshadow -Wconversion` and AddressSanitiz
 sources are also compiled as strict ISO C11 (`-std=c11 -pedantic`, target `portable_c11`, part of the default
 build), which is what caught `strnlen` (POSIX, not C11) in `gatt_codec.c`. The sanitizers run with
 `-fno-sanitize-recover=all` since the capture review, so a UBSan report fails the test instead of scrolling past.
-Result (2026-11-09, with the bring-up rules, WSL Ubuntu 24.04, gcc 13.3): `caliper_tests` **59 groups PASS, 1276
-checks, 0 failures** (the 25 before, the 14 capture groups of §6.1, the capture review's 11 and the 9 bring-up
-groups of `test_bringup.c`: the I2C expectation table incl. a dead and a shorted bus, the BQ25180 status decode
-and every fault bit, the register read-back compare, the MAX17048 rule and VCELL conversion at full scale, the
-LIS2DW12 scaling / norm / motion rule, the button press tracker with glitches and stuck buttons, the AS5311 frame
-text and frame rule, the count vs SSI cross-check on synthetic slides with hysteresis, lost edges, the wrong sign,
-too-fast and too-short runs, and the capacitive rule); `store_tests` **3 groups PASS, 2589 checks, 0 failures**; ctest
-"100% tests passed, 0 tests failed out of 6" (with `pin_plan_tests` and the generated-file checks).
+Result (2026-11-10, with the LSM6DSO and the orientation filter, WSL Ubuntu 24.04, gcc 13.3): `caliper_tests`
+**67 groups PASS, 1723 checks, 0 failures** (the 25 before, the 14 capture groups of §6.1, the capture review's
+11, the 10 bring-up groups of `test_bringup.c`: the I2C expectation table incl. a dead and a shorted bus, the
+BQ25180 status decode and every fault bit, the register read-back compare, the MAX17048 rule and VCELL conversion
+at full scale, the LSM6DSO accelerometer scaling / norm / motion rule, **the gyroscope rules** (the scale of every
+full-scale setting incl. ±125 dps, the zero-rate limit, a moving board, too few samples, the turn threshold and
+the axis signs), the button press tracker with glitches and stuck buttons, the AS5311 frame text and frame rule,
+the count vs SSI cross-check on synthetic slides with hysteresis, lost edges, the wrong sign, too-fast and
+too-short runs, and the capacitive rule; and **the 7 orientation groups of `test_orient.c`**: the mounting table
+(identity, a rotated chip, a mirror refused), gravity on all six faces with roll / pitch / tilt, a gyroscope-only
+turn against the exact rotation, the yaw integral with its uncertainty and its loss on clipping and gaps, the bias
+learned at rest and not while turning slowly, recovery from a wrong start and a shake, and the flip hysteresis);
+`store_tests` **3 groups PASS, 2589 checks, 0 failures**; `pin_plan_tests` 443 checks, 0 failures; ctest
+"100% tests passed, 0 tests failed out of 6" (with the generated-file checks). All motion in these tests is
+synthetic: they prove the arithmetic and the rules, not the sensor.
 Covered: count → nm (1953.125 nm/count) and SSI LSB → nm (488.28125 nm) and their
 symmetry, mm and inch rounding edges (halves, −0, carries, ±150 mm, the 0.0005 in step), zero/hold, auto-hold
 timing and re-arm, tolerance limits ±1 nm (one-sided, negative nominal, sign of tol_minus, rounding before the
@@ -1163,7 +1245,18 @@ host tests; `./gen_vectors` prints LIVE v3, LOG and COMMAND bytes):
   MAX17048's accuracy on this cell, and a full charge at 70 mA to a 7 mA termination.
 * **The capacitive scale** is unproven end to end: front-end gain at 5 kHz, the ADC's true sample rate, the
   half-pitch ambiguity, the 25 mm/s tracking limit, electrode crosstalk.
-* **Not implemented:** OTA updates (the partitions are ready), IMU orientation (display flip), detecting a
+* **The IMU and the orientation (§12.2) have not run.** The LSM6DSO driver is written from the datasheet text
+  (DS12140 Rev 3, AN5192 Rev 5) and the filter is tested on synthetic motion only. **TVP**: the sign of each
+  axis against the board (the mapping table assumes the datasheet's drawing; `bu imu` and `bu gyro turn` check
+  it), the 0.30 mA awake and 5.5 µA asleep currents (typical at 1.8 V; the board runs it at 3.3 V), whether a
+  wake-up threshold of 62.5 mg feels like the LIS2DW12's did (the slope filters differ), the level of INT2
+  with nothing routed (the plan assumes idle high; a pad that sits low costs nothing, it is hi-Z and held in
+  sleep), the 300 ms settle before the latch is cleared, the gyroscope's real zero-rate level and noise in
+  low-power mode against the rest / steady thresholds, the yaw drift figures, the 50 Hz read sharing the bus
+  with the 1 Hz power poll, the flip thresholds and the turned panel offset (§7).
+* **Not implemented:** OTA updates (the partitions are ready), orientation over BLE / the web API / in the
+  app (no wire format has a field for it), movement of the caliper as "use" for the dim and auto-off timers,
+  an IMU stillness gate for SETTLE (§6.1), detecting a
   move > 1 mm while asleep (undetectable with this sensor: the REZERO flag covers only a recovery that
   failed), battery-temperature derating beyond the guards, USB suspend handling (the 2.5 mA suspend budget),
   Wi-Fi/HTTP authentication, a "standby" light-sleep state, a Kconfig switch for the MQTT client.
@@ -1311,5 +1404,7 @@ long stays SEND of the shown value, ZERO resets the capture; the button-edge bla
   pulses = 1024 edges per 2 mm pole pair; power-up lock), §7.2 (2-count hysteresis), §7.3 + Table 10 (SSI
   frame and timing), Tables 12–13 (status bits, red/yellow/green)
 * TI SLUSE99C (BQ25180) register map; dial-me-spinner `docs/firmware.md` §13 (init table, faults, ILIM)
-* Maxim/ADI 19-6171 (MAX17048 registers); ST DS11811 (LIS2DW12 registers)
+* Maxim/ADI 19-6171 (MAX17048 registers); ST DS12140 Rev 3 (LSM6DSO datasheet: registers,
+  scale factors, pin states) and AN5192 Rev 5 (LSM6DSO application note: currents, start-up, the wake-up
+  interrupt)
 * Bluetooth SIG: HID over GATT Profile 1.0, Battery Service, Device Information Service

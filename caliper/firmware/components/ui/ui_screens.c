@@ -294,6 +294,7 @@ static void refresh_prov(const cal_status_t *st)
 static void refresh_cb(lv_timer_t *t)
 {
     (void)t;
+    ui_flip_poll(REFRESH_MS); /* the picture follows the caliper turned top edge down (ui_panel.c) */
     cal_live_t lv;
     cal_status_t st;
     core_get_live(&lv);

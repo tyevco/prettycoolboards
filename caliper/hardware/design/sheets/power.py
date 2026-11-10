@@ -260,7 +260,7 @@ def build(d):
     cap(d, "C12", "1u", "+3V3_UI", "GND")
 
     d.group("I2C + open-drain pull-ups (always-on +3V3)",
-            "SDA/SCL 2.2k: BQ25180 0x6A, MAX17048 0x36, LIS2DW12 0x19 at 400 kHz (SPEC §6): ~205 ns rise (30-70 %)\n"
+            "SDA/SCL 2.2k: BQ25180 0x6A, MAX17048 0x36, LSM6DSO 0x6B at 400 kHz (SPEC §6): ~205 ns rise (30-70 %)\n"
             "with ~110 pF (4.7k gave 438 ns > 300 ns); 1.3 mA sink at VOL 0.4 V (fast mode allows 3 mA).\n"
             "Must stay on the always-on rail: the MAX17048 reads a low bus as 'disconnected' and sleeps.")
     res(d, "R6", "2.2k", "+3V3", "I2C_SDA")

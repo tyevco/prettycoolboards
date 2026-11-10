@@ -15,27 +15,35 @@ static void test_bu_i2c(void)
 {
     const bu_i2c_dev_t *e;
     CHECK_EQ_INT(bu_i2c_expected(&e), 3);
-    CHECK_EQ_STR(bu_i2c_name(0x19), "LIS2DW12");
+    CHECK_EQ_STR(bu_i2c_name(0x6B), "LSM6DSO");
     CHECK_EQ_STR(bu_i2c_name(0x36), "MAX17048");
     CHECK_EQ_STR(bu_i2c_name(0x6A), "BQ25180");
     CHECK(bu_i2c_name(0x50) == NULL);
     /* the table follows board_pins.h (nets.py) */
-    CHECK_EQ_INT(I2C_ADDR_LIS2DW12, 0x19);
+    CHECK_EQ_INT(I2C_ADDR_LSM6DSO, 0x6B);
     CHECK_EQ_INT(I2C_ADDR_MAX17048, 0x36);
     CHECK_EQ_INT(I2C_ADDR_BQ25180, 0x6A);
 
     bu_i2c_result_t r;
-    const uint8_t all[] = {0x6A, 0x19, 0x36}; /* any order */
+    const uint8_t all[] = {0x6A, 0x6B, 0x36}; /* any order */
     CHECK(bu_i2c_eval(all, 3, &r));
     CHECK_EQ_INT(r.n_missing, 0);
     CHECK_EQ_INT(r.n_extra, 0);
 
-    const uint8_t no_gauge[] = {0x19, 0x6A};
+    const uint8_t no_gauge[] = {0x6B, 0x6A};
     CHECK(!bu_i2c_eval(no_gauge, 2, &r));
     CHECK_EQ_INT(r.n_missing, 1);
     CHECK_EQ_INT(r.missing[0], 0x36);
 
-    const uint8_t extra[] = {0x19, 0x36, 0x6A, 0x18, 0x18}; /* SA0 low would answer at 0x18 */
+    /* SA0 open or low: the LSM6DSO answers at 0x6A, on top of the BQ25180. The scan then shows
+     * 0x6A alone with the IMU missing (docs/bringup.md) */
+    const uint8_t sa0_low[] = {0x36, 0x6A};
+    CHECK(!bu_i2c_eval(sa0_low, 2, &r));
+    CHECK_EQ_INT(r.n_missing, 1);
+    CHECK_EQ_INT(r.missing[0], 0x6B);
+    CHECK_EQ_INT(r.n_extra, 0);
+
+    const uint8_t extra[] = {0x6B, 0x36, 0x6A, 0x18, 0x18}; /* something that is not on the board */
     CHECK(!bu_i2c_eval(extra, 5, &r));
     CHECK_EQ_INT(r.n_missing, 0);
     CHECK_EQ_INT(r.n_extra, 1); /* duplicates counted once */
@@ -154,11 +162,16 @@ static void test_bu_fg(void)
 static void test_bu_imu(void)
 {
     CHECK_EQ_INT(bu_imu_mg(0), 0);
-    CHECK_EQ_INT(bu_imu_mg(16384), 1000);
-    CHECK_EQ_INT(bu_imu_mg(-16384), -1000);
-    CHECK_EQ_INT(bu_imu_mg(32767), 2000);
-    CHECK_EQ_INT(bu_imu_mg(-32768), -2000);
-    CHECK_EQ_INT(bu_imu_mg(16), 1); /* 0.98 mg rounds to 1 */
+    /* LSM6DSO: 0.061 mg/LSB at +-2 g (DS12140 Table 2) */
+    CHECK_EQ_INT(BU_IMU_WHO_AM_I, 0x6C);
+    CHECK_EQ_INT(bu_imu_mg(16393), 1000); /* 1 g = 1 / 0.000061 LSB */
+    CHECK_EQ_INT(bu_imu_mg(-16393), -1000);
+    CHECK_EQ_INT(bu_imu_mg(16384), 999);
+    CHECK_EQ_INT(bu_imu_mg(32767), 1999);
+    CHECK_EQ_INT(bu_imu_mg(-32768), -1999);
+    CHECK_EQ_INT(bu_imu_mg(16), 1);  /* 0.976 mg rounds to 1 */
+    CHECK_EQ_INT(bu_imu_mg(-8), 0);  /* -0.488 mg */
+    CHECK_EQ_INT(bu_imu_mg(-9), -1); /* -0.549 mg: half away from zero */
     CHECK_EQ_INT(bu_isqrt(0), 0);
     CHECK_EQ_INT(bu_isqrt(99), 9);
     CHECK_EQ_INT(bu_isqrt(1000000000000ULL), 1000000);
@@ -191,6 +204,126 @@ static void test_bu_imu(void)
     bu_imu_span_feed(&still, a1);
     bu_imu_span_feed(&still, a2);
     CHECK(!bu_imu_move_eval(&still, true, b, sizeof(b))); /* only nudged */
+}
+
+static void test_bu_gyro(void)
+{
+    /* CTRL2_G (11h): FS_G bits 3:2, FS_125 bit 1; DS12140 Table 2 G_So */
+    CHECK_EQ_INT(bu_gyro_udps_per_lsb(0x30), 8750);  /* 52 Hz, +-250 dps */
+    CHECK_EQ_INT(bu_gyro_udps_per_lsb(0x34), 17500); /* +-500 */
+    CHECK_EQ_INT(bu_gyro_udps_per_lsb(0x38), 35000); /* +-1000: what imu.c writes */
+    CHECK_EQ_INT(bu_gyro_udps_per_lsb(0x3C), 70000); /* +-2000 */
+    CHECK_EQ_INT(bu_gyro_udps_per_lsb(0x32), 4375);  /* FS_125 */
+    CHECK_EQ_INT(bu_gyro_udps_per_lsb(0x3E), 4375);  /* FS_125 wins over FS_G */
+    CHECK(bu_gyro_running(0x38));
+    CHECK(bu_gyro_running(0x10));
+    CHECK(!bu_gyro_running(0x08)); /* a full scale set, ODR 0: powered down */
+    CHECK_EQ_INT(bu_gyro_mdps(0, 0x38), 0);
+    CHECK_EQ_INT(bu_gyro_mdps(1, 0x38), 35);
+    CHECK_EQ_INT(bu_gyro_mdps(-1, 0x38), -35);
+    CHECK_EQ_INT(bu_gyro_mdps(28571, 0x38), 999985); /* just under 1000 dps */
+    CHECK_EQ_INT(bu_gyro_mdps(32767, 0x38), 1146845);
+    CHECK_EQ_INT(bu_gyro_mdps(-32768, 0x3C), -2293760);
+    CHECK_EQ_INT(bu_gyro_mdps(1, 0x32), 4);   /* 4.375 */
+    CHECK_EQ_INT(bu_gyro_mdps(-1, 0x32), -4);
+    CHECK_EQ_INT(bu_gyro_mdps(4, 0x32), 18);  /* 17.5 rounds away from zero */
+    CHECK_EQ_INT(bu_gyro_mdps(-4, 0x32), -18);
+
+    char b[320];
+    bu_gyro_stats_t s;
+    bu_gyro_stats_init(&s);
+    CHECK_EQ_INT(bu_gyro_stats_mean(&s, 0), 0);
+    CHECK(!bu_gyro_rest_eval(&s, b, sizeof(b))); /* nothing read */
+    CHECK(strstr(b, "samples") != NULL);
+    CHECK(!bu_gyro_turn_eval(&s, b, sizeof(b)));
+
+    /* at rest: a 0.5 dps offset on X, a few LSB of noise (35 mdps steps at +-1000 dps) */
+    for (int i = 0; i < 50; i++) {
+        const int32_t v[3] = {490 + (i % 3) * 35, -105 + (i % 2) * 70, (i % 4) * 35 - 70};
+        bu_gyro_stats_feed(&s, v);
+    }
+    CHECK_EQ_INT(s.n, 50);
+    CHECK_EQ_INT(bu_gyro_stats_mean(&s, 0), 524); /* 490 + 35 * 49 / 50 = 524.3 */
+    CHECK_EQ_INT(bu_gyro_stats_mean(&s, 1), -70);
+    CHECK_EQ_INT(bu_gyro_stats_mean(&s, 2), -19); /* (-70 * 13 - 35 * 13 + 35 * 12) / 50 = -18.9 */
+    CHECK(bu_gyro_rest_eval(&s, b, sizeof(b)));
+    CHECK(strstr(b, "FAIL") == NULL);
+    CHECK(!bu_gyro_turn_eval(&s, b, sizeof(b))); /* lying still is not a turn */
+    CHECK(strstr(b, "FAIL") != NULL);
+
+    /* too few samples */
+    bu_gyro_stats_t few;
+    bu_gyro_stats_init(&few);
+    for (int i = 0; i < BU_GYRO_MIN_SAMPLES - 1; i++) {
+        const int32_t v[3] = {i * 35, 0, 35};
+        bu_gyro_stats_feed(&few, v);
+    }
+    CHECK(!bu_gyro_rest_eval(&few, b, sizeof(b)));
+
+    /* powered down: the output registers hold one value */
+    bu_gyro_stats_t dead;
+    bu_gyro_stats_init(&dead);
+    for (int i = 0; i < 50; i++) {
+        const int32_t v[3] = {0, 0, 0};
+        bu_gyro_stats_feed(&dead, v);
+    }
+    CHECK(!bu_gyro_rest_eval(&dead, b, sizeof(b)));
+    CHECK(strstr(b, "powered down") != NULL);
+
+    /* a zero-rate level beyond the limit, either sign */
+    bu_gyro_stats_t off;
+    bu_gyro_stats_init(&off);
+    for (int i = 0; i < 50; i++) {
+        const int32_t v[3] = {(i % 2) * 35, -(BU_GYRO_ZERO_MAX_MDPS + 100) + (i % 2) * 35, 0};
+        bu_gyro_stats_feed(&off, v);
+    }
+    CHECK(!bu_gyro_rest_eval(&off, b, sizeof(b)));
+    CHECK(strstr(b, "Y zero-rate") != NULL);
+    CHECK(strstr(b, "X zero-rate") == NULL);
+    /* exactly at the limit passes */
+    bu_gyro_stats_t edge;
+    bu_gyro_stats_init(&edge);
+    for (int i = 0; i < 50; i++) {
+        const int32_t v[3] = {BU_GYRO_ZERO_MAX_MDPS - 35 + (i % 3) * 35, 0, (i % 2) * 35};
+        bu_gyro_stats_feed(&edge, v);
+    }
+    CHECK_EQ_INT(bu_gyro_stats_mean(&edge, 0), 2999); /* 2965 + 35 * 49 / 50 */
+    CHECK(bu_gyro_rest_eval(&edge, b, sizeof(b)));
+
+    /* moved during the rest check: reported as that, not as an offset */
+    bu_gyro_stats_t moved;
+    bu_gyro_stats_init(&moved);
+    for (int i = 0; i < 50; i++) {
+        const int32_t v[3] = {i == 20 ? 9000 : (i % 2) * 35, 0, 35 * (i % 3)};
+        bu_gyro_stats_feed(&moved, v);
+    }
+    CHECK(!bu_gyro_rest_eval(&moved, b, sizeof(b)));
+    CHECK(strstr(b, "not lying still") != NULL);
+    CHECK(strstr(b, "zero-rate") == NULL);
+
+    /* a turn about -Z (clockwise seen from the display side): the sign is in the text */
+    bu_gyro_stats_t turn;
+    bu_gyro_stats_init(&turn);
+    for (int i = 0; i < 100; i++) {
+        const int32_t v[3] = {(i % 5) * 700 - 1400, 2100 - (i % 7) * 700, i < 50 ? -i * 3500 : -(99 - i) * 3500};
+        bu_gyro_stats_feed(&turn, v);
+    }
+    CHECK(bu_gyro_turn_eval(&turn, b, sizeof(b)));
+    CHECK(strstr(b, "Z -171..+0") != NULL);
+    CHECK(strstr(b, "FAIL") == NULL);
+    /* 59 dps is not enough, 60 is, on any axis and either sign */
+    bu_gyro_stats_t slow;
+    bu_gyro_stats_init(&slow);
+    const int32_t v59[3] = {0, BU_GYRO_TURN_MDPS - 1, 0}, vm60[3] = {-BU_GYRO_TURN_MDPS, 0, 0};
+    bu_gyro_stats_feed(&slow, v59);
+    CHECK(!bu_gyro_turn_eval(&slow, b, sizeof(b)));
+    CHECK(strstr(b, "faster") != NULL);
+    bu_gyro_stats_feed(&slow, vm60);
+    CHECK(bu_gyro_turn_eval(&slow, b, sizeof(b)));
+    /* truncation is safe */
+    char tiny[8];
+    bu_gyro_rest_eval(&moved, tiny, sizeof(tiny));
+    CHECK(strlen(tiny) < sizeof(tiny));
 }
 
 static void test_bu_buttons(void)
@@ -356,6 +489,7 @@ void bringup_tests(void)
     RUN(test_bu_regs);
     RUN(test_bu_fg);
     RUN(test_bu_imu);
+    RUN(test_bu_gyro);
     RUN(test_bu_buttons);
     RUN(test_bu_as5311);
     RUN(test_as5311_xcheck);

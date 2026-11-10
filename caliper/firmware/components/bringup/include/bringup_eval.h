@@ -78,14 +78,14 @@ uint32_t bu_fg_vcell_mv(uint16_t raw);
  * HIBRT = 0x8030, CONFIG.SLEEP = 0) left otherwise. */
 bool bu_fg_eval(const bu_fg_regs_t *r, int32_t vbat_ref_mv, char *buf, size_t len);
 
-/* ---- LIS2DW12 ------------------------------------------------------------------------------ */
+/* ---- LSM6DSO accelerometer (ST DS12140 Rev 3) ---------------------------------------------- */
 
-#define BU_IMU_WHO_AM_I   0x44
+#define BU_IMU_WHO_AM_I   0x6C /* WHO_AM_I (0Fh), DS §9.11 */
 #define BU_IMU_G_MIN_MG   850  /* |a| at rest: 1 g within the offset/sensitivity tolerance (TVP) */
 #define BU_IMU_G_MAX_MG   1150
 #define BU_IMU_MOVE_MG    500  /* the motion test: one axis must swing this much */
 
-int32_t bu_imu_mg(int16_t raw); /* +-2 g full scale, left-justified 16-bit output */
+int32_t bu_imu_mg(int16_t raw); /* +-2 g full scale: 0.061 mg/LSB (DS Table 2, LA_So) */
 uint32_t bu_isqrt(uint64_t v);
 uint32_t bu_imu_norm_mg(int32_t x, int32_t y, int32_t z);
 bool bu_imu_still_ok(uint32_t norm_mg);
@@ -101,6 +101,42 @@ void bu_imu_span_feed(bu_imu_span_t *s, const int32_t mg[3]);
 int32_t bu_imu_span_max(const bu_imu_span_t *s); /* the largest per-axis swing, mg */
 /* True if an axis swung BU_IMU_MOVE_MG and the wake-up interrupt pulled IMU_INT1 low. */
 bool bu_imu_move_eval(const bu_imu_span_t *s, bool int1_low_seen, char *buf, size_t len);
+
+/* ---- LSM6DSO gyroscope --------------------------------------------------------------------- */
+
+/* The rest check. The datasheet gives the zero-rate level as +-1 dps TYPICAL (DS Table 2, G_TyOff)
+ * and no maximum, so the limit is three times that (TVP: tighten it after the first boards). The
+ * peak-to-peak limit only says "the board did not move": the noise is 75 mdps RMS (RnRMS). */
+#define BU_GYRO_ZERO_MAX_MDPS 3000
+#define BU_GYRO_STILL_PP_MDPS 2000
+#define BU_GYRO_MIN_SAMPLES   10
+/* The turn check: a wrist turn easily passes 100 dps; 60 dps is 20x the rest limit. */
+#define BU_GYRO_TURN_MDPS     60000
+
+/* Sensitivity in micro-dps per LSB from CTRL2_G (11h): FS_125 (bit 1) = +-125 dps, else FS_G (bits
+ * 3:2) 00 / 01 / 10 / 11 = +-250 / 500 / 1000 / 2000 dps: 4.375 / 8.75 / 17.50 / 35 / 70 mdps/LSB
+ * (DS Table 2, G_So; DS §9.13). */
+uint32_t bu_gyro_udps_per_lsb(uint8_t ctrl2_g);
+int32_t bu_gyro_mdps(int16_t raw, uint8_t ctrl2_g);
+bool bu_gyro_running(uint8_t ctrl2_g); /* ODR_G (bits 7:4) != 0: not in power-down */
+
+typedef struct {
+    bool have;
+    int32_t min[3], max[3];
+    int64_t sum[3];
+    uint32_t n;
+} bu_gyro_stats_t;
+
+void bu_gyro_stats_init(bu_gyro_stats_t *s);
+void bu_gyro_stats_feed(bu_gyro_stats_t *s, const int32_t mdps[3]);
+int32_t bu_gyro_stats_mean(const bu_gyro_stats_t *s, int axis);
+/* The board lying still. False: too few samples, no axis ever changed (the gyroscope is powered
+ * down or not updating: a live one shows noise), an axis moved more than BU_GYRO_STILL_PP_MDPS
+ * (it was not lying still: repeat), or a mean beyond BU_GYRO_ZERO_MAX_MDPS. */
+bool bu_gyro_rest_eval(const bu_gyro_stats_t *s, char *buf, size_t len);
+/* The board being turned by hand. True if some axis reached BU_GYRO_TURN_MDPS either way. The text
+ * lists the extremes of each axis with their signs, to check the axis mapping against the turn. */
+bool bu_gyro_turn_eval(const bu_gyro_stats_t *s, char *buf, size_t len);
 
 /* ---- buttons ------------------------------------------------------------------------------- */
 

@@ -540,6 +540,45 @@ def remove_debris(b, tol=2000):
     return removed
 
 
+def dead_branch(b, seg, open_end, tol=2000):
+    """The rest of the dead branch behind a dangling segment: `seg` has nothing at `open_end`; follow its other end
+    through every point where exactly one more unlocked segment (and nothing else) continues, also down a via that
+    joins just two segments. Stops at a branch, a T-junction, a pad, a zone of the net or locked copper. Returns
+    the items after `seg` (segments and vias) that carry nothing once `seg` is gone. A rework leaves such branches
+    where a re-routed net's old copper was cut (caliper slider 2026-11-10: a grid router's branch is dozens of
+    0.035 mm segments, and DRC reports only the last one each run)."""
+    net = seg.GetNetCode()
+    segs = [t for t in b.GetTracks() if t.Type() == pcbnew.PCB_TRACE_T and t.GetNetCode() == net]
+    vias = [t for t in b.GetTracks() if t.Type() == pcbnew.PCB_VIA_T and t.GetNetCode() == net]
+    pads = [pad for fp in b.GetFootprints() for pad in fp.Pads() if pad.GetNetCode() == net]
+    layers = [lay for lay in (pcbnew.F_Cu, pcbnew.In1_Cu, pcbnew.In2_Cu, pcbnew.B_Cu) if b.IsLayerEnabled(lay)]
+    uid = lambda t: t.m_Uuid.AsString()     # (two proxies of one item are not the same Python object)
+    chain, cur, used = [], seg, {uid(seg)}
+    pt = seg.GetEnd() if (seg.GetStart() - open_end).EuclideanNorm() < tol else seg.GetStart()
+    while True:
+        here = [o for o in segs if uid(o) not in used and
+                ((o.GetStart() - pt).EuclideanNorm() < tol or (o.GetEnd() - pt).EuclideanNorm() < tol)]
+        via = [v for v in vias if (v.GetStart() - pt).EuclideanNorm() < tol]
+        on = layers if via else [cur.GetLayer()]
+        here = [o for o in here if o.GetLayer() in on]
+        if len(here) != 1 or len(via) > 1 or here[0].IsLocked() or any(v.IsLocked() for v in via):
+            break
+        if any(pad.IsOnLayer(lay) and pad.HitTest(pt, cur.GetWidth() // 2) for pad in pads for lay in on):
+            break
+        if any(_zone_has(b, net, lay, pt) for lay in on):
+            break
+        # a segment that passes through the point without ending there: a T-junction, the branch ends here
+        if any(uid(o) not in used and o is not here[0] and o.GetLayer() in on and
+               pcbnew.SEG(o.GetStart(), o.GetEnd()).Distance(pt) < tol for o in segs):
+            break
+        nxt = here[0]
+        chain += via + [nxt]
+        used.add(uid(nxt))
+        pt = nxt.GetEnd() if (nxt.GetStart() - pt).EuclideanNorm() < tol else nxt.GetStart()
+        cur = nxt
+    return chain
+
+
 def stitch_vias(b, net_name="GND", pitch=3.0, via=0.5, drill=0.25, clearance=0.2, spacing=1.0,
                 priority=(), max_vias=400):
     """Add GND stitching vias on a grid (plus any priority points first) wherever a through via fits:
@@ -627,16 +666,28 @@ def fanout_vias(b, net_name="GND", pads=None, via=0.5, drill=0.25, track=0.25, c
         pads = [pd for pd in allpads if pd.GetNetCode() == code and pd.GetDrillSize().x == 0
                 and (pd.IsOnLayer(pcbnew.F_Cu) or pd.IsOnLayer(pcbnew.B_Cu))]
 
+    # The gap to another net's copper is the larger of `clearance` and that net's own netclass clearance: a flat
+    # 0.15 mm put a GND via 0.18 mm from a track of a 0.2 mm class (DRC clearance error, caliper slider 2026-11-10).
+    # (the class is looked up by name in the board's net settings, as finish_route does: KiCad 10's Python returns
+    # an unwrapped object from GetEffectiveNetClass())
+    netset = b.GetDesignSettings().m_NetSettings
+    class_clr = {}
+
+    def gap(item):
+        name = item.GetNetClassName()
+        if name not in class_clr:
+            class_clr[name] = max(clr, netset.GetNetClassByName(name).GetClearance())
+        return class_clr[name]
+
     def via_ok(pt):
         for z in rules:
             if z.GetDoNotAllowVias() and z.Outline().Collide(pt, int(rv + clr)):
                 return False
-        acc = rv + clr
         for t in tracks:
-            if t.GetNetCode() != code and t.HitTest(pt, acc):
+            if t.GetNetCode() != code and t.HitTest(pt, rv + gap(t)):
                 return False
         for pd in allpads:
-            if pd.GetNetCode() != code and any(pd.IsOnLayer(lay) for lay in cu) and pd.HitTest(pt, acc):
+            if pd.GetNetCode() != code and any(pd.IsOnLayer(lay) for lay in cu) and pd.HitTest(pt, rv + gap(pd)):
                 return False
             # no via ring on any SMD / connector pad, even of the same net: an open via in a pad wicks the solder
             if pd.GetAttribute() in (pcbnew.PAD_ATTRIB_SMD, pcbnew.PAD_ATTRIB_CONN) and pd.HitTest(pt, rv + MM(0.05)):
@@ -657,10 +708,10 @@ def fanout_vias(b, net_name="GND", pads=None, via=0.5, drill=0.25, track=0.25, c
                 if z.GetDoNotAllowTracks() and z.IsOnLayer(layer) and z.Outline().Collide(q, int(hw + clr)):
                     return False
             for t in tracks:
-                if t.GetNetCode() != code and t.IsOnLayer(layer) and t.HitTest(q, hw + clr):
+                if t.GetNetCode() != code and t.IsOnLayer(layer) and t.HitTest(q, hw + gap(t)):
                     return False
             for pd in allpads:
-                if pd is not own and pd.GetNetCode() != code and pd.IsOnLayer(layer) and pd.HitTest(q, hw + clr):
+                if pd is not own and pd.GetNetCode() != code and pd.IsOnLayer(layer) and pd.HitTest(q, hw + gap(pd)):
                     return False
         return True
 

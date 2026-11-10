@@ -3,11 +3,14 @@
 ESP-IDF 5.4 firmware for the caliper's ESP32-S3-MINI-1-N4R2: AS5311 magnetic sensing (PCNT + SSI), the
 experimental capacitive scale, an LVGL UI on the ST7789, NimBLE (custom GATT service + Battery + Device
 Information + HID keyboard), Wi-Fi with a web page and MQTT/HTTP push, TinyUSB CDC + MSC, a LittleFS reading
-log, and the BQ25180 / MAX17048 / LIS2DW12 power side.
+log, and the BQ25180 / MAX17048 / LSM6DSO power side. The LSM6DSO (gyroscope + accelerometer) wakes the caliper
+on pickup and, while it is awake, feeds an orientation filter (roll, pitch, a relative yaw, "steady") that turns
+the display 180° when the caliper is held top edge down.
 
 > **Status:** **builds with `idf.py build` on ESP-IDF v5.4.2** (esp32s3, 4 MB layout, 0 warnings; image
-> 1 689 152 B, 4.5 % of the app slot free with the bring-up commands, 6 % with `CONFIG_CALIPER_BRINGUP=n`) but
-> has **never run on hardware**. The portable core passes its host tests (59 groups, 1276 checks, ASan + UBSan,
+> 1 704 880 B, 3.7 % of the app slot free with the bring-up commands; `CONFIG_CALIPER_BRINGUP=n` gave 23.5 KB
+> back before the LSM6DSO change and was not rebuilt after it) but has **never run on hardware**. The LSM6DSO
+> driver and the orientation filter are written from the datasheet and tested on synthetic motion only. The portable core passes its host tests (67 groups, 1723 checks, ASan + UBSan,
 > `-Werror`), and the log store its own (3 groups, 2589 checks).
 > Details, design, the 2026-11-07 review fixes and the list of unverified items:
 > [docs/firmware.md](../docs/firmware.md).
@@ -43,9 +46,10 @@ cmake -S test/host -B build-host -G Ninja && cmake --build build-host && ctest -
 | `main/app_main.c` | tasks and wiring |
 | `main/proto/caliper_gatt.h` | the BLE contract shared with `caliper/app` |
 | `main/board_pins.h` | generated from nets.py by `tools/gen_pins.py` |
-| `components/measure` | portable core: units, rounding, tolerance, stats, log records, GATT codecs, settings JSON, CSV, buttons, HID map |
+| `components/measure` | portable core: units, rounding, tolerance, stats, log records, GATT codecs, settings JSON, CSV, buttons, HID map, `orient.c` (orientation from gyroscope + accelerometer samples) |
 | `components/sensor_mag`, `sensor_cap` | AS5311 and the experimental capacitive scale |
 | `components/caliper_core` | event bus, live state, commands |
 | `components/bringup` | the `bu` bring-up checks on the USB console ([docs/bringup.md](../docs/bringup.md)); `bringup_eval.c` (the pass/fail rules) is portable |
-| `components/store`, `ui`, `ble`, `caliper_wifi`, `caliper_usb`, `power` | the rest |
+| `components/power` | BQ25180, MAX17048, the LSM6DSO driver and its 50 Hz sampler (`imu.c`; the chip → board axis mapping is at its top), backlight / piezo / LED, deep sleep |
+| `components/store`, `ui`, `ble`, `caliper_wifi`, `caliper_usb` | the rest |
 | `test/host` | host unit tests (`caliper_tests`: the portable core and the bring-up rules; `store_tests`: `store.c` against `test/host/stubs`) |

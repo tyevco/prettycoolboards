@@ -15,7 +15,7 @@ live in [nets.py](nets.py). If anything here changes, update `nets.py` and this 
 | MCU / radio | ESP32-S3-MINI-1-**N4R2** (4 MB quad flash + 2 MB quad PSRAM; LCSC C3013941. The N8R2 is not stocked at LCSC), PCB antenna. BLE 5 (HID keyboard + GATT) and 2.4 GHz Wi-Fi |
 | Display | 1.14 in 240×135 ST7789 IPS, 13-pin 0.5 mm FPC, white LED backlight. **Landscape**: the 31.0 mm long axis (240 px) along the beam (§2.1, D4) |
 | UI | 3 buttons: ZERO, HOLD/SEND, MODE. RGB status LED, piezo |
-| IMU | LIS2DW12 (wake on pickup, auto-off, orientation), I2C 0x19 (SA0 high) |
+| IMU | **LSM6DSO**, 6-axis: 3-axis accelerometer + 3-axis gyroscope (wake on pickup, auto-off, orientation tracking), I2C **0x6B** (SA0 high). Was a LIS2DW12 accelerometer; the gyroscope was added on 2026-11-10 (§16) |
 | Power | 1S LiPo, 501230 class: **Renata ICP501230PS-03** (with protection circuit; 135 mAh typ / 130 min; ≤ 5.4 × 12.5 × 31.5 mm including it; 1C = 135 mA continuous / 2C = 270 mA pulse discharge; 0.5C standard / 1C max charge, CC/CV to 4.2 V). Slim housing, owner decision 2026-11-09: was a 402535, ~500 mAh. On JST-SH 2-pin J2 (board bottom, §2.1; an SHR-02V-S plug crimped on the cell's AWG30 leads). USB-C (USB 2.0 device) charging at **70 mA** (0.52C; firmware `CONFIG_CALIPER_CHARGE_MA`, range ≤ 135 mA = 1C; was 250 mA). On battery (no VBUS) the firmware keeps the cell inside its 2C pulse rating: Wi-Fi TX capped at 10 dBm, and no Wi-Fi below a 3.50 V cell reading (off below 3.40 V) (§3) |
 | Storage | Readings in LittleFS on the module flash; exported as CSV over USB MSC, Wi-Fi or BLE |
 
@@ -72,7 +72,7 @@ is given in the notes.
 | RT1 | 10 k NTC (TS) | top | 22.3 | 26.75 | | over J2 (bottom) and the cell's lead end (draft 24.5, 26.5: moved for Q1) |
 | Q1, R10 | AO3401A battery reverse-polarity P-FET, 10 k gate resistor | top | 25.1 / 22.5 | 25.1 / 23.5 | Q1 90: drain pad up | §3. Q1 sits over J2 (bottom); VBAT_RAW runs from J2 pin 1 (23.6, 22.9) down to a via at (23.6, 21.6) and on F.Cu up between Q1's gate and source pads into the drain pad (25.1, 26.04) |
 | BZ50 | PKMCS0909E piezo, 1.9 tall | top | 40.0 | 24.3 | 0 | courtyard x 34.75…45.25, y 19.55…29.05; sound port in the lid at u 48 |
-| U60 | LIS2DW12 | top | 30.0 | 23.5 | | ≥ 15 mm from L1 |
+| U60 | LSM6DSO, LGA-14 2.5 × 3.0, 0.86 tall (was a LIS2DW12, LGA-12 2 × 2; §16) | top | 30.0 | 23.5 | 0 | ≥ 15 mm from L1. Courtyard x 28.21…31.79, y 21.95…25.05. At 0° on the top side the chip axes are the board's: X = +x (along the beam), Y = +y, Z = out of the display face |
 | U2, U3, L1, U5, U6, C1–C6, C8–C13, R3–R5 | charger / buck-boost / rail-switch cluster | top | 56.0 | 11.0 | | inside x 50.5…61.5, y 2.5…20.5 (not under the glass; ≤ 4.2), except C8 (51.3, 1.55) and C10 (49.75, 5.5), held ≤ 2 mm from U5 and up to 0.95 outside the box. L1 and the U3 switch nodes ≥ 10 mm from U40 and the RX feed |
 | U4, C7 | MAX17048 fuel gauge + its VBAT cap | top | 29.6 / 27.37 | 27.2 / 26.3 | C7 90 | beside J2 (draft: in the cluster above); C7 left of U4's VBAT pins 2/3 |
 | R6–R9 | I2C pull-ups (R6, R7, **2.2 k**) and the CHG_INT_N / FG_ALRT_N pull-ups (R8, R9) | top | 5.1…9.0 | 3.7…5.8 | | below the module, left of the glass (draft: in the cluster) |
@@ -235,7 +235,9 @@ USB-C VBUS ─ ESD/TVS ─ BQ25180 (VIN) ─┬─ SYS → VSYS ─┬─ TPS638
 - Sleep budget: the first-draft target is **not reachable** with this buck-boost: its Iq (11 µA) plus its
   feedback divider (5.5 µA) plus the ESP32-S3 deep sleep (~8 µA) already reach 24.5 µA. The target is **≤ 35 µA**
   (≈ 33 µA estimated: ESP32-S3 8 + TPS63802 11 + divider 5.5 + BQ25180 3 + MAX17048 hibernate 3 + LIS2DW12 ~1 +
-  2 × TPS22917 off 0.02 + ≈ 2 conversion loss on the 3.3 V-side loads; the LCD and RGB LED are unpowered). The 3 µA
+  2 × TPS22917 off 0.02 + ≈ 2 conversion loss on the 3.3 V-side loads; the LCD and RGB LED are unpowered).
+  **Since 2026-11-10 (§16) the target is ≤ 40 µA**: the LSM6DSO's accelerometer in ultra-low-power mode at 12.5 Hz
+  draws 5.5 µA typ where the LIS2DW12 drew ~1 µA, which makes the estimate ≈ 38 µA. The 3 µA
   figures need firmware settings: BQ25180 watchdog and push-button off (else 4 µA, SLUSE99C IQ_BAT), MAX17048
   `VRESET.Dis` = 1 (else 4 µA, 19-6171 IDD0). See docs/architecture.md for the budget and life estimate.
 
@@ -300,10 +302,14 @@ The authoritative copy is `nets.py: MCU_PINS`. The constraints behind it:
 - ADC: only ADC1 (GPIO1–10) works alongside Wi-Fi, so CAP_RX = GPIO1.
 - Deep-sleep wake sources must be RTC GPIOs (GPIO0–21): IMU_INT1, the buttons, CHG_INT_N. They share one ext1
   ANY_LOW mask, so every one of them is active low.
-- **IMU_INT1 (D8):** the LIS2DW12 drives INT1 **push-pull, active low, latched** (CTRL3 = 0x18). The net is U60 pin 12
+- **IMU_INT1 (D8):** the LSM6DSO drives INT1 **push-pull, active low, latched** (firmware: CTRL3_C `H_LACTIVE` = 1, `PP_OD` = 0,
+  TAP_CFG0 `LIR` = 1; docs/firmware.md). The net is U60 pin 4
   → U10 IO15 only: no pull-up or pull-down on it (checked in the netlist), so nothing fights the push-pull driver,
-  and the firmware enables no RTC pull on GPIO15. The LIS2DW12 is on the always-on +3V3, so INT1 keeps its level in
-  deep sleep. Do not add a pull on IMU_INT1 or IMU_INT2.
+  and the firmware enables no RTC pull on GPIO15. The LSM6DSO is on the always-on +3V3, so INT1 keeps its level in
+  deep sleep. Do not add a pull on IMU_INT1 or IMU_INT2. Until the firmware has configured it, the LSM6DSO's INT1 is
+  an input with its own pull-down and reads **low** (DS12140 Table 19; it must be low or floating while the IMU
+  powers up, and it is: GPIO15 is a high-impedance input at reset). The firmware must not take that low for a pickup
+  (§16).
 - Never use GPIO26 (the in-package PSRAM chip-select on R2 variants). GPIO27–32 aren't bonded out.
 - The UART0 pins (GPIO43/44) are used as cap TX phases; the console is on USB.
 - **Pin plan (per-mode pad states):** the state of every GPIO above in RESET / RUN / SLEEP / SHIP (direction,
@@ -318,7 +324,7 @@ The authoritative copy is `nets.py: MCU_PINS`. The constraints behind it:
 
 | Bus | Devices | Notes |
 |---|---|---|
-| I2C (GPIO13 SDA / GPIO14 SCL, **2.2 k** to +3V3, 400 kHz; §12) | BQ25180 (0x6A), MAX17048 (0x36), LIS2DW12 (**0x19, SA0 high**) | SA0 has an internal pull-up that cannot be disconnected: a grounded SA0 (0x18) burns 60–170 µA |
+| I2C (GPIO13 SDA / GPIO14 SCL, **2.2 k** to +3V3, 400 kHz; §12) | BQ25180 (0x6A), MAX17048 (0x36), LSM6DSO (**0x6B, SA0 high**) | SA0 low would be 0x6A, the BQ25180's address. SA0 is an input without a pull-up by default (DS12140 Table 19), so the strap costs no current |
 | SPI2 (GPIO33 SCK / GPIO34 MOSI / GPIO35 CS / GPIO36 DC / GPIO37 RST) | ST7789 LCD | 40 MHz, write-only. Panel pin order per DM-TFT114-397 §3.1; connector 0.5K-AX-13PWB (13 P, 0.5 mm, bottom contact) |
 | AS5311 SSI (GPIO7 CLK / GPIO8 DO / GPIO9 CSn) | AS5311 | bit-banged or SPI3, ≤1 MHz |
 
@@ -449,7 +455,8 @@ The authoritative copy is `nets.py: MCU_PINS`. The constraints behind it:
 ## 9. Capture changes log (rev A schematic, 2026-11-07)
 Changes made while capturing the schematic (the reasons are in the sections above and in docs/electronics.md):
 1. ESP32-S3-MINI-1-**N4R2** fixed (N8R2 not stocked at LCSC).
-2. LIS2DW12 SA0 **high → 0x19** (was SA0 low / 0x18): `nets.I2C_ADDR` updated.
+2. LIS2DW12 SA0 **high → 0x19** (was SA0 low / 0x18): `nets.I2C_ADDR` updated. (Superseded on 2026-11-10: U60 is an
+   LSM6DSO at 0x6B, §16.)
 3. New switched rail **+3V3_UI** (U6, TPS22917, also on SNS_PWR_EN) for the LCD VDD and the RGB LED; added to
    `nets.POWER_NETS`.
 4. Sleep budget target revised to **≤ 35 µA** (the buck-boost Iq + its divider made the first-draft figure unreachable).
@@ -474,7 +481,7 @@ detailed in the section named; this list gives the decision and its reason.
 | D6 | GATT clarifications (magnitudes, upsert, delete, 16 max, id 0, end marker alone, error codes, encrypted SETTINGS write, partial update, field limits, decimals, LOG flags, UUID in the scan response) and **LIVE = 12 bytes** with `u16 active_profile_id` (readers accept 10 or 12); extended to **20 bytes (v3)** for the capture modes on 2026-11-07 (§8) | These were implemented one way in the firmware and guessed in the app; the app could not see a profile chosen on the caliper | §8, caliper_gatt.h, protocol.js |
 | D7 | The app lives in `public/caliper/app/` | the empty `caliper/app/` was removed | §8 |
 | D8 | RT1 (10 k NTC on TS) **populated**, firmware **TS enabled**; IMU_INT1 is push-pull, active-low, latched with **no pull** on the net | Checked in the netlist and the firmware defaults; a pull on a push-pull line would only waste current, and ext1 ANY_LOW needs every wake line active low | §3, §5 |
-| D9 | Sleep target **≤ 35 µA** everywhere | the buck-boost's Iq and divider alone exceed the first-draft figure | §3, docs |
+| D9 | Sleep target **≤ 35 µA** everywhere (**≤ 40 µA** since 2026-11-10, §16) | the buck-boost's Iq and divider alone exceed the first-draft figure | §3, docs |
 
 ## 11. As-built reconciliation (2026-11-08, after layout, mechanics and firmware phase 3)
 Designed, not built: nothing below has been fabricated or measured. This records what the routed boards, the
@@ -604,3 +611,54 @@ the previous one; DRC + schematic parity 0 / 0 / 0 (7 `lib_footprint_mismatch` w
 boards, jlcplace slider 102 rows, 0 red, 0 yellow, 102 green; `check_contract.py` OK; `tools/tests` 19 passed;
 mechanics `run_all.sh`: extract from the routed board (J2 and its plug on the bottom, no pending substitution),
 41 tests passed, clash check 0 not clear, 0 FAIL / 0 RISK, 0 BREAK / THIN.
+
+## 16. Gyroscope: LSM6DSO replaces the LIS2DW12 (2026-11-10)
+Designed, not built. The owner asked for a gyroscope so that the caliper knows which way it is held, and offered
+Wi-Fi as the thing to give up if room was needed. U60 changes from the LIS2DW12 (accelerometer only) to an
+**LSM6DSO** (accelerometer + gyroscope in one package) on the same spot, and nothing was removed. **Wi-Fi stays**:
+it is the same ESP32-S3 module and antenna as BLE, so dropping it would be a firmware choice that frees no board
+area. Detail and evidence in docs/electronics.md §7.15. Part data: ST DS12140 Rev 3 and AN5192 Rev 5.
+
+| # | Change | Why / numbers |
+|---|---|---|
+| G1 | **U60 LIS2DW12TR → LSM6DSOTR** (LCSC C2655100). LGA-12 2 × 2 × 0.7 → LGA-14L 2.5 × 3.0 × 0.86 max, KiCad `Package_LGA:LGA-14_3x2.5mm_P0.5mm_LayoutBorder3x4y`. Same centre (30.0, 23.5), rotation 0, courtyard x 28.21…31.79, y 21.95…25.05 (§2.1) | 6-axis: 3-axis accelerometer + 3-axis gyroscope. JLC extended part, 23 738 in stock at $3.99 on 2026-11-10 (the LIS2DW12 was $0.90): **+$3.09 a board** |
+| G2 | **I2C address 0x19 → 0x6B**: SDO/SA0 (pin 1) to +3V3 | SA0 low is 0x6A, the BQ25180's address on the same bus (§6). `nets.I2C_ADDR`, the generated `board_pins.h` (hash `ee472a43b6aab9d6`) |
+| G3 | **Mode 1 straps**: CS (12) to +3V3, SDx / SCx (2, 3) to GND, OCS_Aux / SDO_Aux (10, 11) open | I2C slave only, no sensor hub (DS12140 Table 1, Table 19) |
+| G4 | **INT1 (4) → IMU_INT1 (GPIO15), INT2 (9) → IMU_INT2 (GPIO16)**: the same nets and GPIOs as before, `nets.MCU_PINS` unchanged | no pull on either net: INT1 is an input with a pull-down until the firmware configures it and must be low or open while the part powers up (§5) |
+| G5 | **Decoupling**: C60 100 nF + C61 10 µF at VDD (pin 8), C62 100 nF at VDDIO (pin 5). The same three parts, moved to the new pins | the datasheet asks for 100 nF at each supply pin |
+| G6 | **Sleep target ≤ 35 → ≤ 40 µA** (estimate ≈ 33 → ≈ 38 µA, §3): asleep the gyroscope is powered down and the accelerometer runs in ultra-low-power mode at 12.5 Hz, 5.5 µA typ (the LIS2DW12: ~1 µA). **Awake +0.25 mA**: both sensors at 52 Hz low-power, 0.30 mA typ (0.05 mA before) | AN5192 Table 9, typical at VDD 1.8 V; ST gives no figure at 3.3 V, so both are TVP. Battery life: docs/architecture.md |
+| G7 | **Rule area `U60_NO_COPPER_UNDER`** (`layout.py` `add_imu_keepout`): no track, via or pour on F.Cu inside U60's pad ring, x 29.35…30.65, y 23.1…23.9 (0.2 mm inside the pads' inner edges). The inner layers and B.Cu are not restricted | ST's mounting note for LGA MEMS parts (TN0018) asks for a keep-out on the top metal layer under the sensor. The wording was taken from a search excerpt of Rev 6; the current Rev 8 PDF was **not read**, and nothing was found about vias beside the package. The first rework had put the I2C escape vias between the pad rows |
+| G8 | **Parts moved** to make room for the larger package: C60 (27.62, 22.57) → (32.66, 22.75) rot 90; C61 (32.49, 23.75) rot 90 → (32.85, 20.58) rot 0; C62 (30.11, 21.41) → (29.82, 21.12); R57 (33.73, 19.55) rot 90 → (32.90, 18.93) rot 0 | `SLIDER_PIN_ANCHORS`: C60 / C61 at U60.8, C62 at U60.5. No other part moved |
+| G9 | `tools/pcbgen.fanout_vias`: the gap from a fan-out via to another net's copper is now that net's class clearance when it is the larger one (it was a flat 0.15 mm) | a GND fan-out via landed 0.18 mm from an Analog-class track (0.2 mm clearance): a DRC error. Test: `tools/tests/test_fanout_vias.py` |
+| G10 | `tools/pcbgen.dead_branch` + `layout.py` `prune_dangling`: a dangling track is removed together with the whole dead branch behind it (up to the next fork, T-junction, pad, zone or locked copper); if that would open a connection the round falls back to the single reported segment | the rework left two dead branches of many grid-router segments (+3V3 on B.Cu; BTN_MODE_N on F.Cu, a via and B.Cu); DRC names only the last segment of each per run, so six one-segment rounds did not finish them. Test: `tools/tests/test_dead_branch.py` |
+| G11 | **CPL**: U60 rotation 270 → 0. New jlcplace entry `jlcplace-db/C2655100.json` (fitted by pad numbers, 14 of 14, rms 0.100 mm, green). The USB-C entry C165948 gained a second record for the footprint's current pad hash, with the same correction (dy −1.5709) and verdict | release gate (jlcplace on every CPL) |
+| G12 | **Mechanics**: `extract_board_parts.py` height row LGA-14 / LSM6DSO 1.00 mm (0.86 max + solder; the LGA-12 row is gone). U60's envelope x 28.5…31.5, y 22.25…24.75 | the lid clears it as it cleared the LIS2DW12 (also 1.00 mm): clash check 0 not clear |
+| G13 | **Firmware** (docs/firmware.md §12.2): LSM6DSO driver, orientation filter, display auto-flip, `bu imu` / `bu gyro` bring-up steps, I2C scan expects 0x36 / 0x6A / 0x6B | host-tested and built, not run on hardware |
+
+**What the gyroscope gives, and what it does not.** Roll and pitch (and so "which face is up") are absolute: gravity is
+the reference, and the gyroscope makes them follow a quick turn without waiting for the accelerometer to settle. **Yaw
+(turning about the vertical) is relative and drifts**: there is no magnetometer, so nothing ties it to north. It is
+good for "turned about a quarter since I zeroed it", not for a heading. Chip axes at rotation 0 on the top side are the
+board's: X = +x (along the beam), Y = +y, Z = out of the display face (TVP on the first board: `bu imu`,
+docs/bringup.md).
+
+Re-routed with `layout.py --rework --rework-from <the committed board> --no-freerouting` (grid router; with
+Freerouting the same rework had re-done 42 nets, USB_DP / USB_DM, VBUS, VBAT and VSYS among them), then
+`layout.py --finish`. 11 nets' copper differs from the committed board: I2C_SCL, I2C_SDA, IMU_INT1, IMU_INT2, +3V3
+and GND at U60 and its capacitors, BUZZ_D at R57, and BTN_MODE_N, BOOT_N, LCD_BL and CAP_TX7, which the new copper
+displaced. Vias 546 → 534. USB_DP / USB_DM, VBUS, VBAT, VBAT_RAW, VSYS, CAP_RX and CAP_LP1 are untouched. The seven
++3V3 / GND / I2C escape vias at U60 sit outside the pad ring at the package outline (inside the courtyard; the nearest
+overlaps the body's edge by about 0.1 mm), none in the G7 rule area. hwtools `sicalc xtalk`
+(`design/xtalk-cap.yaml`): the analog victims stay under their 1 mV budget (worst CAP_LP1 ← BTN_MODE_N 0.88 mV,
+unchanged; IMU_INT2 0.31 mV); the USB lines got **worse by one pair, 3 → 4 over sicalc's 10 mV budget**: the pair on
+itself as before, and on B.Cu **I2C_SCL → D+ 27.8 mV** (6.7 mm at 0.18 mm) and **IMU_INT1 → D− 19.5 mV** (13.8 mm at
+0.24 mm) where IMU_INT2 → D+ 26.9 mV was (§15). Terminated-line upper bounds on
+full-speed USB; the guard or re-route of that jog is still open (§14).
+
+**Gates (2026-11-10, KiCad 10.0.8, WSL):** `build.py` wiring check OK, ERC as before (2 waived TPS22917 pin_to_pin);
+netlist against the previous one: 19 differences, all at U60 (its pins, value, footprint and fields; nets 98 → 99
+because two pads are unconnected where one was, net members 400 → 402 for the two extra pins); `check_contract.py` OK; DRC + schematic parity 0 / 0 / 0
+(7 `lib_footprint_mismatch` warnings, no `track_dangling`); `release.py --board slider` PASS, jlcplace 102 rows,
+0 red, 0 yellow, 102 green; `tools/tests` 24 passed; mechanics `run_all.sh`: 107 envelopes from the routed board,
+41 tests passed, clash check 0 not clear, 0 FAIL / 0 RISK, 0 BREAK / THIN; firmware: host tests 6 of 6, `idf.py build`
+without warnings (app 0x1a03b0 bytes, 4 % of the slot free). The scale board did not change.

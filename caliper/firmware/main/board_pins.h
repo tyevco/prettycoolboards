@@ -4,7 +4,7 @@
  */
 #pragma once
 
-#define BOARD_PINS_HASH "16f6bf3015e2f33b"
+#define BOARD_PINS_HASH "ee472a43b6aab9d6"
 #define BOARD_REV "A"
 
 /* GPIO number per net (ESP32-S3-MINI-1) */
@@ -49,7 +49,7 @@
 
 /* 7-bit I2C addresses */
 #define I2C_ADDR_BQ25180    0x6A
-#define I2C_ADDR_LIS2DW12   0x19
+#define I2C_ADDR_LSM6DSO    0x6B
 #define I2C_ADDR_MAX17048   0x36
 
 /* CAP_TX0..7 in phase order, for the dedicated-GPIO bundle */

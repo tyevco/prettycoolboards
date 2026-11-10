@@ -5,7 +5,7 @@
 	(uuid "8b669b1b-99f1-54bd-8e1f-df2e8a8ba4f1")
 	(paper "A3")
 	(title_block
-		(title "Accelerometer")
+		(title "IMU (accelerometer + gyroscope)")
 		(date "2026-11-07")
 		(rev "A")
 		(company "PrettyCool Boards")
@@ -162,7 +162,7 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "caliper:LIS2DW12"
+		(symbol "caliper:LSM6DSO"
 			(pin_names
 				(offset 1.016)
 			)
@@ -172,7 +172,7 @@
 			(in_pos_files yes)
 			(duplicate_pin_numbers_are_jumpers no)
 			(property "Reference" "U"
-				(at -17.78 8.89 0)
+				(at -10.16 11.43 0)
 				(show_name no)
 				(do_not_autoplace no)
 				(effects
@@ -182,8 +182,8 @@
 					(justify left bottom)
 				)
 			)
-			(property "Value" "LIS2DW12"
-				(at -17.78 -8.89 0)
+			(property "Value" "LSM6DSO"
+				(at -10.16 -11.43 0)
 				(show_name no)
 				(do_not_autoplace no)
 				(effects
@@ -193,7 +193,7 @@
 					(justify left top)
 				)
 			)
-			(property "Footprint" "Package_LGA:LGA-12_2x2mm_P0.5mm"
+			(property "Footprint" "Package_LGA:LGA-14_3x2.5mm_P0.5mm_LayoutBorder3x4y"
 				(at 0 0 0)
 				(hide yes)
 				(show_name no)
@@ -204,7 +204,7 @@
 					)
 				)
 			)
-			(property "Datasheet" "https://www.st.com/resource/en/datasheet/lis2dw12.pdf"
+			(property "Datasheet" "https://www.st.com/resource/en/datasheet/lsm6dso.pdf"
 				(at 0 0 0)
 				(hide yes)
 				(show_name no)
@@ -215,7 +215,7 @@
 					)
 				)
 			)
-			(property "Description" "Ultra-low-power 3-axis accelerometer, I2C/SPI, 1.62-3.6 V, LGA-12 2x2x0.7 mm"
+			(property "Description" "6-axis IMU: 3-axis accelerometer + 3-axis gyroscope, I2C/SPI, 1.71-3.6 V, LGA-14 2.5x3x0.83 mm"
 				(at 0 0 0)
 				(hide yes)
 				(show_name no)
@@ -226,7 +226,7 @@
 					)
 				)
 			)
-			(property "ki_keywords" "accelerometer MEMS IMU I2C SPI ST"
+			(property "ki_keywords" "accelerometer gyroscope MEMS IMU 6-axis I2C SPI ST"
 				(at 0 0 0)
 				(hide yes)
 				(show_name no)
@@ -237,10 +237,10 @@
 					)
 				)
 			)
-			(symbol "LIS2DW12_0_1"
+			(symbol "LSM6DSO_0_1"
 				(rectangle
-					(start -17.78 7.62)
-					(end 17.78 -7.62)
+					(start -10.16 10.16)
+					(end 10.16 -10.16)
 					(stroke
 						(width 0.254)
 						(type default)
@@ -250,18 +250,18 @@
 					)
 				)
 			)
-			(symbol "LIS2DW12_1_1"
+			(symbol "LSM6DSO_1_1"
 				(pin power_in line
-					(at -20.32 3.81 0)
+					(at -12.7 5.08 0)
 					(length 2.54)
-					(name "VDD_IO"
+					(name "VDDIO"
 						(effects
 							(font
 								(size 1.27 1.27)
 							)
 						)
 					)
-					(number "10"
+					(number "5"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -270,9 +270,45 @@
 					)
 				)
 				(pin input line
-					(at -20.32 1.27 0)
+					(at -12.7 2.54 0)
 					(length 2.54)
 					(name "CS"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "12"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -12.7 0 0)
+					(length 2.54)
+					(name "SDO/SA0"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -12.7 -2.54 0)
+					(length 2.54)
+					(name "SDx"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -288,9 +324,9 @@
 					)
 				)
 				(pin input line
-					(at -20.32 -1.27 0)
+					(at -12.7 -5.08 0)
 					(length 2.54)
-					(name "SDO/SA0"
+					(name "SCx"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -306,34 +342,16 @@
 					)
 				)
 				(pin input line
-					(at -20.32 -3.81 0)
+					(at 12.7 6.35 180)
 					(length 2.54)
-					(name "RES"
+					(name "SCL"
 						(effects
 							(font
 								(size 1.27 1.27)
 							)
 						)
 					)
-					(number "7"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin input line
-					(at 20.32 5.08 180)
-					(length 2.54)
-					(name "SCL/SPC"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "1"
+					(number "13"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -342,9 +360,27 @@
 					)
 				)
 				(pin bidirectional line
-					(at 20.32 2.54 180)
+					(at 12.7 3.81 180)
 					(length 2.54)
-					(name "SDA/SDI/SDO"
+					(name "SDA"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "14"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 12.7 1.27 180)
+					(length 2.54)
+					(name "INT1"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -360,63 +396,9 @@
 					)
 				)
 				(pin output line
-					(at 20.32 0 180)
-					(length 2.54)
-					(name "INT1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "12"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin output line
-					(at 20.32 -2.54 180)
+					(at 12.7 -1.27 180)
 					(length 2.54)
 					(name "INT2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "11"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin no_connect line
-					(at 20.32 -5.08 180)
-					(length 2.54)
-					(name "NC"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "5"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin power_in line
-					(at 0 10.16 270)
-					(length 2.54)
-					(name "VDD"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -431,8 +413,62 @@
 						)
 					)
 				)
+				(pin no_connect line
+					(at 12.7 -3.81 180)
+					(length 2.54)
+					(name "OCS_Aux"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "10"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin no_connect line
+					(at 12.7 -6.35 180)
+					(length 2.54)
+					(name "SDO_Aux"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "11"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
 				(pin power_in line
-					(at 0 -10.16 90)
+					(at 0 12.7 270)
+					(length 2.54)
+					(name "VDD"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "8"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at 0 -12.7 90)
 					(length 2.54)
 					(name "GND"
 						(effects
@@ -450,7 +486,7 @@
 					)
 				)
 				(pin passive line
-					(at 0 -10.16 90)
+					(at 0 -12.7 90)
 					(length 2.54)
 					(hide yes)
 					(name "GND"
@@ -460,7 +496,7 @@
 							)
 						)
 					)
-					(number "8"
+					(number "7"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -718,7 +754,7 @@
 			(embedded_fonts no)
 		)
 	)
-	(text "Accelerometer: LIS2DW12 on the system I2C (addr 0x19, SA0 high)"
+	(text "6-axis IMU: LSM6DSO on the system I2C (addr 0x6B, SA0 high; 0x6A is the BQ25180)"
 		(exclude_from_sim no)
 		(at 15.24 15.24 0)
 		(effects
@@ -728,9 +764,9 @@
 			)
 			(justify left top)
 		)
-		(uuid "eec25c45-177e-5424-b381-fb096ae03ce9")
+		(uuid "965247e8-d111-51bf-b5cf-2ad4e75b31d3")
 	)
-	(text "Always on (+3V3): wake-up / 6D / activity interrupts while the ESP32 is in deep sleep (~1 uA in low-power wake mode).\nCS high = I2C. SA0 high (never ground it: internal pull-up, see module docstring). RES to GND.\nINT1 -> IMU_INT1 (GPIO15, RTC: deep-sleep wake on pickup), INT2 -> IMU_INT2 (GPIO16). Push-pull, no pull-ups.\n100n + 10u at VDD (pin 9), 100n at VDD_IO (pin 10). Keep away from the buck-boost inductor."
+	(text "Always on (+3V3). Asleep: accelerometer only, ultra-low-power 12.5 Hz, gyroscope powered down (5.5 uA typ,\nAN5192 Table 9), wake-up interrupt while the ESP32 is in deep sleep. Awake: gyroscope on (0.30 mA at 52 Hz low-power).\nCS high = I2C. SA0 high (no internal pull-up by default). SDx / SCx to GND, OCS_Aux / SDO_Aux unconnected.\nINT1 -> IMU_INT1 (GPIO15, RTC: deep-sleep wake on pickup), INT2 -> IMU_INT2 (GPIO16). Push-pull, no pulls:\nINT1 must be low or floating while the IMU powers up (its own pull-down holds it).\n100n + 10u at VDD (pin 8), 100n at VDDIO (pin 5). Keep away from the buck-boost inductor."
 		(exclude_from_sim no)
 		(at 15.24 19.05 0)
 		(effects
@@ -740,11 +776,11 @@
 			)
 			(justify left top)
 		)
-		(uuid "ffad3f1c-5e4d-5722-a005-b7fa4724c8a9")
+		(uuid "ad137a50-624f-5b3d-ab59-3516a059266f")
 	)
 	(rectangle
 		(start 12.7 12.7)
-		(end 148.59 80.01)
+		(end 170.18 88.9)
 		(stroke
 			(width 0.1)
 			(type dash)
@@ -752,11 +788,11 @@
 		(fill
 			(type none)
 		)
-		(uuid "4a7e70ee-3588-5315-a70c-726d46a0106f")
+		(uuid "8493b625-ed06-59ef-a92c-e202a3737a8f")
 	)
 	(symbol
-		(lib_id "caliper:LIS2DW12")
-		(at 57.15 62.23 0)
+		(lib_id "caliper:LSM6DSO")
+		(at 48.26 69.85 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -766,7 +802,7 @@
 		(dnp no)
 		(uuid "01b67007-a378-5936-af1c-8aaa90547068")
 		(property "Reference" "U60"
-			(at 38.07 51.61 0)
+			(at 36.8 56.69 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -776,8 +812,8 @@
 				(justify right)
 			)
 		)
-		(property "Value" "LIS2DW12TR"
-			(at 38.07 53.36 0)
+		(property "Value" "LSM6DSOTR"
+			(at 36.8 58.44 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -787,8 +823,8 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" "Package_LGA:LGA-12_2x2mm_P0.5mm"
-			(at 57.15 62.23 0)
+		(property "Footprint" "Package_LGA:LGA-14_3x2.5mm_P0.5mm_LayoutBorder3x4y"
+			(at 48.26 69.85 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -798,8 +834,8 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.st.com/resource/en/datasheet/lis2dw12.pdf"
-			(at 57.15 62.23 0)
+		(property "Datasheet" "https://www.st.com/resource/en/datasheet/lsm6dso.pdf"
+			(at 48.26 69.85 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -809,8 +845,8 @@
 				)
 			)
 		)
-		(property "Description" "Ultra-low-power 3-axis accelerometer, I2C/SPI, 1.62-3.6 V, LGA-12 2x2x0.7 mm"
-			(at 57.15 62.23 0)
+		(property "Description" "6-axis IMU: 3-axis accelerometer + 3-axis gyroscope, I2C/SPI, 1.71-3.6 V, LGA-14 2.5x3x0.83 mm"
+			(at 48.26 69.85 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -820,8 +856,8 @@
 				)
 			)
 		)
-		(property "MPN" "LIS2DW12TR"
-			(at 57.15 62.23 0)
+		(property "MPN" "LSM6DSOTR"
+			(at 48.26 69.85 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -832,7 +868,7 @@
 			)
 		)
 		(property "Manufacturer" "STMicroelectronics"
-			(at 57.15 62.23 0)
+			(at 48.26 69.85 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -842,8 +878,8 @@
 				)
 			)
 		)
-		(property "LCSC" "C189624"
-			(at 57.15 62.23 0)
+		(property "LCSC" "C2655100"
+			(at 48.26 69.85 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -853,8 +889,14 @@
 				)
 			)
 		)
-		(pin "10"
-			(uuid "e93a2ce0-5f57-5e71-a405-e18009e390c2")
+		(pin "5"
+			(uuid "ff2f3003-323e-5555-9105-fd33e8e64449")
+		)
+		(pin "12"
+			(uuid "ed5f75dc-903f-519c-b8d4-0cc8ddac076a")
+		)
+		(pin "1"
+			(uuid "1921ca22-2887-54b0-9124-f5ad2083e53b")
 		)
 		(pin "2"
 			(uuid "17b4b834-5a99-58db-8a20-3028934db624")
@@ -862,32 +904,32 @@
 		(pin "3"
 			(uuid "41a5a902-387c-557f-950b-25c6a3b1f306")
 		)
-		(pin "7"
-			(uuid "f6ff0650-b2b1-5efa-969e-948bed3162aa")
+		(pin "13"
+			(uuid "3fd432d5-ae7a-51fd-9d3a-74ebf1220d5a")
 		)
-		(pin "1"
-			(uuid "1921ca22-2887-54b0-9124-f5ad2083e53b")
+		(pin "14"
+			(uuid "302d6b81-c299-5a79-9cb0-7560b91c8cf5")
 		)
 		(pin "4"
 			(uuid "089c0498-8432-5472-b3bb-000df3184fcf")
 		)
-		(pin "12"
-			(uuid "ed5f75dc-903f-519c-b8d4-0cc8ddac076a")
+		(pin "9"
+			(uuid "f31664b6-d0d5-5369-8a85-dca4b09b095e")
+		)
+		(pin "10"
+			(uuid "e93a2ce0-5f57-5e71-a405-e18009e390c2")
 		)
 		(pin "11"
 			(uuid "111522e8-93be-51b0-a820-a1fb33f807f9")
 		)
-		(pin "5"
-			(uuid "ff2f3003-323e-5555-9105-fd33e8e64449")
-		)
-		(pin "9"
-			(uuid "f31664b6-d0d5-5369-8a85-dca4b09b095e")
+		(pin "8"
+			(uuid "b0535697-a83f-5de0-a05b-4fba72f66373")
 		)
 		(pin "6"
 			(uuid "4aa4443d-3335-5ef1-a5ca-ab9f016d1a3a")
 		)
-		(pin "8"
-			(uuid "b0535697-a83f-5de0-a05b-4fba72f66373")
+		(pin "7"
+			(uuid "f6ff0650-b2b1-5efa-969e-948bed3162aa")
 		)
 		(instances
 			(project "prettycool-caliper-slider"
@@ -900,7 +942,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 34.29 66.04 0)
+		(at 33.02 74.93 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -908,9 +950,9 @@
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
-		(uuid "9ba74f7d-0acb-5703-8c4d-5ab09da59fb7")
+		(uuid "20cce211-e7db-5a0c-9260-491eefdd2bf3")
 		(property "Reference" "#PWR07001"
-			(at 34.29 66.04 0)
+			(at 33.02 74.93 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -921,7 +963,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 34.29 69.34 0)
+			(at 33.02 78.23 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -932,7 +974,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 34.29 66.04 0)
+			(at 33.02 74.93 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -943,7 +985,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 34.29 66.04 0)
+			(at 33.02 74.93 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -954,7 +996,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 34.29 66.04 0)
+			(at 33.02 74.93 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -965,7 +1007,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "c19ef20e-cef7-544e-92e8-24a49a319e1e")
+			(uuid "7b943e26-cb56-588a-a7a3-8d60aea5e1a1")
 		)
 		(instances
 			(project "prettycool-caliper-slider"
@@ -977,12 +1019,16 @@
 		)
 	)
 	(no_connect
-		(at 77.47 67.31)
-		(uuid "b900f974-114a-50c2-becf-23d2d7eaa84d")
+		(at 60.96 73.66)
+		(uuid "8cb974a7-9a6a-5f6f-8ab5-c5e9a1dd60dd")
+	)
+	(no_connect
+		(at 60.96 76.2)
+		(uuid "d23b2025-636e-55ce-9dff-5c8fd118b3b1")
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 57.15 72.39 0)
+		(at 48.26 82.55 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -990,9 +1036,9 @@
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
-		(uuid "a6153c5c-26ff-5d6d-9f1e-7d66924cc575")
+		(uuid "70442cb9-fbfc-5793-9460-b559cd2d70a2")
 		(property "Reference" "#PWR07002"
-			(at 57.15 72.39 0)
+			(at 48.26 82.55 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1003,7 +1049,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 57.15 75.69 0)
+			(at 48.26 85.85 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1014,7 +1060,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 57.15 72.39 0)
+			(at 48.26 82.55 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1025,7 +1071,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 57.15 72.39 0)
+			(at 48.26 82.55 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1036,7 +1082,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 57.15 72.39 0)
+			(at 48.26 82.55 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1047,7 +1093,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "6a3baf63-9d52-5f4e-b361-cc6004d02112")
+			(uuid "93b06618-3570-5204-8980-4199760c636b")
 		)
 		(instances
 			(project "prettycool-caliper-slider"
@@ -1060,7 +1106,7 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 29.21 62.23 180)
+		(at 29.21 68.58 180)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -1070,7 +1116,7 @@
 		(dnp no)
 		(uuid "5e905164-8fee-57ca-9a49-caa30ba342d3")
 		(property "Reference" "C62"
-			(at 26.278 61.23 0)
+			(at 26.278 67.58 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1081,7 +1127,7 @@
 			)
 		)
 		(property "Value" "100n"
-			(at 26.278 63.23 0)
+			(at 26.278 69.58 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1092,7 +1138,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-			(at 29.21 62.23 0)
+			(at 29.21 68.58 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1103,7 +1149,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 29.21 62.23 0)
+			(at 29.21 68.58 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1114,7 +1160,7 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
-			(at 29.21 62.23 0)
+			(at 29.21 68.58 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1125,7 +1171,7 @@
 			)
 		)
 		(property "MPN" "CL05B104KO5NNNC"
-			(at 29.21 62.23 0)
+			(at 29.21 68.58 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1136,7 +1182,7 @@
 			)
 		)
 		(property "Manufacturer" "Samsung Electro-Mechanics"
-			(at 29.21 62.23 0)
+			(at 29.21 68.58 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1147,7 +1193,7 @@
 			)
 		)
 		(property "LCSC" "C1525"
-			(at 29.21 62.23 0)
+			(at 29.21 68.58 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1174,7 +1220,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 29.21 66.04 0)
+		(at 29.21 72.39 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -1182,9 +1228,9 @@
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
-		(uuid "d9c2d94c-f977-5256-9a99-3b7c53bc4ab6")
+		(uuid "6849ec9e-7c56-5bcd-9602-adee2eb0da4e")
 		(property "Reference" "#PWR07003"
-			(at 29.21 66.04 0)
+			(at 29.21 72.39 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1195,7 +1241,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 29.21 69.34 0)
+			(at 29.21 75.69 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1206,7 +1252,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 29.21 66.04 0)
+			(at 29.21 72.39 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1217,7 +1263,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 29.21 66.04 0)
+			(at 29.21 72.39 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1228,7 +1274,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 29.21 66.04 0)
+			(at 29.21 72.39 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1239,7 +1285,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "ffe2e5b1-fa4e-5e06-8679-2238ab4a516b")
+			(uuid "92dd49c3-68ab-5407-8d28-9a41cba7d0f2")
 		)
 		(instances
 			(project "prettycool-caliper-slider"
@@ -1252,7 +1298,7 @@
 	)
 	(symbol
 		(lib_id "power:+3V3")
-		(at 17.78 58.42 0)
+		(at 17.78 64.77 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -1260,9 +1306,9 @@
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
-		(uuid "e1dc4a35-e6b9-592d-add9-1c808d1aeba3")
+		(uuid "1260b95c-5ceb-54ba-93d3-b5f4d8a85a33")
 		(property "Reference" "#PWR07004"
-			(at 17.78 58.42 0)
+			(at 17.78 64.77 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1273,7 +1319,7 @@
 			)
 		)
 		(property "Value" "+3V3"
-			(at 17.78 55.12 0)
+			(at 17.78 61.47 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1284,7 +1330,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 17.78 58.42 0)
+			(at 17.78 64.77 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1295,7 +1341,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 17.78 58.42 0)
+			(at 17.78 64.77 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1306,7 +1352,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 17.78 58.42 0)
+			(at 17.78 64.77 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1317,7 +1363,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "79aae857-8ed3-5c18-9620-85298ca9e2b7")
+			(uuid "9958662f-4e37-59e9-87cf-8160ec784bbd")
 		)
 		(instances
 			(project "prettycool-caliper-slider"
@@ -1330,7 +1376,7 @@
 	)
 	(global_label "I2C_SCL"
 		(shape input)
-		(at 82.55 57.15 0)
+		(at 66.04 63.5 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -1340,7 +1386,7 @@
 		)
 		(uuid "1aa4b1b8-e428-5195-b2f8-de233a81b488")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 82.55 57.15 0)
+			(at 66.04 63.5 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1354,7 +1400,7 @@
 	)
 	(global_label "I2C_SDA"
 		(shape bidirectional)
-		(at 82.55 59.69 0)
+		(at 66.04 66.04 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -1364,7 +1410,7 @@
 		)
 		(uuid "549c36ed-dd30-5459-947a-cb39e81e4ab6")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 82.55 59.69 0)
+			(at 66.04 66.04 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1378,7 +1424,7 @@
 	)
 	(global_label "IMU_INT1"
 		(shape output)
-		(at 82.55 62.23 0)
+		(at 66.04 68.58 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -1388,7 +1434,7 @@
 		)
 		(uuid "368f2fe8-285d-5cf4-b911-daa867de6814")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 82.55 62.23 0)
+			(at 66.04 68.58 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1402,7 +1448,7 @@
 	)
 	(global_label "IMU_INT2"
 		(shape output)
-		(at 82.55 64.77 0)
+		(at 66.04 71.12 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -1412,7 +1458,7 @@
 		)
 		(uuid "35512fbc-73e8-5d40-b835-385a735657ac")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 82.55 64.77 0)
+			(at 66.04 71.12 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1426,7 +1472,7 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 60.96 40.64 180)
+		(at 52.07 45.72 180)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -1436,7 +1482,7 @@
 		(dnp no)
 		(uuid "6c4b5f19-2002-5270-bd58-e5ae22491491")
 		(property "Reference" "C60"
-			(at 63.892 39.64 0)
+			(at 55.002 44.72 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1447,7 +1493,7 @@
 			)
 		)
 		(property "Value" "100n"
-			(at 63.892 41.64 0)
+			(at 55.002 46.72 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1458,7 +1504,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
-			(at 60.96 40.64 0)
+			(at 52.07 45.72 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1469,7 +1515,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 60.96 40.64 0)
+			(at 52.07 45.72 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1480,7 +1526,7 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
-			(at 60.96 40.64 0)
+			(at 52.07 45.72 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1491,7 +1537,7 @@
 			)
 		)
 		(property "MPN" "CL05B104KO5NNNC"
-			(at 60.96 40.64 0)
+			(at 52.07 45.72 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1502,7 +1548,7 @@
 			)
 		)
 		(property "Manufacturer" "Samsung Electro-Mechanics"
-			(at 60.96 40.64 0)
+			(at 52.07 45.72 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1513,7 +1559,7 @@
 			)
 		)
 		(property "LCSC" "C1525"
-			(at 60.96 40.64 0)
+			(at 52.07 45.72 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1540,7 +1586,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 60.96 44.45 0)
+		(at 52.07 49.53 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -1548,9 +1594,9 @@
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
-		(uuid "656ffd70-e046-50f3-b5bd-02e00eb79e9b")
+		(uuid "ae35432e-d123-5990-b315-6d89ca51874f")
 		(property "Reference" "#PWR07005"
-			(at 60.96 44.45 0)
+			(at 52.07 49.53 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1561,7 +1607,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 60.96 47.75 0)
+			(at 52.07 52.83 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1572,7 +1618,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 60.96 44.45 0)
+			(at 52.07 49.53 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1583,7 +1629,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 60.96 44.45 0)
+			(at 52.07 49.53 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1594,7 +1640,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 60.96 44.45 0)
+			(at 52.07 49.53 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1605,7 +1651,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "54d52080-61c0-5ea1-9e88-090cdaef2356")
+			(uuid "3e58c1f2-72ec-5e54-9410-cddeccfc6209")
 		)
 		(instances
 			(project "prettycool-caliper-slider"
@@ -1618,7 +1664,7 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 73.66 40.64 180)
+		(at 64.77 45.72 180)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -1628,7 +1674,7 @@
 		(dnp no)
 		(uuid "8db2c754-fd50-5009-911e-29b649f08e93")
 		(property "Reference" "C61"
-			(at 76.592 39.64 0)
+			(at 67.702 44.72 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1639,7 +1685,7 @@
 			)
 		)
 		(property "Value" "10u"
-			(at 76.592 41.64 0)
+			(at 67.702 46.72 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1650,7 +1696,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
-			(at 73.66 40.64 0)
+			(at 64.77 45.72 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1661,7 +1707,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 73.66 40.64 0)
+			(at 64.77 45.72 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1672,7 +1718,7 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
-			(at 73.66 40.64 0)
+			(at 64.77 45.72 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1683,7 +1729,7 @@
 			)
 		)
 		(property "MPN" "CL10A106KP8NNNC"
-			(at 73.66 40.64 0)
+			(at 64.77 45.72 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1694,7 +1740,7 @@
 			)
 		)
 		(property "Manufacturer" "Samsung Electro-Mechanics"
-			(at 73.66 40.64 0)
+			(at 64.77 45.72 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1705,7 +1751,7 @@
 			)
 		)
 		(property "LCSC" "C19702"
-			(at 73.66 40.64 0)
+			(at 64.77 45.72 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1732,7 +1778,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 73.66 44.45 0)
+		(at 64.77 49.53 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -1740,9 +1786,9 @@
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
-		(uuid "1b73e778-9b5c-577d-93a7-081169faaf7a")
+		(uuid "ea7ba656-9d47-55e4-9d0b-fd8ae2a481b7")
 		(property "Reference" "#PWR07006"
-			(at 73.66 44.45 0)
+			(at 64.77 49.53 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1753,7 +1799,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 73.66 47.75 0)
+			(at 64.77 52.83 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1764,7 +1810,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 73.66 44.45 0)
+			(at 64.77 49.53 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1775,7 +1821,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 73.66 44.45 0)
+			(at 64.77 49.53 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1786,7 +1832,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 73.66 44.45 0)
+			(at 64.77 49.53 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1797,7 +1843,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "8aae327a-50a4-5991-9726-2bc3a50e5fa3")
+			(uuid "043a4652-b196-51ae-b6aa-c13ed9a40480")
 		)
 		(instances
 			(project "prettycool-caliper-slider"
@@ -1810,7 +1856,7 @@
 	)
 	(symbol
 		(lib_id "power:+3V3")
-		(at 83.82 36.83 0)
+		(at 74.93 41.91 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -1818,9 +1864,9 @@
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
-		(uuid "947cde05-fc69-5ab8-92b8-ab75769c5574")
+		(uuid "e4329020-5bed-56dc-beda-d9189ba04d93")
 		(property "Reference" "#PWR07007"
-			(at 83.82 36.83 0)
+			(at 74.93 41.91 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1831,7 +1877,7 @@
 			)
 		)
 		(property "Value" "+3V3"
-			(at 83.82 33.53 0)
+			(at 74.93 38.61 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1842,7 +1888,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 83.82 36.83 0)
+			(at 74.93 41.91 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1853,7 +1899,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 83.82 36.83 0)
+			(at 74.93 41.91 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1864,7 +1910,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 83.82 36.83 0)
+			(at 74.93 41.91 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1875,7 +1921,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "a10d3edb-7fd1-5b7c-857a-bbf7f0c6f384")
+			(uuid "e021dd56-149a-5e4c-abea-9a823d7627b2")
 		)
 		(instances
 			(project "prettycool-caliper-slider"
@@ -1887,7 +1933,7 @@
 		)
 	)
 	(wire
-		(pts (xy 17.78 58.42) (xy 29.21 58.42))
+		(pts (xy 17.78 64.77) (xy 29.21 64.77))
 		(stroke
 			(width 0)
 			(type default)
@@ -1895,7 +1941,7 @@
 		(uuid "96b9869a-fbde-54c1-9f21-f4d738e02381")
 	)
 	(wire
-		(pts (xy 29.21 58.42) (xy 35.56 58.42))
+		(pts (xy 29.21 64.77) (xy 34.29 64.77))
 		(stroke
 			(width 0)
 			(type default)
@@ -1903,7 +1949,7 @@
 		(uuid "68f60dea-c15e-5711-8621-e8b316c5227b")
 	)
 	(wire
-		(pts (xy 35.56 58.42) (xy 35.56 60.96))
+		(pts (xy 34.29 64.77) (xy 34.29 67.31))
 		(stroke
 			(width 0)
 			(type default)
@@ -1911,7 +1957,7 @@
 		(uuid "05cb9b49-9ed6-55e8-8679-bb30f459cf76")
 	)
 	(wire
-		(pts (xy 35.56 58.42) (xy 36.83 58.42))
+		(pts (xy 34.29 64.77) (xy 35.56 64.77))
 		(stroke
 			(width 0)
 			(type default)
@@ -1919,7 +1965,7 @@
 		(uuid "b7fc93bb-1c6c-52bf-954b-39ddb6d6fab8")
 	)
 	(wire
-		(pts (xy 35.56 60.96) (xy 35.56 63.5))
+		(pts (xy 34.29 67.31) (xy 34.29 69.85))
 		(stroke
 			(width 0)
 			(type default)
@@ -1927,7 +1973,7 @@
 		(uuid "6154555e-e074-5085-ab82-ee8ab615bd8c")
 	)
 	(wire
-		(pts (xy 35.56 60.96) (xy 36.83 60.96))
+		(pts (xy 34.29 67.31) (xy 35.56 67.31))
 		(stroke
 			(width 0)
 			(type default)
@@ -1935,7 +1981,7 @@
 		(uuid "c5460eee-8bce-5638-81ce-526afeb0626f")
 	)
 	(wire
-		(pts (xy 35.56 63.5) (xy 36.83 63.5))
+		(pts (xy 34.29 69.85) (xy 35.56 69.85))
 		(stroke
 			(width 0)
 			(type default)
@@ -1943,7 +1989,7 @@
 		(uuid "e0f4be88-b3be-5b9a-8593-125b56aadaa6")
 	)
 	(wire
-		(pts (xy 57.15 36.83) (xy 57.15 52.07))
+		(pts (xy 48.26 41.91) (xy 48.26 57.15))
 		(stroke
 			(width 0)
 			(type default)
@@ -1951,7 +1997,7 @@
 		(uuid "06b521a3-0787-5645-bc99-45d330e232a2")
 	)
 	(wire
-		(pts (xy 57.15 36.83) (xy 60.96 36.83))
+		(pts (xy 48.26 41.91) (xy 52.07 41.91))
 		(stroke
 			(width 0)
 			(type default)
@@ -1959,7 +2005,7 @@
 		(uuid "386fd7b0-3c62-50d9-9a39-77bd761b7ac1")
 	)
 	(wire
-		(pts (xy 60.96 36.83) (xy 73.66 36.83))
+		(pts (xy 52.07 41.91) (xy 64.77 41.91))
 		(stroke
 			(width 0)
 			(type default)
@@ -1967,7 +2013,7 @@
 		(uuid "b1ba7a23-4af6-5b49-9001-5a6b239e006f")
 	)
 	(wire
-		(pts (xy 73.66 36.83) (xy 83.82 36.83))
+		(pts (xy 64.77 41.91) (xy 74.93 41.91))
 		(stroke
 			(width 0)
 			(type default)
@@ -1975,7 +2021,7 @@
 		(uuid "1ee4de95-3425-5743-b4f0-a649e8c6b9f7")
 	)
 	(wire
-		(pts (xy 34.29 66.04) (xy 36.83 66.04))
+		(pts (xy 33.02 74.93) (xy 34.29 74.93))
 		(stroke
 			(width 0)
 			(type default)
@@ -1983,7 +2029,31 @@
 		(uuid "3883245e-3daa-59d2-9363-ca7ebb8cf3f5")
 	)
 	(wire
-		(pts (xy 77.47 57.15) (xy 82.55 57.15))
+		(pts (xy 34.29 72.39) (xy 34.29 74.93))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "dd91aa4a-8645-5f13-a9c2-b9da97fa5ec0")
+	)
+	(wire
+		(pts (xy 34.29 72.39) (xy 35.56 72.39))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e5f0bc28-e902-5b1e-9e44-2b45634643bc")
+	)
+	(wire
+		(pts (xy 34.29 74.93) (xy 35.56 74.93))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "87dde28a-effb-5e47-9ccb-80dd9a10c579")
+	)
+	(wire
+		(pts (xy 60.96 63.5) (xy 66.04 63.5))
 		(stroke
 			(width 0)
 			(type default)
@@ -1991,7 +2061,7 @@
 		(uuid "d030a311-af99-53c3-a82e-5d72708e3070")
 	)
 	(wire
-		(pts (xy 77.47 59.69) (xy 82.55 59.69))
+		(pts (xy 60.96 66.04) (xy 66.04 66.04))
 		(stroke
 			(width 0)
 			(type default)
@@ -1999,7 +2069,7 @@
 		(uuid "000e7b46-b4b3-5856-9817-ac8bbf6b8e8a")
 	)
 	(wire
-		(pts (xy 77.47 62.23) (xy 82.55 62.23))
+		(pts (xy 60.96 68.58) (xy 66.04 68.58))
 		(stroke
 			(width 0)
 			(type default)
@@ -2007,7 +2077,7 @@
 		(uuid "7a192628-52da-5611-82a3-cfeaa0369307")
 	)
 	(wire
-		(pts (xy 77.47 64.77) (xy 82.55 64.77))
+		(pts (xy 60.96 71.12) (xy 66.04 71.12))
 		(stroke
 			(width 0)
 			(type default)
@@ -2015,33 +2085,39 @@
 		(uuid "176a49b5-de36-5430-a1f6-fcaaffa25390")
 	)
 	(junction
-		(at 29.21 58.42)
+		(at 29.21 64.77)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "8e2cd215-1d69-50f6-aba7-34380624c1f9")
+		(uuid "f92eac05-10ad-5429-8b8f-61b2927d9a8e")
 	)
 	(junction
-		(at 35.56 58.42)
+		(at 34.29 64.77)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "1a6354d0-45ec-5e14-a2ce-5c5c4a225122")
+		(uuid "091d1715-11be-5ffc-9e00-8bc0af2cac20")
 	)
 	(junction
-		(at 35.56 60.96)
+		(at 34.29 67.31)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "b96d611b-f242-563e-9e44-277bee10b4e1")
+		(uuid "950c0c79-872d-5257-aa63-921a12551147")
 	)
 	(junction
-		(at 60.96 36.83)
+		(at 34.29 74.93)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "2ee636f2-a9e0-5bcc-8f30-6cdef66683bc")
+		(uuid "f9fa9cea-bd2e-5491-841b-f3044c6ede5e")
 	)
 	(junction
-		(at 73.66 36.83)
+		(at 52.07 41.91)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "996d8600-7ac4-57e7-b229-bf1890e66247")
+		(uuid "74f13b19-4ff6-543f-aea5-e448986861e5")
+	)
+	(junction
+		(at 64.77 41.91)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "df06d882-644f-5733-832b-83e5aac5fc48")
 	)
 )

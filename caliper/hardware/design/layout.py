@@ -407,8 +407,8 @@ SLIDER_PIN_ANCHORS = {
     # display
     "C50": ("J50", "+3V3_UI", 3.0), "C51": ("J50", "+3V3_UI", 3.5),
     "C55": ("D50", "+3V3_UI", 3.0), "R55": ("D50", "RGB_DIN", 4.0),
-    # IMU decoupling at VDD / VDD_IO
-    "C60": ("U60", "+3V3", 2.5), "C62": ("U60", "+3V3", 2.5), "C61": ("U60", "+3V3", 3.5),
+    # IMU decoupling at VDD (pin 8) / VDDIO (pin 5): "REF.PAD" names the pad (pins 1 and 12 are +3V3 straps)
+    "C60": ("U60.8", "+3V3", 2.5), "C62": ("U60.5", "+3V3", 2.5), "C61": ("U60.8", "+3V3", 3.5),
     # AS5311 pull-ups (top side, over the IC)
     "R30": ("U30", "MAG_INC_N", 6.0), "R31": ("U30", "MAG_DEC_N", 6.0),
 }
@@ -849,6 +849,33 @@ def add_fiducial_keepouts(bb):
         bb.keepout([pcbnew.F_Cu], bb.circle_pts(X, Y, 1.35, 24), pads=False, pours=False, name=f"{ref}_KEEPCLEAR")
 
 
+def add_imu_keepout(bb, ref="U60", gap=0.2):
+    """No copper on the IMU's own layer inside its pad ring: no tracks, no vias, no pour. ST's mounting note for LGA
+    MEMS sensors (TN0018) asks for a keep-out on the top metal layer underneath the sensor, so that nothing under the
+    package loads it unevenly once soldered (the wording was taken from a search excerpt of Rev 6 on 2026-11-10; the
+    current Rev 8 PDF was not read). The first LSM6DSO rework put the I2C escape vias between the pad rows.
+    The rule area is the rectangle `gap` inside the inner edges of the pads; the inner layers are not restricted."""
+    fp = bb.footprints.get(ref)
+    if fp is None:
+        return None
+    c = fp.GetPosition()
+    hx = hy = None
+    for pd in fp.Pads():
+        box = pd.GetBoundingBox()
+        ex = abs(pd.GetPosition().x - c.x) - box.GetWidth() // 2
+        ey = abs(pd.GetPosition().y - c.y) - box.GetHeight() // 2
+        if ex > ey:       # a pad of the left / right column
+            hx = ex if hx is None else min(hx, ex)
+        else:             # a pad of the top / bottom row
+            hy = ey if hy is None else min(hy, ey)
+    if hx is None or hy is None:
+        return None
+    X, Y, hx, hy = TO(c.x), TO(c.y), TO(hx) - gap, TO(hy) - gap
+    pts = [(X - hx, Y - hy), (X + hx, Y - hy), (X + hx, Y + hy), (X - hx, Y + hy)]
+    layer = pcbnew.F_Cu if fp.GetLayer() == pcbnew.F_Cu else pcbnew.B_Cu
+    return bb.keepout([layer], pts, tracks=True, vias=True, pads=False, pours=True, name=f"{ref}_NO_COPPER_UNDER")
+
+
 def place_rest_slider(bb, comps, fixed, placer):
     """Pin-anchored parts, then region parts, then anything left near the part it shares most nets with."""
     fps = bb.footprints
@@ -877,9 +904,11 @@ def place_rest_slider(bb, comps, fixed, placer):
                 print("WARN: could not place", ref)
             done.add(ref)
     for ref, (ic, netname, r) in SLIDER_PIN_ANCHORS.items():
+        ic, _, padnum = ic.partition(".")
         if ref not in fps or ref in done or ic not in fps:
             continue
-        pads = [p for p in fps[ic].Pads() if net_short(p.GetNetname()) == netname]
+        pads = [p for p in fps[ic].Pads() if net_short(p.GetNetname()) == netname
+                and (not padnum or p.GetNumber() == padnum)]
         if not pads:
             print("WARN: no pad", ic, netname)
             continue
@@ -1112,6 +1141,7 @@ def generate(board, pours=True):
         draw_electrodes(bb)
         print(f"[slider] {guard_stitch(bb)} guard stitching vias")
         add_fiducial_keepouts(bb)
+        add_imu_keepout(bb)
         placer = Placer(bb.board, cfg["inside"], cfg["keepouts"](), power_nets=("GND",))
         for ref in fixed:
             if ref in bb.footprints:
@@ -2012,36 +2042,47 @@ def prune_dangling(path, rounds=6):
             break
         backup = path + ".bak"
         shutil.copyfile(path, backup)
-        b = pcbnew.LoadBoard(path)
-        doomed = []
-        for kind, x, y, layer, length in spots:
-            p = pcbnew.VECTOR2I(MM(x), MM(y))
-            for t in b.GetTracks():
-                if t in doomed:          # locked escape stubs the router bypassed are dead copper too
-                    continue
-                # ... but never the locked USB pair: a moment where one end of it is open (mid-route) would otherwise
-                # cascade, round by round, through the whole chain (seen in the 2026-11-08 review re-routes)
-                if t.IsLocked() and net_short(t.GetNetname()) in USB_PAIR:
-                    continue
-                if kind == "via_dangling" and t.Type() == pcbnew.PCB_VIA_T and (t.GetStart() - p).EuclideanNorm() < 2000:
-                    doomed.append(t)
-                elif kind == "track_dangling" and t.Type() == pcbnew.PCB_TRACE_T and \
-                        b.GetLayerName(t.GetLayer()) == layer and abs(TO(t.GetLength()) - length) < 0.002 and \
-                        min((t.GetStart() - p).EuclideanNorm(), (t.GetEnd() - p).EuclideanNorm()) < 2000:
-                    doomed.append(t)
-        if not doomed:
-            os.remove(backup)
-            break
-        for t in doomed:
-            b.Delete(t)
-        pcbnew.SaveBoard(path, b)
-        pcbgen.refill(path)
-        _, after = drc(path)
-        if after.get("[unconnected_items]", 0) > before:
+        # first with the whole dead branch behind each dangling segment (DRC names only its last segment, and a grid
+        # router's branch is dozens of them); if that opens a connection, again with the reported items alone
+        for whole_branch in (True, False):
+            b = pcbnew.LoadBoard(path)
+            doomed = []
+            for kind, x, y, layer, length in spots:
+                p = pcbnew.VECTOR2I(MM(x), MM(y))
+                for t in b.GetTracks():
+                    if t in doomed:          # locked escape stubs the router bypassed are dead copper too
+                        continue
+                    # ... but never the locked USB pair: a moment where one end of it is open (mid-route) would
+                    # otherwise cascade, round by round, through the whole chain (seen in the 2026-11-08 review
+                    # re-routes)
+                    if t.IsLocked() and net_short(t.GetNetname()) in USB_PAIR:
+                        continue
+                    if kind == "via_dangling" and t.Type() == pcbnew.PCB_VIA_T and \
+                            (t.GetStart() - p).EuclideanNorm() < 2000:
+                        doomed.append(t)
+                    elif kind == "track_dangling" and t.Type() == pcbnew.PCB_TRACE_T and \
+                            b.GetLayerName(t.GetLayer()) == layer and abs(TO(t.GetLength()) - length) < 0.002 and \
+                            min((t.GetStart() - p).EuclideanNorm(), (t.GetEnd() - p).EuclideanNorm()) < 2000:
+                        doomed.append(t)
+                        if whole_branch:
+                            doomed += pcbgen.dead_branch(b, t, p)
+            if not doomed:
+                break
+            gone = set()                 # (a branch can be reached from two reported ends)
+            for t in doomed:
+                if t.m_Uuid.AsString() not in gone:
+                    gone.add(t.m_Uuid.AsString())
+                    b.Delete(t)
+            pcbnew.SaveBoard(path, b)
+            pcbgen.refill(path)
+            _, after = drc(path)
+            if after.get("[unconnected_items]", 0) <= before:
+                break
             shutil.copyfile(backup, path)
-            os.remove(backup)
-            break
+            doomed = []
         os.remove(backup)
+        if not doomed:
+            break
         removed += len(doomed)
     return removed
 

@@ -17,6 +17,9 @@
  */
 #pragma once
 
+#include <stdbool.h>
+#include <stdint.h>
+
 #include "buttons.h"
 #include "esp_err.h"
 
@@ -30,6 +33,13 @@ void ui_sleep(void);                   /* panel off before deep sleep */
 /* Bring-up: colour bars + frame + corner labels over everything (true), or removed (false).
  * ESP_ERR_INVALID_STATE if the display is not up. */
 esp_err_t ui_test_pattern(bool on);
+/* The picture turned 180 degrees so that it reads upright when the caliper is held with its top
+ * (button) edge down. AUTO (the default) follows the IMU orientation (measure/orient.c: at least
+ * ~20 degrees past the horizon for 0.6 s; lying flat keeps what it has), or is NORMAL when
+ * CONFIG_CALIPER_UI_AUTO_FLIP is off or there is no IMU. NORMAL / TURNED pin it (bring-up).
+ * Callable from any task: it takes effect at the next UI refresh (40 ms). */
+typedef enum { UI_FLIP_AUTO = 0, UI_FLIP_NORMAL, UI_FLIP_TURNED } ui_flip_t;
+void ui_set_flip(ui_flip_t mode);
 
 /* internal (ui_*.c) */
 typedef enum { UI_SCR_MAIN = 0, UI_SCR_CHART, UI_SCR_STATS, UI_SCR_MENU, UI_SCR_COUNT } ui_screen_t;
@@ -42,6 +52,7 @@ void ui_toast(const char *msg);
 bool ui_ready(void);  /* the display and LVGL are up */
 bool ui_lock(void);   /* false if not ready or busy for 100 ms */
 void ui_unlock(void);
+void ui_flip_poll(uint32_t dt_ms); /* LVGL task only (the refresh timer) */
 
 enum {
     UI_MENU_UNIT = 0,

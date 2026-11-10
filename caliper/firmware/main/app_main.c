@@ -7,6 +7,7 @@
  *   buttons   0    7     100 Hz   debounce + gestures -> ui_handle_button()
  *   app       0    3     10 Hz    BLE notifications; 1 Hz power poll, USB poll, dim/auto-off
  *   bus       0    6     events   commands and events (caliper_core event loop)
+ *   imu       0    5     50 Hz    LSM6DSO gyro + accelerometer -> orientation (power/imu.c)
  *   + NimBLE host, LVGL (esp_lvgl_port), TinyUSB, httpd, mqtt, ble_wrk, push, cli
  */
 #include <string.h>
@@ -353,5 +354,8 @@ void app_main(void)
     }
     xTaskCreatePinnedToCore(buttons_task, "buttons", 4096, NULL, 7, NULL, 0);
     xTaskCreatePinnedToCore(app_task, "app", 4096, NULL, 3, NULL, 0);
+    if (power_imu_start() != ESP_OK) {
+        ESP_LOGW(TAG, "no IMU: no orientation, no pickup wake");
+    }
     ESP_LOGI(TAG, "running");
 }

@@ -1,6 +1,6 @@
 # Portable core logic (no ESP-IDF APIs). Also compiled by test/host.
 idf_component_register(
-    SRCS "measure.c" "capture.c" "logrec.c" "gatt_codec.c" "settings.c" "csv.c" "buttons.c" "hid_keymap.c"
+    SRCS "measure.c" "capture.c" "logrec.c" "gatt_codec.c" "settings.c" "csv.c" "buttons.c" "hid_keymap.c" "orient.c"
     INCLUDE_DIRS "include"
     REQUIRES board)
 target_link_libraries(${COMPONENT_LIB} PUBLIC m)

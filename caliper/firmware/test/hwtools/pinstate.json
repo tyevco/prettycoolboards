@@ -1,7 +1,7 @@
 {
  "pinstate_version": 0,
  "board": "PrettyCool Caliper slider board rev A",
- "firmware": "caliper pin_plan.py@2a079f2238dbb3c3",
+ "firmware": "caliper pin_plan.py@4ba5b56d312214fc",
  "provenance": "assumed: exported from caliper/firmware/tools/pin_plan.py (design intent, not measured)",
  "modes": {
   "RESET": {
@@ -722,33 +722,33 @@
     }
    },
    "U60": {
-    "SDA/SDI/SDO": {
+    "SDA": {
      "dir": "in",
      "out": null,
      "pull": "none",
      "latched": false,
-     "source": "assumed: LIS2DW12 I2C target, bus idle (released; SDA / SCL are inputs between transactions)"
+     "source": "assumed: LSM6DSO I2C target, bus idle (released; SDA / SCL are inputs between transactions)"
     },
-    "SCL/SPC": {
+    "SCL": {
      "dir": "in",
      "out": null,
      "pull": "none",
      "latched": false,
-     "source": "assumed: LIS2DW12 I2C target, bus idle (released; SDA / SCL are inputs between transactions)"
+     "source": "assumed: LSM6DSO I2C target, bus idle (released; SDA / SCL are inputs between transactions)"
     },
     "INT1": {
      "dir": "out",
      "out": 1,
      "pull": "none",
      "latched": false,
-     "source": "assumed: LIS2DW12 INT1 push-pull active low (CTRL3 0x18), idle high"
+     "source": "assumed: LSM6DSO INT1 push-pull active low (CTRL3_C 0x64, wake-up routed), idle high"
     },
     "INT2": {
      "dir": "out",
      "out": 1,
      "pull": "none",
      "latched": false,
-     "source": "assumed: LIS2DW12 INT2 push-pull active low, nothing routed: high"
+     "source": "assumed: LSM6DSO INT2 push-pull active low, nothing routed: high"
     }
    },
    "U30": {
@@ -1183,33 +1183,33 @@
     }
    },
    "U60": {
-    "SDA/SDI/SDO": {
+    "SDA": {
      "dir": "in",
      "out": null,
      "pull": "none",
      "latched": false,
-     "source": "assumed: LIS2DW12 I2C target, bus idle (released; SDA / SCL are inputs between transactions)"
+     "source": "assumed: LSM6DSO I2C target, bus idle (released; SDA / SCL are inputs between transactions)"
     },
-    "SCL/SPC": {
+    "SCL": {
      "dir": "in",
      "out": null,
      "pull": "none",
      "latched": false,
-     "source": "assumed: LIS2DW12 I2C target, bus idle (released; SDA / SCL are inputs between transactions)"
+     "source": "assumed: LSM6DSO I2C target, bus idle (released; SDA / SCL are inputs between transactions)"
     },
     "INT1": {
      "dir": "out",
      "out": 1,
      "pull": "none",
      "latched": false,
-     "source": "assumed: LIS2DW12 INT1 push-pull active low, cleared before sleep: high"
+     "source": "assumed: LSM6DSO INT1 push-pull active low, cleared before sleep: high"
     },
     "INT2": {
      "dir": "out",
      "out": 1,
      "pull": "none",
      "latched": false,
-     "source": "assumed: LIS2DW12 INT2 push-pull active low, nothing routed: high"
+     "source": "assumed: LSM6DSO INT2 push-pull active low, nothing routed: high"
     }
    },
    "U1": {

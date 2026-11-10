@@ -45,7 +45,7 @@ HEIGHTS = [
     (r"JST_SH|SM02B-SRSS", 2.95, "JST SH side entry"),
     (r"TS-1088.*R020", 2.00, "XKB TS-1088-xR020: 2.0"),
     (r"SW_.*3x4|TS-1088|SKRP|SW_SPST", 2.50, "tact, verify"),
-    (r"LGA-12|LIS2DW12", 1.00, "ST LGA-12 2x2x0.7, +solder"),
+    (r"LGA-14|LSM6DSO", 1.00, "ST LGA-14L 2.5x3, 0.86 max (DS12140 Fig. 25), +solder"),
     (r"WSON|DSBGA|BQ25180|YBG", 0.65, "DSBGA 0.625 max"),
     (r"VSON|DLA0010A", 1.00, "TI VSON-HR 1.0 max"),
     (r"TDFN|DFN-8|MAX17048", 0.80, ""),

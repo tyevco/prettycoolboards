@@ -1,4 +1,4 @@
-ERC report (2026-11-09T18:24:08, Encoding UTF8)
+ERC report (2026-11-10T15:31:42, Encoding UTF8)
 Report includes: Errors, Warnings, Exclusions
 
 ***** Sheet /
@@ -21,7 +21,7 @@ Report includes: Errors, Warnings, Exclusions
 
 ***** Sheet /Display, buttons, LED, piezo/
 
-***** Sheet /Accelerometer/
+***** Sheet /IMU (accelerometer + gyroscope)/
 
  ** ERC messages: 2  Errors 2  Warnings 0
 

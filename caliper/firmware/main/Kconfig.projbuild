@@ -22,6 +22,15 @@ menu "PrettyCool Caliper"
             Drives CAP_TX0..7 and samples CAP_RX. Isolated from the magnetic path: if it fails
             to start, LIVE.cap_nm reads INT32_MIN and nothing else changes.
 
+    config CALIPER_UI_AUTO_FLIP
+        bool "Turn the display 180 degrees when the caliper is held top edge down"
+        default y
+        help
+            Uses the LSM6DSO orientation (components/measure/orient.c): the picture turns when the
+            top (button) edge points at least about 20 degrees below the horizon for 0.6 s, and
+            back when it points up again. Lying flat keeps the current state. With this off, or
+            without an IMU, the display stays as mounted.
+
     config CALIPER_USB_TINYUSB
         bool "Use TinyUSB (CDC console + MSC) instead of USB-Serial-JTAG"
         default y

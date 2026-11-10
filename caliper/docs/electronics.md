@@ -204,14 +204,39 @@ Same datasheet: VDD 2.4–3.3 V, 8 mA typ; sleep-in 15 + 5 µA typ; backlight 1 
 | D50 | WS2812B-2020-V6 RGB LED | C52917434 | LCSC lists 3.3–5.3 V, so it runs on +3V3_UI with a 3.3 V DIN and no level shifter. R55 100 k pull-down (GPIO46 strap) |
 | BZ50 | Murata PKMCS0909E4000-R1 piezo (4 kHz, external drive) | C910763 | +3V3 → BZ50 ‖ R57 1 k → Q51 (AO3400A) drain. R56 100 k gate pull-down holds GPIO45 (VDD_SPI strap) low at reset |
 
-### 3.6 imu: LIS2DW12
+### 3.6 imu: LSM6DSO
 
-U60 LIS2DW12TR (C189624) on the system I2C, always powered from +3V3 so it can wake the ESP32 on pickup (INT1 →
-GPIO15, an RTC GPIO). 100 nF + 10 µF at VDD, 100 nF at VDD_IO. CS high (I2C), RES to GND.
-**SA0 is tied high: address 0x19, not the 0x18 SPEC first asked for.** SDO/SA0 has an internal pull-up that cannot
-be disconnected in I2C mode, so a grounded SA0 draws ~60–170 µA permanently (ST AN5038; dial-me-spinner measured
-it as a bring-up fault signature). That alone would be several times the sleep budget. `nets.I2C_ADDR` and SPEC
-§6 are updated.
+U60 **LSM6DSOTR** (C2655100), a 6-axis IMU: 3-axis accelerometer + 3-axis gyroscope in an LGA-14 (2.5 × 3.0 ×
+0.86 mm). It is on the system I2C and always powered from +3V3, so it can wake the ESP32 on pickup (INT1 → GPIO15,
+an RTC GPIO). Until 2026-11-10 U60 was a LIS2DW12 accelerometer; the reasons for the change and what it cost are in
+[§7.15](#_7-15-gyroscope-lsm6dso-replaces-the-lis2dw12-2026-11-10).
+
+| Pin | Net | Why |
+|---|---|---|
+| 8 VDD, 5 VDDIO | +3V3 | C60 100 nF + C61 10 µF at VDD, C62 100 nF at VDDIO (DS12140 asks for 100 nF on each) |
+| 13 SCL, 14 SDA | I2C_SCL, I2C_SDA | the system bus, 400 kHz |
+| 12 CS | +3V3 | high = I2C |
+| 1 SDO/SA0 | +3V3 | **address 0x6B**. SA0 low is 0x6A, the BQ25180's address on the same bus. SA0 is an input without a pull-up by default (Table 19, `PIN_CTRL.SDO_PU_EN` = 0), so the strap draws nothing (the LIS2DW12's SA0 had a permanent pull-up) |
+| 2 SDx, 3 SCx | GND | Mode 1 (no sensor hub): "connect to VDDIO or GND" (Table 1) |
+| 10 OCS_Aux, 11 SDO_Aux | not connected | Mode 1: left open, pads soldered |
+| 4 INT1 | IMU_INT1 (GPIO15) | wake on pickup. Push-pull, active low, latched, set by the firmware. No pull on the net |
+| 9 INT2 | IMU_INT2 (GPIO16) | spare interrupt, push-pull, no pull |
+| 6, 7 GND | GND | |
+
+* **INT1 at power-up.** Until the firmware configures it, INT1 is an *input* with an internal pull-down, and it
+  "must be set to 0 or left unconnected during power-on" (Table 19, note 2). The net has no pull and GPIO15 is a
+  high-impedance input at reset, so that holds. The consequence for the firmware: an unconfigured IMU shows INT1
+  **low**, which is the wake level, so the firmware configures the IMU before it arms the wake
+  ([Firmware](firmware.md)).
+* **Axes.** U60 sits at 0° on the top side, so the chip axes are the board's (Fig. 3): X along the beam (board +x),
+  Y across it (board +y), Z out of the display face.
+* **What the gyroscope gives.** Roll and pitch come from gravity (the accelerometer) and stay absolute; the gyroscope
+  makes them usable while the tool moves, and gives turn rate and a "held steady" test. Heading (rotation about
+  the vertical) is only relative and drifts: there is no magnetometer, and one would not work this close to the
+  magnetic scale.
+* **Not verified.** The piezo (BZ50) is 10 mm away; whether its 4 kHz drive shows up in the gyroscope output is not
+  known (TVP: gyro noise with the buzzer on and off). The current figures are the datasheet's at VDD = 1.8 V; the
+  board runs it at 3.3 V.
 
 ## 4. Scale board
 
@@ -234,7 +259,7 @@ AO3401A C15127, C23 10 µF 0402 C15525 and R6/R7 2.2 k C25879 are all Basic).
 | MAX17048G+T10 | C2682616 | Extended | 22 821 | 2.01 |
 | TPS63802DLAR | C2845237 | Extended | 23 909 | 0.91 |
 | TPS22917DBVR (×2) | C2681320 | Extended | 3 637 | 0.37 |
-| LIS2DW12TR | C189624 | Extended | 52 010 | 0.90 |
+| LSM6DSOTR (since 2026-11-10; was LIS2DW12TR C189624, $0.90) | C2655100 | Extended | 23 738 (2026-11-10) | 3.99 |
 | TLV9062IDGKR | C398356 | Extended | 53 188 | 0.23 |
 | WS2812B-2020-V6 | C52917434 | Extended | 740 820 | 0.09 |
 | PKMCS0909E4000-R1 | C910763 | Extended | **535** | 1.10 |
@@ -256,7 +281,7 @@ itself is not a PCBA part: it plugs into J50 by hand.
   datasheet could not be downloaded during capture.
 * **Backlight headroom**: 3.31 V − 3.0 V VF leaves 0.3 V across 15 Ω + the FET; a 3.1 V LED gets ~14 mA, a 2.9 V
   one ≤ 27 mA. The panel's maximum LED current is not in the cited datasheet: check it on the bought panel.
-* **Sleep current** is ≈ 33 µA (estimate) against SPEC's target of ≤ 35 µA
+* **Sleep current** is ≈ 38 µA (estimate; ≈ 33 µA before the gyroscope) against SPEC's target of ≤ 40 µA
   ([Architecture §5](architecture.md#_5-power-budget-and-battery-life)).
 * **Contract reconciliation (SPEC §10, 2026-11-07).** The layout has the clamp tabs (74 × 34 overall), the
   single upper-band hole H1, the module in the top-left corner with an all-layer antenna keep-out, the D5 electrode
@@ -559,9 +584,11 @@ battery and the standoffs are not on the board.
   geometry; for a bottom placement at rotation 0 its RX pad must sit at local y −3.75) and the scale's Ø1.0 NPTH
   holes. (H5 and the module decoupling were closed on 2026-11-08, §7.11; the SMT standoffs are hand-fitted.)
 * **USB**: the first 7 mm of the pair, under the module's escape-via field, has no plane directly under it (§7.5).
-  The bypasses around U1 that the 2026-11-08 re-route had added are gone (§7.13). sicalc puts MAG_A → D+ at 25.5 mV
+  The bypasses around U1 that the 2026-11-08 re-route had added are gone (§7.13). sicalc put MAG_A → D+ at 25.5 mV
   (5.9 mm at 0.18 mm on B.Cu along the pair's jog at x 10–14, y 20.5; I2C_SCL sat there before, 22.4 mV) against
-  its 10 mV USB budget: a GND guard or a re-route of that jog (§7.14).
+  its 10 mV USB budget: a GND guard or a re-route of that jog (§7.14). Each rework since has put another line
+  beside the pair: IMU_INT2 → D+ 26.9 mV on 2026-11-09, and since 2026-11-10 **I2C_SCL → D+ 27.8 mV and IMU_INT1 →
+  D− 19.5 mV** (§7.15). The guard should be a rule area in `layout.py`, so that a rework cannot do it again.
 * **`--rework` and Freerouting**: Freerouting does not see U1's jumper pad groups, so a rework that runs it puts a
   bypass round U1 back on each USB line, and it re-writes pieces of the VBUS / VBAT pre-routes; finish such a rework
   with `--rework --rip USB_DP,USB_DM,VBUS --no-freerouting` and `--rip VBUS,VSYS,VBAT --no-freerouting` (§7.14), or
@@ -870,3 +897,124 @@ PASS, jlcplace 0.2.1 **102 rows: 0 red, 0 yellow, 102 green** (the scale package
 `tools/tests` 19 passed; mechanics `extract_board_parts.py` + `clash_check.py` on this board (in a scratch copy of
 `hardware/mechanical/`): 108 envelopes identical to the committed `board_parts.json`, 6255 intersections, **0 not
 clear, 0 FAIL / RISK**. The schematic and netlist did not change.
+
+### 7.15 Gyroscope: LSM6DSO replaces the LIS2DW12 (2026-11-10)
+
+Designed, not built: nothing below has been soldered or measured. The currents are ST's typical figures (DS12140
+Rev 3, AN5192 Rev 5, both at VDD = 1.8 V; the board runs the part at 3.3 V), the crosstalk numbers are hwtools
+`sicalc xtalk` calculations on the board file, and the firmware has run on a PC and through the compiler only.
+
+**Request and decision.** The owner asked for a gyroscope, so that the caliper knows which way it is held, and
+offered Wi-Fi as the thing to remove if the board needed the room. It did not: the accelerometer U60 becomes a 6-axis
+part (accelerometer + gyroscope in one package) on the same spot, on the same I2C bus, with the same two interrupt
+lines to the same GPIOs. Nothing was removed.
+
+**Wi-Fi stays.** Wi-Fi and BLE are the same ESP32-S3-MINI-1 module and the same antenna. Taking Wi-Fi out would be a
+firmware option; it frees no board area, no part and no keep-out.
+
+| | LIS2DW12 (before) | LSM6DSO (now) |
+|---|---|---|
+| Sensors | 3-axis accelerometer | 3-axis accelerometer + 3-axis gyroscope |
+| Package | LGA-12, 2 × 2 × 0.7 mm | LGA-14L, 2.5 × 3.0 × 0.86 mm max |
+| I2C address | 0x19 (SA0 high) | **0x6B** (SA0 high; 0x6A is the BQ25180) |
+| Asleep | ~1 µA (low-power wake mode, estimate) | 5.5 µA typ (accelerometer in ultra-low-power mode at 12.5 Hz, gyroscope powered down) |
+| Awake | 0.05 mA | 0.30 mA typ (both at 52 Hz, low-power mode; 0.55 mA in high-performance mode) |
+| LCSC, price at 1–9 (JLC, 2026-11-10) | C189624, $0.90 | C2655100, extended, 23 738 in stock, **$3.99** |
+| JLC placement rotation | 270 | 0 |
+
+**What it costs.** $3.09 a board (5 boards of parts ≈ $136 → ≈ $151, [ordering](ordering.md)). The sleep estimate
+goes from ≈ 33 to ≈ 38 µA and the SPEC target from ≤ 35 to **≤ 40 µA**; awake it adds 0.25 mA to ≈ 56 mA idle /
+≈ 71 mA measuring, which does not show in the rounded totals. Battery life with the 135 mAh cell: a typical shop day
+stays ≈ 3.3 days, light use 9.5 → ≈ 9.4 days, storage in deep sleep ≈ 5 → ≈ 4 months
+([architecture §5](architecture.md)).
+
+**What a gyroscope without a magnetometer can do.** Roll and pitch, and so "which face is up", are absolute:
+gravity is the reference, and the gyroscope lets them follow a quick turn without waiting for the accelerometer to
+settle. **Yaw, the turn about the vertical, is relative and drifts**: nothing on the board knows where north is. The
+firmware reports it as an angle since power-on or since it was last zeroed, with a growing uncertainty
+([firmware §12.2](firmware.md)).
+
+**Circuit** (§3.6). Mode 1, I2C only: CS and SA0 to +3V3, SDx / SCx to GND, OCS_Aux / SDO_Aux open. INT1 → IMU_INT1
+(GPIO15, the pickup wake), INT2 → IMU_INT2 (GPIO16), no pull on either. C60 100 nF + C61 10 µF at VDD (pin 8), C62
+100 nF at VDDIO (pin 5): the same three capacitors as before. The netlist differs from the previous one at U60 only
+(19 differences: its pins, value, footprint and fields).
+
+**Board.** U60 keeps its centre (30.0, 23.5) and now sits at rotation 0, so the chip's axes are the board's: X along
+the beam toward the USB end, Y toward the top edge, Z out of the display (to be checked on the first board with
+`bu imu`, [bring-up](bringup.md)). The courtyard is now 3.58 × 3.10 mm (x 28.21…31.79, y 21.95…25.05), and four parts
+moved out of its way:
+
+| Part | Before (x, y, rot) | Now |
+|---|---|---|
+| C60 100 nF (VDD) | 27.62, 22.57, 90 | 32.66, 22.75, 90 |
+| C61 10 µF (VDD) | 32.49, 23.75, 90 | 32.85, 20.58, 0 |
+| C62 100 nF (VDDIO) | 30.11, 21.41, 0 | 29.82, 21.12, 0 |
+| R57 1 k (piezo) | 33.73, 19.55, 90 | 32.90, 18.93, 0 |
+
+**No copper under the sensor on its own layer** (`layout.py` `add_imu_keepout`, rule area `U60_NO_COPPER_UNDER`):
+no track, via or pour on F.Cu inside the pad ring, x 29.35…30.65, y 23.1…23.9. ST's mounting note for LGA MEMS
+sensors (TN0018) asks for a keep-out on the top metal layer under the package, so that nothing under it loads the
+sensor unevenly once soldered. **Source caveat:** the wording comes from a web-search excerpt of Rev 6 of that note;
+the current Rev 8 PDF was not read, and the excerpt says nothing about vias beside the package. The first rework had
+put the I2C escape vias between the pad rows; with the rule area there is no copper there. The seven +3V3 / GND /
+I2C escape vias now sit outside the pad ring, at the package outline: all inside the courtyard, and the nearest
+overlaps the body's edge by about 0.1 mm. Whether that matters for the zero-g / zero-rate offsets is not known; the
+bring-up reads both (`bu imu`, `bu gyro`).
+
+**Re-route:** `layout.py --rework --rework-from <the committed board> --no-freerouting`, then `layout.py --finish`.
+The grid router alone was used because the first attempt with Freerouting re-did 42 nets, the USB pair, VBUS, VBAT
+and VSYS among them. Copper that differs from the committed board, 11 nets:
+
+| Net | Length mm, before → now | Vias | Why |
+|---|---|---|---|
+| I2C_SCL | 73.6 → 75.0 | 13 → 10 | U60 pins moved |
+| I2C_SDA | 95.1 → 85.8 | 14 → 11 | U60 pins moved |
+| IMU_INT1 | 54.1 → 29.1 | 8 → 3 | U60 pins moved |
+| IMU_INT2 | 33.9 → 51.0 | 7 → 6 | U60 pins moved |
+| +3V3 | 209.2 → 208.7 | 16 → 15 | U60, C60–C62 |
+| GND | 356.5 → 359.8 | 193 → 192 | U60, C60–C62 |
+| BUZZ_D | 17.7 → 14.4 | 3 → 4 | R57 moved |
+| BTN_MODE_N | 114.5 → 112.9 | 18 → 17 | displaced by the new copper |
+| BOOT_N | 59.6 → 63.8 | 9 → 11 | displaced |
+| LCD_BL | 38.9 → 51.8 | 9 → 11 | displaced |
+| CAP_TX7 | 23.1 → 26.7 | 4 → 2 | displaced |
+
+Vias in all 546 → 534. USB_DP / USB_DM, VBUS, VBAT, VBAT_RAW, VSYS, CAP_RX and CAP_LP1 are as on the committed board.
+
+**Crosstalk scan after** (same config as §7.14). ANALOG victims (1 mV budget): CAP_LP1 worst **0.88 mV** (BTN_MODE_N,
+unchanged), BOOT_N 0.65 mV (unchanged), IMU_INT2 0.31 mV. **USB got worse by one pair**: over sicalc's 10 mV budget
+3 → 4. The pair on itself 51 mV as before; **I2C_SCL → D+ 27.8 mV** (6.7 mm at 0.18 mm on B.Cu) and **IMU_INT1 → D−
+19.5 mV** (13.8 mm at 0.24 mm on B.Cu) where IMU_INT2 → D+ 26.9 mV was. These are the two aggressors §7.14 had moved
+away from the pair, back beside it. They are terminated-line upper bounds, a full-speed receiver rejects most of it as
+common mode (§7.13), and the I2C rise through 2.2 k is ≈ 205 ns (only the falling edge is fast). The GND guard or
+re-route of that part of the pair is still the open USB item (§7.9), now with two lines beside it and not one.
+
+**Toolchain fixes that came out of it** (`tools/`, with tests):
+
+* `pcbgen.fanout_vias` kept a flat 0.15 mm from other nets' copper. A GND fan-out via landed 0.18 mm from a track of
+  the Analog class (0.2 mm clearance): a DRC error. The gap is now the other net's class clearance when that is the
+  larger one (`tools/tests/test_fanout_vias.py`).
+* `pcbgen.dead_branch`, used by `layout.py`'s `prune_dangling`: a rework cuts the old copper of a re-routed net and
+  can leave a dead branch of dozens of very short grid-router segments. DRC reports only the last segment of a branch
+  per run, and the pruner removed one segment per round for six rounds, so two `track_dangling` warnings stayed
+  (+3V3 on B.Cu; BTN_MODE_N on F.Cu, through a via, on B.Cu). It now removes the whole branch behind a reported end,
+  up to the next fork, T-junction, pad, zone of the net or locked copper, and falls back to the single segment when
+  the DRC count of unconnected items rises (`tools/tests/test_dead_branch.py`).
+
+**Firmware** ([firmware §12.2](firmware.md)): an LSM6DSO driver (`components/power/imu.c`), an orientation filter
+(`components/measure/orient.c`: up vector, roll / pitch / tilt, nearest face, relative yaw, gyroscope bias learned at
+rest, a "held steady" flag), the display turning with the caliper (`CONFIG_CALIPER_UI_AUTO_FLIP`), and the bring-up
+steps `bu imu`, `bu gyro`, `bu gyro turn` and `bu lcd flip`. Asleep the gyroscope is off and the accelerometer wakes
+the ESP32 on pickup as the LIS2DW12 did. Not connected yet: orientation in the SETTLE capture, movement as "in use"
+for the auto-off timer, and orientation over BLE, the web page or the log. The app slot is nearly full (4 % free).
+
+**To verify on the first board (TVP):** the axis signs; INT1's level before and after configuration and INT2's
+default level; the wake-up threshold (62.5 mg) against real handling; the two currents at 3.3 V; the filter's
+thresholds; the zero-rate offset with the escape vias where they are.
+
+**Gates (2026-11-10, KiCad 10.0.8, WSL):** `build.py` wiring check OK, ERC as before (2 waived TPS22917 pin_to_pin,
+scale clean); `check_contract.py` OK; DRC + schematic parity **0 errors, 0 unconnected, 0 parity** (7
+`lib_footprint_mismatch` warnings, the intended local overrides; no `track_dangling`); `release.py --board slider`
+PASS, jlcplace 0.2.1 **102 rows: 0 red, 0 yellow, 102 green** (new entry C2655100: fitted by pad numbers, 14 of 14, rms
+0.100 mm); `tools/tests` 24 passed; mechanics `run_all.sh`: 107 envelopes, 41 tests passed, clash check **0 not clear,
+0 FAIL / RISK**; firmware host tests 6 of 6, `idf.py build` without warnings. The scale board did not change.

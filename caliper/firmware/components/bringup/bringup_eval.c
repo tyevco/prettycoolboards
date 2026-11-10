@@ -38,7 +38,7 @@ static void clear(char *buf, size_t len)
 /* ---- I2C ----------------------------------------------------------------------------------- */
 
 static const bu_i2c_dev_t s_i2c[] = {
-    {I2C_ADDR_LIS2DW12, "LIS2DW12"},
+    {I2C_ADDR_LSM6DSO, "LSM6DSO"},
     {I2C_ADDR_MAX17048, "MAX17048"},
     {I2C_ADDR_BQ25180, "BQ25180"},
 };
@@ -218,13 +218,14 @@ bool bu_fg_eval(const bu_fg_regs_t *r, int32_t vbat_ref_mv, char *buf, size_t le
     return ok;
 }
 
-/* ---- LIS2DW12 ------------------------------------------------------------------------------ */
+/* ---- LSM6DSO accelerometer ----------------------------------------------------------------- */
 
 int32_t bu_imu_mg(int16_t raw)
 {
-    /* +-2 g over the full signed 16-bit range (the 12/14-bit result is left-justified) */
-    int32_t v = (int32_t)raw * 2000;
-    return v >= 0 ? (v + 16384) / 32768 : -((-v + 16384) / 32768);
+    /* 0.061 mg/LSB at +-2 g (DS12140 Table 2, LA_So): 16-bit two's complement, so 1 g = 16393 LSB
+     * and full scale reads 1999 mg */
+    int32_t v = (int32_t)raw * 61;
+    return v >= 0 ? (v + 500) / 1000 : -((-v + 500) / 1000);
 }
 
 uint32_t bu_isqrt(uint64_t v)
@@ -301,6 +302,115 @@ bool bu_imu_move_eval(const bu_imu_span_t *s, bool int1_low_seen, char *buf, siz
         cat(buf, len, "; FAIL no wake-up interrupt on IMU_INT1");
     }
     return ok;
+}
+
+/* ---- LSM6DSO gyroscope --------------------------------------------------------------------- */
+
+uint32_t bu_gyro_udps_per_lsb(uint8_t ctrl2_g)
+{
+    static const uint32_t fs_g[4] = {8750, 17500, 35000, 70000}; /* +-250 / 500 / 1000 / 2000 dps */
+    return (ctrl2_g & 0x02) ? 4375 : fs_g[(ctrl2_g >> 2) & 0x03];
+}
+
+int32_t bu_gyro_mdps(int16_t raw, uint8_t ctrl2_g)
+{
+    int64_t v = (int64_t)raw * (int64_t)bu_gyro_udps_per_lsb(ctrl2_g);
+    return (int32_t)(v >= 0 ? (v + 500) / 1000 : -((-v + 500) / 1000));
+}
+
+bool bu_gyro_running(uint8_t ctrl2_g)
+{
+    return (ctrl2_g & 0xF0) != 0;
+}
+
+void bu_gyro_stats_init(bu_gyro_stats_t *s)
+{
+    *s = (bu_gyro_stats_t){0};
+}
+
+void bu_gyro_stats_feed(bu_gyro_stats_t *s, const int32_t mdps[3])
+{
+    for (int i = 0; i < 3; i++) {
+        if (!s->have || mdps[i] < s->min[i]) {
+            s->min[i] = mdps[i];
+        }
+        if (!s->have || mdps[i] > s->max[i]) {
+            s->max[i] = mdps[i];
+        }
+        s->sum[i] += mdps[i];
+    }
+    s->have = true;
+    s->n++;
+}
+
+int32_t bu_gyro_stats_mean(const bu_gyro_stats_t *s, int axis)
+{
+    if (!s->n) {
+        return 0;
+    }
+    int64_t v = s->sum[axis], n = (int64_t)s->n;
+    return (int32_t)(v >= 0 ? (v + n / 2) / n : -((-v + n / 2) / n));
+}
+
+static int32_t abs32(int32_t v)
+{
+    return v < 0 ? -v : v;
+}
+
+bool bu_gyro_rest_eval(const bu_gyro_stats_t *s, char *buf, size_t len)
+{
+    static const char axis[3] = {'X', 'Y', 'Z'};
+    clear(buf, len);
+    int32_t mean[3], pp[3];
+    bool flat = true;
+    for (int i = 0; i < 3; i++) {
+        mean[i] = bu_gyro_stats_mean(s, i);
+        pp[i] = s->have ? s->max[i] - s->min[i] : 0;
+        flat = flat && pp[i] == 0;
+    }
+    cat(buf, len, "%lu samples, mean X %ld Y %ld Z %ld mdps, p-p X %ld Y %ld Z %ld mdps", (unsigned long)s->n,
+        (long)mean[0], (long)mean[1], (long)mean[2], (long)pp[0], (long)pp[1], (long)pp[2]);
+    if (s->n < BU_GYRO_MIN_SAMPLES) {
+        cat(buf, len, "; FAIL only %lu samples (< %d)", (unsigned long)s->n, BU_GYRO_MIN_SAMPLES);
+        return false;
+    }
+    if (flat) {
+        cat(buf, len, "; FAIL no axis ever changed: the gyroscope is powered down or not updating");
+        return false;
+    }
+    bool ok = true;
+    for (int i = 0; i < 3; i++) {
+        if (pp[i] > BU_GYRO_STILL_PP_MDPS) {
+            cat(buf, len, "; FAIL %c moved %ld mdps p-p (> %d): it was not lying still, repeat", axis[i], (long)pp[i],
+                BU_GYRO_STILL_PP_MDPS);
+            ok = false;
+        } else if (abs32(mean[i]) > BU_GYRO_ZERO_MAX_MDPS) {
+            cat(buf, len, "; FAIL %c zero-rate level %ld mdps (limit +-%d)", axis[i], (long)mean[i],
+                BU_GYRO_ZERO_MAX_MDPS);
+            ok = false;
+        }
+    }
+    return ok;
+}
+
+bool bu_gyro_turn_eval(const bu_gyro_stats_t *s, char *buf, size_t len)
+{
+    clear(buf, len);
+    int32_t peak = 0;
+    for (int i = 0; s->have && i < 3; i++) {
+        peak = abs32(s->min[i]) > peak ? abs32(s->min[i]) : peak;
+        peak = abs32(s->max[i]) > peak ? abs32(s->max[i]) : peak;
+    }
+    cat(buf, len, "%lu samples, X %+ld..%+ld Y %+ld..%+ld Z %+ld..%+ld dps", (unsigned long)s->n,
+        s->have ? (long)(s->min[0] / 1000) : 0L, s->have ? (long)(s->max[0] / 1000) : 0L,
+        s->have ? (long)(s->min[1] / 1000) : 0L, s->have ? (long)(s->max[1] / 1000) : 0L,
+        s->have ? (long)(s->min[2] / 1000) : 0L, s->have ? (long)(s->max[2] / 1000) : 0L);
+    if (peak < BU_GYRO_TURN_MDPS) {
+        cat(buf, len, "; FAIL largest rate %ld dps < %d dps (turn the board faster)", (long)(peak / 1000),
+            BU_GYRO_TURN_MDPS / 1000);
+        return false;
+    }
+    return true;
 }
 
 /* ---- buttons ------------------------------------------------------------------------------- */

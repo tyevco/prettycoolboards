@@ -8,6 +8,9 @@
 #include "esp_lcd_panel_st7789.h"
 #include "esp_log.h"
 #include "esp_lvgl_port.h"
+#include "orient.h"
+#include "power.h"
+#include "sdkconfig.h"
 #include "ui.h"
 
 static const char *TAG = "ui";
@@ -20,6 +23,13 @@ static const char *TAG = "ui";
  * modules use 40/53 or 40/52 depending on the rotation) */
 #define LCD_GAP_X 40
 #define LCD_GAP_Y 53
+/* The ST7789 RAM in landscape (MV set) is 320 x 240. Turned 180 degrees (MX and MY inverted) the
+ * glass sits at the mirrored offsets: RAM size - visible size - offset = 40 and 52 (TVP like the
+ * pair above; "bu lcd flip" shows the frame for it). */
+#define LCD_RAM_H      320
+#define LCD_RAM_V      240
+#define LCD_GAP_X_TURN (LCD_RAM_H - LCD_HRES - LCD_GAP_X)
+#define LCD_GAP_Y_TURN (LCD_RAM_V - LCD_VRES - LCD_GAP_Y)
 
 static esp_lcd_panel_io_handle_t s_io;
 static esp_lcd_panel_handle_t s_panel;
@@ -176,6 +186,52 @@ esp_err_t ui_test_pattern(bool on)
     }
     ui_unlock();
     return ESP_OK;
+}
+
+/* ---- 180 degree flip --------------------------------------------------------------------------
+ * The LVGL port turns the picture in the panel (MADCTL MX / MY, no software rotation, no extra
+ * buffer): lv_display_set_rotation() invalidates everything and raises RESOLUTION_CHANGED, on which
+ * esp_lvgl_port calls esp_lcd_panel_mirror(). It does not move the panel gap, so that is set here
+ * first. All of it runs in the LVGL task between two frames: the panel commands share the SPI
+ * device with the flushes (see ui_sleep), and esp_lcd's tx_param waits for a queued colour transfer. */
+static volatile ui_flip_t s_flip_mode; /* UI_FLIP_AUTO */
+static orient_flip_t s_flip;           /* LVGL task only */
+static bool s_turned;                  /* what the panel is set to; LVGL task only */
+
+void ui_set_flip(ui_flip_t mode)
+{
+    s_flip_mode = mode;
+}
+
+void ui_flip_poll(uint32_t dt_ms)
+{
+    bool want = false;
+    switch (s_flip_mode) {
+    case UI_FLIP_NORMAL:
+        break;
+    case UI_FLIP_TURNED:
+        want = true;
+        break;
+    default: {
+#if CONFIG_CALIPER_UI_AUTO_FLIP
+        orient_out_t o;
+        if (power_orient_get(&o)) { /* false: no IMU, or no gravity reference yet: keep the state */
+            orient_flip_update(&s_flip, &o, dt_ms);
+        }
+        want = s_flip.flipped;
+#else
+        (void)dt_ms;
+        (void)s_flip;
+#endif
+        break;
+    }
+    }
+    if (want == s_turned || !s_disp) {
+        return;
+    }
+    s_turned = want;
+    esp_lcd_panel_set_gap(s_panel, want ? LCD_GAP_X_TURN : LCD_GAP_X, want ? LCD_GAP_Y_TURN : LCD_GAP_Y);
+    lv_display_set_rotation(s_disp, want ? LV_DISPLAY_ROTATION_180 : LV_DISPLAY_ROTATION_0);
 }
 
 void ui_sleep(void)

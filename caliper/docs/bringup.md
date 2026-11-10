@@ -64,7 +64,7 @@ Type `bu help` for the command list.
    | B-6 on, firmware running | bench → J2 | 3.70 V | 150 mA | ≈ 56 mA idle awake (architecture §5) [TVP] |
    | B-7 with USB | real cell on J2, or bench + 12 Ω dummy load | 3.70 V | 600 mA | ≈ 70 mA into the cell / the load |
    | B-14 Wi-Fi scan | bench → J2 | 3.70 V (Wi-Fi refuses below 3.50 V without USB) | 600 mA | Wi-Fi peaks ≈ 0.2–0.3 A from the cell with the 10 dBm TX cap (SPEC §3) [TVP] |
-   | B-15, B-16 sleep / ship | real cell, or bench + 12 Ω load → µA meter (bypass closed until asleep) → J2 | 3.70 V | 600 mA | ≤ 35 µA / ≤ 3 µA |
+   | B-15, B-16 sleep / ship | real cell, or bench + 12 Ω load → µA meter (bypass closed until asleep) → J2 | 3.70 V | 600 mA | ≤ 40 µA / ≤ 3 µA |
 
 2. **Cold start on a bench "battery":** the BQ25180 only powers SYS from BAT alone above VBATPOR = 3.08 / 3.21 /
    3.46 V (min / typ / max, SLUSE99C). Always power up at **3.70 V**, then lower the voltage while it runs; once
@@ -92,7 +92,7 @@ plus the GND pad).
 | U30 AS5311 (bottom) | pin 1, TSSOP leads; C30 / C31 beside it; nothing else on the bottom over y 0…20 except the electrodes |
 | D1 SMF5.0A, U1 USBLC6 | D1 cathode band to VBUS; U1 pin-1 mark matches the silk (turned 180° it clamps VBUS to GND) |
 | Q1 AO3401A, R10 | Q1 drain pad under J2 pin 1 (SPEC §2.1: Q1 at 90°) |
-| U4 MAX17048, U60 LIS2DW12, U40 TLV9062 | pin-1 marks; U4 exposed pad |
+| U4 MAX17048, U60 LSM6DSO, U40 TLV9062 | pin-1 marks; U4 exposed pad. U60 is an LGA: its 14 pads are underneath, so the firmware checks (B-7.1, B-10) are what proves the joints |
 | D50 WS2812B-2020, BZ50, Q50, Q51 | orientation per silk |
 | J50 FPC | bottom-contact part, latch present, no solder wicking into the contacts |
 | J1 USB-C | shell tabs soldered; no bridge on the 0.5 mm signal row |
@@ -177,8 +177,8 @@ Supply: bench 3.70 V into J2 (150 mA limit) **or** USB alone, not both (B-1 item
 
 | Line | Expected | If not |
 |---|---|---|
-| `PrettyCool Caliper fw …, board rev A (pins 16f6bf3015e2f33b), wake: power-on` | the pin hash of `nets.py` | wrong image |
-| `power: BQ25180 ok, MAX17048 ok (0x001x), LIS2DW12 ok` | all three ok | B-7.1 |
+| `PrettyCool Caliper fw …, board rev A (pins ee472a43b6aab9d6), wake: power-on` | the pin hash of `nets.py` | wrong image |
+| `power: BQ25180 ok, MAX17048 ok (0x001x), LSM6DSO ok` | all three ok | B-7.1 |
 | `mag: AS5311 ok, pos …` or `mag: no valid SSI frame …` | without a magnet the field is out of range: either line is fine here | B-12 |
 | `ui: display up` | | B-8 |
 | `cap: capacitive scale enabled (EXPERIMENTAL), ADC 80645 S/s` | 80 645 S/s | B-13 |
@@ -188,7 +188,8 @@ Then TinyUSB enumerates a composite device: a CDC port ("Caliper console") and a
 The USB-Serial-JTAG port goes away; to flash again type `bootloader` on the console (Firmware §10).
 
 **Current**, from the bench supply, display on, BLE advertising: ≈ 56 mA [TVP] (architecture §5: module 25,
-AS5311 16, LCD 8, backlight 5, op-amp 1 mA). Above 100 mA: find the hot part (thermal camera / finger) before
+AS5311 16, LCD 8, backlight 5, op-amp 1 mA; the LSM6DSO adds 0.3 mA with the gyroscope and the accelerometer
+at 52 Hz in low-power mode, ST AN5192 Table 9, typical at 1.8 V). Above 100 mA: find the hot part (thermal camera / finger) before
 going on.
 
 `bu all` now runs the non-interactive checks in one go (B-7, B-10, B-12, B-13, B-14) and prints a summary. On a
@@ -199,11 +200,11 @@ bare board without the tape, `mag` fails; everything else should pass.
 A real cell on J2 (polarity checked), or the bench supply at 3.70 V with the 12 Ω / 2 W load across its terminals
 (B-1 item 3); USB attached for the console.
 
-**B-7.1 I2C scan:** `bu i2c` → `PASS i2c: 3 found` (0x19 LIS2DW12, 0x36 MAX17048, 0x6A BQ25180, nothing else).
+**B-7.1 I2C scan:** `bu i2c` → `PASS i2c: 3 found` (0x36 MAX17048, 0x6A BQ25180, 0x6B LSM6DSO, nothing else).
 
 | Result | Meaning |
 |---|---|
-| 0x18 instead of 0x19 | LIS2DW12 SA0 low: it then also draws 60–170 µA permanently (electronics §3.6) |
+| 0x6B missing, 0x36 and 0x6A answer | the LSM6DSO's SA0 strap (U60 pin 1) is open or low: the chip then answers at **0x6A, on top of the BQ25180** ([electronics §3.6](electronics.md#_3-6-imu-lsm6dso)), so the scan cannot tell it from a missing chip, and `bu bq` may read nonsense. SA0 has no internal pull-up by default (DS12140 Table 19). Otherwise: U60 not soldered, or VDD / VDDIO (pins 8 / 5) missing |
 | nothing answers | SDA / SCL shorted or open, R6 / R7 (2.2 k) missing, +3V3 not at the pull-ups |
 | every address answers | SDA held low or shorted to SCL |
 | 0x36 missing | U4 unpowered (it sits on VBAT, not +3V3: B-4.2 TP2) or the TDFN pad |
@@ -254,6 +255,22 @@ the top left and "BR" at the bottom right, both readable.
 | text mirrored, or "TOP LEFT" in another corner | rotation | `rotation.swap_xy / mirror_x / mirror_y` |
 | colours wrong in a pattern of stripes | byte order | `swap_bytes` |
 
+`bu lcd flip` shows the same pattern **turned 180°**, which is what the firmware does on its own when the caliper
+is held with the button edge down (Firmware §7). Read it from the other side: the same complete frame, the same
+bar order left to right, both labels readable. While either test runs the picture is pinned, so the IMU cannot turn
+it under you.
+
+| Symptom (only in `bu lcd flip`) | Cause | Fix |
+|---|---|---|
+| one edge of the frame missing, noise on the opposite edge | the turned RAM offset. The firmware derives it as 320 − 240 − `LCD_GAP_X` and 240 − 135 − `LCD_GAP_Y` (40 / 52 now) [TVP] | `LCD_GAP_X_TURN` / `LCD_GAP_Y_TURN` in `ui_panel.c`, after `bu lcd` itself passes |
+| the picture is not turned | `ui_flip_poll` not reached: the UI refresh timer | |
+
+Then the automatic flip, with the normal UI on screen: hold the caliper upright (buttons up), turn it over so the
+buttons point down and hold it there. After about 0.6 s the reading turns to stay upright; turned back, it follows.
+Lying flat on the bench it keeps whichever way it was. If it turns the **wrong** way round (upright only when held
+upside down), the Y axis of the IMU is reversed: B-10 finds that. If it never turns, check `bu imu` (the
+orientation line) and `CONFIG_CALIPER_UI_AUTO_FLIP`.
+
 `bu lcd off` removes a pattern left on screen.
 
 ## B-9. Buttons, piezo, RGB LED
@@ -265,14 +282,34 @@ the top left and "BR" at the bottom right, both readable.
 * `bu led` → red, green, blue, white, 0.7 s each. None: +3V3_UI (TP6), RGB_DIN, R55. Wrong colours: the
   WS2812 model in `outputs.c`.
 
-## B-10. IMU
+## B-10. IMU: accelerometer and gyroscope
 
-* `bu imu` (board flat and still) → WHO_AM_I 0x44 and |a| = **850–1150 mg** [TVP: offset + sensitivity
-  tolerance], gravity on Z (flat, display up). 0 mg on all axes: the part is in power-down (the init failed: boot
-  log).
+U60 is an LSM6DSO (SPEC §16). It sits on the top side at 0°, so the chip's axes are the board's: **+X** along the
+beam toward the USB end, **+Y** toward the buttons (the top edge), **+Z** out of the display. The axis that points
+up reads +1 g; a turn is positive when it is counter-clockwise seen from the tip of the axis. The directions come
+from the datasheet's drawing and SPEC's placement: this step is what confirms them [TVP]. If one is wrong, the
+only place to change is the mounting table at the top of `components/power/imu.c`.
+
+* `bu imu` (board flat and still, display up) → WHO_AM_I 0x6C and |a| = **850–1150 mg** [TVP: offset + sensitivity
+  tolerance], gravity on **+Z** (Z ≈ +1000 mg, X and Y near 0). The line above the verdict is the orientation the
+  firmware derives (Firmware §12.2): `roll` and `pitch` near 0, `display up`, `steady`. Repeat it with the board
+  standing on its jaw-side edge, buttons up: Y ≈ +1000 mg, `top edge up`, roll ≈ +90°; and on end with the USB
+  connector up: X ≈ +1000 mg, `USB end up`, pitch ≈ +90°. 0 mg on all axes: the part is in power-down (the init
+  failed: boot log).
 * `bu imu move` → pick the board up and turn it over within 5 s. PASS: one axis swings ≥ 500 mg **and** IMU_INT1 went
-  low (the wake-up interrupt that wakes the caliper on pickup). INT1 never low: GPIO15 / U60 INT1 routing, or the
-  CTRL3 / CTRL4 setup. INT1 stuck low after clearing: the LIS2DW12 reset to active-high (Firmware §12.2).
+  low (the wake-up interrupt that wakes the caliper on pickup). INT1 never low: GPIO15 / U60 INT1 (pin 4) routing,
+  or the wake-up setup (MD1_CFG, TAP_CFG2). INT1 stuck low after clearing: the LSM6DSO has reset; its INT1 is then
+  an input with a pull-down again until CTRL3_C is rewritten (Firmware §12.2), so reboot and repeat.
+* `bu gyro` (board flat and **still** for 2 s) → the zero-rate level. PASS: the mean of each axis within
+  **±3 dps** [TVP: the datasheet gives ±1 dps typical and no maximum] and no axis moving more than 2 dps
+  peak-to-peak. `the gyroscope is powered down`: CTRL2_G was not written (boot log). `not lying still`: repeat
+  without touching the bench. The line above the verdict is the filter's own bias estimate (it needs 1 s at rest)
+  and the chip temperature.
+* `bu gyro turn` → turn the board back and forth about one axis within 5 s. PASS: some axis reached **60 dps**.
+  The verdict lists each axis' extremes with their signs: turn it counter-clockwise seen from the display side and
+  Z must go positive; with the display facing you, tip the top edge toward and away from you and X changes; swing
+  the USB end toward and away from you and Y changes. An axis that never moves: U60. The wrong axis or sign: the
+  mounting table.
 
 ## B-11. Sensor rails (SNS_PWR_EN)
 
@@ -383,18 +420,23 @@ its bypass switch closed** → J2. (A PPK2 in source mode can replace both once 
 2. Once the display goes off, open the bypass and read the current after 10 s. Close the bypass before any wake
    (the boot current would overload the µA range).
 
-**Expected: ≤ 35 µA** (SPEC §3 target; the estimate is ≈ 33 µA: ESP32-S3 8, TPS63802 Iq + divider 16.5, BQ25180 3,
-MAX17048 3, LIS2DW12 1, conversion loss ≈ 2) [TVP].
+**Expected: ≤ 40 µA** (SPEC §3 target; the estimate is ≈ 38 µA: ESP32-S3 8, TPS63802 Iq + divider 16.5, BQ25180 3,
+MAX17048 3, LSM6DSO 5.5, 2 × TPS22917 0.02, conversion loss ≈ 2.2) [TVP]. The LSM6DSO figure is the
+accelerometer alone at 12.5 Hz in ultra-low-power mode with the gyroscope powered down, typical at VDD 1.8 V
+(AN5192 Table 9); the datasheet has no 3.3 V figure and nothing here is measured.
 
 | Reading | Likely cause |
 |---|---|
-| ≈ 35–40 µA | the 4 µA defaults: BQ25180 push-button scan or MAX17048 VRESET.Dis (`bu bq`, `bu fg` before sleeping) |
-| ≈ 100–200 µA | LIS2DW12 SA0 pulled low (would also show 0x18 in B-7.1); a pull-up fighting a held pad |
+| ≈ 40 µA or a few µA above | the 4 µA defaults: BQ25180 push-button scan or MAX17048 VRESET.Dis (`bu bq`, `bu fg` before sleeping) |
+| ≈ 0.3–0.6 mA | the LSM6DSO still in its awake mode with the gyroscope on (0.3 mA; the sleep log then shows `LSM6DSO sleep configuration failed`), or +3V3_SNS / +3V3_UI still on (next row) |
+| ≈ 100–200 µA | a pull-up fighting a held pad (Firmware §12.5) |
 | ≈ 0.3–1 mA | +3V3_SNS or +3V3_UI still on (meter TP5 / TP6: should be 0 V), a pad back-powering a rail |
 | mA, display lit | not asleep: a wake source held low (button, IMU_INT1, CHG_INT_N); the boot log after a wake shows why |
 
 3. **Wake sources:** a button press wakes it (log `wake: button`); picking it up wakes it (`wake: pickup`, IMU);
-   plugging USB wakes it (`wake: usb`). After a pickup wake the reading continues (the count is recovered,
+   plugging USB wakes it (`wake: usb`). If the log before sleeping says `IMU INT1 still low after clearing: pickup
+   wake disabled for this sleep`, the board was moving while it went to sleep or the LSM6DSO has reset (B-10): the
+   buttons and USB still wake it. After a pickup wake the reading continues (the count is recovered,
    Firmware §4) if the slider did not move more than ±1 mm while asleep.
 
 ## B-16. Ship mode
@@ -417,27 +459,31 @@ i.e. the firmware undid it). Plug USB: the board boots (`wake: power-on`).
 | B-5 | TP1, TP3, TP4 on USB; enumeration | 4.75–5.25 V; ≈ 4.5 V; 3.25–3.37 V; enumerates |
 | B-6 | boot log, awake current | three chips ok, display up, ADC 80 645 S/s; ≈ 56 mA |
 | B-7 | `bu i2c`, `bu rails <mV>`, `bu bq`, `bu fg <mV>`; charge current; full-charge voltage | PASS ×4; 70 mA ±10 %; 4.20 V ±1 % |
-| B-8 | `bu lcd` | PASS |
+| B-8 | `bu lcd`, `bu lcd flip`; the automatic flip by hand | PASS ×2; turns and turns back |
 | B-9 | `bu btn`, `bu beep`, `bu led` | PASS ×3 |
-| B-10 | `bu imu`, `bu imu move` | PASS ×2 |
+| B-10 | `bu imu` in three positions, `bu imu move`, `bu gyro`, `bu gyro turn`; the axis signs | PASS ×4; +Z, +Y, +X up as described |
 | B-11 | `bu sns off`, `bu sns on` | PASS ×2 |
 | B-12 | `bu mag`, `bu mag move`; the SSI sign | PASS ×2 |
 | B-13 | `bu cap` DC level and floor; TP41; `bu cap scale` | PASS; 1.65 V ±2 % |
 | B-14 | BLE and Wi-Fi RSSI vs the reference, 4 orientations × 2 distances, bare and housed | ≤ 6 dB below on average |
-| B-15 | sleep current; the three wake sources | ≤ 35 µA; all three wake |
+| B-15 | sleep current; the three wake sources | ≤ 40 µA; all three wake |
 | B-16 | ship current; USB wake | < 3 µA; boots |
 
-After closing the housing, `bu all` is the quick regression (expect `SUMMARY 8 PASS, 0 FAIL` with the tape and the
-scale in place).
+After closing the housing, `bu all` is the quick regression (expect `SUMMARY 9 PASS, 0 FAIL` with the tape and the
+scale in place, and the caliper lying still: `gyro` is one of the nine).
 
 ## Open [TVP] items
 
 * Every limit marked [TVP] above, in particular: the first-power current, the +3V3 tolerance, the gauge-vs-meter
-  ±30 mV, the 1 g band of the IMU, the capacitive DC window and feed-through floor, the antenna's 6 dB, the sleep
+  ±30 mV, the 1 g band of the IMU, the gyroscope's ±3 dps zero-rate limit, the capacitive DC window and feed-through floor, the antenna's 6 dB, the sleep
   and ship currents.
 * The AS5311 SSI direction (`SSI_SIGN`), the mag direction (`CONFIG_CALIPER_MAG_DIR_INVERT`), and whether the
   MagINCn / MagDECn pins mirror the SSI bits exactly.
-* The display offsets (`LCD_GAP_X` / `_Y`) and orientation flags for the bought panel.
+* The display offsets (`LCD_GAP_X` / `_Y`) and orientation flags for the bought panel, and the turned offsets
+  derived from them (40 / 52).
+* The IMU: the sign of each axis against the board (B-10), the flip thresholds (≈ 20°, 0.6 s), the rest and
+  steady thresholds of the orientation filter, and whether the 62.5 mg wake-up threshold picks the caliper up
+  as readily as it did with the LIS2DW12 (the two chips filter the slope differently).
 * The piezo frequency (4 kHz drive vs the BZ50 resonance), the WS2812 colour order.
 * The BQ25180 behaviour with USB and no cell (the gauge's supply), and the power-on SYS_REG value.
 * The reverse-polarity case with USB present (SPEC §3: not tested).

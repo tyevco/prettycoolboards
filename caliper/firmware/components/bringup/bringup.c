@@ -28,11 +28,14 @@
 
 #define OUT(...) s_io->out(__VA_ARGS__)
 
-/* LIS2DW12 registers (power.c configures it: 12.5 Hz, low-power mode 1, +-2 g, wake-up on INT1) */
-#define IMU_WHO_AM_I    0x0F
-#define IMU_OUT_X_L     0x28
-#define IMU_WAKE_UP_SRC 0x38
-#define IMU_ALL_INT_SRC 0x3B
+/* LSM6DSO registers, ST DS12140 Rev 3 §9 (power/imu.c configures it: accelerometer +-2 g and
+ * gyroscope +-1000 dps at 52 Hz in low-power mode, wake-up latched on INT1) */
+#define IMU_WHO_AM_I    0x0F /* §9.11 */
+#define IMU_CTRL2_G     0x11 /* §9.13 */
+#define IMU_ALL_INT_SRC 0x1A /* §9.22 */
+#define IMU_WAKE_UP_SRC 0x1B /* §9.23 */
+#define IMU_OUTX_L_G    0x22 /* §9.28: gyroscope X, Y, Z, 16 bits each, low byte first */
+#define IMU_OUTX_L_A    0x28 /* §9.31: accelerometer X, Y, Z */
 /* MAX17048 registers */
 #define FG_VCELL   0x02
 #define FG_SOC     0x04
@@ -213,7 +216,7 @@ static bool t_fg(int argc, char **argv)
 static bool imu_read(int32_t mg[3])
 {
     uint8_t b[6];
-    if (power_diag_read(I2C_ADDR_LIS2DW12, IMU_OUT_X_L, b, sizeof(b)) != ESP_OK) {
+    if (power_diag_read(I2C_ADDR_LSM6DSO, IMU_OUTX_L_A, b, sizeof(b)) != ESP_OK) {
         return false;
     }
     for (int i = 0; i < 3; i++) {
@@ -222,11 +225,23 @@ static bool imu_read(int32_t mg[3])
     return true;
 }
 
+static bool gyro_read(uint8_t ctrl2_g, int32_t mdps[3])
+{
+    uint8_t b[6];
+    if (power_diag_read(I2C_ADDR_LSM6DSO, IMU_OUTX_L_G, b, sizeof(b)) != ESP_OK) {
+        return false;
+    }
+    for (int i = 0; i < 3; i++) {
+        mdps[i] = bu_gyro_mdps((int16_t)(b[2 * i] | (b[2 * i + 1] << 8)), ctrl2_g);
+    }
+    return true;
+}
+
 static void imu_clear_latch(void)
 {
     uint8_t v;
-    power_diag_read(I2C_ADDR_LIS2DW12, IMU_WAKE_UP_SRC, &v, 1);
-    power_diag_read(I2C_ADDR_LIS2DW12, IMU_ALL_INT_SRC, &v, 1);
+    power_diag_read(I2C_ADDR_LSM6DSO, IMU_WAKE_UP_SRC, &v, 1);
+    power_diag_read(I2C_ADDR_LSM6DSO, IMU_ALL_INT_SRC, &v, 1);
 }
 
 static bool t_imu_move(int secs)
@@ -261,12 +276,12 @@ static bool t_imu_move(int secs)
 static bool t_imu(int argc, char **argv)
 {
     uint8_t who = 0;
-    if (power_diag_read(I2C_ADDR_LIS2DW12, IMU_WHO_AM_I, &who, 1) != ESP_OK) {
-        return verdict(false, "imu", "no answer at 0x19");
+    if (power_diag_read(I2C_ADDR_LSM6DSO, IMU_WHO_AM_I, &who, 1) != ESP_OK) {
+        return verdict(false, "imu", "no answer at 0x6B");
     }
     if (who != BU_IMU_WHO_AM_I) {
         char d[64];
-        snprintf(d, sizeof(d), "WHO_AM_I 0x%02x (0x44 expected)", who);
+        snprintf(d, sizeof(d), "WHO_AM_I 0x%02x (0x%02x expected)", who, BU_IMU_WHO_AM_I);
         return verdict(false, "imu", d);
     }
     if (argc > 1 && !strcmp(argv[1], "move")) {
@@ -282,18 +297,77 @@ static bool t_imu(int argc, char **argv)
             }
             n++;
         }
-        wait_ms(100); /* ODR 12.5 Hz */
+        wait_ms(100); /* ODR 52 Hz: a new sample every time */
     }
     if (!n) {
         return verdict(false, "imu", "WHO_AM_I ok but the output registers do not read");
     }
+    /* what the firmware makes of it: the board-frame orientation from the filter (measure/orient.c).
+     * The registers above are the CHIP's axes; the mapping between the two is the table in imu.c. */
+    orient_out_t o;
+    if (power_orient_get(&o)) {
+        OUT("orientation: roll %.1f pitch %.1f deg, display %.1f deg off vertical, %s%s; yaw %.1f +-%.0f deg (relative)\n",
+            (double)o.roll_deg, (double)o.pitch_deg, (double)o.tilt_deg, orient_face_name(o.face),
+            o.steady ? ", steady" : "", (double)o.yaw_deg, (double)o.yaw_unc_deg);
+    } else {
+        OUT("orientation: none yet (the sampler is not running, or it has not seen 1 g)\n");
+    }
     int32_t a[3] = {(int32_t)(sum[0] / n), (int32_t)(sum[1] / n), (int32_t)(sum[2] / n)};
     uint32_t norm = bu_imu_norm_mg(a[0], a[1], a[2]);
     char d[160];
-    snprintf(d, sizeof(d), "WHO_AM_I 0x44, X %ld Y %ld Z %ld mg, |a| %lu mg (limit %d-%d), INT1 %s", (long)a[0],
+    snprintf(d, sizeof(d), "WHO_AM_I 0x%02x, X %ld Y %ld Z %ld mg, |a| %lu mg (limit %d-%d), INT1 %s", who, (long)a[0],
              (long)a[1], (long)a[2], (unsigned long)norm, BU_IMU_G_MIN_MG, BU_IMU_G_MAX_MG,
              gpio_get_level(PIN_IMU_INT1) ? "high" : "low (latched wake-up)");
     return verdict(bu_imu_still_ok(norm), "imu", d);
+}
+
+/* "bu gyro": the zero-rate level with the board lying still. "bu gyro turn [s]": a clear rate while
+ * it is turned by hand, with the sign of each axis. Both read the output registers (chip axes). */
+static bool t_gyro(int argc, char **argv)
+{
+    bool turn = argc > 1 && !strcmp(argv[1], "turn");
+    const char *name = turn ? "gyro-turn" : "gyro";
+    uint8_t who = 0, c2 = 0;
+    if (power_diag_read(I2C_ADDR_LSM6DSO, IMU_WHO_AM_I, &who, 1) != ESP_OK || who != BU_IMU_WHO_AM_I) {
+        return verdict(false, name, "no LSM6DSO at 0x6B (see bu imu)");
+    }
+    char d[240];
+    if (power_diag_read(I2C_ADDR_LSM6DSO, IMU_CTRL2_G, &c2, 1) != ESP_OK || !bu_gyro_running(c2)) {
+        snprintf(d, sizeof(d), "CTRL2_G 0x%02x: the gyroscope is powered down", c2);
+        return verdict(false, name, d);
+    }
+    int secs = turn ? arg_int(argc, argv, 2, 5) : 2;
+    secs = secs < 1 ? 1 : secs > 60 ? 60 : secs;
+    if (turn) {
+        OUT("turn the board back and forth about one axis for %d s. Positive = a right-handed turn about the\n", secs);
+        OUT("axis: counter-clockwise seen from the display side is +Z, with the thumb toward USB +X, toward the buttons +Y\n");
+    } else {
+        OUT("leave the board lying still for %d s\n", secs);
+        wait_ms(500); /* the Enter key */
+    }
+    bu_gyro_stats_t s;
+    bu_gyro_stats_init(&s);
+    for (int t = 0; t < secs * 50; t++) {
+        int32_t mdps[3];
+        if (gyro_read(c2, mdps)) {
+            bu_gyro_stats_feed(&s, mdps);
+        }
+        wait_ms(20); /* ODR 52 Hz */
+    }
+    if (!turn) {
+        /* the filter's own estimate, learned over 1 s windows at rest, and what it costs the yaw */
+        orient_out_t o;
+        power_imu_sample_t last;
+        power_orient_get(&o);
+        if (power_imu_last(&last)) {
+            OUT("filter: bias %s X %.2f Y %.2f Z %.2f dps (board axes), %s; IMU %.1f C, %lu samples, %lu read errors\n",
+                o.bias_valid ? "learned" : "not learned yet", (double)o.bias_dps.x, (double)o.bias_dps.y,
+                (double)o.bias_dps.z, o.at_rest ? "at rest" : "not at rest", (double)last.temp_c,
+                (unsigned long)last.samples, (unsigned long)last.errors);
+        }
+    }
+    bool ok = turn ? bu_gyro_turn_eval(&s, d, sizeof(d)) : bu_gyro_rest_eval(&s, d, sizeof(d));
+    return verdict(ok, name, d);
 }
 
 /* ---- sensor rail, AS5311 ------------------------------------------------------------------- */
@@ -391,24 +465,43 @@ static bool t_lcd(int argc, char **argv)
 {
     if (argc > 1 && !strcmp(argv[1], "off")) {
         ui_test_pattern(false);
+        ui_set_flip(UI_FLIP_AUTO);
         return true;
     }
+    /* "bu lcd flip": the same pattern with the picture turned 180 degrees, as the firmware shows it
+     * when the caliper is held top edge down. It proves the turned panel offsets (ui_panel.c). The
+     * plain test pins the picture as mounted, so the IMU cannot turn it under the operator. */
+    bool flip = argc > 1 && !strcmp(argv[1], "flip");
+    const char *name = flip ? "lcd-flip" : "lcd";
     if (ui_test_pattern(true) != ESP_OK) {
-        return verdict(false, "lcd", "display not up (ui_init failed: see the boot log)");
+        return verdict(false, name, "display not up (ui_init failed: see the boot log)");
     }
+    ui_set_flip(flip ? UI_FLIP_TURNED : UI_FLIP_NORMAL);
     power_backlight(100);
-    OUT("expect, landscape, FPC end on the left: a 1 px white frame on all four edges with a black gap,\n");
-    OUT("8 bars left to right: white yellow cyan green magenta red blue black, 'TOP LEFT' top left,\n");
-    OUT("'BR' bottom right, both readable (not mirrored); the backlight dims for 1 s, then returns\n");
-    wait_ms(2000);
-    power_backlight(10);
-    wait_ms(1000);
-    power_backlight(100);
+    if (flip) {
+        OUT("expect the 'bu lcd' picture turned 180 degrees: read it with the button edge toward you / down.\n");
+        OUT("Then: the same white frame complete on all four edges, the bars white ... black left to right,\n");
+        OUT("'TOP LEFT' and 'BR' readable; no noise line on any edge\n");
+        wait_ms(2000);
+    } else {
+        OUT("expect, landscape, FPC end on the left: a 1 px white frame on all four edges with a black gap,\n");
+        OUT("8 bars left to right: white yellow cyan green magenta red blue black, 'TOP LEFT' top left,\n");
+        OUT("'BR' bottom right, both readable (not mirrored); the backlight dims for 1 s, then returns\n");
+        wait_ms(2000);
+        power_backlight(10);
+        wait_ms(1000);
+        power_backlight(100);
+    }
     bool y = ask_yn("all as described?");
     ui_test_pattern(false);
+    ui_set_flip(UI_FLIP_AUTO);
     power_backlight(BACKLIGHT_RUN_PCT);
-    return verdict(y, "lcd", y ? "operator: pattern, orientation and backlight ok"
-                               : "operator: see docs/bringup.md B-8 for what each symptom means");
+    if (flip) {
+        return verdict(y, name, y ? "operator: the turned picture is complete"
+                                  : "operator: see docs/bringup.md B-8 (the turned panel offsets)");
+    }
+    return verdict(y, name, y ? "operator: pattern, orientation and backlight ok"
+                              : "operator: see docs/bringup.md B-8 for what each symptom means");
 }
 
 static uint8_t buttons_down(void)
@@ -585,7 +678,7 @@ static void t_sleep(int argc, char **argv)
 {
     int delay = arg_int(argc, argv, 1, 10);
     OUT("deep sleep in %d s: unplug USB now (VBUS leaving after the sleep would wake it via CHG_INT_N)\n", delay);
-    OUT("then read the supply current into VBAT: SPEC 3 target <= 35 uA (estimate 33 uA); a button wakes it\n");
+    OUT("then read the supply current into VBAT: SPEC 3 target <= 40 uA (estimate 38 uA); a button wakes it\n");
     wait_ms((uint32_t)delay * 1000u);
     core_command(CORE_CMD_SLEEP, 0);
 }
@@ -612,15 +705,16 @@ static void help(void)
     /* one line per OUT(): the console's out() formats into 256 bytes */
     static const char *const lines[] = {
         "bring-up checks (docs/bringup.md); each ends with PASS or FAIL:",
-        "bu all                    rails i2c bq fg imu mag cap ble, then a summary",
+        "bu all                    rails i2c bq fg imu gyro mag cap ble, then a summary",
         "bu rails [vbat_mv]        VBAT (gauge) vs the meter on TP2, VBUS, charge state",
-        "bu i2c                    scan: exactly 0x19 LIS2DW12, 0x36 MAX17048, 0x6A BQ25180",
+        "bu i2c                    scan: exactly 0x36 MAX17048, 0x6A BQ25180, 0x6B LSM6DSO",
         "bu bq                     BQ25180 status + register dump vs the init table",
         "bu fg [vbat_mv]           MAX17048 version, VCELL, SOC, sleep settings",
-        "bu imu | bu imu move [s]  LIS2DW12 WHO_AM_I + 1 g at rest | motion + INT1 wake-up",
+        "bu imu | bu imu move [s]  LSM6DSO WHO_AM_I + 1 g at rest | motion + INT1 wake-up",
+        "bu gyro | bu gyro turn [s] gyroscope zero-rate level at rest | rate while turning",
         "bu sns off | on           SNS_PWR_EN: +3V3_SNS / +3V3_UI off and on (then reboot)",
         "bu mag | bu mag move [s]  AS5311 SSI frames + field | count vs SSI while sliding",
-        "bu lcd [off]              colour bars, frame, orientation, backlight",
+        "bu lcd [flip|off]         colour bars, frame, orientation, backlight | turned 180 deg",
         "bu btn [s]                press each button",
         "bu beep | bu led          piezo | RGB LED",
         "bu cap [scale]            capacitive front-end: DC level, I/Q, amplitude",
@@ -657,6 +751,7 @@ void bringup_cmd(const bu_io_t *io, char *args)
         t_bq(0, none);
         t_fg(0, none);
         t_imu(0, none);
+        t_gyro(0, none);
         t_mag(0, none);
         t_cap(0, none);
         t_ble(2, ble_args);
@@ -666,6 +761,7 @@ void bringup_cmd(const bu_io_t *io, char *args)
     else if (!strcmp(c, "bq")) t_bq(argc, argv);
     else if (!strcmp(c, "fg")) t_fg(argc, argv);
     else if (!strcmp(c, "imu")) t_imu(argc, argv);
+    else if (!strcmp(c, "gyro")) t_gyro(argc, argv);
     else if (!strcmp(c, "sns")) t_sns(argc, argv);
     else if (!strcmp(c, "mag")) t_mag(argc, argv);
     else if (!strcmp(c, "lcd")) t_lcd(argc, argv);

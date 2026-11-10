@@ -1470,7 +1470,7 @@
 		)
 		(embedded_fonts no)
 	)
-	(symbol "LIS2DW12"
+	(symbol "LSM6DSO"
 		(pin_names
 			(offset 1.016)
 		)
@@ -1480,7 +1480,7 @@
 		(in_pos_files yes)
 		(duplicate_pin_numbers_are_jumpers no)
 		(property "Reference" "U"
-			(at -17.78 8.89 0)
+			(at -10.16 11.43 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1490,8 +1490,8 @@
 				(justify left bottom)
 			)
 		)
-		(property "Value" "LIS2DW12"
-			(at -17.78 -8.89 0)
+		(property "Value" "LSM6DSO"
+			(at -10.16 -11.43 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1501,7 +1501,7 @@
 				(justify left top)
 			)
 		)
-		(property "Footprint" "Package_LGA:LGA-12_2x2mm_P0.5mm"
+		(property "Footprint" "Package_LGA:LGA-14_3x2.5mm_P0.5mm_LayoutBorder3x4y"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -1512,7 +1512,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.st.com/resource/en/datasheet/lis2dw12.pdf"
+		(property "Datasheet" "https://www.st.com/resource/en/datasheet/lsm6dso.pdf"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -1523,7 +1523,7 @@
 				)
 			)
 		)
-		(property "Description" "Ultra-low-power 3-axis accelerometer, I2C/SPI, 1.62-3.6 V, LGA-12 2x2x0.7 mm"
+		(property "Description" "6-axis IMU: 3-axis accelerometer + 3-axis gyroscope, I2C/SPI, 1.71-3.6 V, LGA-14 2.5x3x0.83 mm"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -1534,7 +1534,7 @@
 				)
 			)
 		)
-		(property "ki_keywords" "accelerometer MEMS IMU I2C SPI ST"
+		(property "ki_keywords" "accelerometer gyroscope MEMS IMU 6-axis I2C SPI ST"
 			(at 0 0 0)
 			(hide yes)
 			(show_name no)
@@ -1545,10 +1545,10 @@
 				)
 			)
 		)
-		(symbol "LIS2DW12_0_1"
+		(symbol "LSM6DSO_0_1"
 			(rectangle
-				(start -17.78 7.62)
-				(end 17.78 -7.62)
+				(start -10.16 10.16)
+				(end 10.16 -10.16)
 				(stroke
 					(width 0.254)
 					(type default)
@@ -1558,18 +1558,18 @@
 				)
 			)
 		)
-		(symbol "LIS2DW12_1_1"
+		(symbol "LSM6DSO_1_1"
 			(pin power_in line
-				(at -20.32 3.81 0)
+				(at -12.7 5.08 0)
 				(length 2.54)
-				(name "VDD_IO"
+				(name "VDDIO"
 					(effects
 						(font
 							(size 1.27 1.27)
 						)
 					)
 				)
-				(number "10"
+				(number "5"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1578,9 +1578,45 @@
 				)
 			)
 			(pin input line
-				(at -20.32 1.27 0)
+				(at -12.7 2.54 0)
 				(length 2.54)
 				(name "CS"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "12"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin input line
+				(at -12.7 0 0)
+				(length 2.54)
+				(name "SDO/SA0"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin input line
+				(at -12.7 -2.54 0)
+				(length 2.54)
+				(name "SDx"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1596,9 +1632,9 @@
 				)
 			)
 			(pin input line
-				(at -20.32 -1.27 0)
+				(at -12.7 -5.08 0)
 				(length 2.54)
-				(name "SDO/SA0"
+				(name "SCx"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1614,34 +1650,16 @@
 				)
 			)
 			(pin input line
-				(at -20.32 -3.81 0)
+				(at 12.7 6.35 180)
 				(length 2.54)
-				(name "RES"
+				(name "SCL"
 					(effects
 						(font
 							(size 1.27 1.27)
 						)
 					)
 				)
-				(number "7"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-			)
-			(pin input line
-				(at 20.32 5.08 180)
-				(length 2.54)
-				(name "SCL/SPC"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(number "1"
+				(number "13"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1650,9 +1668,27 @@
 				)
 			)
 			(pin bidirectional line
-				(at 20.32 2.54 180)
+				(at 12.7 3.81 180)
 				(length 2.54)
-				(name "SDA/SDI/SDO"
+				(name "SDA"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "14"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin output line
+				(at 12.7 1.27 180)
+				(length 2.54)
+				(name "INT1"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1668,63 +1704,9 @@
 				)
 			)
 			(pin output line
-				(at 20.32 0 180)
-				(length 2.54)
-				(name "INT1"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(number "12"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-			)
-			(pin output line
-				(at 20.32 -2.54 180)
+				(at 12.7 -1.27 180)
 				(length 2.54)
 				(name "INT2"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(number "11"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-			)
-			(pin no_connect line
-				(at 20.32 -5.08 180)
-				(length 2.54)
-				(name "NC"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-				(number "5"
-					(effects
-						(font
-							(size 1.27 1.27)
-						)
-					)
-				)
-			)
-			(pin power_in line
-				(at 0 10.16 270)
-				(length 2.54)
-				(name "VDD"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1739,8 +1721,62 @@
 					)
 				)
 			)
+			(pin no_connect line
+				(at 12.7 -3.81 180)
+				(length 2.54)
+				(name "OCS_Aux"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "10"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin no_connect line
+				(at 12.7 -6.35 180)
+				(length 2.54)
+				(name "SDO_Aux"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "11"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
 			(pin power_in line
-				(at 0 -10.16 90)
+				(at 0 12.7 270)
+				(length 2.54)
+				(name "VDD"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "8"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_in line
+				(at 0 -12.7 90)
 				(length 2.54)
 				(name "GND"
 					(effects
@@ -1758,7 +1794,7 @@
 				)
 			)
 			(pin passive line
-				(at 0 -10.16 90)
+				(at 0 -12.7 90)
 				(length 2.54)
 				(hide yes)
 				(name "GND"
@@ -1768,7 +1804,7 @@
 						)
 					)
 				)
-				(number "8"
+				(number "7"
 					(effects
 						(font
 							(size 1.27 1.27)

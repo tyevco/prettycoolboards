@@ -262,7 +262,7 @@
 			(color 0 0 0 0)
 		)
 		(uuid "8b669b1b-99f1-54bd-8e1f-df2e8a8ba4f1")
-		(property "Sheetname" "Accelerometer"
+		(property "Sheetname" "IMU (accelerometer + gyroscope)"
 			(at 266.36 85.6484 0)
 			(show_name no)
 			(do_not_autoplace no)

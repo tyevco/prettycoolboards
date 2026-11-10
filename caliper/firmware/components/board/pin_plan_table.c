@@ -5,7 +5,7 @@
 #include "board_pins.h"
 #include "pin_plan.h"
 
-const char PIN_PLAN_HASH[] = "a69a03f48b11ea8a";
+const char PIN_PLAN_HASH[] = "83efd9f549187069";
 
 const pin_plan_t PIN_PLAN[] = {
     {.gpio = PIN_BOOT_N, .net = "BOOT_N", .owner = "",
@@ -145,7 +145,7 @@ const pin_plan_t PIN_PLAN[] = {
      }},
     {.gpio = PIN_IMU_INT1, .net = "IMU_INT1", .owner = "",
      .init = PP_INIT_BOARD, .untouched = false,
-     .ext = {PP_EXT_DRIVEN, PP_RAIL_3V3, 0u, "U60 LIS2DW12 INT1, push-pull active low (CTRL3 0x18)"},
+     .ext = {PP_EXT_DRIVEN, PP_RAIL_3V3, 0u, "U60 LSM6DSO INT1, push-pull active low (CTRL3_C 0x64)"},
      .st = {
          [PP_MODE_RESET] = {PP_DIR_HIZ, PP_LEVEL_NONE, PP_PULL_NONE, false, false},
          [PP_MODE_RUN] = {PP_DIR_IN, PP_LEVEL_NONE, PP_PULL_NONE, false, false},
@@ -154,7 +154,7 @@ const pin_plan_t PIN_PLAN[] = {
      }},
     {.gpio = PIN_IMU_INT2, .net = "IMU_INT2", .owner = "",
      .init = PP_INIT_BOARD, .untouched = false,
-     .ext = {PP_EXT_DRIVEN, PP_RAIL_3V3, 0u, "U60 LIS2DW12 INT2, push-pull (no source routed)"},
+     .ext = {PP_EXT_DRIVEN, PP_RAIL_3V3, 0u, "U60 LSM6DSO INT2, push-pull (no source routed)"},
      .st = {
          [PP_MODE_RESET] = {PP_DIR_HIZ, PP_LEVEL_NONE, PP_PULL_NONE, false, false},
          [PP_MODE_RUN] = {PP_DIR_IN, PP_LEVEL_NONE, PP_PULL_NONE, false, false},

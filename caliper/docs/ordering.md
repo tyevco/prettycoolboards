@@ -87,16 +87,16 @@ The parts prices come from JLC's parts pages on 2026-11-09, at the quantity-5 pr
 
 | Line | Estimate | Basis |
 |---|---|---|
-| Parts, 5 boards | **≈ $136** (≈ $27 a board) | 44 BOM lines; the big items: AS5311 $12.64, ESP32-S3-MINI-1 $5.01, MAX17048 $2.01, BQ25180 $1.85 (each, at 1–9 pcs). Plus JLC's attrition on passives (a few $) |
+| Parts, 5 boards | **≈ $151** (≈ $30 a board) | 44 BOM lines; the big items: AS5311 $12.64, ESP32-S3-MINI-1 $5.01, LSM6DSO $3.99 (2026-11-10; it replaced the $0.90 LIS2DW12, +$15 for 5 boards), MAX17048 $2.01, BQ25180 $1.85 (each, at 1–9 pcs). Plus JLC's attrition on passives (a few $) |
 | Feeder loading | ≈ $67 | Standard PCBA loads **every** line, basic and extended: 44 lines × $1.53 (the price page's Standard column, "$1.53 Basic/Extend"; $3.07 extended-only is the Economic rate). The page does not say the unit; per unique part is assumed **[unverified]**. 25 of the 44 lines are extended |
 | Setup, double-sided | $51.12 | Standard |
 | Stencil, double-sided | $16.42 | Standard |
 | Placement | ≈ $3 | 380 joints a board (344 top, 36 bottom) × 5 × $0.0016 |
 | X-ray (BGA, QFN and other leadless parts) | ≈ $8–21 | Charged per X-rayed component ("/pc"): $1.64 for 1–10 pcs, $0.82 for 11–50. Leadless parts on the slider: U2 DSBGA, U3 VSON, U4 TDFN, U10 module, U60 LGA = 5 a board, 25 for 5 boards ≈ $21 if JLC X-rays all of them; ≈ $8 if only one a board **[unverified]** |
-| **PCBA subtotal** | **≈ $280–295** | |
+| **PCBA subtotal** | **≈ $295–310** | |
 | Slider PCB (4L, 1.0 mm, ENIG, 0.2 mm vias, panel) | **$40–130** | **[unverified]** range. The base price, the ENIG upgrade, the small-via / Kelvin-test charge and the panel all depend on JLC's live quote. JLC's 4-layer prices changed in August 2026 |
 | Scale PCB (2L, 0.8 mm, ENIG, 200 × 7) | **$15–40** | **[unverified]** range, live quote |
-| **Before shipping and tax** | **≈ $335–465** | |
+| **Before shipping and tax** | **≈ $350–480** | |
 | Shipping + US import | +$90–170 | Two published 2026 JLC 4-layer PCBA orders to the US paid $36–73 for DHL (duties paid) and $51–98 in duties and taxes ([tscircuit order dataset](https://github.com/tscircuit/jlcpcb-manufacturing-specs/tree/main/datasets/jlcpcb)). This is indicative only |
 
 **AS5311 (U30):** JLC's [part page](https://jlcpcb.com/partdetail/C22459687) showed **75 in stock** on 2026-11-09, at

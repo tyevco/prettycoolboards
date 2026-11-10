@@ -8,12 +8,11 @@
 #include "esp_sleep.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "imu.h"
 #include "pin_plan.h"
 #include "power.h"
 
 static const char *TAG = "sleep";
-
-bool power_imu_clear(void);
 
 #define BTN_MASK ((1ULL << PIN_BTN_ZERO_N) | (1ULL << PIN_BTN_HOLD_N) | (1ULL << PIN_BTN_MODE_N))
 
@@ -43,8 +42,9 @@ void power_deep_sleep(void)
      * CHG_INT_N 10 k) or a push-pull driver (IMU INT1), so the plan turns every pull off (pad and
      * RTC) and RTC_PERIPH can power down */
     uint64_t mask = pin_plan_wake_mask();
-    if (!power_imu_clear()) {
-        mask &= ~(1ULL << PIN_IMU_INT1); /* LIS2DW12 INT1 is active low, latched (power.c) */
+    /* gyroscope off, accelerometer to ultra-low-power 12.5 Hz, wake-up latch cleared (imu.c) */
+    if (!power_imu_sleep_prepare()) {
+        mask &= ~(1ULL << PIN_IMU_INT1); /* LSM6DSO INT1 is active low, latched: low now = no pickup wake */
     }
     /* Every pad to its SLEEP state: wake inputs, the gates (backlight, piezo: GPIO45 strap stays low),
      * the rail switch and every line into the switched rails driven low with NO pull, the rest

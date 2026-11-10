@@ -1,15 +1,15 @@
-/* power: BQ25180 charger, MAX17048 fuel gauge, LIS2DW12 wake-up, temperature guard. */
+/* power: BQ25180 charger, MAX17048 fuel gauge, temperature guard. The LSM6DSO IMU is in imu.c. */
 #include "power.h"
 
 #include <string.h>
 
 #include "board_pins.h"
-#include "driver/gpio.h"
 #include "driver/temperature_sensor.h"
 #include "esp_check.h"
 #include "esp_log.h"
 #include "esp_timer.h"
 #include "freertos/FreeRTOS.h"
+#include "imu.h"
 #include "sdkconfig.h"
 
 static const char *TAG = "power";
@@ -53,20 +53,6 @@ static const char *TAG = "power";
 #define FG_HIBRT_POR       0x8030u
 #define FG_CONFIG_SLEEP    0x0080u
 
-/* ---- LIS2DW12 ---- */
-#define IMU_WHO_AM_I     0x0F
-#define IMU_WHO_AM_I_VAL 0x44
-#define IMU_CTRL1        0x20
-#define IMU_CTRL2        0x21
-#define IMU_CTRL3        0x22
-#define IMU_CTRL4_INT1   0x23
-#define IMU_CTRL6        0x25
-#define IMU_WAKE_UP_THS  0x34
-#define IMU_WAKE_UP_DUR  0x35
-#define IMU_WAKE_UP_SRC  0x38
-#define IMU_ALL_INT_SRC  0x3B
-#define IMU_CTRL7        0x3F
-
 /* Charge temperature guard on the ESP32-S3 die (no NTC). The die runs a few degC above the
  * cell; limits are therefore a little wider than the 0..45 degC cell range (TVP). */
 #define GUARD_COLD_C   2.0f
@@ -75,7 +61,7 @@ static const char *TAG = "power";
 #define CHARGER_GRACE_US (3 * 1000 * 1000) /* no enumeration within 3 s of VBUS: a charger */
 
 static i2c_master_bus_handle_t s_bus;
-static i2c_master_dev_handle_t s_bq, s_fg, s_imu;
+static i2c_master_dev_handle_t s_bq, s_fg;
 static temperature_sensor_handle_t s_tsens;
 static bool s_chg_ok, s_fg_ok, s_imu_ok;
 static bool s_usb_configured;
@@ -219,26 +205,6 @@ static esp_err_t bq_write_table(void)
     return rd(s_bq, BQ_STAT0, st, 3); /* clears the flags */
 }
 
-static esp_err_t imu_init(void)
-{
-    uint8_t who = 0;
-    ESP_RETURN_ON_ERROR(rd(s_imu, IMU_WHO_AM_I, &who, 1), TAG, "imu who");
-    if (who != IMU_WHO_AM_I_VAL) {
-        ESP_LOGE(TAG, "LIS2DW12 WHO_AM_I 0x%02x", who);
-        return ESP_ERR_NOT_FOUND;
-    }
-    ESP_RETURN_ON_ERROR(wr8(s_imu, IMU_CTRL2, 0x0C), TAG, "ctrl2");     /* BDU, auto-increment */
-    ESP_RETURN_ON_ERROR(wr8(s_imu, IMU_CTRL1, 0x20), TAG, "ctrl1");     /* 12.5 Hz, low-power mode 1 */
-    ESP_RETURN_ON_ERROR(wr8(s_imu, IMU_CTRL6, 0x00), TAG, "ctrl6");     /* +-2 g */
-    ESP_RETURN_ON_ERROR(wr8(s_imu, IMU_CTRL3, 0x18), TAG, "ctrl3");     /* latched, active low, push-pull */
-    ESP_RETURN_ON_ERROR(wr8(s_imu, IMU_WAKE_UP_DUR, 0x00), TAG, "wu dur");
-    ESP_RETURN_ON_ERROR(wr8(s_imu, IMU_WAKE_UP_THS, 0x02), TAG, "wu ths"); /* 2 x 31.25 mg */
-    ESP_RETURN_ON_ERROR(wr8(s_imu, IMU_CTRL4_INT1, 0x20), TAG, "int1");  /* wake-up on INT1 */
-    ESP_RETURN_ON_ERROR(wr8(s_imu, IMU_CTRL7, 0x20), TAG, "ctrl7");     /* interrupts enable */
-    uint8_t src;
-    return rd(s_imu, IMU_ALL_INT_SRC, &src, 1);
-}
-
 static esp_err_t add_dev(uint8_t addr, i2c_master_dev_handle_t *out)
 {
     i2c_device_config_t cfg = {
@@ -262,7 +228,6 @@ esp_err_t power_init(void)
     ESP_RETURN_ON_ERROR(i2c_new_master_bus(&bcfg, &s_bus), TAG, "i2c bus");
     ESP_ERROR_CHECK(add_dev(I2C_ADDR_BQ25180, &s_bq));
     ESP_ERROR_CHECK(add_dev(I2C_ADDR_MAX17048, &s_fg));
-    ESP_ERROR_CHECK(add_dev(I2C_ADDR_LIS2DW12, &s_imu));
 
     s_chg_ok = bq_write_table() == ESP_OK;
     uint8_t ver[2] = {0, 0};
@@ -280,8 +245,8 @@ esp_err_t power_init(void)
             }
         }
     }
-    s_imu_ok = imu_init() == ESP_OK;
-    ESP_LOGI(TAG, "BQ25180 %s, MAX17048 %s (0x%02x%02x), LIS2DW12 %s", s_chg_ok ? "ok" : "MISSING",
+    s_imu_ok = power_imu_init(s_bus) == ESP_OK;
+    ESP_LOGI(TAG, "BQ25180 %s, MAX17048 %s (0x%02x%02x), LSM6DSO %s", s_chg_ok ? "ok" : "MISSING",
              s_fg_ok ? "ok" : "MISSING", ver[0], ver[1], s_imu_ok ? "ok" : "MISSING");
 
     temperature_sensor_config_t tcfg = TEMPERATURE_SENSOR_CONFIG_DEFAULT(-10, 80);
@@ -396,10 +361,10 @@ void power_get_last(power_status_t *out)
 
 esp_err_t power_diag_read(uint8_t addr, uint8_t reg, uint8_t *buf, size_t n)
 {
-    i2c_master_dev_handle_t d = addr == I2C_ADDR_BQ25180    ? s_bq
-                                : addr == I2C_ADDR_MAX17048 ? s_fg
-                                : addr == I2C_ADDR_LIS2DW12 ? s_imu
-                                                            : NULL;
+    if (addr == I2C_ADDR_LSM6DSO) {
+        return power_imu_diag_read(reg, buf, n);
+    }
+    i2c_master_dev_handle_t d = addr == I2C_ADDR_BQ25180 ? s_bq : addr == I2C_ADDR_MAX17048 ? s_fg : NULL;
     return d ? rd(d, reg, buf, n) : ESP_ERR_NOT_FOUND;
 }
 
@@ -419,24 +384,4 @@ esp_err_t power_ship_mode(void)
      * TS/MR has no button on rev A, so the button-wake ship mode (10) would only cost
      * IBAT_SHIP 3.2 uA for its push-button scan instead of IBAT_SHUTDOWN 15 nA. */
     return wr8(s_bq, BQ_SHIP_RST, 0x28) == ESP_OK ? ESP_OK : ESP_FAIL;
-}
-
-/* Clears a latched wake-up interrupt so INT1 is high again before sleeping. Returns true only if
- * INT1 then reads high: CTRL3 (active low) was written at boot, but a LIS2DW12 that reset since
- * would drive INT1 active-high (its default) and wake the caliper at once, forever. */
-bool power_imu_clear(void);
-bool power_imu_clear(void)
-{
-    if (!s_imu_ok) {
-        return false;
-    }
-    uint8_t src;
-    rd(s_imu, IMU_WAKE_UP_SRC, &src, 1);
-    rd(s_imu, IMU_ALL_INT_SRC, &src, 1);
-    gpio_set_direction(PIN_IMU_INT1, GPIO_MODE_INPUT);
-    if (!gpio_get_level(PIN_IMU_INT1)) {
-        ESP_LOGW(TAG, "IMU INT1 still low after clearing: pickup wake disabled for this sleep");
-        return false;
-    }
-    return true;
 }

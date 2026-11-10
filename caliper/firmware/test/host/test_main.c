@@ -1333,6 +1333,7 @@ static void test_cap_unwrap(void)
 
 void capture_tests(void); /* test_capture.c */
 void bringup_tests(void); /* test_bringup.c */
+void orient_tests(void);  /* test_orient.c */
 
 int main(void)
 {
@@ -1364,6 +1365,7 @@ int main(void)
     RUN(test_cap_unwrap);
     capture_tests();
     bringup_tests();
+    orient_tests();
     printf("%d checks, %d failures\n", tt_checks, tt_failures);
     return tt_failures ? 1 : 0;
 }

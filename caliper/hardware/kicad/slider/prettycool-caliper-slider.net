@@ -2,7 +2,7 @@
 	(version "E")
 	(design
 		(source "/mnt/c/source/tyevco/prettycoolboards/caliper/hardware/kicad/slider/prettycool-caliper-slider.kicad_sch")
-		(date "2026-11-09T18:24:13")
+		(date "2026-11-10T15:31:46")
 		(tool "Eeschema 10.0.8-10.0.8~ubuntu24.04.1")
 		(sheet
 			(number "1")
@@ -294,10 +294,10 @@
 		)
 		(sheet
 			(number "7")
-			(name "/Accelerometer/")
+			(name "/IMU (accelerometer + gyroscope)/")
 			(tstamps "/8b669b1b-99f1-54bd-8e1f-df2e8a8ba4f1/")
 			(title_block
-				(title "Accelerometer")
+				(title "IMU (accelerometer + gyroscope)")
 				(company "PrettyCool Boards")
 				(rev "A")
 				(date "2026-11-07")
@@ -9402,7 +9402,7 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Accelerometer")
+				(value "IMU (accelerometer + gyroscope)")
 			)
 			(property
 				(name "Sheetfile")
@@ -9417,7 +9417,7 @@
 				(value "C_*")
 			)
 			(sheetpath
-				(names "/Accelerometer/")
+				(names "/IMU (accelerometer + gyroscope)/")
 				(tstamps "/8b669b1b-99f1-54bd-8e1f-df2e8a8ba4f1/")
 			)
 			(tstamps "6c4b5f19-2002-5270-bd58-e5ae22491491")
@@ -9474,7 +9474,7 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Accelerometer")
+				(value "IMU (accelerometer + gyroscope)")
 			)
 			(property
 				(name "Sheetfile")
@@ -9489,7 +9489,7 @@
 				(value "C_*")
 			)
 			(sheetpath
-				(names "/Accelerometer/")
+				(names "/IMU (accelerometer + gyroscope)/")
 				(tstamps "/8b669b1b-99f1-54bd-8e1f-df2e8a8ba4f1/")
 			)
 			(tstamps "8db2c754-fd50-5009-911e-29b649f08e93")
@@ -9546,7 +9546,7 @@
 			)
 			(property
 				(name "Sheetname")
-				(value "Accelerometer")
+				(value "IMU (accelerometer + gyroscope)")
 			)
 			(property
 				(name "Sheetfile")
@@ -9561,7 +9561,7 @@
 				(value "C_*")
 			)
 			(sheetpath
-				(names "/Accelerometer/")
+				(names "/IMU (accelerometer + gyroscope)/")
 				(tstamps "/8b669b1b-99f1-54bd-8e1f-df2e8a8ba4f1/")
 			)
 			(tstamps "5e905164-8fee-57ca-9a49-caa30ba342d3")
@@ -9581,32 +9581,32 @@
 		)
 		(comp
 			(ref "U60")
-			(value "LIS2DW12TR")
-			(footprint "Package_LGA:LGA-12_2x2mm_P0.5mm")
-			(datasheet "https://www.st.com/resource/en/datasheet/lis2dw12.pdf")
-			(description "Ultra-low-power 3-axis accelerometer, I2C/SPI, 1.62-3.6 V, LGA-12 2x2x0.7 mm")
+			(value "LSM6DSOTR")
+			(footprint "Package_LGA:LGA-14_3x2.5mm_P0.5mm_LayoutBorder3x4y")
+			(datasheet "https://www.st.com/resource/en/datasheet/lsm6dso.pdf")
+			(description "6-axis IMU: 3-axis accelerometer + 3-axis gyroscope, I2C/SPI, 1.71-3.6 V, LGA-14 2.5x3x0.83 mm")
 			(fields
 				(field
-					(name "MPN") "LIS2DW12TR")
+					(name "MPN") "LSM6DSOTR")
 				(field
 					(name "Manufacturer") "STMicroelectronics")
 				(field
-					(name "LCSC") "C189624")
+					(name "LCSC") "C2655100")
 				(field
-					(name "Footprint") "Package_LGA:LGA-12_2x2mm_P0.5mm")
+					(name "Footprint") "Package_LGA:LGA-14_3x2.5mm_P0.5mm_LayoutBorder3x4y")
 				(field
-					(name "Datasheet") "https://www.st.com/resource/en/datasheet/lis2dw12.pdf")
+					(name "Datasheet") "https://www.st.com/resource/en/datasheet/lsm6dso.pdf")
 				(field
-					(name "Description") "Ultra-low-power 3-axis accelerometer, I2C/SPI, 1.62-3.6 V, LGA-12 2x2x0.7 mm")
+					(name "Description") "6-axis IMU: 3-axis accelerometer + 3-axis gyroscope, I2C/SPI, 1.71-3.6 V, LGA-14 2.5x3x0.83 mm")
 			)
 			(libsource
 				(lib "caliper")
-				(part "LIS2DW12")
-				(description "Ultra-low-power 3-axis accelerometer, I2C/SPI, 1.62-3.6 V, LGA-12 2x2x0.7 mm")
+				(part "LSM6DSO")
+				(description "6-axis IMU: 3-axis accelerometer + 3-axis gyroscope, I2C/SPI, 1.71-3.6 V, LGA-14 2.5x3x0.83 mm")
 			)
 			(property
 				(name "MPN")
-				(value "LIS2DW12TR")
+				(value "LSM6DSOTR")
 			)
 			(property
 				(name "Manufacturer")
@@ -9614,11 +9614,11 @@
 			)
 			(property
 				(name "LCSC")
-				(value "C189624")
+				(value "C2655100")
 			)
 			(property
 				(name "Sheetname")
-				(value "Accelerometer")
+				(value "IMU (accelerometer + gyroscope)")
 			)
 			(property
 				(name "Sheetfile")
@@ -9626,10 +9626,10 @@
 			)
 			(property
 				(name "ki_keywords")
-				(value "accelerometer MEMS IMU I2C SPI ST")
+				(value "accelerometer gyroscope MEMS IMU 6-axis I2C SPI ST")
 			)
 			(sheetpath
-				(names "/Accelerometer/")
+				(names "/IMU (accelerometer + gyroscope)/")
 				(tstamps "/8b669b1b-99f1-54bd-8e1f-df2e8a8ba4f1/")
 			)
 			(tstamps "01b67007-a378-5936-af1c-8aaa90547068")
@@ -9638,7 +9638,13 @@
 					(name "A")
 					(pins
 						(pin
-							(num "10")
+							(num "5")
+						)
+						(pin
+							(num "12")
+						)
+						(pin
+							(num "1")
 						)
 						(pin
 							(num "2")
@@ -9647,31 +9653,31 @@
 							(num "3")
 						)
 						(pin
-							(num "7")
-						)
-						(pin
-							(num "9")
+							(num "8")
 						)
 						(pin
 							(num "6")
 						)
 						(pin
-							(num "8")
+							(num "7")
 						)
 						(pin
-							(num "1")
+							(num "13")
+						)
+						(pin
+							(num "14")
 						)
 						(pin
 							(num "4")
 						)
 						(pin
-							(num "12")
+							(num "9")
+						)
+						(pin
+							(num "10")
 						)
 						(pin
 							(num "11")
-						)
-						(pin
-							(num "5")
 						)
 					)
 				)
@@ -11128,46 +11134,46 @@
 		)
 		(libpart
 			(lib "caliper")
-			(part "LIS2DW12")
-			(description "Ultra-low-power 3-axis accelerometer, I2C/SPI, 1.62-3.6 V, LGA-12 2x2x0.7 mm")
-			(docs "https://www.st.com/resource/en/datasheet/lis2dw12.pdf")
+			(part "LSM6DSO")
+			(description "6-axis IMU: 3-axis accelerometer + 3-axis gyroscope, I2C/SPI, 1.71-3.6 V, LGA-14 2.5x3x0.83 mm")
+			(docs "https://www.st.com/resource/en/datasheet/lsm6dso.pdf")
 			(fields
 				(field
 					(name "Reference") "U")
 				(field
-					(name "Value") "LIS2DW12")
+					(name "Value") "LSM6DSO")
 				(field
-					(name "Footprint") "Package_LGA:LGA-12_2x2mm_P0.5mm")
+					(name "Footprint") "Package_LGA:LGA-14_3x2.5mm_P0.5mm_LayoutBorder3x4y")
 				(field
-					(name "Datasheet") "https://www.st.com/resource/en/datasheet/lis2dw12.pdf")
+					(name "Datasheet") "https://www.st.com/resource/en/datasheet/lsm6dso.pdf")
 				(field
-					(name "Description") "Ultra-low-power 3-axis accelerometer, I2C/SPI, 1.62-3.6 V, LGA-12 2x2x0.7 mm")
+					(name "Description") "6-axis IMU: 3-axis accelerometer + 3-axis gyroscope, I2C/SPI, 1.71-3.6 V, LGA-14 2.5x3x0.83 mm")
 			)
 			(pins
 				(pin
 					(num "1")
-					(name "SCL/SPC")
-					(type "input")
-				)
-				(pin
-					(num "2")
-					(name "CS")
-					(type "input")
-				)
-				(pin
-					(num "3")
 					(name "SDO/SA0")
 					(type "input")
 				)
 				(pin
+					(num "2")
+					(name "SDx")
+					(type "input")
+				)
+				(pin
+					(num "3")
+					(name "SCx")
+					(type "input")
+				)
+				(pin
 					(num "4")
-					(name "SDA/SDI/SDO")
-					(type "bidirectional")
+					(name "INT1")
+					(type "output")
 				)
 				(pin
 					(num "5")
-					(name "NC")
-					(type "no_connect")
+					(name "VDDIO")
+					(type "power_in")
 				)
 				(pin
 					(num "6")
@@ -11176,33 +11182,43 @@
 				)
 				(pin
 					(num "7")
-					(name "RES")
-					(type "input")
-				)
-				(pin
-					(num "8")
 					(name "GND")
 					(type "passive")
 				)
 				(pin
-					(num "9")
+					(num "8")
 					(name "VDD")
 					(type "power_in")
 				)
 				(pin
-					(num "10")
-					(name "VDD_IO")
-					(type "power_in")
-				)
-				(pin
-					(num "11")
+					(num "9")
 					(name "INT2")
 					(type "output")
 				)
 				(pin
+					(num "10")
+					(name "OCS_Aux")
+					(type "no_connect")
+				)
+				(pin
+					(num "11")
+					(name "SDO_Aux")
+					(type "no_connect")
+				)
+				(pin
 					(num "12")
-					(name "INT1")
-					(type "output")
+					(name "CS")
+					(type "input")
+				)
+				(pin
+					(num "13")
+					(name "SCL")
+					(type "input")
+				)
+				(pin
+					(num "14")
+					(name "SDA")
+					(type "bidirectional")
 				)
 			)
 		)
@@ -11559,26 +11575,26 @@
 			)
 			(node
 				(ref "U60")
-				(pin "10")
-				(pinfunction "VDD_IO_10")
+				(pin "1")
+				(pinfunction "SDO/SA0_1")
+				(pintype "input")
+			)
+			(node
+				(ref "U60")
+				(pin "12")
+				(pinfunction "CS_12")
+				(pintype "input")
+			)
+			(node
+				(ref "U60")
+				(pin "5")
+				(pinfunction "VDDIO_5")
 				(pintype "power_in")
 			)
 			(node
 				(ref "U60")
-				(pin "2")
-				(pinfunction "CS_2")
-				(pintype "input")
-			)
-			(node
-				(ref "U60")
-				(pin "3")
-				(pinfunction "SDO/SA0_3")
-				(pintype "input")
-			)
-			(node
-				(ref "U60")
-				(pin "9")
-				(pinfunction "VDD_9")
+				(pin "8")
+				(pinfunction "VDD_8")
 				(pintype "power_in")
 			)
 		)
@@ -13272,6 +13288,18 @@
 			)
 			(node
 				(ref "U60")
+				(pin "2")
+				(pinfunction "SDx_2")
+				(pintype "input")
+			)
+			(node
+				(ref "U60")
+				(pin "3")
+				(pinfunction "SCx_3")
+				(pintype "input")
+			)
+			(node
+				(ref "U60")
 				(pin "6")
 				(pinfunction "GND_6")
 				(pintype "power_in")
@@ -13279,13 +13307,7 @@
 			(node
 				(ref "U60")
 				(pin "7")
-				(pinfunction "RES_7")
-				(pintype "input")
-			)
-			(node
-				(ref "U60")
-				(pin "8")
-				(pinfunction "GND_8")
+				(pinfunction "GND_7")
 				(pintype "passive")
 			)
 		)
@@ -13318,8 +13340,8 @@
 			)
 			(node
 				(ref "U60")
-				(pin "1")
-				(pinfunction "SCL/SPC_1")
+				(pin "13")
+				(pinfunction "SCL_13")
 				(pintype "input")
 			)
 		)
@@ -13352,8 +13374,8 @@
 			)
 			(node
 				(ref "U60")
-				(pin "4")
-				(pinfunction "SDA/SDI/SDO_4")
+				(pin "14")
+				(pinfunction "SDA_14")
 				(pintype "bidirectional")
 			)
 		)
@@ -13369,8 +13391,8 @@
 			)
 			(node
 				(ref "U60")
-				(pin "12")
-				(pinfunction "INT1_12")
+				(pin "4")
+				(pinfunction "INT1_4")
 				(pintype "output")
 			)
 		)
@@ -13386,8 +13408,8 @@
 			)
 			(node
 				(ref "U60")
-				(pin "11")
-				(pinfunction "INT2_11")
+				(pin "9")
+				(pinfunction "INT2_9")
 				(pintype "output")
 			)
 		)
@@ -14120,12 +14142,23 @@
 		)
 		(net
 			(code "98")
-			(name "unconnected-(U60-NC-Pad5)")
+			(name "unconnected-(U60-OCS_Aux-Pad10)")
 			(class "Default")
 			(node
 				(ref "U60")
-				(pin "5")
-				(pinfunction "NC_5")
+				(pin "10")
+				(pinfunction "OCS_Aux_10")
+				(pintype "no_connect")
+			)
+		)
+		(net
+			(code "99")
+			(name "unconnected-(U60-SDO_Aux-Pad11)")
+			(class "Default")
+			(node
+				(ref "U60")
+				(pin "11")
+				(pinfunction "SDO_Aux_11")
 				(pintype "no_connect")
 			)
 		)
