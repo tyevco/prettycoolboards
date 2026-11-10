@@ -51,6 +51,8 @@ export default withMermaid(defineConfig({
           text: 'PrettyCool Caliper',
           items: [
             { text: 'Overview', link: '/caliper/' },
+            // a static page from public/: an absolute URL so the router doesn't treat it as a doc page
+            { text: '3D gallery', link: 'https://tyevco.github.io/prettycoolboards/caliper/gallery/' },
             { text: 'Architecture', link: '/caliper/docs/architecture' },
             { text: 'SPEC (architecture of record)', link: '/caliper/hardware/design/SPEC' },
           ],

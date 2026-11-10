@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PrettyCool Caliper rev A</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: an engineering sheet. Title block on top, a live 3D bench, then the drawing set as plates. */
+:root {
+  --paper: #f2f5f8; --sheet: #ffffff; --ink: #15202b; --muted: #5a6877; --line: #d3dce5;
+  --anod: #2a62a0; --brass: #a8781e; --grid: rgba(42, 98, 160, .07); --stage: #e9eef3;
+  --display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #0e1318; --sheet: #151c24; --ink: #e4ebf2; --muted: #93a3b4; --line: #2a3644;
+  --anod: #6fa7e6; --brass: #d8ad55; --grid: rgba(111, 167, 230, .07); --stage: #111820; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --paper: #0e1318; --sheet: #151c24; --ink: #e4ebf2; --muted: #93a3b4; --line: #2a3644;
+  --anod: #6fa7e6; --brass: #d8ad55; --grid: rgba(111, 167, 230, .07); --stage: #111820; color-scheme: dark }
+
+body { background: var(--paper); color: var(--ink); font: 15px/1.55 var(--body); }
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 36px; }
+
+/* title block */
+.titleblock { display: grid; grid-template-columns: 1fr auto; gap: 18px 28px; align-items: end;
+  border-bottom: 2px solid var(--ink); padding-bottom: 16px; }
+.eyebrow { font: 500 12px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { font: 700 clamp(34px, 6vw, 56px)/1 var(--display); letter-spacing: .01em; margin: 8px 0 0; text-wrap: balance; }
+h1 span { color: var(--anod); }
+.lede { max-width: 62ch; margin: 10px 0 0; color: var(--muted); }
+.stamp { font: 500 12px/1.3 var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--brass);
+  border: 1.5px solid var(--brass); padding: 8px 10px; transform: rotate(-2deg); text-align: center; }
+.specs { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  border: 1px solid var(--line); background: var(--sheet); }
+.spec { padding: 10px 14px; border-right: 1px solid var(--line); min-width: 0; }
+.spec:last-child { border-right: 0; }
+.spec dt { font: 500 11px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.spec dd { margin: 6px 0 0; font: 600 20px/1.1 var(--display); font-variant-numeric: tabular-nums; }
+.spec dd small { font: 400 12px var(--mono); color: var(--muted); }
+.was { text-decoration: line-through; color: var(--muted); font-weight: 500; }
+
+h2 { font: 600 26px/1.1 var(--display); letter-spacing: .02em; margin: 0; text-wrap: balance; }
+.sectionhead { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px 20px; }
+.sectionhead p { margin: 0; color: var(--muted); max-width: 62ch; }
+
+/* 3D bench */
+.bench { display: grid; gap: 12px; }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.tabs button { font: 500 14px var(--body); color: var(--ink); background: var(--sheet); border: 1px solid var(--line);
+  padding: 7px 12px; cursor: pointer; border-radius: 3px; }
+.tabs button[aria-pressed="true"] { background: var(--anod); border-color: var(--anod); color: var(--sheet); }
+.tabs button:focus-visible, .plate button:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+.stage { position: relative; aspect-ratio: 16 / 9; max-width: 100%; border: 1px solid var(--line);
+  background-color: var(--stage);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 20px 20px; overflow: hidden; touch-action: none; }
+.stage canvas { display: block; width: 100%; height: 100%; }
+.hud { position: absolute; left: 12px; bottom: 10px; right: 12px; display: flex; justify-content: space-between; gap: 12px;
+  font: 400 12px var(--mono); color: var(--muted); pointer-events: none; flex-wrap: wrap; }
+.status { position: absolute; inset: 0; display: grid; place-items: center; font: 500 13px var(--mono); color: var(--muted); pointer-events: none; }
+.labels { position: absolute; inset: 0; pointer-events: none; }
+.labels div { position: absolute; transform: translate(-50%, -100%); font: 600 15px var(--display); letter-spacing: .03em;
+  background: var(--sheet); border: 1px solid var(--line); padding: 3px 8px; white-space: nowrap; }
+.caption { margin: 0; color: var(--muted); max-width: 75ch; }
+@media (max-width: 640px) { .stage { aspect-ratio: 4 / 3; } .titleblock { grid-template-columns: 1fr; } .stamp { justify-self: start; } }
+
+/* drawing set */
+.plates { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 18px; }
+.plate { margin: 0; background: var(--sheet); border: 1px solid var(--line); display: grid; grid-template-rows: auto 1fr; min-width: 0; }
+.plate button { all: unset; cursor: zoom-in; display: grid; place-items: center; background: #fff; aspect-ratio: 4 / 3; padding: 10px; }
+.plate img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.plate figcaption { padding: 10px 14px 12px; border-top: 1px solid var(--line); min-width: 0; }
+.plate figcaption b { display: block; font: 600 17px/1.2 var(--display); letter-spacing: .02em; }
+.plate figcaption span { color: var(--muted); font-size: 13.5px; }
+.plate .ref { font: 400 11px var(--mono); color: var(--muted); letter-spacing: .04em; }
+
+dialog { border: 1px solid var(--line); background: var(--sheet); color: var(--ink); padding: 0; max-width: min(96vw, 1500px); }
+dialog::backdrop { background: rgba(10, 15, 20, .72); }
+dialog img { display: block; max-width: 100%; max-height: 82vh; background: #fff; }
+dialog form { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px 12px; }
+dialog button { font: 500 13px var(--body); background: var(--anod); color: var(--sheet); border: 0; padding: 6px 12px; border-radius: 3px; cursor: pointer; }
+
+footer { border-top: 1px solid var(--line); padding-top: 14px; font: 400 12.5px var(--mono); color: var(--muted);
+  display: flex; flex-wrap: wrap; gap: 6px 22px; }
+footer a { color: var(--anod); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+body { margin: 0; } [hidden] { display: none !important; } img { max-width: 100%; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="titleblock">
+    <div>
+      <div class="eyebrow">prettycoolboards · caliper · rev A · drawing set</div>
+      <h1>PrettyCool <span>Caliper</span></h1>
+      <p class="lede">A 150 mm digital caliper with a magnetic encoder, an experimental capacitive scale, BLE and Wi‑Fi, a colour display and memory for readings. This is the slimmed rev A: the housing dropped from 52 to 39.2 mm tall around a smaller cell.</p>
+    </div>
+    <div class="stamp">Designed<br>not built</div>
+    <dl class="specs">
+      <div class="spec"><dt>Housing</dt><dd>76.9 × 39.2 × 16.0 <small>mm</small></dd></div>
+      <div class="spec"><dt>Height</dt><dd><span class="was">52.0</span> 39.2 <small>mm</small></dd></div>
+      <div class="spec"><dt>Printed slider parts</dt><dd><span class="was">43</span> 29 <small>g</small></dd></div>
+      <div class="spec"><dt>Cell</dt><dd>135 <small>mAh · 501230</small></dd></div>
+      <div class="spec"><dt>Range · resolution</dt><dd>150 <small>mm ·</small> 0.488 <small>µm</small></dd></div>
+      <div class="spec"><dt>Slider board</dt><dd>74 × 34 <small>mm · 4 layers</small></dd></div>
+    </dl>
+  </header>
+
+  <section class="bench" aria-labelledby="bench-h">
+    <div class="sectionhead">
+      <h2 id="bench-h">3D bench</h2>
+      <p>Drag to orbit, scroll or pinch to zoom, right-drag to pan. Models come straight from the build123d and KiCad sources.</p>
+    </div>
+    <div class="tabs" role="group" aria-label="Scene">
+      <button id="t-assembly" data-scene="assembly" aria-pressed="true">Assembly</button>
+      <button id="t-exploded" data-scene="exploded" aria-pressed="false">Exploded</button>
+      <button id="t-housing" data-scene="housing" aria-pressed="false">Housing only</button>
+      <button id="t-compare" data-scene="compare" aria-pressed="false">Before / after</button>
+      <button id="t-slider" data-scene="slider" aria-pressed="false">Slider board</button>
+      <button id="t-scale" data-scene="scale" aria-pressed="false">Scale board</button>
+    </div>
+    <div class="stage" id="stage">
+      <div class="labels" id="labels"></div>
+      <div class="status" id="status">Loading model…</div>
+      <div class="hud"><span id="hud-l"></span><span id="hud-r">reading 60 mm</span></div>
+    </div>
+    <p class="caption" id="caption"></p>
+  </section>
+
+  <section aria-labelledby="set-h" style="display:grid;gap:16px">
+    <div class="sectionhead">
+      <h2 id="set-h">Drawing set</h2>
+      <p>Renders from the repository's pipeline. Select a plate to see it full size.</p>
+    </div>
+    <div class="plates" id="plates"></div>
+  </section>
+
+  <footer>
+    <span>Source: <a href="https://github.com/tyevco/prettycoolboards">github.com/tyevco/prettycoolboards</a> @ 073c364</span>
+    <span>Docs: <a href="https://tyevco.github.io/prettycoolboards/caliper/">tyevco.github.io/prettycoolboards</a></span>
+    <span>Status: designed, not built or measured</span>
+  </footer>
+</div>
+
+<dialog id="zoom"><img id="zoom-img" alt=""><form method="dialog"><span id="zoom-cap" class="ref"></span><button>Close</button></form></dialog>
+
+<script>
+const PLATES = [
+  ["assembly.png", "Assembly, front", "The whole caliper at a 60 mm reading: slider on the ground flat-stock beam, magnetic tape and capacitive scale in their pockets.", "renders/assembly"],
+  ["assembly_back.png", "Assembly, back", "The battery door and the back web that carries the gib springs. Bevelled edges round the back face.", "renders/assembly_back"],
+  ["exploded.png", "Exploded view", "Front shell and buttons, display, slider board, slider body with jaws, gibs and pads, battery door.", "renders/exploded"],
+  ["slider_open.png", "Slider, lid off", "The board envelope in its cavity, the end-tab clamps and the plunger hardware.", "renders/slider_open"],
+  ["board_fit.png", "Board in the towers", "Front view with the lid off: the routed board with its end tabs clamped in the two towers.", "renders/board_fit"],
+  ["pcb_top.png", "Slider board, top", "ESP32-S3-MINI-1 top left with its antenna at the edge, buttons, display FPC, charger and buck-boost cluster.", "KiCad 10 · 3d-top"],
+  ["pcb_bottom.png", "Slider board, bottom", "AS5311 over the tape track, the 8-phase capacitive electrode comb, J2 battery connector and the filter by GPIO1.", "KiCad 10 · 3d-bottom"],
+  ["scale_top.png", "Scale board", "The 200 × 7 mm passive capacitive scale bonded into the beam: reflector and coupler pattern.", "KiCad 10 · scale"],
+  ["section.png", "Section through the AS5311", "Stack-up at x = 39: display, board, sensor over the tape channel, beam, gibs, and the new cell behind the board.", "renders/section"],
+  ["section_gaps.png", "Gap detail", "The 0.30 mm magnetic gap and 0.15 mm capacitive gap, tape channel, scale pocket and gibs.", "renders/section_gaps"],
+  ["jaws_closed.png", "Jaws closed", "Front view at zero: outside, inside and step jaws.", "renders/jaws_closed"],
+  ["parts.png", "Printed parts", "Every printed and brass part in its print pose on the plate.", "renders/parts"],
+];
+const plates = document.getElementById("plates"), dlg = document.getElementById("zoom");
+PLATES.forEach(([f, t, d, r], i) => {
+  const fig = document.createElement("figure"); fig.className = "plate";
+  fig.innerHTML = `<button id="plate-${i}" aria-label="Enlarge ${t}"><img src="img/${f}" alt="${t}" loading="lazy"></button>
+    <figcaption><b>${t}</b><span>${d}</span><div class="ref">${r}</div></figcaption>`;
+  fig.querySelector("button").addEventListener("click", () => {
+    document.getElementById("zoom-img").src = "img/" + f; document.getElementById("zoom-img").alt = t;
+    document.getElementById("zoom-cap").textContent = t; dlg.showModal();
+  });
+  plates.appendChild(fig);
+});
+</script>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
+
+const SCENES = {
+  assembly: { files: ["models/new_assembly.m.glb"], dir: [0.45, 0.55, 1], hud: "reading 60 mm",
+    caption: "The slider at a 60 mm reading. Blue is the printed PA-CF body and front shell, orange the button caps, green the scale board, brown the magnetic tape." },
+  exploded: { files: ["models/new_exploded.m.glb"], dir: [0.55, 0.45, 1], hud: "slider exploded along z",
+    caption: "Each slider part pulled apart along its assembly axis: front shell and buttons up, battery door and back gib down." },
+  housing: { files: ["models/new_housing.m.glb"], dir: [0.5, 0.5, 1], hud: "76.9 × 39.2 × 16.0 mm",
+    caption: "The printed housing by itself: slider body with the jaws, front shell, battery door and button caps. Corner radii R 3.4 / R 3.0, 1.2 mm bevel on the back, 0.8 mm on the lid." },
+  compare: { files: ["models/old_housing.m.glb", "models/new_housing.m.glb"], dir: [0.15, 0.2, 1], hud: "same scale",
+    caption: "The housing before (52.0 mm tall, 500 mAh cell) and after (39.2 mm, 135 mAh cell), side by side at the same scale. Length and thickness stay 76.9 × 16 mm." ,
+    labels: ["Before · 52.0 mm", "After · 39.2 mm"] },
+  slider: { files: ["boards/slider.glb"], dir: [0.2, 1, 0.55], hud: "4 layers · 1.0 mm · KiCad 10.0.8",
+    caption: "The routed slider board with its 3D component models, exported from KiCad. Turn it over to see the AS5311, the electrode comb and J2 on the bottom." },
+  scale: { files: ["boards/scale.glb"], dir: [0.15, 1, 0.6], hud: "200 × 7 mm · 2 layers",
+    caption: "The passive capacitive scale board: a 5.08 mm-pitch reflector and coupler pattern, solid ground on the back." },
+};
+
+const stage = document.getElementById("stage"), status = document.getElementById("status"), labelsEl = document.getElementById("labels");
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+stage.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(30, 16 / 9, 0.01, 1e6);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x8899aa, 1.6));
+const key = new THREE.DirectionalLight(0xffffff, 2.2); key.position.set(1, 1.6, 2); scene.add(key);
+const fill = new THREE.DirectionalLight(0xffffff, 0.8); fill.position.set(-2, -1, -1.5); scene.add(fill);
+
+const loader = new GLTFLoader(); loader.setMeshoptDecoder(MeshoptDecoder);
+const cache = new Map();
+function load(url) {
+  // models ship as base64 text (.glb.txt): artifacts serve text, not .glb
+  if (!cache.has(url)) cache.set(url, fetch(url + ".txt").then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
+    .then(b64 => { const bin = atob(b64.trim()), buf = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+      return new Promise((res, rej) => loader.parse(buf.buffer, "", g => res(g.scene), rej)); }));
+  return cache.get(url).then(s => s.clone(true));
+}
+let group = null, labelAnchors = [], token = 0;
+
+function fit(obj, dir) {
+  const box = new THREE.Box3().setFromObject(obj), size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3());
+  const r = size.length() / 2, d = r / Math.sin(THREE.MathUtils.degToRad(camera.fov / 2)) * 0.82;
+  const v = new THREE.Vector3(...dir).normalize();
+  camera.near = r / 100; camera.far = r * 100; camera.updateProjectionMatrix();
+  camera.position.copy(c).addScaledVector(v, d); controls.target.copy(c); controls.update();
+}
+
+async function show(name) {
+  const S = SCENES[name], my = ++token;
+  document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.scene === name)));
+  status.textContent = "Loading model…"; status.hidden = false;
+  document.getElementById("caption").textContent = S.caption;
+  document.getElementById("hud-r").textContent = S.hud;
+  try {
+    const parts = await Promise.all(S.files.map(load));
+    if (my !== token) return;
+    if (group) scene.remove(group);
+    group = new THREE.Group(); labelAnchors = [];
+    let x = 0;
+    parts.forEach((p, i) => {
+      p.traverse(o => { if (o.isMesh) {
+        const m = o.material; m.side = THREE.DoubleSide;
+        if (m.metalness !== undefined) { m.metalness = Math.min(m.metalness, 0.25); m.roughness = Math.max(m.roughness ?? 0.6, 0.45); }
+      } });
+      const box = new THREE.Box3().setFromObject(p), size = box.getSize(new THREE.Vector3());
+      if (parts.length > 1) {
+        p.position.x += x - box.min.x; p.position.y -= box.min.y;   // side by side, bottoms aligned
+        const top = new THREE.Vector3(x + size.x / 2, size.y + size.y * 0.04, box.max.z);
+        labelAnchors.push(top); x += size.x * 1.25;
+      }
+      group.add(p);
+    });
+    scene.add(group); fit(group, S.dir);
+    labelsEl.innerHTML = (S.labels || []).map(t => `<div>${t}</div>`).join("");
+    const b = new THREE.Box3().setFromObject(group).getSize(new THREE.Vector3());
+    document.getElementById("hud-l").textContent = name === "slider" || name === "scale" ? "" : `bounds ${b.x.toFixed(1)} × ${b.y.toFixed(1)} × ${b.z.toFixed(1)} mm`;
+    status.hidden = true;
+  } catch (e) {
+    if (my === token) status.textContent = "This model didn't load. The drawing set below has the same views.";
+  }
+}
+
+function resize() {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(stage); resize();
+const tmp = new THREE.Vector3();
+renderer.setAnimationLoop(() => {
+  controls.update(); renderer.render(scene, camera);
+  const els = labelsEl.children;
+  labelAnchors.forEach((a, i) => { if (!els[i]) return;
+    tmp.copy(a).project(camera);
+    els[i].style.left = ((tmp.x + 1) / 2 * stage.clientWidth) + "px";
+    els[i].style.top = ((1 - tmp.y) / 2 * stage.clientHeight) + "px"; });
+});
+document.querySelectorAll(".tabs button").forEach(b => b.addEventListener("click", () => show(b.dataset.scene)));
+const start = (location.hash || "").slice(1);
+show(SCENES[start] ? start : "assembly");
+</script>
+</body>
+</html>
