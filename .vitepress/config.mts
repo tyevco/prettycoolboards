@@ -15,7 +15,10 @@ function repoLinks(md: any) {
     if (href && !/^([a-z][a-z0-9+.-]*:|#|\/)/i.test(href)) {
       const [path, hash] = href.split('#')
       const isPage = path === '' || /\.(md|html)$/i.test(path)
-      if (!isPage) {
+      if (isPage && /(^|\/)README\.md$/i.test(path)) {
+        // a README is its folder's index page on the site (see rewrites), so link to the folder
+        token.attrSet('href', path.replace(/README\.md$/i, '') + (hash ? '#' + hash : ''))
+      } else if (!isPage) {
         const target = posix.normalize(posix.join(posix.dirname(env.relativePath ?? ''), path))
         const kind = path.endsWith('/') ? 'tree' : 'blob'
         token.attrSet('href', `${REPO}/${kind}/main/${target.replace(/\/$/, '')}${hash ? '#' + hash : ''}`)
@@ -34,15 +37,16 @@ export default withMermaid(defineConfig({
   lastUpdated: true,
   ignoreDeadLinks: [/\/hardware\/sim\/results\//],
   // README.md files are the index pages of their folders
-  rewrites: { 'README.md': 'index.md', ':dir/README.md': ':dir/index.md' },
+  // (at any depth: caliper/hardware/mechanical/README.md is served at /caliper/hardware/mechanical/)
+  rewrites: { 'README.md': 'index.md', ':path(.*)/README.md': ':path/index.md' },
   srcExclude: ['**/hardware/kicad/**', '**/hardware/fab/**', '**/node_modules/**', '**/managed_components/**',
-    '**/firmware/build/**', '.github/**', 'CLAUDE*.md'],
+    '**/firmware/build/**', '**/.pytest_cache/**', '.github/**', 'CLAUDE*.md'],
   markdown: { config: (md) => { md.use(repoLinks) } },
   vite: { build: { chunkSizeWarningLimit: 3000 } },
   themeConfig: {
     nav: [
       { text: 'Caliper', link: '/caliper/' },
-      { text: 'Toolchain', link: '/tools/README' },
+      { text: 'Toolchain', link: '/tools/' },
       { text: 'GitHub', link: REPO },
     ],
     sidebar: {

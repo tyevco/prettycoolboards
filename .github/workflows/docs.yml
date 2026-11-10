@@ -29,6 +29,11 @@ jobs:
       - run: npm ci
       - run: npm run docs:build
 
+      # every internal link, #anchor and github.com/.../blob/main/<path> link must resolve
+      # (external sites are not checked here: many block bots, which would make CI flaky)
+      - name: Check links
+        run: python3 tools/check_links.py . --no-external
+
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:

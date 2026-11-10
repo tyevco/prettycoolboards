@@ -30,3 +30,4 @@ node_modules/
 # for local review only, never published (jlcplace README, "Data and licensing")
 **/hardware/fab/*/jlcplace-report.html
 **/hardware/fab/*/jlcplace-overlay/
+.vitepress/linkcheck.json
