@@ -531,7 +531,7 @@
     ],
     [
       "8b669b1b-99f1-54bd-8e1f-df2e8a8ba4f1",
-      "IMU (accelerometer + gyroscope)"
+      "IMU (accelerometer + gyroscope) and compass (magnetometer)"
     ]
   ],
   "text_variables": {},

@@ -14,43 +14,52 @@
 static void test_bu_i2c(void)
 {
     const bu_i2c_dev_t *e;
-    CHECK_EQ_INT(bu_i2c_expected(&e), 3);
+    CHECK_EQ_INT(bu_i2c_expected(&e), 4);
     CHECK_EQ_STR(bu_i2c_name(0x6B), "LSM6DSO");
     CHECK_EQ_STR(bu_i2c_name(0x36), "MAX17048");
     CHECK_EQ_STR(bu_i2c_name(0x6A), "BQ25180");
+    CHECK_EQ_STR(bu_i2c_name(0x1E), "IIS2MDC");
     CHECK(bu_i2c_name(0x50) == NULL);
     /* the table follows board_pins.h (nets.py) */
     CHECK_EQ_INT(I2C_ADDR_LSM6DSO, 0x6B);
     CHECK_EQ_INT(I2C_ADDR_MAX17048, 0x36);
     CHECK_EQ_INT(I2C_ADDR_BQ25180, 0x6A);
+    CHECK_EQ_INT(I2C_ADDR_IIS2MDC, 0x1E);
 
     bu_i2c_result_t r;
-    const uint8_t all[] = {0x6A, 0x6B, 0x36}; /* any order */
-    CHECK(bu_i2c_eval(all, 3, &r));
+    const uint8_t all[] = {0x6A, 0x6B, 0x1E, 0x36}; /* any order */
+    CHECK(bu_i2c_eval(all, 4, &r));
     CHECK_EQ_INT(r.n_missing, 0);
     CHECK_EQ_INT(r.n_extra, 0);
 
-    const uint8_t no_gauge[] = {0x6B, 0x6A};
-    CHECK(!bu_i2c_eval(no_gauge, 2, &r));
+    const uint8_t no_gauge[] = {0x6B, 0x6A, 0x1E};
+    CHECK(!bu_i2c_eval(no_gauge, 3, &r));
     CHECK_EQ_INT(r.n_missing, 1);
     CHECK_EQ_INT(r.missing[0], 0x36);
 
+    /* U61 not populated (or not answering): the three chips of before are not enough any more */
+    const uint8_t no_compass[] = {0x36, 0x6A, 0x6B};
+    CHECK(!bu_i2c_eval(no_compass, 3, &r));
+    CHECK_EQ_INT(r.n_missing, 1);
+    CHECK_EQ_INT(r.missing[0], 0x1E);
+    CHECK_EQ_INT(r.n_extra, 0);
+
     /* SA0 open or low: the LSM6DSO answers at 0x6A, on top of the BQ25180. The scan then shows
      * 0x6A alone with the IMU missing (docs/bringup.md) */
-    const uint8_t sa0_low[] = {0x36, 0x6A};
-    CHECK(!bu_i2c_eval(sa0_low, 2, &r));
+    const uint8_t sa0_low[] = {0x1E, 0x36, 0x6A};
+    CHECK(!bu_i2c_eval(sa0_low, 3, &r));
     CHECK_EQ_INT(r.n_missing, 1);
     CHECK_EQ_INT(r.missing[0], 0x6B);
     CHECK_EQ_INT(r.n_extra, 0);
 
-    const uint8_t extra[] = {0x6B, 0x36, 0x6A, 0x18, 0x18}; /* something that is not on the board */
-    CHECK(!bu_i2c_eval(extra, 5, &r));
+    const uint8_t extra[] = {0x6B, 0x36, 0x6A, 0x1E, 0x18, 0x18}; /* something that is not on the board */
+    CHECK(!bu_i2c_eval(extra, 6, &r));
     CHECK_EQ_INT(r.n_missing, 0);
     CHECK_EQ_INT(r.n_extra, 1); /* duplicates counted once */
     CHECK_EQ_INT(r.extra[0], 0x18);
 
     CHECK(!bu_i2c_eval(NULL, 0, &r)); /* bus dead: everything missing */
-    CHECK_EQ_INT(r.n_missing, 3);
+    CHECK_EQ_INT(r.n_missing, 4);
 
     /* a shorted bus ACKs everything: every extra is listed up to BU_I2C_MAX */
     uint8_t every[BU_I2C_LAST - BU_I2C_FIRST + 1];
@@ -204,6 +213,78 @@ static void test_bu_imu(void)
     bu_imu_span_feed(&still, a1);
     bu_imu_span_feed(&still, a2);
     CHECK(!bu_imu_move_eval(&still, true, b, sizeof(b))); /* only nudged */
+}
+
+/* n readings of a field of (x, y, z) nT with a few LSB of noise on each axis */
+static void compass_feed(bu_gyro_stats_t *s, int n, int32_t x, int32_t y, int32_t z)
+{
+    bu_gyro_stats_init(s);
+    for (int i = 0; i < n; i++) {
+        int32_t v[3] = {x + 150 * (i % 3), y + 150 * (i % 2), z - 150 * (i % 4)};
+        bu_gyro_stats_feed(s, v);
+    }
+}
+
+static void test_bu_compass(void)
+{
+    /* 1.5 mgauss/LSB (ST iis2mdc_reg.c, iis2mdc_from_lsb_to_mgauss) = 150 nT/LSB */
+    CHECK_EQ_INT(bu_compass_nt(0), 0);
+    CHECK_EQ_INT(bu_compass_nt(1), 150);
+    CHECK_EQ_INT(bu_compass_nt(-1), -150);
+    CHECK_EQ_INT(bu_compass_nt(32767), 4915050);
+    CHECK_EQ_INT(bu_compass_nt(-32768), -4915200);
+    /* CFG_REG_A (60h): md bits 1:0, 00 continuous / 01 single / 10 power-down (iis2mdc_reg.h) */
+    CHECK(bu_compass_running(0x90));  /* what compass.c writes awake */
+    CHECK(!bu_compass_running(0x92)); /* and before deep sleep */
+    CHECK(!bu_compass_running(0x91));
+    CHECK(!bu_compass_running(0x03));
+    CHECK_EQ_INT(BU_COMPASS_WHO_AM_I, 0x40);
+
+    char b[240];
+    bu_gyro_stats_t s;
+    bu_gyro_stats_init(&s);
+    CHECK(!bu_compass_eval(&s, b, sizeof(b))); /* nothing read */
+    CHECK(strstr(b, "only 0 samples") != NULL);
+
+    /* the Earth's field at mid latitudes, display up, USB end toward north: 20 uT north, 45 down */
+    compass_feed(&s, 8, 20000, -300, -45000);
+    CHECK(bu_compass_eval(&s, b, sizeof(b)));
+    CHECK(strstr(b, "8 samples, X 20.1 Y -0.2 Z -45.2 uT, |B| 49.5 uT") != NULL);
+    CHECK(strstr(b, "FAIL") == NULL);
+
+    /* next to steel: several times the Earth's field still passes, this is not the plausibility
+     * gate of the filter */
+    compass_feed(&s, 8, 250000, -120000, 90000);
+    CHECK(bu_compass_eval(&s, b, sizeof(b)));
+    compass_feed(&s, 8, 0, 9000, 6000); /* 10.8 uT: the bottom of the window */
+    CHECK(bu_compass_eval(&s, b, sizeof(b)));
+
+    compass_feed(&s, 3, 20000, -300, -45000);
+    CHECK(!bu_compass_eval(&s, b, sizeof(b)));
+    CHECK(strstr(b, "only 3 samples") != NULL);
+
+    /* a dead part: every reading the same (here 0) */
+    bu_gyro_stats_init(&s);
+    for (int i = 0; i < 8; i++) {
+        const int32_t v[3] = {0, 0, 0};
+        bu_gyro_stats_feed(&s, v);
+    }
+    CHECK(!bu_compass_eval(&s, b, sizeof(b)));
+    CHECK(strstr(b, "no axis ever changed") != NULL);
+    /* alive, but no field to speak of / far too much of it */
+    compass_feed(&s, 8, 1500, -3000, 4500);
+    CHECK(!bu_compass_eval(&s, b, sizeof(b)));
+    CHECK(strstr(b, "|B| outside") != NULL);
+    compass_feed(&s, 8, 900000, 500000, 0);
+    CHECK(!bu_compass_eval(&s, b, sizeof(b)));
+    CHECK(strstr(b, "|B| outside") != NULL);
+    /* an axis at the rail, either way */
+    compass_feed(&s, 8, 20000, -300, bu_compass_nt(32767));
+    CHECK(!bu_compass_eval(&s, b, sizeof(b)));
+    CHECK(strstr(b, "Z at full scale") != NULL);
+    compass_feed(&s, 8, bu_compass_nt(-32768), -300, -45000);
+    CHECK(!bu_compass_eval(&s, b, sizeof(b)));
+    CHECK(strstr(b, "X at full scale") != NULL);
 }
 
 static void test_bu_gyro(void)
@@ -490,6 +571,7 @@ void bringup_tests(void)
     RUN(test_bu_fg);
     RUN(test_bu_imu);
     RUN(test_bu_gyro);
+    RUN(test_bu_compass);
     RUN(test_bu_buttons);
     RUN(test_bu_as5311);
     RUN(test_as5311_xcheck);

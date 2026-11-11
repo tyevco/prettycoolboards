@@ -8,7 +8,7 @@ Rev A is **designed, not built**: nothing here has been fabricated, assembled or
 * Do not place (DNP): none
 * Not assembled, not in BOM/CPL (copper / mechanical only): E40, FID1, FID2, FID3, H1, H2, H3, H4, H5, TP1, TP2, TP3, TP4, TP5, TP6, TP7, TP20, TP21, TP22, TP23, TP30, TP31, TP32, TP40, TP41, TP42, TP50, TP51 (E40 = the capacitive electrode comb: bare copper, no part)
 * Bottom-side placements (8): C21, C23, C30, C31, C44, J2, R85, U30
-* **jlcplace 0.2.1 placement gate** (JLC's EasyEDA footprints put down at every CPL row, over gerbers.zip): 102 results: 0 red, 0 yellow, 102 green, 0 verified
+* **jlcplace 0.2.1 placement gate** (JLC's EasyEDA footprints put down at every CPL row, over gerbers.zip): 107 results: 0 red, 0 yellow, 107 green, 0 verified
   * origin: the Gerbers' (0, 0) is this CPL's origin, board (100, 100) (the aux (drill/place file) origin): the rows were checked from it, as JLC reads them
   * cross-check without the database (EasyEDA records alone): every row the records call red is red here too, or a recorded decision accepts it
 * **JLC placement preview checklist** (3 items, also in jlcplace-checklist.md): open the order's placement preview and tick each part when it sits on its pads with pin 1 / polarity where the board wants it

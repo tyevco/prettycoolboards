@@ -49,7 +49,7 @@ GPIO = {net: (43 if pin == "TXD0" else 44 if pin == "RXD0" else int(pin[2:]))
         for pin, net in MCU_PINS.items() if net and pin.startswith(("IO", "TXD", "RXD"))}
 
 # LSM6DSO SA0 is tied HIGH (0x6B): SA0 low would be 0x6A, the BQ25180's address (sheets/imu.py).
-I2C_ADDR = {"BQ25180": 0x6A, "MAX17048": 0x36, "LSM6DSO": 0x6B}
+I2C_ADDR = {"BQ25180": 0x6A, "MAX17048": 0x36, "LSM6DSO": 0x6B, "IIS2MDC": 0x1E}
 
 INTERSHEET = SLIDER_INTERSHEET
 

@@ -3,15 +3,19 @@
 > **Status: builds for the target, not run on hardware.** The ESP-IDF project in
 > [`caliper/firmware`](../firmware/README.md) **builds with `idf.py build` on ESP-IDF v5.4.2** for the
 > esp32s3 (4 MB / N4R2 layout, clean build, **0 warnings**). With the bring-up commands (§10.1) the image is
-> **1 704 880 B and fits the 1 728 KB app slot with 64 592 B (3.7 %) to spare** (built 2026-11-10 with the LSM6DSO
-> driver, the orientation filter and the display flip: 15 728 B more than before); `CONFIG_CALIPER_BRINGUP=n`
-> gave 23 520 B back before that change and has not been rebuilt since (§13). No binary has been flashed: nothing
-> has run on a chip, and that includes the LSM6DSO driver, which is written from the datasheet text (§12.2). The portable core (units, rounding, tolerance, statistics, the SETTLE / SWEEP capture modes, log
+> **1 711 168 B and fits the 1 728 KB app slot with 58 304 B (3.3 %) to spare** (built 2026-11-10 with the IIS2MDC
+> compass driver and its part of the orientation filter: 6 288 B more than with the LSM6DSO driver, the orientation
+> filter and the display flip, which had added 15 728 B the same day); `CONFIG_CALIPER_BRINGUP=n` gave 23 520 B
+> back before those changes and has not been rebuilt since (§13). No binary has been flashed: nothing has run on a
+> chip, and that includes the LSM6DSO driver, which is written from the datasheet text, and the IIS2MDC compass
+> driver, whose register values come from ST's driver sources because the datasheet's register map was not read
+> (§12.2). The portable core (units, rounding, tolerance, statistics, the SETTLE / SWEEP capture modes, log
 > records, GATT codecs, settings JSON, CSV, button gestures, the AS5311 frame logic, the SSI fine
-> interpolation, the capacitive demodulator, the orientation filter of §12.2 and the bring-up pass/fail rules) is
-> compiled and tested on the host: **67 test groups, 1723 checks, 0 failures**, with `-Werror`,
+> interpolation, the capacitive demodulator, the orientation filter of §12.2 with its compass part and the
+> bring-up pass/fail rules) is compiled and tested on the host: **72 test groups, 2741 checks, 0 failures**, with
+> `-Werror`,
 > AddressSanitizer and UBSan (fatal: any undefined behaviour fails the run), and also compiled as strict ISO C11; the reading-log store (`store.c`) has its
-> own host test against stubbed LittleFS/NVS (**3 groups, 2589 checks, 0 failures**). Everything that
+> own host test against stubbed LittleFS/NVS (**4 groups, 2614 checks, 0 failures**). Everything that
 > touches a peripheral is unverified. Numbers marked **TVP** are to be verified on the prototype. The
 > adversarial review of the capacitive, UI, storage, Wi-Fi and USB modules and the SSI interpolation
 > (§14.1) found and fixed 20 defects; none of the fixes has run on a chip either.
@@ -44,7 +48,8 @@ caliper/firmware/
   components/
     board/                   exposes main/board_pins.h + proto/ to every component; checks pin drift
     measure/                 PORTABLE: measure.c logrec.c gatt_codec.c settings.c csv.c buttons.c hid_keymap.c
-                             orient.c (orientation from the gyroscope + accelerometer, §12.2)
+                             orient.c (orientation from the gyroscope + accelerometer, the compass as a
+                             yaw reference, §12.2)
     sensor_mag/              AS5311: sensor_mag.c (PCNT, SSI, index) + as5311_proto.c (PORTABLE)
     sensor_cap/              EXPERIMENTAL: sensor_cap.c (bundle drive, ADC) + cap_demod.c (PORTABLE)
     caliper_core/            event bus, live state, commands, settings, profiles, stats
@@ -53,7 +58,8 @@ caliper/firmware/
     ble/                     NimBLE: custom service, BAS/DIS/HID, worker (log stream, typing)
     caliper_wifi/            STA / provisioning AP, HTTP server, MQTT + HTTP POST push
     caliper_usb/             TinyUSB CDC + MSC, CLI
-    power/                   BQ25180, MAX17048, LSM6DSO (imu.c), temperature guard, LEDC, LED, deep sleep
+    power/                   BQ25180, MAX17048, LSM6DSO (imu.c), IIS2MDC (compass.c), temperature guard,
+                             LEDC, LED, deep sleep
   test/host/                 CMake project: the PORTABLE files + tiny_test.h + test_main.c
 ```
 
@@ -92,7 +98,7 @@ flowchart LR
   CORE -- "RECORDED / SEND / STATE /<br/>SLEEP / WIFI / BEEP / TOAST" --> BUS
   BUS --> BLEW & PUSH & LV & APP
   CORE --> STORE["store<br/>LittleFS ring + NVS"]
-  APP --> PWR["power<br/>BQ25180, MAX17048,<br/>LSM6DSO, sleep"]
+  APP --> PWR["power<br/>BQ25180, MAX17048,<br/>LSM6DSO, IIS2MDC, sleep"]
   APP -- "ble_tick()" --> BLEGATT
 ```
 
@@ -116,7 +122,7 @@ flowchart LR
 | `buttons` | 0 | 7 | 100 Hz | sample 3 GPIOs, `btn_update()`, `ui_handle_button()` |
 | `app` | 0 | 3 | 10 Hz | `ble_tick()` (LIVE/battery notify); at 1 Hz: power poll, USB poll, dim, auto-off, low battery |
 | `bus` | 0 | 6 | events | commands, events |
-| `imu` | 0 | 5 | 50 Hz (`vTaskDelayUntil`) | one 14-byte I2C read of the LSM6DSO (temperature, gyroscope, accelerometer), the orientation filter (§12.2) |
+| `imu` | 0 | 5 | 50 Hz (`vTaskDelayUntil`) | one 14-byte I2C read of the LSM6DSO (temperature, gyroscope, accelerometer), the orientation filter (§12.2); on every 5th sample (10 Hz) the IIS2MDC compass: its status and, when a new sample is waiting, a 6-byte read |
 | `ble_wrk` | 0 | 5 | jobs | LOG_READ streaming, HID typing |
 | `push` | 0 | 3 | jobs | MQTT publish, HTTP POST |
 | `cli` | 0 | 3 | lines | USB console commands |
@@ -141,7 +147,10 @@ pin-plan test, §12.5), and a `BOARD_PINS_HASH` (SHA-256 of nets.py and the gene
   build** with the command to regenerate it. CMake re-runs the check when nets.py changes.
 * It already paid off once: during capture the schematic moved the accelerometer (then a LIS2DW12) to **0x19**
   (SA0 high) and added the +3V3_UI rail; the check flagged the stale header and the firmware followed (§12).
-  The same path carried the change to the LSM6DSO at **0x6B** on 2026-11-10 (§12.2).
+  The same path carried the change to the LSM6DSO at **0x6B** on 2026-11-10 (§12.2), and the same day the
+  compass: `I2C_ADDR["IIS2MDC"]` in nets.py became `I2C_ADDR_IIS2MDC` **0x1E** in the header, whose
+  `BOARD_PINS_HASH` is now `202d301f8ed3b0f1` (it was `ee472a43b6aab9d6`). No GPIO changed: the compass has no
+  pin of its own (§12.2).
 
 ```sh
 python3 caliper/firmware/tools/gen_pins.py           # regenerate
@@ -621,13 +630,15 @@ the console (`ask()` in `cli.c` reads the next line from the CLI queue while the
 
 | Command | Checks | Reads |
 |---|---|---|
-| `bu all` | rails, i2c, bq, fg, imu, gyro, mag, cap, ble (2 s), then `SUMMARY n PASS, m FAIL` | |
+| `bu all` | rails, i2c, bq, fg, imu, gyro, compass, mag, cap, ble (2 s), then `SUMMARY n PASS, m FAIL` | |
 | `bu rails [vbat_mv]` | charger and gauge present; VBAT (MAX17048 VCELL) 2.5–4.5 V and within ±30 mV of the meter value given; VBUS, charge state, die temperature. VSYS and the 3.3 V rails have no ADC: the meter, at TP3–TP6 | `power_get_last()` (the app task's 1 Hz poll) |
-| `bu i2c` | `i2c_master_probe` 0x08–0x77: exactly 0x36, 0x6A, 0x6B (the table is `board_pins.h`) | |
+| `bu i2c` | `i2c_master_probe` 0x08–0x77: exactly 0x1E, 0x36, 0x6A, 0x6B (the table is `board_pins.h`) | |
 | `bu bq` | STAT0 / STAT1 / FLAG0 decoded (fails on VIN OVP, safety timer, BAT_OCP, TS open / hot / cold); registers 0x00–0x0C dumped and compared with the init table (`power_bq_table()`, with the live ICHG and ILIM) | `power_diag_read()` |
 | `bu fg [vbat_mv]` | VERSION 0x001x, VCELL, SOC, and the settings §12.2 makes (VRESET.Dis, HIBRT 0x8030, CONFIG.SLEEP clear) | |
 | `bu imu` / `bu imu move [s]` | LSM6DSO WHO_AM_I 0x6C and \|a\| 850–1150 mg at rest, plus the orientation line (roll, pitch, face, steady, relative yaw) / a ≥ 500 mg swing and IMU_INT1 going low (the wake-up interrupt), latch cleared after | `power_diag_read()`, `power_orient_get()` |
 | `bu gyro` / `bu gyro turn [s]` | the gyroscope running (CTRL2_G), 2 s lying still: each axis' mean within ±3 dps and ≤ 2 dps peak-to-peak, with the filter's bias estimate and the chip temperature / some axis reaching 60 dps while turned by hand, each axis' extremes printed with their signs (the axis-mapping check) | `power_diag_read()`, `power_imu_last()` |
+| `bu compass` | IIS2MDC WHO_AM_I 0x40 and CFG_REG_A in continuous mode, then 8 readings of the output registers 100 ms apart: at least 4 of them, some axis changing (a part in power-down repeats itself), no axis at full scale, \|B\| 10–1000 µT (a deliberately wide first-board window, **TVP**: hard iron and the steel beam are in the number). Prints the chip's X / Y / Z and \|B\| in µT, and the filter's line: \|B\| with the offset removed, the dip, plausible / DISTURBED, the magnetic heading and its uncertainty, or "compass not in use" without a calibration (§12.2) | `power_diag_read()`, `power_orient_get()` |
+| `bu compass cal [s]` | the hard-iron calibration (§12.2): the same two register checks, then the caliper is turned through every direction for s seconds (default 20, 5–120). PASS when the three axis spans make a sphere of 20–75 µT: the offsets are then in use and stored in NVS. A refused run changes nothing | `power_compass_last()`, `power_compass_cal_set()`, `store_compass_save()` |
 | `bu sns off` / `on` | SNS_PWR_EN: the UI stopped, its lines low, rails off, operator reads TP5 / TP6 / rails back on and the AS5311 answering; then `reboot` | `sensor_mag_power()` |
 | `bu mag` / `bu mag move [s]` | one second of frames: ≥ 50, ≤ 1 % bad, last valid, field in range / the count vs SSI cross-check below | `sensor_mag_diag()` |
 | `bu lcd [off]` | colour bars, a 1 px frame, corner labels on LVGL's top layer (`ui_test_pattern()`), backlight dim and back; operator y / n. The picture is pinned as mounted for the test (`ui_set_flip`) | |
@@ -643,7 +654,10 @@ the console (`ask()` in `cli.c` reads the next line from the CLI queue while the
 No check owns a bus or a pin the normal firmware owns: the I2C reads go through the I2C driver's bus lock, and
 the AS5311, the capacitive burst, BLE and Wi-Fi are read from snapshots their own tasks publish
 (`sensor_mag_diag`, `sensor_cap_diag`, `ble_diag`) or through their component's lock (`caliper_wifi_scan` under
-the Wi-Fi state lock). The pass/fail rules are portable (`bringup_eval.c`) and host-tested (§13).
+the Wi-Fi state lock). One check does get in the firmware's way: `bu compass` reads the IIS2MDC's output registers
+itself, which (as the driver assumes) clears the part's data-ready flag, so the orientation filter can miss compass
+samples while the command runs (§14). `bu compass cal` reads the sampler's copies and does not. The pass/fail
+rules are portable (`bringup_eval.c`) and host-tested (§13).
 
 **Count vs SSI (`bu mag move`).** The sensor task feeds every valid, still-believed frame with the raw PCNT count
 (no origin, no slip correction) into `as5311_xcheck_feed()`: the SSI position is unwrapped frame to frame on its
@@ -661,7 +675,7 @@ its last two characters (now three calls); the gauge's VCELL conversion multipli
 
 | Partition (4 MB) | Offset | Size | Use |
 |---|---|---|---|
-| nvs | 0x9000 | 24 KB | settings JSON + wifi_pass, unit/profile/auto-hold, BLE bonds, PHY cal |
+| nvs | 0x9000 | 24 KB | settings JSON + wifi_pass, unit/profile/auto-hold, the compass calibration (§12.2), BLE bonds, PHY cal |
 | otadata | 0xF000 | 8 KB | OTA slot selection (rollback enabled) |
 | phy_init | 0x11000 | 4 KB | |
 | ota_0 / ota_1 | 0x20000 / 0x1D0000 | 1728 KB each | application (two slots; no OTA transport is implemented yet) |
@@ -693,10 +707,13 @@ consistent (shorter) log; the numbering continues. A failed append gives its seq
 records back to back, written to `.tmp`, synced, and renamed over the old file (LittleFS `rename` replaces
 atomically; the old code unlinked first, so a power loss there lost the table).
 
-`store_tests` (host, §13) runs `store.c` against stubs (a directory for the partition, an empty NVS):
+`store_tests` (host, §13) runs `store.c` against stubs (a directory for the partition, an NVS that keeps only its
+u16 values):
 wraparound over 3 segments with a partial last one, reboot scan, clear across reboot, capacity change,
-a misplaced seq, a blank newest slot, a deleted segment, a torn header, removal of the v1 file, and the CSV
-export of a full log (every record, every line complete). POSIX files do not reproduce LittleFS's atomic
+a misplaced seq, a blank newest slot, a deleted segment, a torn header, removal of the v1 file, the CSV
+export of a full log (every record, every line complete), and the compass calibration's four NVS keys (nothing
+stored, the range limits and NaN refused, the round trip to 0.1 µT, a refused save leaving the stored one). POSIX
+files do not reproduce LittleFS's atomic
 commit, so the power-loss guarantee itself rests on LittleFS (**not tested here**).
 
 ## 12. Power
@@ -752,7 +769,7 @@ again whenever IC_CTRL reads back wrong (a BQ reset), checked at 1 Hz.
   (19-6171). The automatic hibernate thresholds (HIBRT POR 0x8030: HibThr 0x80 × 0.208 %/h = 26.6 %/h, ActThr
   0x30 × 1.25 mV = 60 mV) now keep the gauge **active while the caliper is awake** (56–71 mA is 41–53 %/h of
   135 mAh; with the 500 mAh cell it was 11–14 %/h, below the threshold) and let it hibernate in deep sleep
-  (38 µA = 0.03 %/h), as the sleep budget assumes. The ALRT thresholds (ATHD 4 % default) stay unused: nothing
+  (40 µA = 0.03 %/h), as the sleep budget assumes. The ALRT thresholds (ATHD 4 % default) stay unused: nothing
   reads FG_ALRT_N (§12.5). The "Battery empty" threshold stays at **3 %** SOC. The small cell's higher
   resistance makes VCELL, and so SOC, read low under load, which can end a session early but never late. 3 %
   is now ≈ 4 mAh, about 3–4 min awake. The MAX17048's accuracy on this cell is **TVP**.
@@ -786,11 +803,11 @@ again whenever IC_CTRL reads back wrong (a BQ reset), checked at 1 Hz.
 | | |
 |---|---|
 | Frame | the board's: **+x** along the beam toward the USB end, **+y** toward the buttons (top edge), **+z** out of the display. The chip → board mapping is one 3 × 3 table at the top of `imu.c` (the identity: U60 is on the top side at 0°); `power_imu_init` refuses a table that is not a rotation |
-| State | the unit vector `up` (opposite to gravity) in board coordinates, the gyroscope bias, the yaw integral |
+| State | the unit vector `up` (opposite to gravity) in board coordinates, the gyroscope bias, the yaw integral; with a compass calibration also the heading, the learned dip and the yaw's reference (**Compass**, below) |
 | Gyroscope step | `up` is turned by the bias-corrected rate over the sample interval (exact rotation, Rodrigues), so it follows a quick flip without waiting for the accelerometer |
 | Accelerometer step | a complementary filter pulls `up` toward a / \|a\| with τ = 0.5 s, only while \|\|a\| − 1 g\| ≤ 0.15 g (a shake is not gravity); it snaps instead of blending when the two point into opposite half-spaces |
 | **Roll, pitch, tilt** | **absolute** (gravity is the reference): roll about the beam (0 display up, +90° top edge up), pitch of the beam against the horizon (+90° USB end up), tilt of the display normal against vertical; plus the nearest face (`display up`, `top edge down`, …) |
-| **Yaw** | **relative, and it drifts.** There is no magnetometer, so nothing ties it to north. It is the integral of the turn rate about the vertical since power-on or `power_orient_zero_yaw()`, with `yaw_unc_deg` growing at 1 °/s before a bias is known and 0.05 °/s after (estimates, not measured); a clipped gyroscope sample or a gap above 100 ms sets it to "unknown" (180°). Good for "turned about a quarter since I zeroed it", not for a heading |
+| **Yaw** | **relative, and it drifts.** It is the integral of the turn rate about the vertical since power-on or `power_orient_zero_yaw()`, with `yaw_unc_deg` growing at 1 °/s before a bias is known and 0.05 °/s after (estimates, not measured); a clipped gyroscope sample or a gap above 100 ms sets it to "unknown" (180°). Without a calibrated compass nothing else holds it: good for "turned about a quarter since I zeroed it", not for a heading. With one, the compass limits how far it can drift and gives a lost yaw back (**Compass**, below); it stays an angle since the zero, and nothing ties it to north |
 | Angular rate | bias-corrected, dps, board axes, and its magnitude |
 | Bias | learned whenever the caliper lies still for 1 s (each gyro axis within 1 dps peak-to-peak and each accelerometer axis within 30 mg over the window, mean below 5 dps), low-passed over later windows, subtracted from then on. The datasheet's zero-rate level is ±1 dps typical with ±0.010 dps/°C drift |
 | `steady` | \|rate\| ≤ 6 dps and \|\|a\| − 1 g\| ≤ 0.06 g for 300 ms: "held still enough to read". Looser and quicker than "at rest" (a hand, not a table) |
@@ -803,6 +820,108 @@ Where it is used: the **display flip** (§7), `bu imu` and `bu gyro` (§10.1). W
 the SETTLE capture (§6.1) keeps its position-only rule, movement of the caliper does not count as "use" for the
 dim / auto-off timers, and **no orientation goes over BLE, the web API or the log**: the LIVE record stays
 20 bytes (v3) and no wire format changed.
+
+**Compass** (IIS2MDC, U61, I2C 0x1E, since 2026-11-10: SPEC §17 and
+[electronics §7.16](electronics.md#_7-16-compass-iis2mdc-magnetometer-2026-11-10); driver
+`components/power/compass.c`, the fusion in `orient.c`). **Designed, compiled and host-tested; it has not run on a
+chip.** The part sits on the always-on +3V3 at a fixed address. Its INT/DRDY pin is not connected (every ESP32 GPIO
+is taken), so it is polled. In the firmware it is always called the compass: `mag`, as in `sensor_mag` and
+`bu mag`, is the AS5311 position sensor.
+
+*What the heading is.* The direction of the **local field at the sensor, not north**, and nothing in the firmware
+calls it north. The part is at board (23.5, 31.2), 11.2 mm from the edge of the O1 steel beam. The beam is soft
+iron: it bends the field, by an amount that changes with the slider position and with how the tool is held. The
+load currents add an estimated few degrees between load states and several times that during a Wi-Fi transmission
+(calculations, not measurements: electronics §7.16). A distorted field that holds still is still a reference, and
+that is the job here: it stops the yaw's drift. With the 1.4301 (non-magnetic) beam option this is expected to be
+much better. **All of it is unmeasured**;
+[Bring-up B-10a](bringup.md#b-10a-compass-iis2mdc-and-the-steel-beam) is where it gets measured.
+
+*Where the register values come from.* The datasheet (ST DocID030986 Rev 1) was read up to page 25 of 40, from a
+distributor's mirror, for the pins, the currents and the application circuit; **its register map pages were not
+read**. Every register address, bit position, the WHO_AM_I value and the scale factor below therefore come from
+ST's own driver sources, `iis2mdc_reg.h` and `iis2mdc_reg.c`, and the sequence from ST's example
+`iis2mdc_read_data_polling.c` (§15). Those were read with a fetch tool that returns a page through a summarising
+model, not byte for byte; the header was fetched twice and the two readings agree. That is weaker than the
+datasheet's own tables: every value in this table is **TVP** against the part.
+
+| Register | Value | Setting (the field names are those of `iis2mdc_reg.h`) |
+|---|---|---|
+| WHO_AM_I 4Fh | reads **0x40** | `IIS2MDC_ID`; any other value and the driver gives up |
+| CFG_REG_A 60h | 0x20, then **0x90** | first `soft_rst` (bit 5), read back every 2 ms, up to 10 times, until it is 0 (ST's example does the same). Then, written last because it starts the part: `comp_temp_en` (bit 7), `lp` (bit 4: low-power mode), `odr` (bits 3:2) = 00: 10 Hz, `md` (bits 1:0) = 00: continuous mode |
+| CFG_REG_B 61h | **0x03** | `set_rst` (bits 2:1) = 01, `IIS2MDC_SENS_OFF_CANC_EVERY_ODR`: offset cancellation at every sample; `lpf` (bit 0): the digital low-pass filter |
+| CFG_REG_C 62h | **0x10** | `bdu` (bit 4): the two bytes of an output never come from different samples; `ble` (bit 3) = 0: low byte first; `i2c_dis` (bit 5) = 0; `drdy_on_pin` (bit 0) and `int_on_pin` (bit 6) = 0: nothing on the unconnected pin |
+| STATUS_REG 67h | read | `zyxda` (bit 3): a new sample is waiting |
+| OUTX_L 68h … OUTZ_H 6Dh | read | X, Y, Z: 16-bit two's complement, low byte first, one 6-byte read. **1.5 mgauss/LSB = 0.15 µT/LSB** (`iis2mdc_from_lsb_to_mgauss()`); full scale ±4915 µT, so the Earth's 25–65 µT is a few hundred LSB |
+| CFG_REG_A 60h, before deep sleep | **0x92** | the awake value with `md` = 10: `IIS2MDC_POWER_DOWN`. That this is the state of the datasheet's 1.5 µA (Table 5, Idd_PD) rests on the enum's name |
+
+The `lp` and `lpf` bits are from the header alone: ST's example sets neither.
+
+* **At boot** (`power_compass_init`, from `power_init` after the IMU): an `i2c_master_probe` of 0x1E first. A board
+  without U61 gets one warning (`no IIS2MDC at 0x1e: no magnetic heading`), `IIS2MDC MISSING` in the boot line and
+  `compass_ok` false in `power_status_t`, and everything else carries on as it did before the compass. The device
+  runs at 400 kHz with a 50 ms timeout per transfer. The part is on the always-on rail, so after a deep sleep it is
+  still in power-down and after a crash in whatever state it had: hence the software reset.
+* **Awake**: continuous mode at 10 Hz, low-power, with offset cancellation, the low-pass filter and temperature
+  compensation: **0.05 mA** typical (DocID030986 Table 11; not measured). The `imu` task polls it on every 5th of
+  its 50 Hz samples (`COMPASS_DIV`): STATUS_REG, and only when `zyxda` is set the six output bytes. The part runs
+  on its own clock, so now and then a poll comes before the next sample: it is skipped, and the next sample carries
+  the longer gap in its dt (counted up to 1 s). No sample is weighed twice, **if** reading the outputs clears
+  `zyxda` (assumed, §14). An I2C error is counted and skipped the same way. The reading goes to µT in the board
+  frame through one 3 × 3 table at the top of `compass.c`: the identity (U61 is on the top side at 0°), **TVP**,
+  because the chip's axis drawing has not been checked against the footprint. Unlike the IMU's table it is not
+  required to be a rotation: if the chip's frame turns out left-handed against the board's, the right table is a
+  mirror.
+* **Asleep** (`power_compass_sleep_prepare`, called by `power_deep_sleep` right after the IMU's, when the sampler
+  has stopped): CFG_REG_A = 0x92, power-down, **1.5 µA** typical (not measured). If the write fails the log says
+  `IIS2MDC power-down failed: it may stay in continuous mode (50 uA)` and the caliper sleeps anyway. The boot
+  after a wake resets and configures the part again.
+* **Calibration, hard iron only** (`bu compass cal [s]`, §10.1; `orient_compass_span_cal()`): while the caliper is
+  turned through every direction the command keeps the minimum and maximum of each axis. The offset is the middle
+  of each span and the reference field the mean of the three half spans. The result is refused when that reference
+  is outside 20–75 µT (`ORIENT_COMPASS_MIN_UT` / `MAX_UT`; the Earth's field is about 25–65 µT) or when any half
+  span is more than 30 % off their mean (`ORIENT_COMPASS_SPAN_TOL`): not turned all the way round, or iron that
+  bends the field. There is no soft-iron matrix, so what the beam does to the field's direction stays in the
+  heading, and the 30 % rule may well refuse a calibration made next to the beam (**TVP**). An accepted calibration
+  goes to the filter (`power_compass_cal_set()`, taken by the sampler at its next sample) and into NVS: namespace
+  `caliper`, keys `cmp_x`, `cmp_y`, `cmp_z` (the offsets, two's complement) and `cmp_ref`, each a u16 in 0.1 µT,
+  all four or nothing. `store_compass_save()` refuses an offset beyond ±3276.7 µT, a reference outside
+  0.1–6553.5 µT, and NaN. `app_main` loads the calibration after `power_init()`. A new one replaces the stored one;
+  no command removes it. **Without a calibration the compass is not used**: its samples are read and kept for
+  `bu compass cal` only, and the filter behaves bit for bit as it did before the compass (host-tested).
+
+The fusion (`orient_compass_update()`, once per compass sample). **Every number in it is a guess (TVP)**: none has
+seen a real field, let alone the one next to the beam.
+
+| Step | Rule | Value (`orient_cfg_t` field or constant) |
+|---|---|---|
+| Used at all | only with a calibration, and once `up` is valid | |
+| Field | the offset is subtracted; \|B\| and the dip (the field's angle below the horizontal, taken against `up`) follow | |
+| Plausible, 1 | \|B\| is the size of the Earth's field | 20–75 µT (`cmp_abs_min_ut`, `cmp_abs_max_ut`) |
+| Plausible, 2 | and the size it was calibrated at | within ±25 % (`cmp_ref_tol` 0.25) |
+| Plausible, 3 | and its dip is the dip it has had: within a tolerance of a learned dip, which starts as the first sample's and then follows the measured one slowly | ±10° (`cmp_dip_tol_deg`); τ = 20 s (`cmp_dip_tau_s`) |
+| Plausible, 4 | all of that without a break | for 1 s (`cmp_hold_ms`) |
+| Not plausible | `field_disturbed`: no correction, and the gyroscope carries the heading and the yaw exactly as it does without a compass | |
+| Plausible, but no heading | the beam is near vertical (the heading of +x is then the angle of a vanishing vector) | \|`up.x`\| > 0.9, within ≈ 26° (`cmp_vert_cos`) |
+| | or the field is near vertical | within 10° (`CMP_FIELD_COS` 0.985) |
+| | or the caliper is turning fast (a 10 Hz sample lags) | above 60 dps (`cmp_rate_max_dps`) |
+| **Heading** | of board +x projected on the horizontal plane, clockwise seen from above, from the horizontal part of the field: 0–360°, **magnetic, in the local field**, tilt-compensated with `up`. The first one is taken as it is; after that the gyroscope carries the heading between samples and each believed sample pulls it | τ = 3 s (`cmp_tau_s`) |
+| `heading_unc_deg` | grows at the gyroscope's drift rates, as `yaw_unc_deg` does, and each believed sample pulls it with the same τ toward what such a heading may still be off by (soft iron, currents). 180° = unknown: no heading yet, a clipped gyroscope sample, a gap | 15° (`cmp_unc_deg`), not measured |
+| `heading_valid` | a heading was taken from a plausible sample just now; false: carried by the gyroscope, or unknown | within 300 ms (`CMP_FRESH_US`) |
+| **Yaw** | heading + yaw is constant, so the heading at the moment the yaw was zeroed says what the yaw must be now. That is good to a floor: the heading's uncertainty at the zero plus 15°, or, when no heading was known at the zero, the yaw's uncertainty at the first believed heading plus 2 × 15°. While `yaw_unc_deg` is below the floor the gyroscope is the better of the two and the yaw is **not touched**. Above it the yaw is pulled toward the compass and `yaw_unc_deg` comes down to the floor. A lost yaw (180°) is set from the compass at once, though not from a disturbed field, and not a yaw that was already unknown when the first heading came: that one has nothing to be restored to | floor ≈ 30°; τ = 3 s (`cmp_tau_s`) |
+
+What follows from those numbers: with a learned bias (0.05 °/s) the yaw's uncertainty takes about ten minutes
+after a zero to reach a 30° floor, and without one (1 °/s) half a minute; until then the compass changes nothing.
+So the compass does not make the yaw accurate. It bounds the drift at roughly ±30° (the floor plus drift rate × τ)
+and gives a yaw back after a clipped sample or a gap. What the gate cannot do: a disturbance of the right size and
+dip passes after the 1 s hold, and one of the right size that lasts is learned (the dip follows it with τ = 20 s)
+and passes from then on. Nothing here can tell those from the Earth's field.
+
+API (`power.h`): `power_compass_last(&s)` (the last sample in µT in the board frame, as measured, with the sample
+and error counts; false until the first one), `power_compass_cal_set(&cal)` (`NULL` removes the calibration from
+the filter, not from NVS), and in `orient_out_t`: `heading_valid`, `heading_deg`, `heading_unc_deg`,
+`field_disturbed`, `field_abs_ut`, `dip_deg`. Where it is used: `bu compass` (§10.1), and through the yaw in the
+orientation line of `bu imu`. Nowhere else: no heading is on the display, over BLE, in the web API or in the log.
 
 ### 12.3 Power states
 
@@ -822,7 +941,7 @@ stateDiagram-v2
   DFS (40–160 MHz) and tickless idle still run. Light sleep is configured for a future standby state.
 * **Going to sleep:** Wi-Fi off, panel off, LCD and RGB lines driven low with no pull (they feed +3V3_UI),
   cap phases low, AS5311 position saved and SNS_PWR_EN low (both switched rails off), the LSM6DSO from its
-  awake mode to the wake-up mode (gyroscope off, §12.2), then **every pad to its
+  awake mode to the wake-up mode (gyroscope off, §12.2), the IIS2MDC compass to power-down, then **every pad to its
   SLEEP state from the pin plan** (§12.5): gates, rail switch and the lines into the switched rails low and
   held, the other RTC pads isolated and held, ext1 armed on the plan's wake pins (IMU_INT1, the three buttons,
   CHG_INT_N: all external pull-ups or push-pull, so every pad and RTC pull is off and RTC peripherals can
@@ -844,10 +963,11 @@ off.
 | BQ25180 | ~3 µA | battery-only |
 | MAX17048 | ~3 µA | automatic hibernate |
 | LSM6DSO | 5.5 µA | gyroscope powered down, accelerometer in the 12.5 Hz ultra-low-power wake-up mode (§12.2). Typical at VDD 1.8 V (AN5192 Table 9); ST gives no figure at 3.3 V. It was ~1 µA with the LIS2DW12 |
+| IIS2MDC | 1.5 µA | power-down, CFG_REG_A `md` = 10 (§12.2). Typical (ST DocID030986 Rev 1 Table 5, Idd_PD); it draws 0.05 mA awake |
 | TPS22917 × 2 (off) | 0.02 µA | SNS_PWR_EN held low |
 | AS5311, AFE, ST7789, WS2812 | 0 | on the switched rails, lines held low |
-| Conversion loss | ≈ 2.2 µA | the 3.3 V loads seen from the battery through the TPS63802 |
-| **Total** | **≈ 38 µA** | within the SPEC target of ≤ 40 µA (≤ 35 µA and ≈ 33 µA before the LSM6DSO, SPEC §16); ≈ 40 µA with 4 µA for the BQ25180 and the MAX17048 each; not measured |
+| Conversion loss | ≈ 2.4 µA | the 3.3 V loads seen from the battery through the TPS63802 (≈ 2.2 µA before the compass) |
+| **Total** | **≈ 40 µA** | within the SPEC target of ≤ 42 µA (≤ 40 µA and ≈ 38 µA before the compass, SPEC §17; ≤ 35 µA and ≈ 33 µA before the LSM6DSO, SPEC §16); ≈ 42 µA with 4 µA for the BQ25180 and the MAX17048 each; not measured |
 
 The pad currents behind "lines held low" are what §12.5 checks: until the fix there, six of those held
 lines cost **≈ 440 µA**, more than eleven times the whole budget.
@@ -1143,17 +1263,27 @@ changes). In the image now: `orient.c` 2.9 KB, `libpower.a` 5.5 KB in all (the d
 `acosf` pull in from `libm` (14.1 KB in all now; how much of it is new was not measured).
 `CONFIG_CALIPER_BRINGUP=n` and the 8 MB overlay were **not** rebuilt with this change.
 
-| `idf.py size` (4 MB / N4R2, bring-up on, 2026-11-10) | Used | Of |
-|---|---|---|
-| Image (.bin) | **1 704 880 B** | 1 769 472 B app slot (`ota_0`/`ota_1`): **64 592 B (3.7 %) free** (it was 80 320 B before the LSM6DSO; 104 560 B with `CONFIG_CALIPER_BRINGUP=n` before the cell changes) |
-| Flash code (.text) | 1 168 228 B | |
-| Flash data (.rodata) | 385 548 B | |
-| DIRAM (.text + .data + .bss) | 219 339 B (64.2 %) | 341 760 B, 122 421 B free (the capture state is about 1.7 KB, the orientation state 0.3 KB; the `imu` task's 4 KB stack comes from the heap) |
-| IRAM | 16 383 B | 16 384 B: the S3's fixed IRAM block, which the linker always fills before using DIRAM |
-| RTC slow / fast | 52 B / 148 B (from the build before the cell changes; nothing was added to RTC memory) | 8 KB each (the AS5311 position, the zero) |
+**With the IIS2MDC compass** (§12.2; 2026-11-10, built the same way: in the working tree with the build directory
+and the sdkconfig outside it, `set-target esp32s3` then `build` from an empty build directory, 0 compiler warnings):
+*"caliper.bin binary size 0x1a1c40 bytes. Smallest app partition is 0x1b0000 bytes. 0xe3c0 bytes (3%) free."* and
+ESP-IDF's notice *"The smallest app partition is nearly full (3% free space left)!"*. That is **6 288 B more** than
+the line above: by `esp_idf_size` the flash code grew 4 864 B and the read-only data 1 408 B. In the image now:
+`orient.c` 4.6 KB (was 2.9 KB), `compass.c` 1.0 KB, `libpower.a` 7.4 KB in all (was 5.5 KB), `libbringup.a` 11.9 KB
+(was 10.4 KB), `libstore.a` 3.4 KB; `libm` is unchanged at 14.1 KB. `CONFIG_CALIPER_BRINGUP=n` and the 8 MB overlay
+were **not** rebuilt with this change either.
 
-The 3.7 % margin is thin for one slot of a two-slot OTA layout, and the orientation code took a fifth of what
-was left: a release image can turn `CONFIG_CALIPER_BRINGUP` off (it gave 23.5 KB back before this change), and the
+| `idf.py size` (4 MB / N4R2, bring-up on, 2026-11-10, with the compass) | Used | Of |
+|---|---|---|
+| Image (.bin) | **1 711 168 B** | 1 769 472 B app slot (`ota_0`/`ota_1`): **58 304 B (3.3 %) free** (it was 64 592 B before the compass and 80 320 B before the LSM6DSO; 104 560 B with `CONFIG_CALIPER_BRINGUP=n` before the cell changes) |
+| Flash code (.text) | 1 173 092 B | |
+| Flash data (.rodata) | 386 956 B | |
+| DIRAM (.text + .data + .bss) | 219 555 B (64.2 %) | 341 760 B, 122 205 B free (the capture state is about 1.7 KB, the orientation state was 0.3 KB before the compass, which added 216 B of DIRAM in all; the `imu` task's 4 KB stack comes from the heap) |
+| IRAM | 16 383 B | 16 384 B: the S3's fixed IRAM block, which the linker always fills before using DIRAM |
+| RTC slow / fast | 44 B / 148 B in this build (52 B / 148 B in the table before the cell changes; the compass keeps nothing in RTC memory, and what took 8 B out in between was not looked into) | 8 KB each (the AS5311 position, the zero) |
+
+The 3.3 % margin is thin for one slot of a two-slot OTA layout: the orientation code took a fifth of what was
+left and the compass a tenth of the rest. A release image can turn `CONFIG_CALIPER_BRINGUP` off (it gave 23.5 KB
+back before these two changes), and the
 next big feature should look at the fonts (Montserrat 48 is the largest), the MQTT client (no Kconfig switch yet) or TinyUSB MSC first. The 8 MB
 overlay (`SDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.defaults.8mb"`, `partitions_8mb.csv`, 16 384-record
 log) also builds with 0 warnings (clean `build8` directory): *"caliper.bin binary size 0x1956b0 bytes. Smallest
@@ -1170,19 +1300,29 @@ They build with `-Wall -Wextra -Werror -Wshadow -Wconversion` and AddressSanitiz
 sources are also compiled as strict ISO C11 (`-std=c11 -pedantic`, target `portable_c11`, part of the default
 build), which is what caught `strnlen` (POSIX, not C11) in `gatt_codec.c`. The sanitizers run with
 `-fno-sanitize-recover=all` since the capture review, so a UBSan report fails the test instead of scrolling past.
-Result (2026-11-10, with the LSM6DSO and the orientation filter, WSL Ubuntu 24.04, gcc 13.3): `caliper_tests`
-**67 groups PASS, 1723 checks, 0 failures** (the 25 before, the 14 capture groups of §6.1, the capture review's
-11, the 10 bring-up groups of `test_bringup.c`: the I2C expectation table incl. a dead and a shorted bus, the
+Result (2026-11-10, with the LSM6DSO, the IIS2MDC compass and the orientation filter, WSL Ubuntu 24.04,
+gcc 13.3): `caliper_tests` **72 groups PASS, 2741 checks, 0 failures** (the 25 before, the 14 capture groups of
+§6.1, the capture review's 11, the 11 bring-up groups of `test_bringup.c`: the I2C expectation table incl. a
+missing compass, a dead and a shorted bus, the
 BQ25180 status decode and every fault bit, the register read-back compare, the MAX17048 rule and VCELL conversion
 at full scale, the LSM6DSO accelerometer scaling / norm / motion rule, **the gyroscope rules** (the scale of every
 full-scale setting incl. ±125 dps, the zero-rate limit, a moving board, too few samples, the turn threshold and
-the axis signs), the button press tracker with glitches and stuck buttons, the AS5311 frame text and frame rule,
+the axis signs), **the compass rule** (the 150 nT/LSB scale at both ends of the range, the mode bits of
+CFG_REG_A, too few readings, a part that repeats itself, an axis at full scale, the 10–1000 µT window), the button
+press tracker with glitches and stuck buttons, the AS5311 frame text and frame rule,
 the count vs SSI cross-check on synthetic slides with hysteresis, lost edges, the wrong sign, too-fast and
-too-short runs, and the capacitive rule; and **the 7 orientation groups of `test_orient.c`**: the mounting table
+too-short runs, and the capacitive rule; and **the 11 orientation groups of `test_orient.c`**: the mounting table
 (identity, a rotated chip, a mirror refused), gravity on all six faces with roll / pitch / tilt, a gyroscope-only
 turn against the exact rotation, the yaw integral with its uncertainty and its loss on clipping and gaps, the bias
-learned at rest and not while turning slowly, recovery from a wrong start and a shake, and the flip hysteresis);
-`store_tests` **3 groups PASS, 2589 checks, 0 failures**; `pin_plan_tests` 443 checks, 0 failures; ctest
+learned at rest and not while turning slowly, recovery from a wrong start and a shake, the flip hysteresis, and
+the four compass groups: the span calibration (a sphere around a large offset, a turn in one plane refused, a mild
+ellipsoid passed and strong ones refused), the tilt-compensated heading in a set of poses with and without an
+offset and carried by the gyroscope through a turn, the gate (no calibration, a field too strong, too weak and at
+the wrong dip, a wrong dip that stays and is learned, the 1 s hold, the beam and the field near vertical, a fast
+turn, samples that stop, the calibration taken away), and the yaw (bit for bit the filter without a compass while
+the gyroscope is the better of the two, a lost yaw given back but not from a disturbed field, a 2 dps gyroscope
+offset held to about 6°)); `store_tests` **4 groups PASS, 2614 checks, 0 failures** (the three before and the
+compass calibration in NVS); `pin_plan_tests` 443 checks, 0 failures; ctest
 "100% tests passed, 0 tests failed out of 6" (with the generated-file checks). All motion in these tests is
 synthetic: they prove the arithmetic and the rules, not the sensor.
 Covered: count → nm (1953.125 nm/count) and SSI LSB → nm (488.28125 nm) and their
@@ -1254,8 +1394,37 @@ host tests; `./gen_vectors` prints LIVE v3, LOG and COMMAND bytes):
   sleep), the 300 ms settle before the latch is cleared, the gyroscope's real zero-rate level and noise in
   low-power mode against the rest / steady thresholds, the yaw drift figures, the 50 Hz read sharing the bus
   with the 1 Hz power poll, the flip thresholds and the turned panel offset (§7).
+* **The compass (§12.2) has not run either, and its driver stands on weaker ground than the others:** the
+  datasheet's register map was not read, so the addresses, the bits, WHO_AM_I and the scale factor are ST's driver
+  sources as a summarising fetch tool reported them. **TVP**, every item:
+  * *The driver.* That `md` = 10 is the power-down state behind the datasheet's 1.5 µA: it is ST's enum name and
+    nothing more, and if it is wrong the part keeps drawing up to 50 µA asleep. That reading the output registers
+    clears `zyxda`: assumed, not sourced, and the rule that no sample is weighed twice rests on it. The reset
+    values of the registers the driver does not write were not read. The `lp` and `lpf` bits are from the header
+    alone (ST's example sets neither). The axis table is the identity and unchecked against the footprint; a
+    wrong sign or a mirrored frame turns the heading the wrong way (`bu compass` and the sign of the dip check
+    it). The 0.05 mA awake, the 1.5 µA asleep and the noise are the datasheet's typical figures.
+  * *The sampler.* The compass is polled by the `imu` task: **without an IMU there are no compass samples**, no
+    heading and no `bu compass cal`, though the register part of `bu compass` still works. `bu compass` reads the
+    outputs itself and so takes samples away from the filter while it runs; the gap is carried in the next
+    sample's dt, and the command's own filter line can say `not measured now` for that reason alone. The 10 Hz
+    poll shares the bus with the 50 Hz IMU read and the 1 Hz power poll, unexercised.
+  * *The calibration.* Hard iron only: the soft iron of the beam is not calibrated out, and its effect changes
+    with the slider position, so offsets found at one position may be wrong at another. The 30 % span rule and
+    the 20–75 µT window **may refuse every calibration next to the steel beam**, and then the compass is simply
+    not used. Stored to 0.1 µT. No command removes a stored calibration.
+  * *The fusion.* Every threshold in the table of §12.2 is a guess. **A steady disturbance of the right size is
+    learned** by the dip filter (τ 20 s) and passes the gate from then on; one of the right size and dip passes after
+    the 1 s hold. With a gyroscope offset the carried heading and a held yaw lag by the offset × 3 s (6° at 2 dps in the
+    host test). A heading taken while `up` is still converging, after a shake, is off until the 3 s filter pulls
+    it in. A held `yaw_unc_deg` settles at the floor plus drift rate × τ, not at the floor. The floor of about 30°
+    means the compass does nothing for the first ten minutes after a zero. The 15° a believed heading is trusted
+    to is not measured, and neither is the 10–1000 µT window of `bu compass`.
+  * *The physics.* How far the beam, the slider position, the way the tool is held and the load currents move the
+    heading (§12.2): calculated for the currents, unknown for the beam, measured for neither.
 * **Not implemented:** OTA updates (the partitions are ready), orientation over BLE / the web API / in the
-  app (no wire format has a field for it), movement of the caliper as "use" for the dim and auto-off timers,
+  app (no wire format has a field for it), a heading anywhere but `bu compass`, a soft-iron calibration, a
+  command that removes a compass calibration, movement of the caliper as "use" for the dim and auto-off timers,
   an IMU stillness gate for SETTLE (§6.1), detecting a
   move > 1 mm while asleep (undetectable with this sensor: the REZERO flag covers only a recovery that
   failed), battery-temperature derating beyond the guards, USB suspend handling (the 2.5 mA suspend budget),
@@ -1407,4 +1576,11 @@ long stays SEND of the shown value, ZERO resets the capture; the button-edge bla
 * Maxim/ADI 19-6171 (MAX17048 registers); ST DS12140 Rev 3 (LSM6DSO datasheet: registers,
   scale factors, pin states) and AN5192 Rev 5 (LSM6DSO application note: currents, start-up, the wake-up
   interrupt)
+* ST, IIS2MDC datasheet DocID030986 Rev 1: read up to page 25 of 40, from a distributor's mirror (Table 5 and
+  Table 11 currents); **the register map was not read**. The registers, bits, WHO_AM_I and scale factor are from
+  ST's driver, <https://raw.githubusercontent.com/STMicroelectronics/iis2mdc-pid/master/iis2mdc_reg.h> and
+  <https://raw.githubusercontent.com/STMicroelectronics/iis2mdc-pid/master/iis2mdc_reg.c>, and the sequence from
+  ST's example
+  <https://raw.githubusercontent.com/STMicroelectronics/STMems_Standard_C_drivers/master/iis2mdc_STdC/examples/iis2mdc_read_data_polling.c>
+  (all three read on 2026-11-10 through a fetch tool that returns the page through a summarising model, §12.2)
 * Bluetooth SIG: HID over GATT Profile 1.0, Battery Service, Device Information Service

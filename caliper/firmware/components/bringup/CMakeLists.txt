@@ -3,4 +3,4 @@
 idf_component_register(
     SRCS "bringup.c" "bringup_eval.c"
     INCLUDE_DIRS "include"
-    PRIV_REQUIRES board power sensor_mag sensor_cap ui ble caliper_wifi caliper_core esp_driver_gpio esp_driver_i2c)
+    PRIV_REQUIRES board power store sensor_mag sensor_cap ui ble caliper_wifi caliper_core esp_driver_gpio esp_driver_i2c)

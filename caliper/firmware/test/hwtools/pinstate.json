@@ -1,7 +1,7 @@
 {
  "pinstate_version": 0,
  "board": "PrettyCool Caliper slider board rev A",
- "firmware": "caliper pin_plan.py@4ba5b56d312214fc",
+ "firmware": "caliper pin_plan.py@a40bda10a19043bf",
  "provenance": "assumed: exported from caliper/firmware/tools/pin_plan.py (design intent, not measured)",
  "modes": {
   "RESET": {
@@ -751,6 +751,22 @@
      "source": "assumed: LSM6DSO INT2 push-pull active low, nothing routed: high"
     }
    },
+   "U61": {
+    "SDA": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: IIS2MDC I2C target, bus idle (released; SDA / SCL are inputs between transactions)"
+    },
+    "SCL": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: IIS2MDC I2C target, bus idle (released; SDA / SCL are inputs between transactions)"
+    }
+   },
    "U30": {
     "A": {
      "dir": "out",
@@ -1210,6 +1226,22 @@
      "pull": "none",
      "latched": false,
      "source": "assumed: LSM6DSO INT2 push-pull active low, nothing routed: high"
+    }
+   },
+   "U61": {
+    "SDA": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: IIS2MDC I2C target, bus idle (released; SDA / SCL are inputs between transactions)"
+    },
+    "SCL": {
+     "dir": "in",
+     "out": null,
+     "pull": "none",
+     "latched": false,
+     "source": "assumed: IIS2MDC I2C target, bus idle (released; SDA / SCL are inputs between transactions)"
     }
    },
    "U1": {

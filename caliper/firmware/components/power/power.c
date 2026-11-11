@@ -1,4 +1,5 @@
-/* power: BQ25180 charger, MAX17048 fuel gauge, temperature guard. The LSM6DSO IMU is in imu.c. */
+/* power: BQ25180 charger, MAX17048 fuel gauge, temperature guard. The LSM6DSO IMU is in imu.c, the
+ * IIS2MDC compass in compass.c. */
 #include "power.h"
 
 #include <string.h>
@@ -9,6 +10,7 @@
 #include "esp_log.h"
 #include "esp_timer.h"
 #include "freertos/FreeRTOS.h"
+#include "compass.h"
 #include "imu.h"
 #include "sdkconfig.h"
 
@@ -63,7 +65,7 @@ static const char *TAG = "power";
 static i2c_master_bus_handle_t s_bus;
 static i2c_master_dev_handle_t s_bq, s_fg;
 static temperature_sensor_handle_t s_tsens;
-static bool s_chg_ok, s_fg_ok, s_imu_ok;
+static bool s_chg_ok, s_fg_ok, s_imu_ok, s_compass_ok;
 static bool s_usb_configured;
 static bool s_guard_dis;
 static int64_t s_vbus_since;
@@ -246,8 +248,10 @@ esp_err_t power_init(void)
         }
     }
     s_imu_ok = power_imu_init(s_bus) == ESP_OK;
-    ESP_LOGI(TAG, "BQ25180 %s, MAX17048 %s (0x%02x%02x), LSM6DSO %s", s_chg_ok ? "ok" : "MISSING",
-             s_fg_ok ? "ok" : "MISSING", ver[0], ver[1], s_imu_ok ? "ok" : "MISSING");
+    s_compass_ok = power_compass_init(s_bus) == ESP_OK;
+    ESP_LOGI(TAG, "BQ25180 %s, MAX17048 %s (0x%02x%02x), LSM6DSO %s, IIS2MDC %s", s_chg_ok ? "ok" : "MISSING",
+             s_fg_ok ? "ok" : "MISSING", ver[0], ver[1], s_imu_ok ? "ok" : "MISSING",
+             s_compass_ok ? "ok" : "MISSING");
 
     temperature_sensor_config_t tcfg = TEMPERATURE_SENSOR_CONFIG_DEFAULT(-10, 80);
     if (temperature_sensor_install(&tcfg, &s_tsens) == ESP_OK) {
@@ -279,6 +283,7 @@ void power_poll(power_status_t *o)
     o->charger_ok = s_chg_ok;
     o->gauge_ok = s_fg_ok;
     o->imu_ok = s_imu_ok;
+    o->compass_ok = s_compass_ok;
 
     if (s_fg_ok) {
         uint8_t b[2];
@@ -363,6 +368,9 @@ esp_err_t power_diag_read(uint8_t addr, uint8_t reg, uint8_t *buf, size_t n)
 {
     if (addr == I2C_ADDR_LSM6DSO) {
         return power_imu_diag_read(reg, buf, n);
+    }
+    if (addr == I2C_ADDR_IIS2MDC) {
+        return power_compass_diag_read(reg, buf, n);
     }
     i2c_master_dev_handle_t d = addr == I2C_ADDR_BQ25180 ? s_bq : addr == I2C_ADDR_MAX17048 ? s_fg : NULL;
     return d ? rd(d, reg, buf, n) : ESP_ERR_NOT_FOUND;

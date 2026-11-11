@@ -83,7 +83,7 @@ EXTRA_U10 = {"EN": {"dir": "in", "out": None, "pull": "none", "latched": False,
 
 # --peers: the other chips' pins on the MCU nets, from their datasheets as the firmware configures them
 # (design intent, "assumed" like the rest). Without them pullaudit falls back to a generic CMOS guess for
-# U2 / U4 / U30 / U60 / U1 and reports UNKNOWN_STATE on nets the plan alone settles. SHIP / RESET: none.
+# U2 / U4 / U30 / U60 / U61 / U1 and reports UNKNOWN_STATE on nets the plan alone settles. SHIP / RESET: none.
 def _p(dir, out=None, note=""):
     return {"dir": dir, "out": out, "pull": "none", "latched": False, "source": f"assumed: {note}"}
 
@@ -102,6 +102,7 @@ PEERS = {
         "U60": {"SDA": _p("in", note="LSM6DSO " + _I2C_REL), "SCL": _p("in", note="LSM6DSO " + _I2C_REL),
                 "INT1": _p("out", 1, "LSM6DSO INT1 push-pull active low (CTRL3_C 0x64, wake-up routed), idle high"),
                 "INT2": _p("out", 1, "LSM6DSO INT2 push-pull active low, nothing routed: high")},
+        "U61": {"SDA": _p("in", note="IIS2MDC " + _I2C_REL), "SCL": _p("in", note="IIS2MDC " + _I2C_REL)},
         "U30": {"A": _p("out", 1, "AS5311 A push-pull (level follows the position)"),
                 "B": _p("out", 1, "AS5311 B push-pull (level follows the position)"),
                 "Index": _p("out", 0, "AS5311 Index push-pull, low between index pulses"),
@@ -118,6 +119,7 @@ PEERS = {
         "U60": {"SDA": _p("in", note="LSM6DSO " + _I2C_REL), "SCL": _p("in", note="LSM6DSO " + _I2C_REL),
                 "INT1": _p("out", 1, "LSM6DSO INT1 push-pull active low, cleared before sleep: high"),
                 "INT2": _p("out", 1, "LSM6DSO INT2 push-pull active low, nothing routed: high")},
+        "U61": {"SDA": _p("in", note="IIS2MDC " + _I2C_REL), "SCL": _p("in", note="IIS2MDC " + _I2C_REL)},
         "U1": {"I/O1": _p("hiz", note="USBLC6 ESD clamp, no DC path"), "I/O2": _p("hiz", note="USBLC6 ESD clamp")},
     },
 }

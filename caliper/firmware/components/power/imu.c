@@ -3,7 +3,8 @@
  *
  *   awake   accelerometer + gyroscope at 52 Hz, both in low-power mode, read by a 50 Hz task and
  *           fused by components/measure/orient.c: roll / pitch from gravity, relative yaw, angular
- *           rate, "steady", gyro bias at rest (power_orient_get()).
+ *           rate, "steady", gyro bias at rest (power_orient_get()). The same task polls the
+ *           compass (compass.c) at 10 Hz and hands its samples to the same filter.
  *   asleep  gyroscope powered down, accelerometer in ultra-low-power mode at 12.5 Hz, the wake-up
  *           (slope) interrupt latched on INT1: the ext1 "pickup" wake of sleep.c.
  *
@@ -23,6 +24,7 @@
 #include "imu.h"
 
 #include "board_pins.h"
+#include "compass.h"
 #include "driver/gpio.h"
 #include "esp_check.h"
 #include "esp_log.h"
@@ -116,6 +118,7 @@ static const orient_mount_t s_mount = {{
 #define I2C_TIMEOUT 50 /* ms */
 
 #define IMU_PERIOD_MS   20  /* 50 Hz poll of a 52 Hz output: every poll finds a new sample */
+#define COMPASS_DIV     5   /* every 5th sample: the IIS2MDC's 10 Hz */
 #define IMU_TASK_PRIO   5
 #define IMU_TASK_CORE   0
 /* gyroscope power-down -> low-power: 70 ms + discard 1 sample (AN Table 17); 52 Hz = 19.2 ms */
@@ -130,10 +133,14 @@ static bool s_run;               /* the sampler may read (under s_lock) */
 static TaskHandle_t s_task;
 static orient_t s_orient;        /* the sampler task's own */
 static volatile bool s_zero_req;
+static unsigned s_cmp_div;       /* the sampler task's own: samples since the last compass poll */
+static uint32_t s_cmp_dt_us;     /* and the time since the last compass sample */
 
 static portMUX_TYPE s_mux = portMUX_INITIALIZER_UNLOCKED;
 static orient_out_t s_out;       /* under s_mux */
 static power_imu_sample_t s_last;
+static orient_compass_cal_t s_cmp_cal; /* under s_mux: waiting for the sampler while s_cmp_cal_req */
+static volatile bool s_cmp_cal_req;
 
 static esp_err_t wr8(uint8_t reg, uint8_t v)
 {
@@ -264,7 +271,25 @@ static void sample_once(int64_t *t_prev)
         s_zero_req = false;
         orient_zero_yaw(&s_orient);
     }
+    if (s_cmp_cal_req) {
+        taskENTER_CRITICAL(&s_mux);
+        orient_compass_cal_t cal = s_cmp_cal;
+        s_cmp_cal_req = false;
+        taskEXIT_CRITICAL(&s_mux);
+        orient_compass_set_cal(&s_orient, &cal);
+    }
     orient_update(&s_orient, gyro, acc, dt_us, clipped);
+    /* the compass, after the update: its heading is taken against the `up` of this sample. A poll
+     * that finds no new sample waits for the next turn, and the sample after it carries the gap. */
+    s_cmp_dt_us += s_cmp_dt_us < 1000000u ? dt_us : 0;
+    if (++s_cmp_div >= COMPASS_DIV) {
+        s_cmp_div = 0;
+        orient_vec_t b_ut;
+        if (power_compass_poll(&b_ut)) {
+            orient_compass_update(&s_orient, b_ut, s_cmp_dt_us);
+            s_cmp_dt_us = 0;
+        }
+    }
     orient_out_t out;
     orient_get(&s_orient, &out);
 
@@ -327,6 +352,14 @@ bool power_orient_get(orient_out_t *out)
 void power_orient_zero_yaw(void)
 {
     s_zero_req = true; /* taken by the sampler at its next sample */
+}
+
+void power_compass_cal_set(const orient_compass_cal_t *cal)
+{
+    taskENTER_CRITICAL(&s_mux);
+    s_cmp_cal = cal ? *cal : (orient_compass_cal_t){0};
+    s_cmp_cal_req = true; /* taken by the sampler at its next sample: after orient_init(), too */
+    taskEXIT_CRITICAL(&s_mux);
 }
 
 bool power_imu_last(power_imu_sample_t *out)

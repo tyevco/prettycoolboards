@@ -3,7 +3,7 @@
  *   - reading log: a ring of 16-byte records (logrec.h) in LittleFS segment files of 256 records
  *     (one 4 KiB block each) plus a 16-byte header file; see store.c for why
  *   - tolerance profiles: a LittleFS file of 30-byte records (the GATT PROFILES layout)
- *   - settings and small state (unit, active profile, capture mode): NVS
+ *   - settings and small state (unit, active profile, capture mode), the compass calibration: NVS
  * All functions are thread-safe (one internal mutex).
  */
 #pragma once
@@ -15,6 +15,7 @@
 #include "esp_err.h"
 #include "logrec.h"
 #include "measure.h"
+#include "orient.h"
 #include "settings.h"
 
 #ifdef __cplusplus
@@ -61,6 +62,12 @@ typedef struct {
 
 esp_err_t store_state_load(store_state_t *st);
 esp_err_t store_state_save(const store_state_t *st);
+
+/* The compass's hard-iron calibration ("bu compass cal"), kept to 0.1 uT. Load: false, and *cal
+ * zeroed (= not calibrated), if none is stored. Save: ESP_ERR_INVALID_ARG for one that does not fit
+ * (an offset beyond +-3276 uT, a reference field outside 0..6553 uT). */
+bool store_compass_load(orient_compass_cal_t *cal);
+esp_err_t store_compass_save(const orient_compass_cal_t *cal);
 
 #ifdef __cplusplus
 }

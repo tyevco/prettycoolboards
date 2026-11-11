@@ -311,6 +311,11 @@ void app_main(void)
     esp_timer_create(&ta, &s_led_timer);
 
     power_init();
+    /* the hard-iron calibration of "bu compass cal": without one the compass is not used */
+    orient_compass_cal_t compass_cal;
+    if (store_compass_load(&compass_cal)) {
+        power_compass_cal_set(&compass_cal);
+    }
     /* SNS_PWR_EN also switches +3V3_UI (LCD VDD, RGB LED): the sensor driver turns the rails on
      * first, so the panel and the LED are powered before they are initialised */
     if (sensor_mag_init() != ESP_OK) {

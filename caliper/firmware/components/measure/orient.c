@@ -1,4 +1,5 @@
-/* orient: roll / pitch from gravity, relative yaw from the gyro, gyro bias at rest. Portable C. */
+/* orient: roll / pitch from gravity, relative yaw from the gyro, gyro bias at rest, and a magnetic
+ * heading that holds the yaw once the gyro has drifted further than the compass is wrong. Portable C. */
 #include "orient.h"
 
 #include <math.h>
@@ -8,6 +9,9 @@
 #define DEG2RAD  0.01745329252f
 #define FACE_COS 0.8f /* an axis within acos(0.8) = 37 deg of vertical names the face */
 #define REST_MIN_N 8u /* a rest window needs at least this many samples to mean anything */
+#define CMP_FIELD_COS 0.985f   /* a field within acos(0.985) = 10 deg of vertical points nowhere */
+#define CMP_FRESH_US  300000u  /* a heading older than this is carried, not measured */
+#define CMP_DT_MAX_US 1000000u /* a longer gap between compass samples counts as this */
 
 /* ---- vectors ------------------------------------------------------------------------------- */
 
@@ -68,6 +72,18 @@ static float clampf(float v, float lo, float hi)
     return v < lo ? lo : (v > hi ? hi : v);
 }
 
+/* an angle in degrees, into -180..180 */
+static float wrap180(float a)
+{
+    while (a > 180.0f) {
+        a -= 360.0f;
+    }
+    while (a < -180.0f) {
+        a += 360.0f;
+    }
+    return a;
+}
+
 /* ---- mounting ------------------------------------------------------------------------------ */
 
 bool orient_mount_valid(const orient_mount_t *m)
@@ -119,6 +135,19 @@ void orient_cfg_default(orient_cfg_t *c)
     c->bias_alpha = 0.25f;
     c->drift_unbiased_dps = 1.0f;  /* the typical zero-rate level, uncorrected */
     c->drift_biased_dps = 0.05f;   /* an estimate (a few degC of drift + the bias error), not measured */
+    /* The compass: guesses, every one (TVP). IIS2MDC DocID030986 Rev 1: 9 mG RMS noise in low-power
+     * mode, 6 mG with the low-pass filter or offset cancellation, which is about 2 deg on a 20 uT
+     * horizontal field. What the steel beam and the battery do to the field is not known at all. */
+    c->cmp_abs_min_ut = ORIENT_COMPASS_MIN_UT;
+    c->cmp_abs_max_ut = ORIENT_COMPASS_MAX_UT;
+    c->cmp_ref_tol = 0.25f;
+    c->cmp_dip_tol_deg = 10.0f;
+    c->cmp_hold_ms = 1000;
+    c->cmp_dip_tau_s = 20.0f;
+    c->cmp_vert_cos = 0.9f;        /* the beam within 26 deg of vertical */
+    c->cmp_rate_max_dps = 60.0f;   /* 6 deg per 10 Hz sample */
+    c->cmp_tau_s = 3.0f;
+    c->cmp_unc_deg = 15.0f;        /* soft iron is not calibrated out; not measured */
 }
 
 void orient_init(orient_t *o, const orient_cfg_t *cfg)
@@ -137,6 +166,10 @@ void orient_zero_yaw(orient_t *o)
 {
     o->yaw_deg = 0;
     o->yaw_unc_deg = 0;
+    /* the compass holds the yaw against the heading of this moment, if one is known */
+    o->yaw_ref = o->hdg_lock && o->hdg_unc_deg < 180.0f;
+    o->yaw_ref_deg = o->hdg_deg;
+    o->yaw_floor_deg = o->hdg_unc_deg + o->cfg.cmp_unc_deg;
 }
 
 /* The rest window: both sensors quiet (peak-to-peak) for rest_ms and the mean rate small enough to
@@ -223,6 +256,11 @@ void orient_update(orient_t *o, orient_vec_t gyro_dps, orient_vec_t acc_g, uint3
             o->yaw_deg += 360.0f;
         }
         o->yaw_unc_deg += (o->bias_valid ? c->drift_biased_dps : c->drift_unbiased_dps) * dt;
+        if (o->hdg_lock) {
+            /* the heading is clockwise, so it turns the other way; the gyro carries it no better */
+            o->hdg_deg = wrap180(o->hdg_deg - v_dot(w, o->up) * dt);
+            o->hdg_unc_deg += (o->bias_valid ? c->drift_biased_dps : c->drift_unbiased_dps) * dt;
+        }
 
         /* gyro: dv/dt = -w x v, i.e. `up` turns by -|w| dt about w (Rodrigues) */
         float th = w_abs * dt * DEG2RAD;
@@ -248,6 +286,12 @@ void orient_update(orient_t *o, orient_vec_t gyro_dps, orient_vec_t acc_g, uint3
     }
     if (yaw_lost || o->yaw_unc_deg > 180.0f) {
         o->yaw_unc_deg = 180.0f;
+    }
+    if (yaw_lost || o->hdg_unc_deg > 180.0f) {
+        o->hdg_unc_deg = 180.0f;
+    }
+    if (o->cmp_age_us <= CMP_FRESH_US) {
+        o->cmp_age_us += dt_us;
     }
 
     /* steady: low rate and 1 g, continuously */
@@ -305,6 +349,126 @@ void orient_get(const orient_t *o, orient_out_t *out)
     out->bias_valid = o->bias_valid;
     out->bias_dps = o->bias_dps;
     out->face = o->valid ? face_of(o->up) : ORIENT_FACE_TILTED;
+    out->heading_unc_deg = o->hdg_lock ? o->hdg_unc_deg : 180.0f;
+    out->heading_valid = o->cmp_ok && o->cmp_age_us <= CMP_FRESH_US && out->heading_unc_deg < 180.0f;
+    float h = o->hdg_deg < 0.0f ? o->hdg_deg + 360.0f : o->hdg_deg;
+    out->heading_deg = h < 360.0f ? h : 0.0f;
+    out->field_disturbed = o->cmp_disturbed;
+    out->field_abs_ut = o->field_abs_ut;
+    out->dip_deg = o->dip_deg;
+}
+
+/* ---- compass ------------------------------------------------------------------------------- */
+
+void orient_compass_span_feed(orient_compass_span_t *s, orient_vec_t raw_ut)
+{
+    s->min = s->have ? v_min(s->min, raw_ut) : raw_ut;
+    s->max = s->have ? v_max(s->max, raw_ut) : raw_ut;
+    s->have = true;
+    s->n++;
+}
+
+bool orient_compass_span_cal(const orient_compass_span_t *s, orient_compass_cal_t *cal)
+{
+    orient_vec_t half = v_scale(v_sub(s->max, s->min), 0.5f);
+    float ref = (half.x + half.y + half.z) / 3.0f;
+    cal->off_ut = v_scale(v_add(s->max, s->min), 0.5f);
+    cal->ref_ut = ref;
+    return s->have && ref >= ORIENT_COMPASS_MIN_UT && ref <= ORIENT_COMPASS_MAX_UT &&
+           v_within(v_sub(half, v3(ref, ref, ref)), ORIENT_COMPASS_SPAN_TOL * ref);
+}
+
+void orient_compass_set_cal(orient_t *o, const orient_compass_cal_t *cal)
+{
+    memset(&o->cmp_cal, 0, sizeof(o->cmp_cal));
+    if (cal && cal->ref_ut > 0.0f) {
+        o->cmp_cal = *cal;
+    }
+    o->field_abs_ut = o->dip_deg = o->dip_ref_deg = 0;
+    o->dip_valid = o->cmp_disturbed = o->cmp_ok = false;
+    o->cmp_ok_us = 0;
+    o->hdg_lock = o->yaw_ref = false;
+}
+
+void orient_compass_update(orient_t *o, orient_vec_t raw_ut, uint32_t dt_us)
+{
+    const orient_cfg_t *c = &o->cfg;
+    float ref = o->cmp_cal.ref_ut;
+    if (!(ref > 0.0f) || !o->valid) {
+        return;
+    }
+    if (dt_us > CMP_DT_MAX_US) {
+        dt_us = CMP_DT_MAX_US;
+    }
+    float dt = (float)dt_us * 1e-6f;
+    o->cmp_age_us = 0;
+    o->cmp_ok = false;
+
+    orient_vec_t b = v_sub(raw_ut, o->cmp_cal.off_ut);
+    float b_abs = v_abs(b), b_up = 0;
+    o->field_abs_ut = b_abs;
+
+    /* plausible: the size of the Earth's field, the size it was calibrated at, the dip it has had */
+    bool ok = b_abs >= c->cmp_abs_min_ut && b_abs <= c->cmp_abs_max_ut && fabsf(b_abs - ref) <= c->cmp_ref_tol * ref;
+    if (ok) {
+        b_up = v_dot(b, o->up);
+        o->dip_deg = -asinf(clampf(b_up / b_abs, -1.0f, 1.0f)) * RAD2DEG;
+        if (!o->dip_valid) {
+            o->dip_ref_deg = o->dip_deg;
+            o->dip_valid = true;
+        }
+        ok = fabsf(o->dip_deg - o->dip_ref_deg) <= c->cmp_dip_tol_deg;
+        o->dip_ref_deg += (o->dip_deg - o->dip_ref_deg) * dt / (c->cmp_dip_tau_s + dt);
+    }
+    if (!ok) {
+        o->cmp_disturbed = true;
+        o->cmp_ok_us = 0;
+        return;
+    }
+    uint32_t lim = c->cmp_hold_ms * 1000u;
+    o->cmp_ok_us = o->cmp_ok_us + dt_us > lim ? lim : o->cmp_ok_us + dt_us;
+    if (o->cmp_ok_us < lim) {
+        return;
+    }
+    o->cmp_disturbed = false;
+
+    /* With the beam or the field near vertical the heading is the angle of a vanishing vector, and
+     * in a fast turn the sample is behind: not disturbed, just no heading. */
+    if (fabsf(o->up.x) > c->cmp_vert_cos || fabsf(b_up) > CMP_FIELD_COS * b_abs ||
+        v_abs(o->rate_dps) > c->cmp_rate_max_dps) {
+        return;
+    }
+    /* north = the horizontal part of b, east = north x up; where +x lies between the two */
+    float h = atan2f(b.y * o->up.z - b.z * o->up.y, b.x - b_up * o->up.x) * RAD2DEG;
+    float a = dt / (c->cmp_tau_s + dt);
+    o->cmp_ok = true;
+
+    if (!o->hdg_lock || o->hdg_unc_deg >= 180.0f) {
+        o->hdg_deg = h; /* nothing carried to weigh it against */
+        o->hdg_unc_deg = c->cmp_unc_deg;
+        o->hdg_lock = true;
+    } else {
+        o->hdg_deg = wrap180(o->hdg_deg + a * wrap180(h - o->hdg_deg));
+        o->hdg_unc_deg += a * (c->cmp_unc_deg - o->hdg_unc_deg);
+    }
+
+    /* The yaw. heading + yaw = the heading at yaw 0, and the two headings in that are each good to
+     * cmp_unc_deg: their sum is the floor the compass can hold yaw_unc_deg at. Below the floor the
+     * yaw is the gyro's alone. */
+    if (!o->yaw_ref) {
+        if (o->yaw_unc_deg < 180.0f) {
+            /* no heading was known when the yaw was zeroed: this one, turned back by the yaw, is it */
+            o->yaw_ref_deg = wrap180(h + o->yaw_deg);
+            o->yaw_floor_deg = o->yaw_unc_deg + 2.0f * c->cmp_unc_deg;
+            o->yaw_ref = true;
+        }
+        return;
+    }
+    if (o->yaw_unc_deg > o->yaw_floor_deg) {
+        float ya = o->yaw_unc_deg >= 180.0f ? 1.0f : a; /* a lost yaw: there is nothing to blend with */
+        o->yaw_deg = wrap180(o->yaw_deg + ya * wrap180(o->yaw_ref_deg - h - o->yaw_deg));
+        o->yaw_unc_deg += ya * (o->yaw_floor_deg - o->yaw_unc_deg);
+    }
 }
 
 /* ---- display flip -------------------------------------------------------------------------- */

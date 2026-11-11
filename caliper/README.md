@@ -2,10 +2,9 @@
 
 A 150 mm digital caliper that remembers its readings and sends them wirelessly.
 
-> **Status (2026-11-08): rev A designed, not built.** Schematics captured (ERC clean, 2 waived); both boards laid
+> **Status (2026-11-10): rev A designed, not built.** Schematics captured (ERC clean, 2 waived); both boards laid
 > out and routed (KiCad 10.0.8 DRC + schematic parity: 0 errors, 0 unconnected); both fab packages pass
-> `release.py`, including the jlcplace placement gate (slider 0 red, 1 yellow; the J50 land matches its part since
-> phase 4); the mechanics pass the clash
+> `release.py`, including the jlcplace placement gate (slider 107 rows, 0 red, 0 yellow); the mechanics pass the clash
 > check against the routed board; the firmware builds for the ESP32-S3 and passes its host tests. Nothing has been
 > fabricated, flashed, printed or measured, and no SPICE simulation has been run. Every figure here is a design
 > target until the prototype passes [bring-up](docs/bringup.md).
@@ -17,7 +16,7 @@ A 150 mm digital caliper that remembers its readings and sends them wirelessly.
 | Display | 1.14 in colour IPS, landscape: big reading, live graph, go/no-go gauge, stats |
 | Wireless | BLE HID keyboard (types the reading into any spreadsheet), a companion GATT app, a Wi-Fi web page, MQTT/HTTP push |
 | Memory | Thousands of readings with timestamps and tolerance profiles; CSV export over USB, Wi-Fi or BLE |
-| Smarts | Tolerance / go-no-go, min/max/mean/σ stats, 6-axis IMU (accelerometer + gyroscope): wake-on-pickup, auto-hold, orientation tracking |
+| Smarts | Tolerance / go-no-go, min/max/mean/σ stats, 6-axis IMU (accelerometer + gyroscope): wake-on-pickup, auto-hold, orientation tracking; a compass (IIS2MDC magnetometer) as a reference that keeps the relative yaw from drifting: beside a steel beam it reads the local field, not north, and how well that works is unmeasured |
 | Power | 135 mAh LiPo (501230 class, behind the board), USB-C charging (BQ25180), fuel gauge, buck-boost 3V3. Estimated ≈ 3 days per charge on a typical shop day (30 min measuring a day), ≈ 1 h 40 min of continuous measuring ([architecture §5](docs/architecture.md)); not measured |
 | Body | Rev A: printed slider on a ground 20 × 4 mm flat-stock beam. Rev B: CNC-machined drawings. Slider housing 77 × 39 × 16 mm (slimmed from 77 × 52 × 16 on 2026-11-09) |
 

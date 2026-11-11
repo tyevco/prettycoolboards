@@ -41,6 +41,7 @@ static const bu_i2c_dev_t s_i2c[] = {
     {I2C_ADDR_LSM6DSO, "LSM6DSO"},
     {I2C_ADDR_MAX17048, "MAX17048"},
     {I2C_ADDR_BQ25180, "BQ25180"},
+    {I2C_ADDR_IIS2MDC, "IIS2MDC"},
 };
 #define N_I2C (sizeof(s_i2c) / sizeof(s_i2c[0]))
 
@@ -411,6 +412,55 @@ bool bu_gyro_turn_eval(const bu_gyro_stats_t *s, char *buf, size_t len)
         return false;
     }
     return true;
+}
+
+/* ---- IIS2MDC compass ----------------------------------------------------------------------- */
+
+int32_t bu_compass_nt(int16_t raw)
+{
+    /* 1.5 mgauss/LSB (iis2mdc_reg.c, iis2mdc_from_lsb_to_mgauss), 1 mgauss = 100 nT: full scale
+     * reads 4915 uT */
+    return (int32_t)raw * 150;
+}
+
+bool bu_compass_running(uint8_t cfg_reg_a)
+{
+    return (cfg_reg_a & 0x03) == 0;
+}
+
+bool bu_compass_eval(const bu_gyro_stats_t *s, char *buf, size_t len)
+{
+    static const char axis[3] = {'X', 'Y', 'Z'};
+    clear(buf, len);
+    int32_t mean[3];
+    bool flat = true;
+    for (int i = 0; i < 3; i++) {
+        mean[i] = bu_gyro_stats_mean(s, i);
+        flat = flat && (!s->have || s->max[i] == s->min[i]);
+    }
+    uint32_t norm = bu_imu_norm_mg(mean[0], mean[1], mean[2]); /* nT in, nT out */
+    cat(buf, len, "%lu samples, X %.1f Y %.1f Z %.1f uT, |B| %.1f uT (limit %d-%d)", (unsigned long)s->n,
+        mean[0] / 1000.0, mean[1] / 1000.0, mean[2] / 1000.0, norm / 1000.0, BU_COMPASS_MIN_UT, BU_COMPASS_MAX_UT);
+    if (s->n < BU_COMPASS_MIN_SAMPLES) {
+        cat(buf, len, "; FAIL only %lu samples (< %d)", (unsigned long)s->n, BU_COMPASS_MIN_SAMPLES);
+        return false;
+    }
+    if (flat) {
+        cat(buf, len, "; FAIL no axis ever changed: the part is in power-down or not updating");
+        return false;
+    }
+    bool ok = true;
+    for (int i = 0; i < 3; i++) {
+        if (s->max[i] >= BU_COMPASS_CLIP_NT || s->min[i] <= -BU_COMPASS_CLIP_NT) {
+            cat(buf, len, "; FAIL %c at full scale: a magnet on the part, or a dead axis", axis[i]);
+            ok = false;
+        }
+    }
+    if (norm < BU_COMPASS_MIN_UT * 1000u || norm > BU_COMPASS_MAX_UT * 1000u) {
+        cat(buf, len, "; FAIL |B| outside the window");
+        ok = false;
+    }
+    return ok;
 }
 
 /* ---- buttons ------------------------------------------------------------------------------- */

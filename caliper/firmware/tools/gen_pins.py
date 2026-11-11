@@ -26,7 +26,7 @@ REQUIRED = [
     "BTN_ZERO_N", "BTN_HOLD_N", "BTN_MODE_N", "USB_DM", "USB_DP", "LCD_SCK", "LCD_MOSI", "LCD_CS_N",
     "LCD_DC", "LCD_RST_N", "LCD_BL", *[f"CAP_TX{i}" for i in range(8)], "BUZZ", "RGB_DIN",
 ]
-REQUIRED_I2C = ["BQ25180", "MAX17048", "LSM6DSO"]
+REQUIRED_I2C = ["BQ25180", "MAX17048", "LSM6DSO", "IIS2MDC"]
 
 
 def macro(net: str) -> str:

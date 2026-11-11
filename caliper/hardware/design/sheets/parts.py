@@ -33,6 +33,7 @@ CAP = {
     "100p C0G": ("0402CG101J500NT", "FH (Guangdong Fenghua)", "C1546", C0402),
     "1n": ("0402B102K500NT", "FH (Guangdong Fenghua)", "C1523", C0402),
     "100n": ("CL05B104KO5NNNC", SAMSUNG, "C1525", C0402),
+    "220n": ("CL05B224KO5NNNC", SAMSUNG, "C16772", C0402),       # 16 V X7R (the IIS2MDC's C1)
     "1u": ("CL05A105KA5NQNC", SAMSUNG, "C52923", C0402),
     "4.7u": ("CL10A475KO8NNNC", SAMSUNG, "C19666", C0603),
     "10u/6.3V": ("CL05A106MQ5NUNC", SAMSUNG, "C15525", C0402),    # 0402 X5R, 0.5 mm tall (bottom side)

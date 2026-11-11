@@ -15,7 +15,7 @@ A 150 mm caliper whose slider carries one 4-layer board, 74 × 34 mm (a 62 × 34
 be cut out with jumpers, from an **8-phase capacitive scale** (a passive 200 × 7 mm PCB bonded into the beam). An
 **ESP32-S3-MINI-1** runs everything: the reading on a **1.14 in colour IPS** display, three buttons, an RGB LED and a
 piezo, a reading log in flash, **BLE** (HID keyboard + GATT) and **Wi-Fi**. An **LSM6DSO** 6-axis IMU (accelerometer + gyroscope) wakes it on
-pickup and tracks how it is held. Power is a 1S 135 mAh LiPo (Renata ICP501230PS-03, chosen 2026-11-09 for the slim housing) charged from **USB-C** by a BQ25180, regulated by a **TPS63802 buck-boost**, and
+pickup and tracks how it is held; an **IIS2MDC** magnetometer gives the yaw a reference (best effort beside a steel beam, [Schematics §7.16](electronics.md#_7-16-compass-iis2mdc-magnetometer-2026-11-10)). Power is a 1S 135 mAh LiPo (Renata ICP501230PS-03, chosen 2026-11-09 for the slim housing) charged from **USB-C** by a BQ25180, regulated by a **TPS63802 buck-boost**, and
 measured by a **MAX17048** fuel gauge.
 
 ## 2. Block diagram
@@ -29,6 +29,7 @@ flowchart LR
   CHG -->|VSYS| BB["TPS63802<br/>buck-boost"]
   BB -->|+3V3| MCU["ESP32-S3-MINI-1-N4R2<br/>BLE 5 + Wi-Fi, PCB antenna"]
   BB -->|+3V3| IMU["LSM6DSO 6-axis IMU<br/>0x6B, wake on pickup,<br/>orientation"]
+  BB -->|+3V3| CMP["IIS2MDC compass<br/>0x1E, polled"]
   BB -->|+3V3| SW1["TPS22917 U5"] -->|+3V3_SNS| MAG["AS5311<br/>A/B/Index + SSI"]
   SW1 -->|+3V3_SNS| AFE["Charge amp + VREF<br/>TLV9062"]
   BB -->|+3V3| SW2["TPS22917 U6"] -->|+3V3_UI| LCD["ST7789 1.14in IPS<br/>SPI2 40 MHz"]
@@ -40,6 +41,7 @@ flowchart LR
   MCU -->|I2C 400 kHz| CHG
   MCU -->|I2C| FG
   MCU -->|I2C| IMU
+  MCU -->|I2C| CMP
   MCU --> UI["ZERO / HOLD / MODE<br/>piezo, backlight FET"]
 ```
 
@@ -93,7 +95,7 @@ datasheet Table 6-4) pull the cell lower still; the S3 needs 3.0–3.6 V. The **
 regulated from 1.3 V to 5.5 V in, with 2 A out. The price is quiescent current: 11 µA Iq plus 5.5 µA in its
 feedback divider (the datasheet limits the lower resistor to 100 kΩ), against ~2 µA for an LDO. That is the largest
 single line in the sleep budget below, and the reason SPEC's sleep target was set to ≤ 35 µA (the first-draft figure was
-below what the buck-boost alone draws; ≤ 40 µA since the gyroscope, §5).
+below what the buck-boost alone draws; ≤ 40 µA since the gyroscope and ≤ 42 µA since the compass, §5).
 
 ### 3.4 Smaller decisions made during capture
 
@@ -101,6 +103,10 @@ below what the buck-boost alone draws; ≤ 40 µA since the gyroscope, §5).
   ([Schematics §3.6](electronics.md#_3-6-imu-lsm6dso)). Until 2026-11-10 the IMU was a LIS2DW12 accelerometer at
   0x19; the owner asked for a gyroscope, and a 6-axis part in the same place was the smallest change
   ([Schematics §7.15](electronics.md#_7-15-gyroscope-lsm6dso-replaces-the-lis2dw12-2026-11-10)).
+* **IIS2MDC compass at 0x1E, polled:** added on 2026-11-10 so that yaw has a reference. Every ESP32 pin was taken,
+  so its INT/DRDY pin is not connected and the firmware reads it on a timer. It sits in the top band, as far from
+  the steel beam as the board allows (11.2 mm); what that does to the heading is not known until a board is built
+  ([Schematics §7.16](electronics.md#_7-16-compass-iis2mdc-magnetometer-2026-11-10)).
 * **+3V3_UI switched rail:** the ST7789 still draws 15 + 5 µA typ in sleep-in (DM-TFT114-397 §5.3) and a WS2812
   idles at hundreds of µA in older revisions, so both lose power in deep sleep. No GPIO is free, so the switch
   shares SNS_PWR_EN with the sensor rail.
@@ -126,7 +132,7 @@ below what the buck-boost alone draws; ≤ 40 µA since the gyroscope, §5).
 ## 4. Power tree
 
 ```
-USB-C VBUS ─ SMF5.0A/USBLC6 ─ BQ25180 IN ─┬─ SYS → VSYS ─ TPS63802 → +3V3 ─┬─ ESP32-S3, LSM6DSO, I2C pull-ups, piezo, backlight (FET)
+USB-C VBUS ─ SMF5.0A/USBLC6 ─ BQ25180 IN ─┬─ SYS → VSYS ─ TPS63802 → +3V3 ─┬─ ESP32-S3, LSM6DSO, IIS2MDC, I2C pull-ups, piezo, backlight (FET)
                                           │                                ├─ TPS22917 U5 → +3V3_SNS: AS5311, TLV9062, VREF
                                           │                                └─ TPS22917 U6 → +3V3_UI : ST7789 VDD, WS2812
                                           └─ BAT ─ LiPo (J2) ─ MAX17048 (VDD = CELL)
@@ -143,7 +149,7 @@ down to the firmware's 3 % "Battery empty" cut-off at the 0.4–0.5C awake load)
 buck-boost is taken as ~90 % efficient at tens of mA (*estimate*; TPS63802 efficiency curves), so a 3.3 V load
 of *I* draws ≈ *I* × 3.3 / (3.7 × 0.9) ≈ 1.0 × *I* from the cell. In deep sleep the converter's Iq dominates its
 efficiency, so the sleep column lists the quiescent currents directly, plus one line for the conversion loss on
-the 3.3 V-side sleep loads (ESP32, LSM6DSO, divider: ≈ 19 µA at an assumed ~80 % light-load efficiency).
+the 3.3 V-side sleep loads (ESP32, LSM6DSO, IIS2MDC, divider: ≈ 20.5 µA at an assumed ~80 % light-load efficiency).
 
 | Block | Deep sleep (µA) | Idle, awake (mA) | Measuring (mA) | Basis |
 |---|---|---|---|---|
@@ -152,20 +158,21 @@ the 3.3 V-side sleep loads (ESP32, LSM6DSO, divider: ≈ 19 µA at an assumed ~8
 | BQ25180 (battery only) | 3 | – | – | IQ_BAT 3 µA typ with the watchdog and push-button disabled; 4 µA with the push-button on (SLUSE99C Electrical Characteristics, IQ_BAT). Firmware must set it |
 | MAX17048 | 3 | 0.023 | 0.023 | 3 µA hibernate with `VRESET.Dis` = 1, else 4 µA; 23 µA active (19-6171 Electrical Characteristics, IDD0). Plus ≤ 2 × 0.4 µA SCL/SDA pull-downs (IPD) against the pull-ups |
 | LSM6DSO | 5.5 | 0.30 | 0.30 | Asleep: accelerometer only, ultra-low-power mode at 12.5 Hz, gyroscope powered down: 5.5 µA typ (ST AN5192 Table 9; DS12140 gives its currents at VDD = 1.8 V, the 3.3 V figure is not in it and is *not measured*). Awake: accelerometer + gyroscope at 52 Hz in low-power mode, as the firmware runs them: 0.30 mA typ (AN5192 Table 9; 0.55 mA in high-performance mode, DS12140 Table 4). The LIS2DW12 it replaced: ~1 µA / 0.05 mA |
+| IIS2MDC compass | 1.5 | 0.05 | 0.05 | Asleep: idle mode, 1.5 µA typ (ST DocID030986 Rev 1 Table 5, Idd_PD). Awake: low-power mode at 10 Hz with offset cancellation, 50 µA typ (Table 11); 25 µA without the cancellation, 100 µA in high-resolution mode. The datasheet's typical figures; *not measured* |
 | TPS22917 ×2 (off) | 0.02 | – | – | ISD,VIN 10 nA typ each (SLVSDW8B; the 0.5 µA figure is the *on*-state IQ) |
-| Buck-boost conversion loss on the 3.3 V sleep loads | ≈ 2.2 | – | – | 19 µA × 3.3 / (3.7 × ~0.8) − 19 (*estimate*) |
+| Buck-boost conversion loss on the 3.3 V sleep loads | ≈ 2.4 | – | – | 20.5 µA × 3.3 / (3.7 × ~0.8) − 20.5 (*estimate*) |
 | AS5311 | 0 | 16 | 16 | 16 mA typ, 21 mA max (rev 1.13, electrical characteristics); off in sleep |
 | Capacitive AFE | 0 | 1.1 | 1.2 | TLV9062 2 × 538 µA + 16.5 µA divider; TX drive negligible |
 | ST7789 logic | 0 | 8 | 8 | DM-TFT114-397 §5.3; off in sleep (+3V3_UI) |
 | Backlight | 0 | 5 | 10 | ≈ 20 mA at 100 % (15 Ω, VF 3.0 V); 25 % / 50 % PWM (*estimate*) |
 | WS2812B-2020-V6 | 0 | ~1 | ~1 | Idle current per LCSC listing (*to verify*); off in sleep |
-| **Total** | **≈ 38 µA** (≈ 40 µA if the firmware leaves the 4 µA defaults; ≈ 33 µA before the gyroscope) | **≈ 56 mA** | **≈ 71 mA** | |
+| **Total** | **≈ 40 µA** (≈ 42 µA if the firmware leaves the 4 µA defaults; ≈ 38 µA before the compass, ≈ 33 µA before the gyroscope) | **≈ 56 mA** | **≈ 71 mA** | |
 
 Battery life (120 mAh usable, *estimates*; the "was" column is the 500 mAh cell with the LIS2DW12 budget):
 
 | Scenario | Average | Runtime | (was, 500 mAh cell) |
 |---|---|---|---|
-| Deep sleep only (storage, not ship mode) | 38 µA | ≈ 3 100 h ≈ **4 months** | 1.5 years |
+| Deep sleep only (storage, not ship mode) | 40 µA | ≈ 3 000 h ≈ **4 months** | 1.5 years |
 | Ship mode (BQ25180 shutdown, MAX17048 asleep) | ≈ 0.5 µA + the pack's PCM | set by the PCM's own drain (not on the sheets we have) and the cell's self-discharge, not by the caliper. Wake by plugging in USB | years |
 | Continuous measuring, display on | 71 mA (0.53C) | **≈ 1 h 40 min** | ≈ 6 h |
 | Awake, idle | 56 mA | ≈ 2 h 10 min | ≈ 8 h |
@@ -178,7 +185,7 @@ reading (it does not start below 3.50 V), roughly the last 10–15 % of the char
 measuring carry on to the 3 % cut-off.
 
 What dominates: awake, the ESP32-S3 (~50 %) and the AS5311 (~22 %); asleep, the buck-boost Iq and its divider
-(50 %) and the ESP32-S3 (24 %). The cheapest rev-B improvement is the auto-off delay (the IMU sees the caliper put
+(≈ 41 %) and the ESP32-S3 (≈ 20 %). The cheapest rev-B improvement is the auto-off delay (the IMU sees the caliper put
 down), then a lower-Iq buck-boost (e.g. TPS63900 class, 75 nA Iq, if it can supply the Wi-Fi peaks).
 
 Peak current: uncapped, Wi-Fi TX 355 mA (802.11b, 20.5 dBm) + AS5311 21 mA + LCD/backlight ~30 mA ≈ 405 mA at
@@ -206,3 +213,6 @@ Details and the arithmetic: [Firmware §12.6](firmware.md#_12-6-the-135-mah-cell
 * DisplayModule, *DM-TFT114-397* (1.14 in ST7789 panel pinout, DC characteristics): <https://cdn.shopify.com/s/files/1/0264/7629/files/DM-TFT114-397_Datasheet.pdf>
 * ST, *LSM6DSO* DS12140 Rev 3 (pin table 1 and Fig. 3, Table 4 currents, Table 19 pin states): <https://www.st.com/resource/en/datasheet/lsm6dso.pdf>;
   AN5192 (operating modes and their currents, Table 9). Before 2026-11-10: LIS2DW12 DS11811 and AN5038
+* ST, *IIS2MDC* DocID030986 Rev 1, pages 1–25 of 40 (pin table 2, Table 5 and Table 11 currents, Fig. 5 application
+  circuit, §5 layout notes); the register map and the package drawing were not read:
+  <https://www.st.com/resource/en/datasheet/iis2mdc.pdf>

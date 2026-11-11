@@ -1,0 +1,108 @@
+{
+ "entries": [
+  {
+   "correction": {
+    "dx": 0.0,
+    "dy": 0.0,
+    "mirror": false,
+    "rot": 0.0
+   },
+   "ee": {
+    "key": "ee-sha1:71b971e10b1ad6f3",
+    "title": "LGA-12_L2.0-W2.0-P0.50_LIS2DU12TR"
+   },
+   "fit": {
+    "alternatives": [
+     {
+      "conflicts": 8,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": false,
+      "matched": 2,
+      "mirror": true,
+      "names": 0,
+      "rot": 90.0
+     },
+     {
+      "conflicts": 10,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": false,
+      "matched": 2,
+      "mirror": true,
+      "names": 0,
+      "rot": 270.0
+     },
+     {
+      "conflicts": 10,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": false,
+      "names": 0,
+      "rot": 180.0
+     },
+     {
+      "conflicts": 12,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": false,
+      "names": 0,
+      "rot": 90.0
+     },
+     {
+      "conflicts": 12,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": false,
+      "names": 0,
+      "rot": 270.0
+     },
+     {
+      "conflicts": 12,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": true,
+      "names": 0,
+      "rot": 0.0
+     },
+     {
+      "conflicts": 12,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": true,
+      "names": 0,
+      "rot": 180.0
+     }
+    ],
+    "matched": 12,
+    "method": "number",
+    "rms": 0.0125,
+    "score": 68
+   },
+   "fitted": "2026-11-10",
+   "kicad": {
+    "fpid": "Package_LGA:LGA-12_2x2mm_P0.5mm",
+    "pad_hash": "sha1:872f7e09feef80e1"
+   },
+   "reasons": [
+    "fits by pad numbers: 12/12 matched, rms 0.013 mm",
+    "rot 90, 180, 270 also land every pad, on other nets; ruled out by pad numbers"
+   ],
+   "status": "auto",
+   "tool": "jlcplace 0.2.1",
+   "verdict": "green",
+   "verifications": []
+  }
+ ],
+ "lcsc": "C2655002"
+}

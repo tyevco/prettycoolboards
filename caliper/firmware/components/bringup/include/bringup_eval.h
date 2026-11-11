@@ -138,6 +138,24 @@ bool bu_gyro_rest_eval(const bu_gyro_stats_t *s, char *buf, size_t len);
  * lists the extremes of each axis with their signs, to check the axis mapping against the turn. */
 bool bu_gyro_turn_eval(const bu_gyro_stats_t *s, char *buf, size_t len);
 
+/* ---- IIS2MDC compass (ST iis2mdc_reg.h / iis2mdc_reg.c) ------------------------------------ */
+
+#define BU_COMPASS_WHO_AM_I    0x40 /* WHO_AM_I (4Fh): IIS2MDC_ID */
+/* |B| as the chip reads it, hard iron and all. The Earth's field is 25-65 uT, but this part sits
+ * next to a steel beam and a battery: the window only tells a live part in some field from a dead
+ * one (TVP: a guess, to be set from the first boards). */
+#define BU_COMPASS_MIN_UT      10
+#define BU_COMPASS_MAX_UT      1000
+#define BU_COMPASS_CLIP_NT     4905000 /* 32700 LSB: an axis at full scale (+-4915 uT) */
+#define BU_COMPASS_MIN_SAMPLES 4
+
+int32_t bu_compass_nt(int16_t raw);         /* 1.5 mgauss/LSB = 150 nT/LSB */
+bool bu_compass_running(uint8_t cfg_reg_a); /* md (bits 1:0) = 00: continuous mode */
+/* s: the readings of the three axes in nT (bu_gyro_stats_t does not care about the unit). False:
+ * too few samples, no axis ever changed (the part is in power-down or not updating: a live one
+ * shows noise), an axis at full scale, or the |B| of the means outside the window. */
+bool bu_compass_eval(const bu_gyro_stats_t *s, char *buf, size_t len);
+
 /* ---- buttons ------------------------------------------------------------------------------- */
 
 #define BU_BTN_N      3

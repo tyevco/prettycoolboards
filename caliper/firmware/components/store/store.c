@@ -531,3 +531,57 @@ esp_err_t store_state_save(const store_state_t *st)
     nvs_close(h);
     return err;
 }
+
+/* The compass calibration: four u16 in 0.1 uT, the three offsets as two's complement. All four or
+ * nothing: a missing key is no calibration. */
+static const char *const s_cmp_key[4] = {"cmp_x", "cmp_y", "cmp_z", "cmp_ref"};
+
+bool store_compass_load(orient_compass_cal_t *cal)
+{
+    memset(cal, 0, sizeof(*cal));
+    nvs_handle_t h;
+    if (nvs_open(NVS_NS, NVS_READONLY, &h) != ESP_OK) {
+        return false;
+    }
+    uint16_t v[4] = {0};
+    bool ok = true;
+    for (int i = 0; i < 4; i++) {
+        ok = nvs_get_u16(h, s_cmp_key[i], &v[i]) == ESP_OK && ok;
+    }
+    nvs_close(h);
+    if (!ok || v[3] == 0) {
+        return false;
+    }
+    cal->off_ut.x = (float)(int16_t)v[0] * 0.1f;
+    cal->off_ut.y = (float)(int16_t)v[1] * 0.1f;
+    cal->off_ut.z = (float)(int16_t)v[2] * 0.1f;
+    cal->ref_ut = (float)v[3] * 0.1f;
+    return true;
+}
+
+esp_err_t store_compass_save(const orient_compass_cal_t *cal)
+{
+    const float f[4] = {cal->off_ut.x, cal->off_ut.y, cal->off_ut.z, cal->ref_ut};
+    uint16_t v[4];
+    for (int i = 0; i < 4; i++) {
+        float t = f[i] * 10.0f + (f[i] < 0 ? -0.5f : 0.5f); /* rounds away from zero */
+        /* written so that a NaN fails too */
+        if (!(i < 3 ? t > -32768.0f && t < 32768.0f : t >= 1.0f && t < 65536.0f)) {
+            return ESP_ERR_INVALID_ARG;
+        }
+        v[i] = i < 3 ? (uint16_t)(int16_t)t : (uint16_t)t;
+    }
+    nvs_handle_t h;
+    esp_err_t err = nvs_open(NVS_NS, NVS_READWRITE, &h);
+    if (err != ESP_OK) {
+        return err;
+    }
+    for (int i = 0; i < 4 && err == ESP_OK; i++) {
+        err = nvs_set_u16(h, s_cmp_key[i], v[i]);
+    }
+    if (err == ESP_OK) {
+        err = nvs_commit(h);
+    }
+    nvs_close(h);
+    return err;
+}

@@ -232,11 +232,36 @@ an RTC GPIO). Until 2026-11-10 U60 was a LIS2DW12 accelerometer; the reasons for
   Y across it (board +y), Z out of the display face.
 * **What the gyroscope gives.** Roll and pitch come from gravity (the accelerometer) and stay absolute; the gyroscope
   makes them usable while the tool moves, and gives turn rate and a "held steady" test. Heading (rotation about
-  the vertical) is only relative and drifts: there is no magnetometer, and one would not work this close to the
-  magnetic scale.
+  the vertical) from the gyroscope alone is only relative and drifts. Since 2026-11-10 a magnetometer (U61, below)
+  gives it a reference. This page said until then that one "would not work this close to the magnetic scale"; that
+  reason was wrong (the tape's field is gone a centimetre away), and the real problem is the steel beam
+  ([§7.16](#_7-16-compass-iis2mdc-magnetometer-2026-11-10)).
 * **Not verified.** The piezo (BZ50) is 10 mm away; whether its 4 kHz drive shows up in the gyroscope output is not
   known (TVP: gyro noise with the buzzer on and off). The current figures are the datasheet's at VDD = 1.8 V; the
   board runs it at 3.3 V.
+
+**The compass, U61.** An **IIS2MDCTR** (C2655002), a 3-axis magnetometer in an LGA-12 (2 × 2 × 0.7 mm), on the same
+sheet, the same I2C bus and the always-on +3V3. Added on 2026-11-10
+([§7.16](#_7-16-compass-iis2mdc-magnetometer-2026-11-10)). Pin functions and the application circuit are from ST
+DocID030986 Rev 1 (Table 2, Fig. 5, §5), read from a distributor's copy up to page 25 of 40: the register map and
+the package drawing were **not read**.
+
+| Pin | Net | Why |
+|---|---|---|
+| 9 Vdd, 10 Vdd_IO | +3V3 | C64 100 nF + C65 10 µF at Vdd, C66 100 nF at Vdd_IO (Fig. 5: C3, C2, C4) |
+| 5 C1 | COMPASS_C1 | **C63 220 nF** to GND (Fig. 5). The sensor's set / reset pulses come out of this capacitor: "very high current pulses flow from C1 to pin 5 and 6", ESR ≤ 200 mΩ, "as close as possible" to both pins (§5). An X7R 0402 (CL05B224KO5NNNC, C16772) |
+| 1 SCL, 4 SDA | I2C_SCL, I2C_SDA | the system bus, 400 kHz. **Address 0x1E**, fixed (Table 21): no address pin, and nothing else on the bus is near it |
+| 3 CS | +3V3 | "When using the I2C, CS must be tied high" (§5). An input without a pull-up |
+| 7 INT/DRDY | not connected | every ESP32 pin is taken (`nets.MCU_PINS`), so the firmware polls. The pin is high impedance by default (Table 14) |
+| 2, 11, 12 NC | not connected | "internally not connected" (Table 2); pads soldered |
+| 6, 8 GND | GND | |
+
+* **Axes: not known from the datasheet.** Its axis drawing (Fig. 2) is an isometric view from which the signs
+  against pin 1 could not be read with certainty. The firmware has an axis map, and the first board fixes it
+  (`bu compass`, [bring-up](bringup.md)).
+* **Currents** (Table 5 and Table 11, typical): idle 1.5 µA; low-power mode at 10 Hz 25 µA, 50 µA with offset
+  cancellation (the firmware's mode); high-resolution at 10 Hz 100 µA. Not measured.
+* **What it can and cannot do here** is in §7.16: the steel beam is 11.2 mm away.
 
 ## 4. Scale board
 
@@ -247,9 +272,11 @@ layout can import the holes and fiducials the same way as the slider.
 
 ## 5. BOM and sourcing
 
-`tools/lcsc_check.py` against the JLCPCB catalogue on 2026-11-08: **47 BOM lines, 0 flagged** (every code
-found, in stock, MPN matches). 22 lines are JLC **Basic**, 25 **Extended** (re-run after the 2026-11-08 changes: Q1
-AO3401A C15127, C23 10 µF 0402 C15525 and R6/R7 2.2 k C25879 are all Basic).
+`tools/lcsc_check.py` against the JLCPCB catalogue on 2026-11-10: **49 BOM lines, 0 flagged** (every code
+found, in stock, MPN matches). 23 lines are JLC **Basic**, 26 **Extended**; the four buttons are four lines with one
+code, so the order has 46 different parts. On 2026-11-08 it was 47 lines, 22 Basic and 25 Extended: the compass
+(§7.16) added U61 (Extended) and C63 220 nF (Basic). The stock and price columns below are as read on the date
+given in each row, or on 2026-11-08.
 
 | Line | LCSC | Type | Stock | $ (qty 1) |
 |---|---|---|---|---|
@@ -260,6 +287,7 @@ AO3401A C15127, C23 10 µF 0402 C15525 and R6/R7 2.2 k C25879 are all Basic).
 | TPS63802DLAR | C2845237 | Extended | 23 909 | 0.91 |
 | TPS22917DBVR (×2) | C2681320 | Extended | 3 637 | 0.37 |
 | LSM6DSOTR (since 2026-11-10; was LIS2DW12TR C189624, $0.90) | C2655100 | Extended | 23 738 (2026-11-10) | 3.99 |
+| IIS2MDCTR (compass, since 2026-11-10; §7.16) | C2655002 | Extended | 2 705 (2026-11-10) | 4.25 |
 | TLV9062IDGKR | C398356 | Extended | 53 188 | 0.23 |
 | WS2812B-2020-V6 | C52917434 | Extended | 740 820 | 0.09 |
 | PKMCS0909E4000-R1 | C910763 | Extended | **535** | 1.10 |
@@ -281,7 +309,8 @@ itself is not a PCBA part: it plugs into J50 by hand.
   datasheet could not be downloaded during capture.
 * **Backlight headroom**: 3.31 V − 3.0 V VF leaves 0.3 V across 15 Ω + the FET; a 3.1 V LED gets ~14 mA, a 2.9 V
   one ≤ 27 mA. The panel's maximum LED current is not in the cited datasheet: check it on the bought panel.
-* **Sleep current** is ≈ 38 µA (estimate; ≈ 33 µA before the gyroscope) against SPEC's target of ≤ 40 µA
+* **Sleep current** is ≈ 40 µA (estimate; ≈ 38 µA before the compass, ≈ 33 µA before the gyroscope) against SPEC's
+  target of ≤ 42 µA
   ([Architecture §5](architecture.md#_5-power-budget-and-battery-life)).
 * **Contract reconciliation (SPEC §10, 2026-11-07).** The layout has the clamp tabs (74 × 34 overall), the
   single upper-band hole H1, the module in the top-left corner with an all-layer antenna keep-out, the D5 electrode
@@ -1018,3 +1047,127 @@ scale clean); `check_contract.py` OK; DRC + schematic parity **0 errors, 0 uncon
 PASS, jlcplace 0.2.1 **102 rows: 0 red, 0 yellow, 102 green** (new entry C2655100: fitted by pad numbers, 14 of 14, rms
 0.100 mm); `tools/tests` 24 passed; mechanics `run_all.sh`: 107 envelopes, 41 tests passed, clash check **0 not clear,
 0 FAIL / RISK**; firmware host tests 6 of 6, `idf.py build` without warnings. The scale board did not change.
+
+### 7.16 Compass: IIS2MDC magnetometer (2026-11-10)
+
+Designed, not built: nothing below has been soldered or measured. The currents are ST's typical figures (DocID030986
+Rev 1, read up to page 25 of 40 from a distributor's copy; the register map and the package drawing were not read),
+the field figures are hand calculations, the crosstalk numbers are hwtools `sicalc xtalk` calculations on the board
+file, and the firmware has run on a PC and through the compiler only.
+
+**Request and decision.** After the gyroscope (§7.15) the owner asked for the magnetometer. The gyroscope's yaw is
+relative and drifts, and a magnetometer is the usual reference for it. U61, an **IIS2MDCTR**, goes on the same I2C
+bus and the always-on +3V3 with four capacitors (circuit and pin table: §3.6). Nothing was removed, and no ESP32 pin
+changed: there was none free, so the part's INT/DRDY pin is not connected and the firmware polls it.
+
+**What it costs.** $4.25 a board (U61 $4.25, JLC extended, 2 705 in stock on 2026-11-10; C63 $0.0045), and one more
+extended line and one more basic line to load: 5 boards of parts ≈ $151 → ≈ $172 ([ordering](ordering.md)). The sleep estimate goes from ≈ 38 to
+≈ 40 µA and the SPEC target from ≤ 40 to **≤ 42 µA**; awake it adds 0.05 mA, which does not show in the rounded
+totals ([architecture §5](architecture.md)).
+
+**What a compass can do on this tool, and what it cannot.** It gives the orientation filter a direction that holds
+still, so the yaw stops drifting. It does **not** give north, and nothing in the firmware or the pages calls it
+north. The Earth's field is 25–65 µT, of which roughly 20 µT is horizontal at mid-northern latitudes; that
+horizontal part is all a heading has to work with. What disturbs it here, largest first:
+
+| Source | Estimate at U61 | Kind |
+|---|---|---|
+| **The beam** (O1 tool steel, ferromagnetic), its edge 11.2 mm from U61 | **not calculated, not measured**; tens of degrees of heading error are possible | soft iron that moves against the sensor: it changes with the slider position and with how the tool is held, so no fixed calibration removes it |
+| Wi-Fi transmission, ≈ 300 mA peaks | several times the 70 mA figures below | comes and goes with the load |
+| GND-plane return under the corner, 70 mA | ≈ 1.3–1.7 µT in the board's plane (an upper bound: all of the current in a narrow strip) | load |
+| VBAT riser, 70 mA | ≈ 1.8 µT, of which ≈ 0.56 µT in the board's plane | load |
+| Battery lead pair at J2 (bottom side, under this corner), 70 mA | ≈ 1.6 µT, mostly vertical | load |
+| Q1 path, 70 mA | ≤ ≈ 0.8 µT | load |
+| VBAT trunk, 70 mA | ≈ 0.4 µT | load |
+| The magnetic tape (2 mm poles), ≈ 21 mm from U61 | < 0.01 µT | negligible: an alternating pole pattern's field dies off within a few pole lengths |
+
+* The load terms together come to roughly 5–10 % of a 20 µT horizontal field: **a few degrees of heading between
+  load states**, and several times that while Wi-Fi transmits. They are straight-wire and current-strip estimates at
+  70 mA (measuring, radio idle), not a field simulation.
+* The datasheet asks to "keep currents higher than 10 mA a few millimeters away from the sensor IC" (§5.2). The
+  battery connector J2 is on the bottom side under this corner, and its leads carry the whole load. The corner was
+  still chosen, because distance from the beam matters more and the only other free spot, near (46.7, 26.5), is
+  6.5 mm from the beam.
+* **The beam is the open question.** With the O1 beam the heading may be poor or useless; with the 1.4301 beam
+  option (not magnetic) it is expected to be much better. A distorted field that holds still is still a reference
+  for yaw; a field that changes when the slider moves is not. The first board measures it
+  ([bring-up B-10a](bringup.md#b-10a-compass-iis2mdc-and-the-steel-beam)).
+* **Not assessed:** steel that moves with the board (the dome of SW50, 3.2 mm from U61's courtyard, the screws, the
+  cell's tabs). It is fixed against the sensor, so its permanent field ends up in the calibration's offset; what it
+  does by bending the field is not corrected.
+
+**Board.** U61 at (23.5, 31.2), rotation 0, top side: the free corner of the top band, 1.25 mm right of the antenna
+keep-out (x ≤ 21) and 3.2 mm left of SW50's courtyard. Courtyard x 22.25…24.75, y 29.95…32.45.
+
+| Part | x, y, rot | Where |
+|---|---|---|
+| U61 IIS2MDC | 23.5, 31.2, 0 | |
+| C63 220 nF (C1) | 23.5, 29.4, 0 | under pins 5 and 6, 1.04 mm centre to centre |
+| C64 100 nF (Vdd) | 25.3, 31.2, 90 | beside pin 9 |
+| C65 10 µF (Vdd) | 26.3, 31.2, 90 | beside C64 |
+| C66 100 nF (Vdd_IO) | 25.1, 32.95, 180 | above pin 10 |
+
+* **C1 loop, pre-routed** (`layout.py` `preroute_compass`, locked): pin 5 → C63 and pin 6 (GND) → C63 on F.Cu,
+  0.25 mm wide, 1.1 mm each, about 2 mΩ. The datasheet wants C1 "as close as possible to pins 5 and 6 since very
+  high current pulses flow from C1 to pin 5 and 6" (§5). The grid router's first result joined pin 5 and C63 with
+  fifteen 0.12 mm segments in a zigzag.
+* **No copper under the sensor on its own layer** (`add_imu_keepout(bb, "U61")`, rule area `U61_NO_COPPER_UNDER`):
+  no track, via or pour on F.Cu inside the pad ring, x 23.12…23.88, y 30.83…31.58. The same rule as U60's, with the
+  same caveat about its source (§7.15). Three vias sit inside the courtyard but outside the pad ring: GND
+  (24.05, 32.5), I2C_SCL (22.33, 31.85) and I2C_SDA (22.62, 30.05). On In2, BTN_HOLD_N passes under the part and
+  BOOT_N close by: lines that carry microamps through their pull-ups.
+* **Re-route:** as in §7.15, `layout.py --rework --rework-from <the committed board> --no-freerouting`, then
+  `layout.py --finish`. Copper that differs from the committed board, 16 nets:
+
+| Net | Length mm, before → now | Vias | Why |
+|---|---|---|---|
+| COMPASS_C1 | 0 → 1.1 | 0 → 0 | new, pre-routed |
+| +3V3 | 208.7 → 222.7 | 15 → 16 | U61, C64–C66 |
+| GND | 359.8 → 366.5 | 192 → 189 | U61, C63–C66 |
+| I2C_SCL | 75.0 → 98.0 | 10 → 11 | U61 added to the bus |
+| I2C_SDA | 85.8 → 106.6 | 11 → 15 | U61 added to the bus |
+| IMU_INT2 | 51.0 → 33.2 | 6 → 6 | re-routed with the bus |
+| BOOT_N | 63.8 → 59.5 | 11 → 9 | displaced by the new copper |
+| BTN_HOLD_N | 82.5 → 83.3 | 9 → 9 | displaced |
+| BTN_MODE_N | 112.9 → 113.0 | 17 → 17 | displaced |
+| BTN_ZERO_N | 64.2 → 68.2 | 10 → 12 | displaced |
+| BUZZ | 62.9 → 54.7 | 11 → 11 | displaced |
+| CAP_TX1 | 33.9 → 29.6 | 5 → 3 | displaced |
+| CHG_TSMR | 44.4 → 42.2 | 4 → 6 | displaced |
+| FG_ALRT_N | 59.7 → 64.6 | 4 → 9 | displaced |
+| MCU_EN | 17.4 → 17.8 | 3 → 3 | displaced |
+| RGB_DIN | 39.8 → 43.4 | 3 → 4 | displaced |
+
+  Vias in all 534 → 543. USB_DP / USB_DM, VBUS, VBAT, VBAT_RAW, VSYS, CAP_RX and CAP_LP1 are as on the committed
+  board. The I2C bus is now about 100 mm a line with four devices and the 2.2 k pull-ups; its capacitance was not
+  re-calculated (TVP: rise time at 400 kHz).
+
+**Crosstalk scan after** (same config as §7.14). ANALOG victims (1 mV budget): CAP_LP1 worst **0.88 mV** (BTN_MODE_N,
+unchanged), then BTN_ZERO_N 0.74 mV (new: 2.5 mm at 0.27 mm on F.Cu) and BOOT_N 0.66 mV. **USB got better by one
+pair**: over sicalc's 10 mV budget 4 → 3. The pair on itself 51 mV as before and IMU_INT1 → D− 19.4 mV (13.8 mm at
+0.24 mm on B.Cu) as in §7.15; **I2C_SCL → D+ 27.8 mV is gone**. Now under the budget beside the pair: IMU_INT2 → D+
+8.4 mV and I2C_SDA → D+ 6.8 mV. Terminated-line upper bounds, as before; the GND guard or re-route of that part of
+the pair is still the open USB item (§7.9).
+
+**Firmware** ([firmware §12.2](firmware.md)): a driver (`components/power/compass.c`: low-power mode at 10 Hz with
+offset cancellation, power-down before deep sleep), a compass term in the orientation filter
+(`components/measure/orient.c`), a hard-iron calibration kept in NVS (`bu compass cal`), and the bring-up check
+`bu compass`. The filter uses the compass only while the field looks like the calibrated one (its size and its dip);
+otherwise it marks the field as disturbed and yaw runs on the gyroscope alone, as before. The register addresses and
+values come from ST's driver sources (`iis2mdc_reg.h`), not from the datasheet's register map. The app slot is now
+3 % free.
+
+**To verify on the first board (TVP):** the WHO_AM_I value and every register setting; the axis map; the two
+currents at 3.3 V (1.5 µA asleep, 50 µA awake); the heading against the slider position and the tool's attitude
+with the O1 beam, and with a 1.4301 beam if one is made; the heading against the load state (backlight, Wi-Fi,
+charging); whether the calibration is accepted at all next to the beam; every threshold in the filter; the I2C rise
+time.
+
+**Gates (2026-11-10, KiCad 10.0.8, WSL):** `build.py` wiring check OK, ERC as before (2 waived TPS22917 pin_to_pin,
+scale clean); `check_contract.py` OK; netlist against the previous one: 14 differences, all at U61 and C63–C66
+(components 130 → 135, nets 99 → 104); DRC + schematic parity **0 errors, 0 unconnected, 0 parity** (7
+`lib_footprint_mismatch` warnings, the intended local overrides); `release.py --board slider` PASS, jlcplace 0.2.1
+**107 rows: 0 red, 0 yellow, 107 green** (new entries C2655002: fitted by pad numbers, 12 of 12, rms 0.013 mm, and
+C16772: 2 of 2, rms 0.060 mm); `tools/lcsc_check.py` 49 lines, 0 flagged; `tools/tests` 24 passed; mechanics
+`run_all.sh`: 112 envelopes, 41 tests passed, clash check **0 not clear, 0 FAIL / RISK**; firmware host tests 6 of 6,
+`idf.py build` without warnings. The scale board did not change.

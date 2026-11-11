@@ -16,6 +16,7 @@ live in [nets.py](nets.py). If anything here changes, update `nets.py` and this 
 | Display | 1.14 in 240×135 ST7789 IPS, 13-pin 0.5 mm FPC, white LED backlight. **Landscape**: the 31.0 mm long axis (240 px) along the beam (§2.1, D4) |
 | UI | 3 buttons: ZERO, HOLD/SEND, MODE. RGB status LED, piezo |
 | IMU | **LSM6DSO**, 6-axis: 3-axis accelerometer + 3-axis gyroscope (wake on pickup, auto-off, orientation tracking), I2C **0x6B** (SA0 high). Was a LIS2DW12 accelerometer; the gyroscope was added on 2026-11-10 (§16) |
+| Compass | **IIS2MDC** 3-axis magnetometer, I2C **0x1E** (fixed), polled (no interrupt pin free). A yaw reference for the gyroscope, added on 2026-11-10 (§17). **Best effort**: the steel beam is 11.2 mm away, so the heading is a magnetic heading in a distorted field, not north |
 | Power | 1S LiPo, 501230 class: **Renata ICP501230PS-03** (with protection circuit; 135 mAh typ / 130 min; ≤ 5.4 × 12.5 × 31.5 mm including it; 1C = 135 mA continuous / 2C = 270 mA pulse discharge; 0.5C standard / 1C max charge, CC/CV to 4.2 V). Slim housing, owner decision 2026-11-09: was a 402535, ~500 mAh. On JST-SH 2-pin J2 (board bottom, §2.1; an SHR-02V-S plug crimped on the cell's AWG30 leads). USB-C (USB 2.0 device) charging at **70 mA** (0.52C; firmware `CONFIG_CALIPER_CHARGE_MA`, range ≤ 135 mA = 1C; was 250 mA). On battery (no VBUS) the firmware keeps the cell inside its 2C pulse rating: Wi-Fi TX capped at 10 dBm, and no Wi-Fi below a 3.50 V cell reading (off below 3.40 V) (§3) |
 | Storage | Readings in LittleFS on the module flash; exported as CSV over USB MSC, Wi-Fi or BLE |
 
@@ -73,6 +74,7 @@ is given in the notes.
 | Q1, R10 | AO3401A battery reverse-polarity P-FET, 10 k gate resistor | top | 25.1 / 22.5 | 25.1 / 23.5 | Q1 90: drain pad up | §3. Q1 sits over J2 (bottom); VBAT_RAW runs from J2 pin 1 (23.6, 22.9) down to a via at (23.6, 21.6) and on F.Cu up between Q1's gate and source pads into the drain pad (25.1, 26.04) |
 | BZ50 | PKMCS0909E piezo, 1.9 tall | top | 40.0 | 24.3 | 0 | courtyard x 34.75…45.25, y 19.55…29.05; sound port in the lid at u 48 |
 | U60 | LSM6DSO, LGA-14 2.5 × 3.0, 0.86 tall (was a LIS2DW12, LGA-12 2 × 2; §16) | top | 30.0 | 23.5 | 0 | ≥ 15 mm from L1. Courtyard x 28.21…31.79, y 21.95…25.05. At 0° on the top side the chip axes are the board's: X = +x (along the beam), Y = +y, Z = out of the display face |
+| U61, C63–C66 | IIS2MDC compass, LGA-12 2 × 2, 0.7 tall (§17); C63 220 nF (C1), C64 100 nF + C65 10 µF (Vdd), C66 100 nF (Vdd_IO) | top | 23.5 / 23.5 / 25.3 / 26.3 / 25.1 | 31.2 / 29.4 / 31.2 / 31.2 / 32.95 | U61 0, C63 0, C64 / C65 90, C66 180 | the free corner of the top band: **11.2 mm from the beam's edge** (y 20), 1.25 mm clear of the antenna keep-out (x ≤ 21), 3.2 mm left of SW50's courtyard, over J2's mated plug (bottom side). Courtyard x 22.25…24.75, y 29.95…32.45. C63 directly under pins 5 / 6 (1.04 mm centre to centre), pre-routed. Chip axes: not taken from the datasheet (its Fig. 2 was not readable for that), found on the first board with `bu compass` |
 | U2, U3, L1, U5, U6, C1–C6, C8–C13, R3–R5 | charger / buck-boost / rail-switch cluster | top | 56.0 | 11.0 | | inside x 50.5…61.5, y 2.5…20.5 (not under the glass; ≤ 4.2), except C8 (51.3, 1.55) and C10 (49.75, 5.5), held ≤ 2 mm from U5 and up to 0.95 outside the box. L1 and the U3 switch nodes ≥ 10 mm from U40 and the RX feed |
 | U4, C7 | MAX17048 fuel gauge + its VBAT cap | top | 29.6 / 27.37 | 27.2 / 26.3 | C7 90 | beside J2 (draft: in the cluster above); C7 left of U4's VBAT pins 2/3 |
 | R6–R9 | I2C pull-ups (R6, R7, **2.2 k**) and the CHG_INT_N / FG_ALRT_N pull-ups (R8, R9) | top | 5.1…9.0 | 3.7…5.8 | | below the module, left of the glass (draft: in the cluster) |
@@ -237,7 +239,9 @@ USB-C VBUS ─ ESD/TVS ─ BQ25180 (VIN) ─┬─ SYS → VSYS ─┬─ TPS638
   (≈ 33 µA estimated: ESP32-S3 8 + TPS63802 11 + divider 5.5 + BQ25180 3 + MAX17048 hibernate 3 + LIS2DW12 ~1 +
   2 × TPS22917 off 0.02 + ≈ 2 conversion loss on the 3.3 V-side loads; the LCD and RGB LED are unpowered).
   **Since 2026-11-10 (§16) the target is ≤ 40 µA**: the LSM6DSO's accelerometer in ultra-low-power mode at 12.5 Hz
-  draws 5.5 µA typ where the LIS2DW12 drew ~1 µA, which makes the estimate ≈ 38 µA. The 3 µA
+  draws 5.5 µA typ where the LIS2DW12 drew ~1 µA, which makes the estimate ≈ 38 µA. **With the compass (§17) the
+  target is ≤ 42 µA**: the IIS2MDC idles at 1.5 µA typ (ST DocID030986 Rev 1 Table 5, Idd_PD), which with the
+  conversion loss makes the estimate ≈ 40 µA, and a target equal to the estimate would be no target. The 3 µA
   figures need firmware settings: BQ25180 watchdog and push-button off (else 4 µA, SLUSE99C IQ_BAT), MAX17048
   `VRESET.Dis` = 1 (else 4 µA, 19-6171 IDD0). See docs/architecture.md for the budget and life estimate.
 
@@ -324,7 +328,7 @@ The authoritative copy is `nets.py: MCU_PINS`. The constraints behind it:
 
 | Bus | Devices | Notes |
 |---|---|---|
-| I2C (GPIO13 SDA / GPIO14 SCL, **2.2 k** to +3V3, 400 kHz; §12) | BQ25180 (0x6A), MAX17048 (0x36), LSM6DSO (**0x6B, SA0 high**) | SA0 low would be 0x6A, the BQ25180's address. SA0 is an input without a pull-up by default (DS12140 Table 19), so the strap costs no current |
+| I2C (GPIO13 SDA / GPIO14 SCL, **2.2 k** to +3V3, 400 kHz; §12) | BQ25180 (0x6A), MAX17048 (0x36), LSM6DSO (**0x6B, SA0 high**), IIS2MDC (**0x1E**, fixed; §17) | SA0 low would be 0x6A, the BQ25180's address. SA0 is an input without a pull-up by default (DS12140 Table 19), so the strap costs no current. The IIS2MDC has no address pin and no interrupt line to the ESP32: it is polled |
 | SPI2 (GPIO33 SCK / GPIO34 MOSI / GPIO35 CS / GPIO36 DC / GPIO37 RST) | ST7789 LCD | 40 MHz, write-only. Panel pin order per DM-TFT114-397 §3.1; connector 0.5K-AX-13PWB (13 P, 0.5 mm, bottom contact) |
 | AS5311 SSI (GPIO7 CLK / GPIO8 DO / GPIO9 CSn) | AS5311 | bit-banged or SPI3, ≤1 MHz |
 
@@ -481,7 +485,7 @@ detailed in the section named; this list gives the decision and its reason.
 | D6 | GATT clarifications (magnitudes, upsert, delete, 16 max, id 0, end marker alone, error codes, encrypted SETTINGS write, partial update, field limits, decimals, LOG flags, UUID in the scan response) and **LIVE = 12 bytes** with `u16 active_profile_id` (readers accept 10 or 12); extended to **20 bytes (v3)** for the capture modes on 2026-11-07 (§8) | These were implemented one way in the firmware and guessed in the app; the app could not see a profile chosen on the caliper | §8, caliper_gatt.h, protocol.js |
 | D7 | The app lives in `public/caliper/app/` | the empty `caliper/app/` was removed | §8 |
 | D8 | RT1 (10 k NTC on TS) **populated**, firmware **TS enabled**; IMU_INT1 is push-pull, active-low, latched with **no pull** on the net | Checked in the netlist and the firmware defaults; a pull on a push-pull line would only waste current, and ext1 ANY_LOW needs every wake line active low | §3, §5 |
-| D9 | Sleep target **≤ 35 µA** everywhere (**≤ 40 µA** since 2026-11-10, §16) | the buck-boost's Iq and divider alone exceed the first-draft figure | §3, docs |
+| D9 | Sleep target **≤ 35 µA** everywhere (**≤ 40 µA** since 2026-11-10, §16; **≤ 42 µA** with the compass, §17) | the buck-boost's Iq and divider alone exceed the first-draft figure | §3, docs |
 
 ## 11. As-built reconciliation (2026-11-08, after layout, mechanics and firmware phase 3)
 Designed, not built: nothing below has been fabricated or measured. This records what the routed boards, the
@@ -637,7 +641,8 @@ area. Detail and evidence in docs/electronics.md §7.15. Part data: ST DS12140 R
 
 **What the gyroscope gives, and what it does not.** Roll and pitch (and so "which face is up") are absolute: gravity is
 the reference, and the gyroscope makes them follow a quick turn without waiting for the accelerometer to settle. **Yaw
-(turning about the vertical) is relative and drifts**: there is no magnetometer, so nothing ties it to north. It is
+(turning about the vertical) is relative and drifts**: there is no magnetometer, so nothing ties it to north (one was added the same day, §17:
+a best-effort reference, not north). It is
 good for "turned about a quarter since I zeroed it", not for a heading. Chip axes at rotation 0 on the top side are the
 board's: X = +x (along the beam), Y = +y, Z = out of the display face (TVP on the first board: `bu imu`,
 docs/bringup.md).
@@ -662,3 +667,55 @@ because two pads are unconnected where one was, net members 400 → 402 for the 
 0 red, 0 yellow, 102 green; `tools/tests` 24 passed; mechanics `run_all.sh`: 107 envelopes from the routed board,
 41 tests passed, clash check 0 not clear, 0 FAIL / 0 RISK, 0 BREAK / THIN; firmware: host tests 6 of 6, `idf.py build`
 without warnings (app 0x1a03b0 bytes, 4 % of the slot free). The scale board did not change.
+
+## 17. Compass: IIS2MDC magnetometer (2026-11-10)
+Designed, not built. After the gyroscope (§16) the owner asked for the magnetometer, so that yaw has a reference.
+U61, an **IIS2MDC**, goes on the I2C bus and the always-on +3V3, with four capacitors. Nothing was removed and no
+ESP32 pin changed. It is a **best-effort** reference: the part sits 11.2 mm from a steel beam. Detail and evidence in
+docs/electronics.md §7.16. Part data: ST DocID030986 Rev 1, pages 1–25 of 40, read from a distributor's copy; the
+register map and the package drawing were **not read**.
+
+| # | Change | Why / numbers |
+|---|---|---|
+| M1 | **U61 IIS2MDCTR** (LCSC C2655002), LGA-12 2 × 2 × 0.7 mm, KiCad `Package_LGA:LGA-12_2x2mm_P0.5mm` | 3-axis magnetometer, ±49 gauss, 1.5 mgauss/LSB. JLC extended part, 2 705 in stock at $4.25 on 2026-11-10: **+$4.25 a board** with C63. The pin-compatible LIS2MDL was not checked |
+| M2 | **I2C address 0x1E**, fixed (no address pin). `nets.I2C_ADDR["IIS2MDC"]`; the bus now holds 0x1E, 0x36, 0x6A, 0x6B | the generated `board_pins.h` gains `I2C_ADDR_IIS2MDC` (hash `202d301f8ed3b0f1`). `nets.MCU_PINS` is unchanged, 42 entries |
+| M3 | **INT/DRDY (pin 7) not connected**; the firmware polls at 10 Hz | every ESP32 GPIO is taken (§5). The pin is high impedance by default (Table 14) |
+| M4 | **Straps**: CS (3) to +3V3; the NC pins 2, 11 and 12 have pads and no net | "When using the I2C, CS must be tied high" (datasheet §5); Table 2 calls the NC pins internally not connected |
+| M5 | **Capacitors**: C63 220 nF X7R 0402 (CL05B224KO5NNNC, C16772, basic) from C1 (pin 5) to GND on the new net COMPASS_C1; C64 100 nF + C65 10 µF at Vdd (pin 9); C66 100 nF at Vdd_IO (pin 10) | Fig. 5. C1 feeds the sensor's set / reset pulses: "as close as possible to pins 5 and 6 since very high current pulses flow from C1 to pin 5 and 6", ESR ≤ 200 mΩ |
+| M6 | **Placement** (§2.1): U61 (23.5, 31.2) rot 0, top; C63 (23.5, 29.4); C64 (25.3, 31.2) rot 90; C65 (26.3, 31.2) rot 90; C66 (25.1, 32.95) rot 180 | the free corner of the top band, the farthest from the beam the board offers: 11.2 mm from its edge (y 20), about 21 mm from the tape's centre line, 1.25 mm right of the antenna keep-out (x ≤ 21). A spot near (46.7, 26.5) was rejected: 6.5 mm from the beam |
+| M7 | **Sleep target ≤ 40 → ≤ 42 µA** (estimate ≈ 38 → ≈ 40 µA, §3): the part idles at 1.5 µA typ (Table 5). **Awake +0.05 mA**: low-power mode at 10 Hz with offset cancellation, 50 µA typ (Table 11) | typical figures, not measured. Battery life: docs/architecture.md |
+| M8 | **Rule area `U61_NO_COPPER_UNDER`** (`layout.py` `add_imu_keepout(bb, "U61")`): no track, via or pour on F.Cu inside U61's pad ring, x 23.12…23.88, y 30.83…31.58. The inner layers and B.Cu are not restricted | the same rule as U60's (§16 G7, with the same caveat about its source); it also keeps other nets' top copper from under the sensor |
+| M9 | **Pre-route `preroute_compass`** (`layout.py`, locked): pin 5 → C63 pad 1 and pin 6 → C63 pad 2 on F.Cu, 0.25 mm, 1.1 mm each (about 2 mΩ) | the grid router had joined pin 5 and C63 with fifteen 0.12 mm segments in a zigzag; the datasheet wants this loop short (M5) |
+| M10 | **BOM / CPL**: BOM 47 → 49 lines (46 LCSC codes), 102 → 107 placed parts; CPL rows U61 (23.5, 31.2, top, 0) and C63–C66. New jlcplace entries `jlcplace-db/C2655002.json` (fitted by pad numbers, 12 of 12, rms 0.013 mm, rotation 0, green) and `C16772.json` (2 of 2, rms 0.060 mm, green) | release gate (jlcplace on every CPL). EasyEDA's footprint for C2655002 carries another part's name in its title (LIS2DU12TR); the pads fit |
+| M11 | **Mechanics**: `extract_board_parts.py` height row LGA-12 / IIS2MDC 1.00 mm (0.7 nominal + margin; the maximum was not read). 107 → 112 envelopes | the lid clears all five parts: clash check 0 not clear |
+| M12 | **Firmware** (docs/firmware.md §12.2): `components/power/compass.c`, a compass term in the orientation filter, a calibration stored in NVS, `bu compass` and `bu compass cal`; the I2C scan expects 0x1E, 0x36, 0x6A, 0x6B | host-tested and built, not run on hardware. The register values come from ST's driver sources, not from the datasheet's register map |
+
+**What the compass gives, and what it does not.** It gives the orientation filter a direction that holds still, so
+the relative yaw of §16 stops drifting and a lost yaw comes back. **It does not give north.** The beam (O1 tool
+steel, §2) is soft iron 11.2 mm away: it bends the field at the sensor by an amount that depends on where the slider
+is and how the tool is held, and nobody has measured it; the heading may be off by tens of degrees. The 1.4301 beam
+option is not magnetic. The magnetic tape does not matter (its field is below 0.01 µT a centimetre away). The
+board's own load currents are estimated at a few degrees between load states and several times that during a Wi-Fi
+transmission (calculations, docs/electronics.md §7.16). The firmware checks the field's size and dip, and falls back
+to the gyroscope alone when they are off. The chip's axes against the board are **not known**: the datasheet's
+drawing could not be read for that, and the first board settles it (`bu compass`, docs/bringup.md B-10a).
+
+Re-routed like §16: `layout.py --rework --rework-from <the committed board> --no-freerouting`, then
+`layout.py --finish`. 16 nets' copper differs from the committed board: COMPASS_C1 (new), +3V3, GND, I2C_SCL and
+I2C_SDA at U61 and its capacitors, and BOOT_N, BTN_HOLD_N, BTN_MODE_N, BTN_ZERO_N, BUZZ, CAP_TX1, CHG_TSMR,
+FG_ALRT_N, IMU_INT2, MCU_EN and RGB_DIN, which crossed the corner or were displaced. Vias 534 → 543. USB_DP /
+USB_DM, VBUS, VBAT, VBAT_RAW, VSYS, CAP_RX and CAP_LP1 are untouched. I2C_SCL grew from 75 to 98 mm and I2C_SDA
+from 86 to 107 mm. Three vias sit inside U61's courtyard, outside the pad ring and the M8 rule area: GND (24.05,
+32.5), I2C_SCL (22.33, 31.85), I2C_SDA (22.62, 30.05). hwtools `sicalc xtalk` (`design/xtalk-cap.yaml`): the analog
+victims stay under their 1 mV budget (worst CAP_LP1 ← BTN_MODE_N 0.88 mV, unchanged; new CAP_LP1 ← BTN_ZERO_N
+0.74 mV); the USB lines got **better by one pair, 4 → 3 over sicalc's 10 mV budget**: I2C_SCL → D+ 27.8 mV (§16)
+is gone, the pair on itself and IMU_INT1 → D− 19.4 mV remain. The guard or re-route of that jog is still open (§14).
+
+**Gates (2026-11-10, KiCad 10.0.8, WSL):** `build.py` wiring check OK, ERC as before (2 waived TPS22917 pin_to_pin);
+netlist against the previous one: 14 differences, all at U61 and C63–C66 (components 130 → 135, nets 99 → 104: COMPASS_C1
+and four unconnected pads; net members 402 → 422); `check_contract.py` OK; DRC + schematic parity 0 / 0 / 0
+(7 `lib_footprint_mismatch` warnings); `release.py --board slider` PASS, jlcplace 107 rows, 0 red, 0 yellow,
+107 green; `tools/lcsc_check.py`: 49 BOM lines, 0 flagged; `tools/tests` 24 passed; mechanics `run_all.sh`:
+112 envelopes from the routed board, 41 tests passed, clash check 0 not clear, 0 FAIL / 0 RISK, 0 BREAK / THIN;
+firmware: host tests 6 of 6, `idf.py build` without warnings (app 0x1a1c40 bytes, 3 % of the slot free). The scale
+board did not change.

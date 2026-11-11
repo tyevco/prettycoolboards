@@ -64,7 +64,7 @@ Type `bu help` for the command list.
    | B-6 on, firmware running | bench → J2 | 3.70 V | 150 mA | ≈ 56 mA idle awake (architecture §5) [TVP] |
    | B-7 with USB | real cell on J2, or bench + 12 Ω dummy load | 3.70 V | 600 mA | ≈ 70 mA into the cell / the load |
    | B-14 Wi-Fi scan | bench → J2 | 3.70 V (Wi-Fi refuses below 3.50 V without USB) | 600 mA | Wi-Fi peaks ≈ 0.2–0.3 A from the cell with the 10 dBm TX cap (SPEC §3) [TVP] |
-   | B-15, B-16 sleep / ship | real cell, or bench + 12 Ω load → µA meter (bypass closed until asleep) → J2 | 3.70 V | 600 mA | ≤ 40 µA / ≤ 3 µA |
+   | B-15, B-16 sleep / ship | real cell, or bench + 12 Ω load → µA meter (bypass closed until asleep) → J2 | 3.70 V | 600 mA | ≤ 42 µA / ≤ 3 µA |
 
 2. **Cold start on a bench "battery":** the BQ25180 only powers SYS from BAT alone above VBATPOR = 3.08 / 3.21 /
    3.46 V (min / typ / max, SLUSE99C). Always power up at **3.70 V**, then lower the voltage while it runs; once
@@ -177,8 +177,8 @@ Supply: bench 3.70 V into J2 (150 mA limit) **or** USB alone, not both (B-1 item
 
 | Line | Expected | If not |
 |---|---|---|
-| `PrettyCool Caliper fw …, board rev A (pins ee472a43b6aab9d6), wake: power-on` | the pin hash of `nets.py` | wrong image |
-| `power: BQ25180 ok, MAX17048 ok (0x001x), LSM6DSO ok` | all three ok | B-7.1 |
+| `PrettyCool Caliper fw …, board rev A (pins 202d301f8ed3b0f1), wake: power-on` | the pin hash of `nets.py` | wrong image |
+| `power: BQ25180 ok, MAX17048 ok (0x001x), LSM6DSO ok, IIS2MDC ok` | all four ok | B-7.1 |
 | `mag: AS5311 ok, pos …` or `mag: no valid SSI frame …` | without a magnet the field is out of range: either line is fine here | B-12 |
 | `ui: display up` | | B-8 |
 | `cap: capacitive scale enabled (EXPERIMENTAL), ADC 80645 S/s` | 80 645 S/s | B-13 |
@@ -189,10 +189,11 @@ The USB-Serial-JTAG port goes away; to flash again type `bootloader` on the cons
 
 **Current**, from the bench supply, display on, BLE advertising: ≈ 56 mA [TVP] (architecture §5: module 25,
 AS5311 16, LCD 8, backlight 5, op-amp 1 mA; the LSM6DSO adds 0.3 mA with the gyroscope and the accelerometer
-at 52 Hz in low-power mode, ST AN5192 Table 9, typical at 1.8 V). Above 100 mA: find the hot part (thermal camera / finger) before
-going on.
+at 52 Hz in low-power mode, ST AN5192 Table 9, typical at 1.8 V; the IIS2MDC compass adds 0.05 mA at 10 Hz in
+low-power mode with offset cancellation, ST DocID030986 Table 11, typical). Above 100 mA: find the hot part
+(thermal camera / finger) before going on.
 
-`bu all` now runs the non-interactive checks in one go (B-7, B-10, B-12, B-13, B-14) and prints a summary. On a
+`bu all` now runs the non-interactive checks in one go (B-7, B-10, B-10a, B-12, B-13, B-14) and prints a summary. On a
 bare board without the tape, `mag` fails; everything else should pass.
 
 ## B-7. Power path, I2C, charger, gauge
@@ -200,7 +201,8 @@ bare board without the tape, `mag` fails; everything else should pass.
 A real cell on J2 (polarity checked), or the bench supply at 3.70 V with the 12 Ω / 2 W load across its terminals
 (B-1 item 3); USB attached for the console.
 
-**B-7.1 I2C scan:** `bu i2c` → `PASS i2c: 3 found` (0x36 MAX17048, 0x6A BQ25180, 0x6B LSM6DSO, nothing else).
+**B-7.1 I2C scan:** `bu i2c` → `PASS i2c: 4 found` (0x1E IIS2MDC, 0x36 MAX17048, 0x6A BQ25180, 0x6B LSM6DSO,
+nothing else).
 
 | Result | Meaning |
 |---|---|
@@ -208,6 +210,7 @@ A real cell on J2 (polarity checked), or the bench supply at 3.70 V with the 12 
 | nothing answers | SDA / SCL shorted or open, R6 / R7 (2.2 k) missing, +3V3 not at the pull-ups |
 | every address answers | SDA held low or shorted to SCL |
 | 0x36 missing | U4 unpowered (it sits on VBAT, not +3V3: B-4.2 TP2) or the TDFN pad |
+| 0x1E missing | U61 (the IIS2MDC compass) not soldered, or its supply pins open; the boot log then says `IIS2MDC MISSING`. Everything else works without it: the yaw drifts as it does without a compass (Firmware §12.2), and B-10a cannot be done |
 
 **B-7.2 Rails as the firmware sees them:** `bu rails <mV>` with the meter reading of TP2 in mV (e.g.
 `bu rails 3702`). PASS: charger and gauge present, the gauge's VBAT within **±30 mV** of the meter [TVP: gauge
@@ -310,6 +313,81 @@ only place to change is the mounting table at the top of `components/power/imu.c
   Z must go positive; with the display facing you, tip the top edge toward and away from you and X changes; swing
   the USB end toward and away from you and Y changes. An axis that never moves: U60. The wrong axis or sign: the
   mounting table.
+
+## B-10a. Compass: IIS2MDC and the steel beam
+
+U61 is an IIS2MDC magnetometer (SPEC §17,
+[electronics §7.16](electronics.md#_7-16-compass-iis2mdc-magnetometer-2026-11-10)) at 0x1E on the always-on +3V3.
+Its interrupt pin is not connected: the firmware polls it at 10 Hz. It is not there to find north. It gives the
+orientation filter a direction that holds still, so that the relative yaw stops drifting (Firmware §12.2). It sits
+11.2 mm from the O1 steel beam, which bends the field by an amount nobody has measured. **This step is where the
+beam's effect gets measured**: the numbers at the end decide whether the compass is of any use next to the beam.
+
+Two cautions. The driver's register values come from ST's driver sources, not from the datasheet's register map
+(Firmware §12.2): a FAIL here may be the firmware's mistake and not the board's. And the bench is part of the
+measurement: keep the board well away from steel (the bench frame, tools, the vice), from magnets (the scale's
+magnetic tape included, while the board is bare) and from the bench supply.
+
+* `bu compass` (board flat and still, display up) → WHO_AM_I 0x40, CFG_REG_A in continuous mode, then 8 readings
+  100 ms apart. PASS: at least 4 readings, some axis changing between them, no axis at full scale, and |B| =
+  **10–1000 µT** [TVP: a wide first-board window; the board's own hard iron and the bench are in the number, the
+  Earth's field alone is about 25–65 µT]. The verdict prints X, Y, Z and |B| in µT: the **chip's** axes, as read,
+  before any calibration. The line above the verdict is the filter's; until the calibration below it says
+  `compass not in use`.
+
+| Result | Meaning |
+|---|---|
+| `no answer at 0x1E` | B-7.1 |
+| `WHO_AM_I 0x.. (0x40 expected)` | another part at 0x1E, or the register address / value in the driver is wrong (they are from ST's header) |
+| `CFG_REG_A 0x..: not in continuous mode` | the init failed (boot log: a warning from `compass`), or the part has reset since: reboot and repeat |
+| `only n samples (< 4)` | I2C read errors: B-7.1 |
+| `no axis ever changed` | the part is not converting: in power-down, or the mode bits are not what ST's header says |
+| `X at full scale` (or Y, Z) | a magnet on the part, or a dead axis |
+| `\|B\| outside the window` | below 10 µT: less than anywhere on Earth, so the outputs are not what the driver takes them for; above 1000 µT: a magnet or magnetised steel close by (a screwdriver is enough) |
+
+* **The chip's axes against the board** [TVP]. U61 is on the top side at 0°, which should make them the board's
+  (B-10: +X toward the USB end, +Y toward the buttons, +Z out of the display), but the chip's positive directions
+  are a drawing in the datasheet that has not been checked against the footprint. The board's hard iron is in the
+  raw numbers, so compare readings, not signs: lying flat with the display up, turn the board through a full turn.
+  **X is at its largest with the USB end toward magnetic north** (a hand compass, read away from the board) and
+  **Y with the button edge toward north**; Z barely changes. Turn the board display down: north of the magnetic
+  equator the field points down, so **Z goes up** (it is the more negative of the two with the display up). A wrong
+  axis or sign: the only place to change is the table at the top of `components/power/compass.c` (it may be a
+  mirror, not a rotation).
+* `bu compass cal` → turn the board through every direction for 20 s (`bu compass cal 40` for longer, 5–120 s):
+  each of the six faces up, and a full turn on each. PASS: `PASS compass-cal: … samples, offset X … Y … Z … uT,
+  half span X … Y … Z … uT, field … uT; in use and stored`, with about 10 samples per second, the three half
+  spans within 30 % of their mean and the field (that mean) within 20–75 µT [TVP]. The offsets are then in use
+  and in NVS; a failed run leaves the previous calibration as it was. `FAIL not a sphere of 20-75 uT`: not every
+  direction was covered (repeat, slower), or steel nearby bends the field. `FAIL no samples`: the sampler is not
+  running (`bu imu`: the compass is polled by the IMU's task). Do it **on the bare board first**, then again on
+  the assembled caliper. Next to the beam the 30 % rule may refuse every run [TVP]: that is a result to write
+  down, with the three half spans, not a fault of the board. Only the hard iron is calibrated: what the beam does
+  to the field's direction stays in.
+* `bu compass` again → the filter's line now reads `filter: |B| … uT, dip … deg, plausible; heading … +-… deg
+  (magnetic, measured)`. Expected after a few seconds lying still: |B| near the calibration's field, the dip
+  positive north of the magnetic equator **whichever face is up** and close to the inclination of the place (the
+  second check of the axis signs), `plausible`, and an uncertainty of about 15°. The heading is about 0
+  with the USB end toward magnetic north and rises when the board is turned clockwise seen from above. It is the
+  direction of the field at the part, which next to the beam is not north. `DISTURBED`: |B| is outside 20–75 µT or
+  more than 25 % off the calibration, or the dip is more than 10° off the one learned so far [all TVP]; no heading
+  is taken then. `not measured now` can be the command's own doing (its readings take samples away from the
+  filter, Firmware §14): repeat it.
+
+**What to write down.** There are no limits yet: this is the first measurement of what the beam and the currents
+do to the field, and it decides whether the gate's windows and the 15° a heading is trusted to (Firmware §12.2) are
+right. Assembled caliper, calibrated, on a wooden table away from steel, with the **beam taped down** so that it
+cannot turn. After each change wait 10 s (the heading follows with τ = 3 s) and take `bu compass` twice.
+
+| Record | How | What it tells |
+|---|---|---|
+| the chip's axes against the board | the comparison above, and the sign of the dip | the table in `compass.c` |
+| the calibration, bare board and assembled: offsets, half spans, field, PASS or refused | `bu compass cal` | the board's hard iron, and what the beam does to the sphere |
+| \|B\|, dip and heading with the slider at 0, 75 and 150 mm | slide, wait, `bu compass` (both lines) | the board moves along the beam without turning, so in an even field the three agree: a difference is the beam's doing (or the room's: repeat with the beam pointing another way) |
+| the heading change when the slider moves, and whether the filter says `DISTURBED` on the way | largest minus smallest of the row above | the error the compass would add to the yaw in use |
+| the same with the beam pointing north and east, flat and on edge | as above | soft iron: the beam's effect depends on how it lies in the field |
+| the heading with Wi-Fi off, and connected and busy | `wifi off`, `bu compass`; `wifi on` with the web page open, `bu compass` several times | the field of the load currents: estimated at a few degrees between load states and several times that during a transmission (electronics §7.16), not measured |
+| the charge state with every reading | `bu bq` | the console is USB, so the cable is always in: charging and a full cell are two load states |
 
 ## B-11. Sensor rails (SNS_PWR_EN)
 
@@ -420,14 +498,16 @@ its bypass switch closed** → J2. (A PPK2 in source mode can replace both once 
 2. Once the display goes off, open the bypass and read the current after 10 s. Close the bypass before any wake
    (the boot current would overload the µA range).
 
-**Expected: ≤ 40 µA** (SPEC §3 target; the estimate is ≈ 38 µA: ESP32-S3 8, TPS63802 Iq + divider 16.5, BQ25180 3,
-MAX17048 3, LSM6DSO 5.5, 2 × TPS22917 0.02, conversion loss ≈ 2.2) [TVP]. The LSM6DSO figure is the
+**Expected: ≤ 42 µA** (SPEC §3 target; the estimate is ≈ 40 µA: ESP32-S3 8, TPS63802 Iq + divider 16.5, BQ25180 3,
+MAX17048 3, LSM6DSO 5.5, IIS2MDC 1.5, 2 × TPS22917 0.02, conversion loss ≈ 2.4) [TVP]. The LSM6DSO figure is the
 accelerometer alone at 12.5 Hz in ultra-low-power mode with the gyroscope powered down, typical at VDD 1.8 V
-(AN5192 Table 9); the datasheet has no 3.3 V figure and nothing here is measured.
+(AN5192 Table 9); the datasheet has no 3.3 V figure. The IIS2MDC figure is its power-down current, typical
+(DocID030986 Rev 1 Table 5, Idd_PD). Nothing here is measured.
 
 | Reading | Likely cause |
 |---|---|
-| ≈ 40 µA or a few µA above | the 4 µA defaults: BQ25180 push-button scan or MAX17048 VRESET.Dis (`bu bq`, `bu fg` before sleeping) |
+| ≈ 42 µA or a few µA above | the 4 µA defaults: BQ25180 push-button scan or MAX17048 VRESET.Dis (`bu bq`, `bu fg` before sleeping) |
+| ≈ 90 µA (about 50 µA too many) | the IIS2MDC still in continuous mode: the sleep log shows `IIS2MDC power-down failed`, or the power-down bits are not what ST's driver header says (Firmware §12.2) [TVP] |
 | ≈ 0.3–0.6 mA | the LSM6DSO still in its awake mode with the gyroscope on (0.3 mA; the sleep log then shows `LSM6DSO sleep configuration failed`), or +3V3_SNS / +3V3_UI still on (next row) |
 | ≈ 100–200 µA | a pull-up fighting a held pad (Firmware §12.5) |
 | ≈ 0.3–1 mA | +3V3_SNS or +3V3_UI still on (meter TP5 / TP6: should be 0 V), a pad back-powering a rail |
@@ -457,20 +537,22 @@ i.e. the firmware undid it). Plug USB: the board boots (`wake: power-on`).
 | B-3 | TP1–TP6 resistances, TP20 / 21 / 50 / 51 / 41 | no short, within ±20 % of the first good board |
 | B-4 | current at 3.70 V; TP2, TP3, TP4, TP5, TP6; TP4 at 3.05 V and 4.20 V | 20–50 mA; 3.25–3.37 V; TP5 / TP6 < 0.1 V |
 | B-5 | TP1, TP3, TP4 on USB; enumeration | 4.75–5.25 V; ≈ 4.5 V; 3.25–3.37 V; enumerates |
-| B-6 | boot log, awake current | three chips ok, display up, ADC 80 645 S/s; ≈ 56 mA |
+| B-6 | boot log, awake current | four chips ok, display up, ADC 80 645 S/s; ≈ 56 mA |
 | B-7 | `bu i2c`, `bu rails <mV>`, `bu bq`, `bu fg <mV>`; charge current; full-charge voltage | PASS ×4; 70 mA ±10 %; 4.20 V ±1 % |
 | B-8 | `bu lcd`, `bu lcd flip`; the automatic flip by hand | PASS ×2; turns and turns back |
 | B-9 | `bu btn`, `bu beep`, `bu led` | PASS ×3 |
 | B-10 | `bu imu` in three positions, `bu imu move`, `bu gyro`, `bu gyro turn`; the axis signs | PASS ×4; +Z, +Y, +X up as described |
+| B-10a | `bu compass`, `bu compass cal`; the chip's axes; \|B\|, dip and heading with the slider at 0 / 75 / 150 mm, with Wi-Fi off and on | PASS ×2 (a calibration refused on the assembled caliper is recorded, not failed); the rest is recorded: no limits yet |
 | B-11 | `bu sns off`, `bu sns on` | PASS ×2 |
 | B-12 | `bu mag`, `bu mag move`; the SSI sign | PASS ×2 |
 | B-13 | `bu cap` DC level and floor; TP41; `bu cap scale` | PASS; 1.65 V ±2 % |
 | B-14 | BLE and Wi-Fi RSSI vs the reference, 4 orientations × 2 distances, bare and housed | ≤ 6 dB below on average |
-| B-15 | sleep current; the three wake sources | ≤ 40 µA; all three wake |
+| B-15 | sleep current; the three wake sources | ≤ 42 µA; all three wake |
 | B-16 | ship current; USB wake | < 3 µA; boots |
 
-After closing the housing, `bu all` is the quick regression (expect `SUMMARY 9 PASS, 0 FAIL` with the tape and the
-scale in place, and the caliper lying still: `gyro` is one of the nine).
+After closing the housing, `bu all` is the quick regression (expect `SUMMARY 10 PASS, 0 FAIL` with the tape and the
+scale in place, and the caliper lying still: `gyro` is one of the ten, and so is `compass`, which only checks that
+the part answers and reads a field of 10–1000 µT).
 
 ## Open [TVP] items
 
@@ -484,6 +566,10 @@ scale in place, and the caliper lying still: `gyro` is one of the nine).
 * The IMU: the sign of each axis against the board (B-10), the flip thresholds (≈ 20°, 0.6 s), the rest and
   steady thresholds of the orientation filter, and whether the 62.5 mg wake-up threshold picks the caliper up
   as readily as it did with the LIS2DW12 (the two chips filter the slope differently).
+* The compass (B-10a): the chip's axes against the board; the register values taken from ST's driver sources
+  (WHO_AM_I, the mode bits, the power-down state behind the 1.5 µA); the 10–1000 µT window; whether a calibration
+  passes next to the beam at all; and how far the slider position, the way the tool lies, the charge current and
+  Wi-Fi move the heading. Every threshold of the compass fusion (Firmware §12.2) waits for those numbers.
 * The piezo frequency (4 kHz drive vs the BZ50 resonance), the WS2812 colour order.
 * The BQ25180 behaviour with USB and no cell (the gauge's supply), and the power-on SYS_REG value.
 * The reverse-polarity case with USB present (SPEC §3: not tested).

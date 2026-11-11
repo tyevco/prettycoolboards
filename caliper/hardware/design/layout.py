@@ -321,6 +321,13 @@ def slider_fixed(comps):
         "C7": (27.37, 26.3, 90.0, "F"),
         "BZ50": (40.0, 24.3, 0.0, "F"),
         "U60": (30.0, 23.5, 0.0, "F"),
+        # compass U61 (IIS2MDC, SPEC §17) in the free corner of the top band: 11.2 mm from the beam's edge (y 20) and
+        # 21 mm from the tape's centre line, the farthest the board offers; right of the antenna rule area (x <= 21),
+        # 3.2 mm left of SW50's courtyard. Rotation 0 like U60. C63 (C1, 220n) right under pins 5 / 6; C64 100n and
+        # C65 10u beside Vdd (pin 9), GND pads down toward pin 8; C66 100n above Vdd_IO (pin 10), +3V3 pad left
+        "U61": (23.5, 31.2, 0.0, "F"),
+        "C63": (23.5, 29.4, 0.0, "F"), "C64": (25.3, 31.2, 90.0, "F"), "C65": (26.3, 31.2, 90.0, "F"),
+        "C66": (25.1, 32.95, 180.0, "F"),
         "U30": (31.0, 6.0, 90.0, "B"),
         # C30 (100 nF) beside the VDD pins 18/19 (review 2026-11-08: at SPEC's x 25.5 it was 8.1 mm from them and 14.9 mm
         # of track); still inside the D2 bottom window (x 20..41, y 2.4..9.6). C31 (1 uF) stays at SPEC's 36.5
@@ -854,7 +861,9 @@ def add_imu_keepout(bb, ref="U60", gap=0.2):
     MEMS sensors (TN0018) asks for a keep-out on the top metal layer underneath the sensor, so that nothing under the
     package loads it unevenly once soldered (the wording was taken from a search excerpt of Rev 6 on 2026-11-10; the
     current Rev 8 PDF was not read). The first LSM6DSO rework put the I2C escape vias between the pad rows.
-    The rule area is the rectangle `gap` inside the inner edges of the pads; the inner layers are not restricted."""
+    The rule area is the rectangle `gap` inside the inner edges of the pads; the inner layers are not restricted.
+    Also used for the compass U61 (same LGA family; and no track or via of another net then runs right under the
+    magnetometer on its own layer)."""
     fp = bb.footprints.get(ref)
     if fp is None:
         return None
@@ -1142,6 +1151,7 @@ def generate(board, pours=True):
         print(f"[slider] {guard_stitch(bb)} guard stitching vias")
         add_fiducial_keepouts(bb)
         add_imu_keepout(bb)
+        add_imu_keepout(bb, "U61")
         placer = Placer(bb.board, cfg["inside"], cfg["keepouts"](), power_nets=("GND",))
         for ref in fixed:
             if ref in bb.footprints:
@@ -1178,6 +1188,7 @@ def generate(board, pours=True):
         preroute_vbat_raw(bb)
         preroute_vsys(bb)
         preroute_cap_rx(bb)
+        preroute_compass(bb)
         preroute_cap_lp1(bb)
         print(f"[slider] CAP_LP1 shield: {cap_lp1_shield_keepouts(bb)} rule areas")
         # U1's VBUS pin sits between the D+/D- pins: give it a via so VBUS need not thread the pair
@@ -1533,6 +1544,22 @@ def preroute_cap_rx(bb):
     via = (gpio1[0] + 1.15, gpio1[1])                      # escape_module()'s via
     assert r85[0] < pad_xy(fps["R85"], net="CAP_LP1")[0], "R85's CAP_RX pad must face the escape via (west)"
     add_path(bb.board, [via, r85, c44], pcbnew.B_Cu, net, 0.2)
+
+
+def preroute_compass(bb):
+    """U61 (IIS2MDC) pin 5 -> C63 pad 1 and pin 6 -> C63 pad 2 on F.Cu, 0.25 mm: straight down from the two pins
+    (0.5 mm apart) and the last 0.33 mm at 45 degrees into the 0402's pads. ST DocID030986 section 5: C1 "as close
+    as possible to pins 5 and 6 since very high current pulses flow from C1 to pin 5 and 6". The grid router had
+    joined pin 5 and C63 with fifteen 0.12 mm segments in a zigzag. Each track is 1.14 mm long: 2.2 mOhm."""
+    fps = bb.footprints
+    if not all(r in fps for r in ("U61", "C63")):
+        return
+    u61, c63 = fps["U61"], fps["C63"]
+    for num, short in (("5", "COMPASS_C1"), ("6", "GND")):
+        pin, cap = pad_xy(u61, num=num), pad_xy(c63, net=short)
+        knee = (pin[0], cap[1] + abs(cap[0] - pin[0]))
+        assert pin[1] - knee[1] > 0.4 and abs(cap[0] - pin[0]) < 0.3, f"C63 is not under U61 pin {num}: {pin}, {cap}"
+        add_path(bb.board, [pin, knee, cap], pcbnew.F_Cu, _elnet(bb, short), 0.25)
 
 
 # CAP_LP1: the long run from the RC's first stage at U40 (R84 / C43) to R85 under the module (review 2026-11-08), pre-

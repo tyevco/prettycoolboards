@@ -1,11 +1,12 @@
 /*
  * Host tests for components/store/store.c (the reading log), built against the stubs in
  * test/host/stubs: the LittleFS partition is a directory (STORE_BASE_PATH, set by CMake), NVS is
- * empty, the mutex is a no-op. Covers the v2 segmented layout, wrap-around, the boot scan
- * (reboot = store_test_reboot), clear, capacity changes, damaged slots / headers and the CSV
- * export. POSIX files do not model LittleFS's atomic commits, so power loss itself is not tested
- * here: what is tested is that whatever state a slot or the header is left in, the scan does not
- * accept a record that is not exactly where its seq says.
+ * empty (it keeps u16 values only), the mutex is a no-op. Covers the v2 segmented layout,
+ * wrap-around, the boot scan (reboot = store_test_reboot), clear, capacity changes, damaged slots /
+ * headers, the CSV export, and the compass calibration in NVS. POSIX files do not model LittleFS's
+ * atomic commits, so power loss itself is not tested here: what is tested is that whatever state a
+ * slot or the header is left in, the scan does not accept a record that is not exactly where its
+ * seq says.
  */
 #include <dirent.h>
 #include <stdint.h>
@@ -322,12 +323,54 @@ static void test_store_csv(void)
     wipe();
 }
 
+/* The compass's hard-iron calibration: four u16 keys of 0.1 uT in NVS. */
+static void test_store_compass(void)
+{
+    orient_compass_cal_t c = {{1, 2, 3}, 4};
+    CHECK(!store_compass_load(&c)); /* nothing stored */
+    CHECK(c.off_ut.x == 0 && c.off_ut.y == 0 && c.off_ut.z == 0 && c.ref_ut == 0); /* = not calibrated */
+
+    /* does not fit, or is not one: refused, and nothing written */
+    const orient_compass_cal_t far = {{3300.0f, 0, 0}, 48.0f}, far_neg = {{0, 0, -3276.8f}, 48.0f};
+    const orient_compass_cal_t none = {{1, 2, 3}, 0}, neg = {{1, 2, 3}, -48.0f}, big = {{1, 2, 3}, 6553.6f};
+    const orient_compass_cal_t nan_off = {{0, NAN, 0}, 48.0f}, nan_ref = {{0, 0, 0}, NAN};
+    CHECK_EQ_INT(store_compass_save(&far), ESP_ERR_INVALID_ARG);
+    CHECK_EQ_INT(store_compass_save(&far_neg), ESP_ERR_INVALID_ARG);
+    CHECK_EQ_INT(store_compass_save(&none), ESP_ERR_INVALID_ARG);
+    CHECK_EQ_INT(store_compass_save(&neg), ESP_ERR_INVALID_ARG);
+    CHECK_EQ_INT(store_compass_save(&big), ESP_ERR_INVALID_ARG);
+    CHECK_EQ_INT(store_compass_save(&nan_off), ESP_ERR_INVALID_ARG);
+    CHECK_EQ_INT(store_compass_save(&nan_ref), ESP_ERR_INVALID_ARG);
+    CHECK(!store_compass_load(&c));
+
+    /* a round trip, to 0.1 uT, negative offsets and the ends of the range included */
+    const orient_compass_cal_t in = {{-12.34f, 250.06f, -3276.7f}, 48.27f};
+    CHECK_EQ_INT(store_compass_save(&in), ESP_OK);
+    CHECK(store_compass_load(&c));
+    CHECK_NEAR(c.off_ut.x, -12.3, 1e-3);
+    CHECK_NEAR(c.off_ut.y, 250.1, 1e-3);
+    CHECK_NEAR(c.off_ut.z, -3276.7, 1e-3);
+    CHECK_NEAR(c.ref_ut, 48.3, 1e-3);
+    const orient_compass_cal_t in2 = {{3276.7f, -0.04f, 0.06f}, 6553.5f};
+    CHECK_EQ_INT(store_compass_save(&in2), ESP_OK); /* replaces the first */
+    CHECK(store_compass_load(&c));
+    CHECK_NEAR(c.off_ut.x, 3276.7, 1e-3);
+    CHECK_NEAR(c.off_ut.y, 0.0, 1e-6);
+    CHECK_NEAR(c.off_ut.z, 0.1, 1e-3);
+    CHECK_NEAR(c.ref_ut, 6553.5, 1e-2);
+    /* a refused save leaves the stored one alone */
+    CHECK_EQ_INT(store_compass_save(&none), ESP_ERR_INVALID_ARG);
+    CHECK(store_compass_load(&c));
+    CHECK_NEAR(c.ref_ut, 6553.5, 1e-2);
+}
+
 int main(void)
 {
     printf("store tests (%s)\n", STORE_BASE_PATH);
     RUN(test_store_ring);
     RUN(test_store_damage);
     RUN(test_store_csv);
+    RUN(test_store_compass);
     printf("\n%d checks, %d failures\n", tt_checks, tt_failures);
     return tt_failures ? 1 : 0;
 }

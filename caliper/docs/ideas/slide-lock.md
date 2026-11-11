@@ -43,7 +43,7 @@ location), and the mechanics clash check decides which.
 | Item | Target | Source |
 |---|---|---|
 | Axial hold | ≥ 5–10 N (measuring force 5 N + handling) | brief |
-| Holding power | 0 (deep-sleep budget 40 µA, ≈ 38 µA already used; 35 / 33 when this note was written) | SPEC §3 |
+| Holding power | 0 (deep-sleep budget 42 µA, ≈ 40 µA already used; 35 / 33 when this note was written) | SPEC §3 |
 | Supply | VSYS 3.0–4.4 V (1S LiPo ~500 mAh), +3V3 from the TPS63802 | SPEC §3 |
 | GPIO | **none free** (SPEC §5 / `nets.py` MCU_PINS uses every bonded pin) | SPEC §5 |
 | Jaw shift on engagement | ≪ 10 µm (0.01 mm display), ideally < 2 µm | brief, SPEC §1 |
@@ -201,8 +201,8 @@ defect.
 * The 0.82 Ω limit (244 mA) sits just above the motor's 3.3 V stall current (220 mA). It's a short-circuit and
   jam guard only. End stops are detected by time, not current, because the stall current at the low end-approach
   voltage is under the 200 mA minimum limit.
-* **Sleep budget:** +0.3 µA typ (≤ 1 µA). The SPEC §3 estimate goes from ≈ 38 to ≈ 38.3–39 µA, still ≤ 40 µA (figures updated on 2026-11-10 for the
-  LSM6DSO; they were 33 / 35). That
+* **Sleep budget:** +0.3 µA typ (≤ 1 µA). The SPEC §3 estimate goes from ≈ 40 to ≈ 40.3–41 µA, still ≤ 42 µA (figures updated on 2026-11-10 for the
+  LSM6DSO and the IIS2MDC compass; they were 33 / 35). That
   is tight, so measure it **(TVP)**.
 * **Alternative with GPIO:** DRV8837DSGR (LCSC **C39159**, already in the dial-me-spinner library) needs IN1, IN2
   and nSLEEP. There are no free pins, so that means a **TCA9534PWR** I2C expander (LCSC **C783615**, 0x20–0x27)

@@ -1,6 +1,7 @@
 /*
  * power: charger (BQ25180), fuel gauge (MAX17048), IMU (LSM6DSO: orientation while awake, pickup
- * wake while asleep), backlight / buzzer / RGB LED, die-temperature charge guard, and deep sleep.
+ * wake while asleep), compass (IIS2MDC: a magnetic heading that holds the yaw), backlight / buzzer /
+ * RGB LED, die-temperature charge guard, and deep sleep.
  */
 #pragma once
 
@@ -20,6 +21,7 @@ typedef struct {
     bool charger_ok;
     bool gauge_ok;
     bool imu_ok;
+    bool compass_ok;      /* false also when U61 is not populated */
     uint8_t soc_pct;      /* MAX17048 state of charge */
     uint16_t vcell_mv;
     bool vbus;            /* BQ25180 VIN_PGOOD */
@@ -31,7 +33,7 @@ typedef struct {
     uint8_t stat0, stat1, flag0;
 } power_status_t;
 
-esp_err_t power_init(void);             /* I2C bus + all three chips; individual failures are logged */
+esp_err_t power_init(void);             /* I2C bus + all four chips; individual failures are logged */
 i2c_master_bus_handle_t power_i2c_bus(void);
 void power_poll(power_status_t *out);   /* call at about 1 Hz */
 void power_usb_configured(bool configured); /* ILIM 100 mA before enumeration, 500 mA after */
@@ -44,8 +46,8 @@ void power_get_last(power_status_t *out); /* the last power_poll() result (about
 /* The BQ25180 register values power_init writes, with the live ICHG_CTRL (CHG_DIS from the
  * temperature guard) and TMR_ILIM (USB input limit). Returns the entry count (fills up to max). */
 size_t power_bq_table(power_reg_t *out, size_t max);
-/* Reads n bytes from reg of one of the three chips (I2C_ADDR_BQ25180 / _MAX17048 / _LSM6DSO):
- * ESP_ERR_NOT_FOUND for any other address. Thread-safe (the I2C driver's bus lock). */
+/* Reads n bytes from reg of one of the four chips (I2C_ADDR_BQ25180 / _MAX17048 / _LSM6DSO /
+ * _IIS2MDC): ESP_ERR_NOT_FOUND for any other address. Thread-safe (the I2C driver's bus lock). */
 esp_err_t power_diag_read(uint8_t addr, uint8_t reg, uint8_t *buf, size_t n);
 
 /* ---- IMU / orientation (imu.c) ---- */
@@ -69,6 +71,21 @@ typedef struct {
 } power_imu_sample_t;
 bool power_imu_last(power_imu_sample_t *out); /* false until the first sample */
 
+/* ---- compass (compass.c) ---- */
+/* The IIS2MDC is polled at 10 Hz by the IMU sampler, so there is no compass without power_imu_start().
+ * The last sample as the filter got it (board frame, uT, nothing calibrated out), for the bring-up
+ * commands and the calibration. */
+typedef struct {
+    float ut[3];
+    uint32_t samples; /* samples taken since boot */
+    uint32_t errors;  /* I2C reads that failed */
+} power_compass_sample_t;
+bool power_compass_last(power_compass_sample_t *out); /* false until the first sample */
+/* Hands the hard-iron calibration (orient.h; from store_compass_load() or "bu compass cal") to the
+ * orientation filter, which uses the compass only with one. NULL removes it. Thread-safe; taken by
+ * the sampler at its next sample. */
+void power_compass_cal_set(const orient_compass_cal_t *cal);
+
 /* ---- user-facing outputs ---- */
 esp_err_t power_outputs_init(void);
 void power_backlight(uint8_t pct);      /* 0..100, LEDC PWM on LCD_BL */
@@ -77,8 +94,8 @@ void power_led(uint8_t r, uint8_t g, uint8_t b);
 
 /* ---- sleep ---- */
 /* Puts the IMU into its sleep mode (gyroscope off, accelerometer ultra-low-power 12.5 Hz, wake-up
- * interrupt on INT1), ext1 wake on IMU_INT1 + buttons + CHG_INT_N, gates the sensor rail and enters
- * deep sleep. Does not return. */
+ * interrupt on INT1) and the compass into power-down, ext1 wake on IMU_INT1 + buttons + CHG_INT_N,
+ * gates the sensor rail and enters deep sleep. Does not return. */
 void power_deep_sleep(void) __attribute__((noreturn));
 /* Ship mode (BQ25180 disconnects the battery). Rev A has no button on TS/MR: only USB wakes it.
  * Puts the MAX17048 (which stays on VBAT) into sleep first: in ship mode +3V3 and the I2C pull-ups

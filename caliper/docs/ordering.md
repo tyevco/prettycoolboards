@@ -9,7 +9,7 @@
 
 1. **Buy the display panel first** (§5). Check its drawing against the tail rule. If no panel fits, J50 / `PANEL_PINS`
    change before any PCB order.
-2. **Re-check stock on the day you order:** U30 AS5311 at JLC (75 pcs on 2026-11-09) and the 25 extended parts (§4).
+2. **Re-check stock on the day you order:** U30 AS5311 at JLC (75 pcs on 2026-11-09) and the 26 extended parts (§4).
 3. **Ask JLC about the flatness remark** before you pay (or put it in the order remark and wait for the engineering
    question). The board needs ≤ 0.03 mm bow/twist over y 0–20. Standard IPC class 2 would allow 0.55 mm.
 4. **Order the slider PCBA and the scale PCB** together (§2, §3). Go through the placement preview (§6) **before**
@@ -30,7 +30,7 @@ Upload `caliper/hardware/fab/slider/gerbers.zip`, `prettycool-caliper-slider-BOM
 | Stack-up | **JLC04101H-3313** | Symmetric, and the USB pair impedance is computed on it (§2.1). If the form only offers a stack-up choice with impedance control on, set impedance control to Yes, enter USB_DP/USB_DM as 90 Ω differential, 0.16 mm traces / 0.16 mm gap on L4 referenced to L3. Reaching that form is **[unverified]** |
 | Impedance control | **No** | Full-speed USB (12 Mb/s) does not need it |
 | Surface finish | **ENIG** (1U″) | 0.4 mm-pitch DSBGA, LGA module, bare electrode copper. The ENIG-area surcharge starts above 30 % of the board area and is a few cents at this size |
-| Via hole option | **0.2 mm hole** (not the free 0.3 mm option) | 432 vias have a 0.20 mm hole (394 × 0.40, 38 × 0.45 pad). JLC charges extra below 0.3 mm. Forum reports and a published order dataset say JLC adds a 4-wire Kelvin test for these vias and may send a supplement request after the order **[unverified amount]** |
+| Via hole option | **0.2 mm hole** (not the free 0.3 mm option) | 443 vias have a 0.20 mm hole (408 × 0.40, 35 × 0.45 pad; counted on the 2026-11-10 board). JLC charges extra below 0.3 mm. Forum reports and a published order dataset say JLC adds a 4-wire Kelvin test for these vias and may send a supplement request after the order **[unverified amount]** |
 | Via covering | Tented | Except the electrode finger vias, which are open on the bottom by design (ORDER-NOTES) |
 | Mask / silk | green / white, both sides | |
 | Copper | 1 oz outer, 0.5 oz inner (the stack's own) | |
@@ -39,7 +39,7 @@ Upload `caliper/hardware/fab/slider/gerbers.zip`, `prettycool-caliper-slider-BOM
 | Assembly side | **Both sides** | Bottom: U30, C30, C31 (beam band), C21, C23, R85, C44 (under the module), J2 (the battery connector, since 2026-11-09) |
 | Panel / rails | **Panel by JLCPCB, 1 × 2, edge rails on the long sides** | Standard PCBA needs edge rails, fiducials and ≥ 70 × 70 mm per piece. Remark: "no break-off tabs on the end tabs (x < 0, x > 62): they are clamp faces". Whether a nub left on the long edges fits the body has not been checked **[unverified]**: file any nub flush |
 | Quantity | 5 boards (counted as panels on the form) | |
-| Parts | JLC parts library, all 44 lines | U30 stock: §4 |
+| Parts | JLC parts library, all 46 lines | U30 stock: §4 |
 
 ### 2.1 Stack-up check (2026-11-09)
 
@@ -87,16 +87,16 @@ The parts prices come from JLC's parts pages on 2026-11-09, at the quantity-5 pr
 
 | Line | Estimate | Basis |
 |---|---|---|
-| Parts, 5 boards | **≈ $151** (≈ $30 a board) | 44 BOM lines; the big items: AS5311 $12.64, ESP32-S3-MINI-1 $5.01, LSM6DSO $3.99 (2026-11-10; it replaced the $0.90 LIS2DW12, +$15 for 5 boards), MAX17048 $2.01, BQ25180 $1.85 (each, at 1–9 pcs). Plus JLC's attrition on passives (a few $) |
-| Feeder loading | ≈ $67 | Standard PCBA loads **every** line, basic and extended: 44 lines × $1.53 (the price page's Standard column, "$1.53 Basic/Extend"; $3.07 extended-only is the Economic rate). The page does not say the unit; per unique part is assumed **[unverified]**. 25 of the 44 lines are extended |
+| Parts, 5 boards | **≈ $172** (≈ $34 a board) | 46 BOM lines; the big items: AS5311 $12.64, ESP32-S3-MINI-1 $5.01, IIS2MDC $4.25 (the compass, added 2026-11-10: +$21 for 5 boards), LSM6DSO $3.99 (2026-11-10; it replaced the $0.90 LIS2DW12, +$15 for 5 boards), MAX17048 $2.01, BQ25180 $1.85 (each, at 1–9 pcs). Plus JLC's attrition on passives (a few $) |
+| Feeder loading | ≈ $70 | Standard PCBA loads **every** line, basic and extended: 46 lines × $1.53 (the price page's Standard column, "$1.53 Basic/Extend"; $3.07 extended-only is the Economic rate). The page does not say the unit; per unique part is assumed **[unverified]**. 26 of the 46 lines are extended |
 | Setup, double-sided | $51.12 | Standard |
 | Stencil, double-sided | $16.42 | Standard |
-| Placement | ≈ $3 | 380 joints a board (344 top, 36 bottom) × 5 × $0.0016 |
-| X-ray (BGA, QFN and other leadless parts) | ≈ $8–21 | Charged per X-rayed component ("/pc"): $1.64 for 1–10 pcs, $0.82 for 11–50. Leadless parts on the slider: U2 DSBGA, U3 VSON, U4 TDFN, U10 module, U60 LGA = 5 a board, 25 for 5 boards ≈ $21 if JLC X-rays all of them; ≈ $8 if only one a board **[unverified]** |
-| **PCBA subtotal** | **≈ $295–310** | |
+| Placement | ≈ $3 | 400 joints a board (364 top, 36 bottom) × 5 × $0.0016 |
+| X-ray (BGA, QFN and other leadless parts) | ≈ $8–25 | Charged per X-rayed component ("/pc"): $1.64 for 1–10 pcs, $0.82 for 11–50. Leadless parts on the slider: U2 DSBGA, U3 VSON, U4 TDFN, U10 module, U60 LGA, U61 LGA = 6 a board, 30 for 5 boards ≈ $25 if JLC X-rays all of them; ≈ $8 if only one a board **[unverified]** |
+| **PCBA subtotal** | **≈ $320–340** | |
 | Slider PCB (4L, 1.0 mm, ENIG, 0.2 mm vias, panel) | **$40–130** | **[unverified]** range. The base price, the ENIG upgrade, the small-via / Kelvin-test charge and the panel all depend on JLC's live quote. JLC's 4-layer prices changed in August 2026 |
 | Scale PCB (2L, 0.8 mm, ENIG, 200 × 7) | **$15–40** | **[unverified]** range, live quote |
-| **Before shipping and tax** | **≈ $350–480** | |
+| **Before shipping and tax** | **≈ $375–510** | |
 | Shipping + US import | +$90–170 | Two published 2026 JLC 4-layer PCBA orders to the US paid $36–73 for DHL (duties paid) and $51–98 in duties and taxes ([tscircuit order dataset](https://github.com/tscircuit/jlcpcb-manufacturing-specs/tree/main/datasets/jlcpcb)). This is indicative only |
 
 **AS5311 (U30):** JLC's [part page](https://jlcpcb.com/partdetail/C22459687) showed **75 in stock** on 2026-11-09, at

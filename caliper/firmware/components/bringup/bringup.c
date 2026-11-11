@@ -24,6 +24,7 @@
 #include "sdkconfig.h"
 #include "sensor_cap.h"
 #include "sensor_mag.h"
+#include "store.h"
 #include "ui.h"
 
 #define OUT(...) s_io->out(__VA_ARGS__)
@@ -36,6 +37,11 @@
 #define IMU_WAKE_UP_SRC 0x1B /* §9.23 */
 #define IMU_OUTX_L_G    0x22 /* §9.28: gyroscope X, Y, Z, 16 bits each, low byte first */
 #define IMU_OUTX_L_A    0x28 /* §9.31: accelerometer X, Y, Z */
+/* IIS2MDC registers, ST iis2mdc_reg.h (power/compass.c configures it: continuous mode at 10 Hz,
+ * low-power, offset cancellation, low-pass filter) */
+#define CMP_WHO_AM_I  0x4F
+#define CMP_CFG_REG_A 0x60
+#define CMP_OUTX_L    0x68 /* X, Y, Z, 16 bits each, low byte first */
 /* MAX17048 registers */
 #define FG_VCELL   0x02
 #define FG_SOC     0x04
@@ -368,6 +374,90 @@ static bool t_gyro(int argc, char **argv)
     }
     bool ok = turn ? bu_gyro_turn_eval(&s, d, sizeof(d)) : bu_gyro_rest_eval(&s, d, sizeof(d));
     return verdict(ok, name, d);
+}
+
+/* ---- compass -------------------------------------------------------------------------------- */
+
+/* "bu compass cal [s]": the hard-iron offsets from the span of each axis while the caliper is turned
+ * through every direction (measure/orient.c), handed to the filter and stored in NVS. */
+static bool t_compass_cal(int secs)
+{
+    secs = secs < 5 ? 5 : secs > 120 ? 120 : secs;
+    OUT("turn the caliper through every direction for %d s: each of the six faces up, a full turn on each\n", secs);
+    orient_compass_span_t s = {0};
+    uint32_t seen = 0;
+    for (int t = 0; t < secs * 10; t++) {
+        power_compass_sample_t c;
+        if (power_compass_last(&c) && c.samples != seen) { /* board frame, as the filter gets it */
+            seen = c.samples;
+            orient_compass_span_feed(&s, (orient_vec_t){c.ut[0], c.ut[1], c.ut[2]});
+        }
+        wait_ms(100);
+    }
+    orient_compass_cal_t cal;
+    bool ok = orient_compass_span_cal(&s, &cal);
+    esp_err_t err = ESP_OK;
+    if (ok) {
+        power_compass_cal_set(&cal);
+        err = store_compass_save(&cal);
+    }
+    char d[240];
+    snprintf(d, sizeof(d), "%lu samples, offset X %.1f Y %.1f Z %.1f uT, half span X %.1f Y %.1f Z %.1f uT, field %.1f uT%s",
+             (unsigned long)s.n, (double)cal.off_ut.x, (double)cal.off_ut.y, (double)cal.off_ut.z,
+             (double)(s.max.x - s.min.x) / 2, (double)(s.max.y - s.min.y) / 2, (double)(s.max.z - s.min.z) / 2,
+             (double)cal.ref_ut,
+             !s.have ? "; FAIL no samples (bu compass, bu imu)"
+                     : !ok ? "; FAIL not a sphere of 20-75 uT: every direction, away from steel and magnets"
+                           : err != ESP_OK ? "; FAIL in use but not stored" : "; in use and stored");
+    return verdict(ok && err == ESP_OK, "compass-cal", d);
+}
+
+/* "bu compass": the part answers, runs and reads a field of a believable size. The axes are the
+ * CHIP's (the mapping to the board frame is the table in compass.c), hard iron and all. */
+static bool t_compass(int argc, char **argv)
+{
+    uint8_t who = 0, a = 0;
+    if (power_diag_read(I2C_ADDR_IIS2MDC, CMP_WHO_AM_I, &who, 1) != ESP_OK) {
+        return verdict(false, "compass", "no answer at 0x1E");
+    }
+    char d[240];
+    if (who != BU_COMPASS_WHO_AM_I) {
+        snprintf(d, sizeof(d), "WHO_AM_I 0x%02x (0x%02x expected)", who, BU_COMPASS_WHO_AM_I);
+        return verdict(false, "compass", d);
+    }
+    if (power_diag_read(I2C_ADDR_IIS2MDC, CMP_CFG_REG_A, &a, 1) != ESP_OK || !bu_compass_running(a)) {
+        snprintf(d, sizeof(d), "CFG_REG_A 0x%02x: not in continuous mode", a);
+        return verdict(false, "compass", d);
+    }
+    if (argc > 1 && !strcmp(argv[1], "cal")) {
+        return t_compass_cal(arg_int(argc, argv, 2, 20));
+    }
+    bu_gyro_stats_t s;
+    bu_gyro_stats_init(&s);
+    for (int i = 0; i < 8; i++) {
+        uint8_t b[6];
+        if (power_diag_read(I2C_ADDR_IIS2MDC, CMP_OUTX_L, b, sizeof(b)) == ESP_OK) {
+            int32_t nt[3];
+            for (int k = 0; k < 3; k++) {
+                nt[k] = bu_compass_nt((int16_t)(b[2 * k] | (b[2 * k + 1] << 8)));
+            }
+            bu_gyro_stats_feed(&s, nt);
+        }
+        wait_ms(100); /* ODR 10 Hz */
+    }
+    /* what the firmware makes of it, once calibrated (measure/orient.c). The dip is the check of the
+     * axis signs: positive (the field points down) north of the magnetic equator, whichever face is up. */
+    orient_out_t o;
+    power_orient_get(&o);
+    if (o.field_abs_ut > 0) {
+        OUT("filter: |B| %.1f uT, dip %.0f deg, %s; heading %.0f +-%.0f deg (magnetic, %s)\n", (double)o.field_abs_ut,
+            (double)o.dip_deg, o.field_disturbed ? "DISTURBED" : "plausible", (double)o.heading_deg,
+            (double)o.heading_unc_deg, o.heading_valid ? "measured" : "not measured now");
+    } else {
+        OUT("filter: compass not in use (no calibration: bu compass cal; or no orientation: bu imu)\n");
+    }
+    bool ok = bu_compass_eval(&s, d, sizeof(d));
+    return verdict(ok, "compass", d);
 }
 
 /* ---- sensor rail, AS5311 ------------------------------------------------------------------- */
@@ -705,13 +795,14 @@ static void help(void)
     /* one line per OUT(): the console's out() formats into 256 bytes */
     static const char *const lines[] = {
         "bring-up checks (docs/bringup.md); each ends with PASS or FAIL:",
-        "bu all                    rails i2c bq fg imu gyro mag cap ble, then a summary",
+        "bu all                    rails i2c bq fg imu gyro compass mag cap ble, then a summary",
         "bu rails [vbat_mv]        VBAT (gauge) vs the meter on TP2, VBUS, charge state",
-        "bu i2c                    scan: exactly 0x36 MAX17048, 0x6A BQ25180, 0x6B LSM6DSO",
+        "bu i2c                    scan: exactly 0x1E IIS2MDC, 0x36 MAX17048, 0x6A BQ25180, 0x6B LSM6DSO",
         "bu bq                     BQ25180 status + register dump vs the init table",
         "bu fg [vbat_mv]           MAX17048 version, VCELL, SOC, sleep settings",
         "bu imu | bu imu move [s]  LSM6DSO WHO_AM_I + 1 g at rest | motion + INT1 wake-up",
         "bu gyro | bu gyro turn [s] gyroscope zero-rate level at rest | rate while turning",
+        "bu compass | bu compass cal [s]  IIS2MDC WHO_AM_I + field | hard-iron calibration",
         "bu sns off | on           SNS_PWR_EN: +3V3_SNS / +3V3_UI off and on (then reboot)",
         "bu mag | bu mag move [s]  AS5311 SSI frames + field | count vs SSI while sliding",
         "bu lcd [flip|off]         colour bars, frame, orientation, backlight | turned 180 deg",
@@ -752,6 +843,7 @@ void bringup_cmd(const bu_io_t *io, char *args)
         t_fg(0, none);
         t_imu(0, none);
         t_gyro(0, none);
+        t_compass(0, none);
         t_mag(0, none);
         t_cap(0, none);
         t_ble(2, ble_args);
@@ -762,6 +854,7 @@ void bringup_cmd(const bu_io_t *io, char *args)
     else if (!strcmp(c, "fg")) t_fg(argc, argv);
     else if (!strcmp(c, "imu")) t_imu(argc, argv);
     else if (!strcmp(c, "gyro")) t_gyro(argc, argv);
+    else if (!strcmp(c, "compass")) t_compass(argc, argv);
     else if (!strcmp(c, "sns")) t_sns(argc, argv);
     else if (!strcmp(c, "mag")) t_mag(argc, argv);
     else if (!strcmp(c, "lcd")) t_lcd(argc, argv);
