@@ -5,9 +5,13 @@ Each idea gets a short summary here and a research note beside it.
 
 | Idea | Status | Note |
 |---|---|---|
-| Electronic slide lock | Researched. Needs a rev B housing change | [slide-lock.md](slide-lock.md) |
+| Rev B directions: battery life, dropping Wi-Fi, other chips, jaws, beam, fabrication | Open list, nothing designed | [rev-b.md](rev-b.md) |
+| Electronic slide lock | **Binned** (owner, 2026-11-11). Research kept for reference | [slide-lock.md](slide-lock.md) |
 
-## Electronic slide lock
+## Electronic slide lock (binned)
+
+> **Binned on 2026-11-11** by the owner: not pursued for rev B. The summary below and the research note stay as a
+> record.
 
 **What:** press HOLD and the slider locks itself on the beam. It unlocks on a button press, or when you push the
 slider (the encoder sees it). It holds with zero power, so the lock stays engaged through deep sleep.

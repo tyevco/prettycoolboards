@@ -83,7 +83,8 @@ export default withMermaid(defineConfig({
           text: 'Future ideas',
           items: [
             { text: 'Oh, neat: maybe later', link: '/caliper/docs/ideas/' },
-            { text: 'Electronic slide lock', link: '/caliper/docs/ideas/slide-lock' },
+            { text: 'Rev B ideas', link: '/caliper/docs/ideas/rev-b' },
+            { text: 'Electronic slide lock (binned)', link: '/caliper/docs/ideas/slide-lock' },
           ],
         },
       ],
