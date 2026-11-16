@@ -103,7 +103,7 @@ Reference designators are grouped by sheet: power 1–19, mcu 20s, sensor_mag 30
 | C13 | 1 µF 0402 X5R at U6 VIN (added 2026-11-08) | C52923 (Basic) | U6's own input capacitor, right under its VIN / GND pins (C5, the nearest +3V3 cap, was 12.5 mm away by copper); the same part as C8 at U5 |
 | R6, R7 | **2.2 k** I2C pull-ups to +3V3 (were 4.7 k) | C25879 | 400 kHz: rise time (30→70 %) = 0.847 RC = **205 ns** with the ≈ 110 pF bus estimate (4.7 k gave 438 ns, over fast mode's 300 ns). Sink current at VOL 0.4 V: (3.4 V − 0.4 V) / 2.18 kΩ ≤ **1.4 mA**, inside fast mode's 3 mA and every device's VOL rating: ESP32-S3 0.1 × VDD at 28 mA (S3 datasheet), BQ25180 0.4 V at 5 mA (SLUSE99C), MAX17048 0.4 V at 4 mA (19-6171); the LIS2DW12 is taken as fast-mode compliant (3 mA at 0.4 V; its datasheet could not be re-read here). No sleep cost: the bus idles high and the rail is off in ship mode. Always-on rail: the MAX17048's SCL/SDA have internal pull-downs and read a low bus as "disconnected" |
 | R8, R9 | 10 k pull-ups on CHG_INT_N, FG_ALRT_N | C25744 | Open-drain interrupts |
-| H1–H5, FID1–3 | M2 plated holes (GND), fiducials | – | Footprints only. H1 is the support hole, H2–H5 the tab clamp holes (H5 added to the schematic 2026-11-08). The SMT M2 standoffs on H2–H5 are **fitted by hand**: the only LCSC M2 SMT nuts (SMTSO20x0CTJ, e.g. C2915626 M2 × 2) have a Ø5.6 base and land, which would overhang the 6 mm tab (the hole is 2.5 mm from its outer edge) and exceed SPEC's OD ≤ 4.0 |
+| H1–H5, FID1–3 | M2 plated holes (GND), fiducials | – | Footprints only. H1 is the support hole, H2–H5 the tab clamp holes (H5 added to the schematic 2026-11-08). Since 2026-11-13 H2–H5 use `caliper:Wuerth_WA-SMSI-M2_H2mm_9774020243_Pullback`, Würth's land with the copper pulled back 0.2 mm from the hole (a Ø3.4…5.3 GND top ring round a Ø3.0 NPTH), for the Würth WA-SMSI 9774020243R SMT M2 × 2 spacers, **fitted by hand** (not found at LCSC; §7.17) |
 | TP1–TP7 | VBUS, VBAT, VSYS, +3V3, +3V3_SNS, +3V3_UI, GND | – | Bring-up |
 
 Pinouts: BQ25180 from TI SLUSE99C Table 6-1 (and the YBG0008 land pattern, the footprint is copied from
@@ -485,8 +485,8 @@ copper (B.Mask dropped on the instance pads).
 
 74 × 34 overall: the 62 × 34 body with 1 mm corners plus the two 6 × 14 mm end tabs (x −6…0 and 62…68, y 2.5…16.5),
 with 0.5 mm fillets at the tab roots (a router bit leaves those anyway). H1 (18.75, 24) is the support hole; H2–H5 are
-the tab clamp holes at (−3.5 / 65.5, 5.5 / 14.0), plated GND, Ø4.4 top pads for the SMT standoffs (fitted by hand,
-§3.1). H5 is in the schematic since 2026-11-08 (it was a board-only footprint before).
+the tab clamp holes at (−3.0 / 65.0, 5.5 / 13.5): Ø3.0 NPTH with a Ø3.4…5.3 GND top ring for the Würth SMT spacers
+(fitted by hand, §3.1; moved and re-landed on 2026-11-13, §7.17). H5 is in the schematic since 2026-11-08 (it was a board-only footprint before).
 
 ### 7.5 Routing result (slider)
 
@@ -1171,3 +1171,36 @@ scale clean); `check_contract.py` OK; netlist against the previous one: 14 diffe
 C16772: 2 of 2, rms 0.060 mm); `tools/lcsc_check.py` 49 lines, 0 flagged; `tools/tests` 24 passed; mechanics
 `run_all.sh`: 112 envelopes, 41 tests passed, clash check **0 not clear, 0 FAIL / RISK**; firmware host tests 6 of 6,
 `idf.py build` without warnings. The scale board did not change.
+
+### 7.17 Order readiness: tab spacers and V-cut clearance (2026-11-13)
+
+Designed, not built. Found while staging the JLC order and costing other vendors (SPEC §18).
+
+* **Tab clamp spacers.** The PEM SMTSO-M2-2ET named for H2–H5 does not fit: PEM's catalogue asks for a Ø3.73 hole, a
+  Ø6.2 pad and a board ≥ 1.53 mm thick. It is replaced by the **Würth WA-SMSI 9774020243R** (M2 × 2.0 steel, Ø4.35,
+  pure SMT). H2–H5 now use `caliper:Wuerth_WA-SMSI-M2_H2mm_9774020243_Pullback` (`sheets/power.py`): KiCad's Würth land
+  (a Ø5.3 ring round a Ø3.0 NPTH) with the copper pulled back to Ø3.4, 0.2 mm from the hole (Würth's and KiCad's land
+  runs the copper to the hole edge, which broke the 0.2 mm hole clearance: 4 DRC errors), a solid zone connection (the
+  pours did not reach the ring: 4 unconnected) and a Ø5.5 courtyard (the ESP32 module's courtyard ends 0.15 mm past
+  the left tab root: 1 overlap). The holes move to the tab centre line, **x −3.0 / 65.0, y 5.5 / 13.5** (was −3.5 /
+  65.5, 5.5 / 14.0), so the ring keeps 0.35 mm from every tab edge. Netlist against the previous one: 12 differences,
+  all value / footprint at H2–H5. The KiCad-library route crashed pcbnew when the custom ring pad was built through the
+  API; the footprint is now a text edit of the library file.
+* **V-cut clearance.** JLC panels the slider only with V-cuts, along the long edges (y 0, y 34), and wants copper
+  ≥ 0.4 mm from them. A pour-only rule area `VCUT_NO_POUR` (`layout.py`, `VCUT_POUR_BAND` 0.45 mm, all four layers)
+  pulls the pours back; nearest copper now 0.45 mm (VBAT tracks) at the top edge and 0.50 mm (pours) at the bottom,
+  was 0.35 mm.
+* **Re-route** as in §7.15: `layout.py --rework --rework-from <the committed board> --no-freerouting`, then
+  `layout.py --finish`. Only H2–H5 moved and no net was re-routed: 4 old GND vias inside the new ring were removed and
+  the GND fan-out re-done. 0.20 mm vias 443 → 439.
+* **Release** (`release.py`): the order notes take the 0.20 mm via count from the board and record what the live JLC
+  form does (V-cut-only panel, quantities in panels, tenting upgraded to plugging, a 200-character remark); a
+  vendor-neutral BOM (`…-BOM-generic.csv`, from `design/mpn-map.csv`; refused if a line has no entry) and KiCad's own
+  placement file (`…-pos-generic.csv`) for assemblers other than JLC.
+
+**Gates (2026-11-15, KiCad 10.0.8, WSL):** `build.py` wiring check OK, ERC as before (2 waived TPS22917 pin_to_pin,
+scale clean); `check_contract.py` OK; DRC + schematic parity **0 errors, 0 unconnected, 0 parity** (7
+`lib_footprint_mismatch` warnings, the intended local overrides); `release.py` PASS on both boards, jlcplace 0.2.1
+**107 rows: 0 red, 0 yellow, 107 green**; `tools/tests` 24 passed; mechanics `run_all.sh`: 42 tests passed, clash check
+**0 not clear, 0 FAIL / RISK, 0 BREAK / THIN** (the extractor now recognises the spacer footprint; it had boxed it as a
+generic part, which hit the round tower pockets).

@@ -4,7 +4,9 @@
 usage: python3 caliper/hardware/design/release.py [--board slider|scale] [--refit-jlc] [--force]
 
 Adapted from dial-me-spinner's hardware/design/release.py. Outputs: gerbers.zip (+ gerbers/), drill + map, the
-JLCPCB BOM + CPL (slider only; the scale has no parts), ORDER-NOTES.md, the jlcplace preview checklist
+JLCPCB BOM + CPL (slider only; the scale has no parts), a vendor-neutral BOM (the JLC BOM joined with
+caliper/hardware/design/mpn-map.csv; refused if a line has no entry) and KiCad's own placement file for other
+assemblers, ORDER-NOTES.md, the jlcplace preview checklist
 (jlcplace-checklist.md) and review report (jlcplace-report.html, git-ignored: it draws EasyEDA pad outlines), schematic
 PDF, board PDFs (per side and per copper layer), 3D renders (top/bottom) and the DRC/parity report the gate ran.
 
@@ -30,6 +32,7 @@ run only (and a part with neither record nor correction is not simulated: red un
 from __future__ import annotations
 
 import argparse
+import csv
 import os
 import shutil
 import subprocess
@@ -67,20 +70,27 @@ FAB_NOTES = {
         "0.16/0.16 mm on L4 over L3.",
         "**Flatness callout (SPEC D3):** bow/twist <= 0.03 mm over y 0-20 mm (the beam band, x -6...68 incl. the end "
         "tabs), assembled board on a surface plate, 100 % inspected, reject above. IPC-6012 class 2 (0.75 %) would allow "
-        "0.55 mm: put this in the order remark and agree it before ordering; it may need a quote.",
+        "0.55 mm: put this in the order remark and agree it before ordering; it may need a quote. JLC's PCB remark "
+        "field takes 200 characters; a version that fits: \"Bow/twist <=0.03 mm over the lower 20 mm band incl. end "
+        "tabs, 100% inspected, reject above. Keep the copper pours on all 4 layers. Bottom electrode fingers: bare "
+        "ENIG, no paste.\"",
         "**Copper balance:** copper is poured on all four layers in the beam band (y 0-20) on purpose; do not remove it.",
         "**Vias:** 0.40/0.20 mm signal vias, 0.45-0.50/0.20-0.25 mm GND/power vias; tented on **both** sides "
         "(no via opening in either mask gerber). The exceptions are the 64 electrode finger vias and the RX feed via: "
-        "they sit inside the bottom electrode mask apertures, so they are open on the bottom and tented on top (no "
-        "plugging needed; epoxy-filled + capped is acceptable if JLC prefers). **Order option: the 0.2 mm via hole** "
-        "(432 vias have a 0.20 mm drill): JLC charges extra below 0.3 mm and is reported to add a 4-wire Kelvin test "
-        "(caliper/docs/ordering.md §2).",
+        "they sit inside the bottom electrode mask apertures, so they are open on the bottom and tented on top. **Order "
+        "option: the 0.2 mm via hole** ({vias_020} vias have a 0.20 mm drill): JLC's form (2026-11-10) then adds a "
+        "4-wire Kelvin test and FR4 Tg155, and offers no tented option: it upgrades tenting to **plugged** (solder-mask "
+        "filled), and JLC's rule is that plugged vias must not sit in a mask opening, which the electrode vias do. "
+        "Take **Epoxy Filled & Capped** (flat copper over every via, fine in a mask opening), or have JLC confirm in "
+        "writing that the electrode-area vias stay unplugged (caliper/docs/ordering.md §2).",
         "**Bottom side, beam band (y 0-20):** only U30 (AS5311) and C30/C31 are assembled there (<= 1.30 mm). The E40 "
         "electrode copper is bare (mask open per finger, no paste, no part).",
         "**Assembly: Standard PCBA, both sides** (Economic cannot build it: one side only, 0.5 mm minimum BGA pitch "
         "against U2's 0.4 mm DSBGA, standard stack-ups only). Standard needs edge rails, fiducials and >= 70 x 70 mm: "
-        "order it panelised by JLCPCB (1 x 2, rails on the long sides) with no break-off tabs on the end tabs "
-        "(x < 0, x > 62: clamp faces). Top = everything else; bottom = U30, C30, C31 (beam band) and C21, C23, R85, C44 "
+        "order it panelised by JLCPCB: the form offers **V-cut only**, 1 x 2 with 5 mm rails on the long sides (74 x 78 "
+        "mm; without rails it is under the 70 x 70 minimum). The V-cuts run along the long edges (y 0 and y 34): copper "
+        "and pours stay >= 0.45 mm from them (JLC asks >= 0.4); the end tabs (x < 0, x > 62: clamp faces) are not cut. "
+        "The PCB and PCBA quantities count **panels** (5 panels = 10 boards). Top = everything else; bottom = U30, C30, C31 (beam band) and C21, C23, R85, C44 "
         "(0402, under the module: its 3V3 decoupling and the ADC input's RC filter, upper band) and J2 (the battery's "
         "JST-SH receptacle, upper band, mouth toward the top edge; on the bottom since 2026-11-09 for the slim housing, "
         "SPEC 15); nothing else is placed on the bottom (the 19 test pads are bare). If two-sided assembly is not "
@@ -88,9 +98,9 @@ FAB_NOTES = {
         "**AS5311 supply:** U30 AS5311-ATST (LCSC C22459687): 80 pcs at LCSC on 2026-11-07, 75 in JLC's parts "
         "library on 2026-11-09 (USD 12.64 at 1-9). Check stock when ordering; if it is gone, order the board with U30 as DNP and consign/hand-fit the part (Mouser/DigiKey stock "
         "it as AS5311-ATST / AS5311-ATSU).",
-        "**SMT M2 standoffs on H2-H5 (tab clamp holes, SPEC D3):** not in this BOM: fitted by hand (reflow or iron) on "
-        "the top pads (PEM SMTSO-M2-2ET class, 2.0 mm tall, OD <= 4.0). The LCSC M2 SMT nuts (SMTSO20x0CTJ, e.g. "
-        "C2915626) have a 5.6 mm base that overhangs the 6 mm tabs.",
+        "**SMT M2 spacers on H2-H5 (tab clamp holes, SPEC D3):** not in this BOM: 4 x Wuerth WA-SMSI 9774020243R "
+        "(M2 x 2.0, steel, Ø4.35; not found at LCSC; DigiKey / Mouser / RS), fitted by hand (paste + hot air) on the "
+        "Ø3.4-5.3 top rings round the Ø3.0 NPTH. A US assembler can place them from tape.",
         "**Not on the PCBA:** the LCD panel (plugs into J50 by hand), the LiPo (J2), the magnetic tape and the scale "
         "board.",
     ],
@@ -213,9 +223,50 @@ def order_notes(board, pcb, net, path, review_only, jlc_lines, gate_line):
             f.write(f"* Board-only parts (no BOM): {', '.join(board_only)}\n")
         for ln in jlc_lines:
             f.write(ln + "\n")
+        vias_020 = sum(1 for t in b.GetTracks()
+                       if t.Type() == pcbnew.PCB_VIA_T and t.GetDrillValue() <= pcbnew.FromMM(0.2) + 100)
         for note in FAB_NOTES.get(board, []):
-            f.write(f"* {note}\n")
+            f.write(f"* {note.replace('{vias_020}', str(vias_020))}\n")
     return path
+
+
+MPN_MAP = os.path.join(HERE, "mpn-map.csv")
+# parts the JLC BOM leaves out on purpose but another assembler can buy and place
+GENERIC_EXTRA = [
+    {"Designator": "H2,H3,H4,H5", "Qty": 4, "Value": "SMT M2 x 2.0 steel spacer",
+     "Footprint": "Wuerth_WA-SMSI-M2_H2mm_9774020243_Pullback", "Side": "top", "Manufacturer": "Wurth Elektronik",
+     "MPN": "9774020243R", "DigiKey": "", "Mouser": "", "LCSC": "",
+     "Note": "not at LCSC, hand-fitted at JLC; on tape with a polyimide pick-up label; centred on the H2-H5 holes"},
+]
+
+
+def generic_bom(out, proj):
+    """Vendor-neutral BOM for assemblers other than JLC: the JLC BOM joined with mpn-map.csv (LCSC code ->
+    manufacturer part, DigiKey / Mouser numbers), plus GENERIC_EXTRA. Refuses if a BOM line has no map entry."""
+    with open(MPN_MAP, encoding="utf-8") as f:
+        mp = {r["LCSC"]: r for r in csv.DictReader(ln for ln in f if not ln.startswith("#"))}
+    with open(os.path.join(out, f"{proj}-CPL-JLCPCB.csv"), encoding="utf-8") as f:
+        side = {r["Designator"]: r["Layer"].lower() for r in csv.DictReader(f)}
+    rows, missing = [], []
+    with open(os.path.join(out, f"{proj}-BOM-JLCPCB.csv"), encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            m = mp.get(r["LCSC Part #"])
+            if m is None:
+                missing.append(f"{r['Designator']} ({r['LCSC Part #'] or 'no LCSC code'})")
+                continue
+            refs = r["Designator"].split(",")
+            rows.append({"Designator": r["Designator"], "Qty": r["Qty"], "Value": r["Comment"],
+                         "Footprint": r["Footprint"], "Side": "/".join(sorted({side.get(x, "?") for x in refs})),
+                         "Manufacturer": m["Manufacturer"], "MPN": m["MPN"], "DigiKey": m["DigiKey"],
+                         "Mouser": m["Mouser"], "LCSC": r["LCSC Part #"], "Note": m["Note"]})
+    if missing:
+        raise SystemExit(f"generic BOM: no mpn-map.csv entry for {', '.join(missing)}; add them to {MPN_MAP}")
+    path = os.path.join(out, f"{proj}-BOM-generic.csv")
+    with open(path, "w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, list(rows[0]), lineterminator="\n")
+        w.writeheader()
+        w.writerows(rows + GENERIC_EXTRA)
+    return path, len(rows) + len(GENERIC_EXTRA)
 
 
 def jlc_gate(board, pcb, out, tmp, proj, force, refit):
@@ -308,6 +359,13 @@ def release(board, force=False, refit=False):
                     "Fix the red rows (see jlcplace-report.html) and release again.\n")
         raise
     review_only = review_only or not jlc_ok
+    if board == "slider":
+        gpath, n = generic_bom(out, proj)
+        fab.pos_csv(pcb, os.path.join(out, f"{proj}-pos-generic.csv"))
+        jlc_lines = list(jlc_lines) + [
+            f"* **Other assemblers:** `{os.path.basename(gpath)}` ({n} lines: manufacturer parts, DigiKey / Mouser "
+            f"numbers, substitutes noted) and `{proj}-pos-generic.csv` (KiCad's placement file: library-zero "
+            "rotations, not JLC's)."]
     order_notes(board, pcb, net, os.path.join(out, "ORDER-NOTES.md"), review_only, jlc_lines, gate_line)
     if review_only:
         with open(os.path.join(out, "REVIEW-ONLY.txt"), "w") as f:

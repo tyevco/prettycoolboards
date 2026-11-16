@@ -197,6 +197,9 @@ def rect(x0, y0, x1, y1):
     return [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
 
 
+VCUT_POUR_BAND = 0.45   # mm: no pour this close to the long (V-cut) edges; JLC asks >= 0.4
+
+
 def rounded_outline(corners, radii, n=8):
     """Polygon (board mm) through `corners` with each corner filleted by its radius (convex or concave)."""
     out = []
@@ -368,8 +371,9 @@ def slider_fixed(comps):
         "C5": (56.6, 6.35, 0.0, "F"), "C6": (56.6, 4.55, 0.0, "F"),
         "U2": (57.2, 16.4, 0.0, "F"),
         "H1": (18.75, 24.0, 0.0, "F"),
-        "H2": (-3.5, 5.5, 0.0, "F"), "H3": (-3.5, 14.0, 0.0, "F"), "H4": (65.5, 5.5, 0.0, "F"),
-        "H5": (65.5, 14.0, 0.0, "F"),
+        # tab holes on the tab centre line for the Wuerth WA-SMSI land (nets.SLIDER_HOLES, 2026-11-13)
+        "H2": (-3.0, 5.5, 0.0, "F"), "H3": (-3.0, 13.5, 0.0, "F"), "H4": (65.0, 5.5, 0.0, "F"),
+        "H5": (65.0, 13.5, 0.0, "F"),
         # module decoupling on the BOTTOM under its 3V3 pad 3 (0.85, 25.95), either side of that pad's escape via
         # (2.0, 25.95): C21 100n above, C23 10u below, +3V3 pad (1) toward the via. 0402, 0.5 mm tall, in the upper
         # band where the housing floor is 0.75 mm below the board (SPEC §2.1); clear of the antenna rule area (y >= 29.2)
@@ -787,6 +791,12 @@ def build_slider(bb, comps, nets):
     outline = slider_outline_pts()
     bb.polyline(pcbnew.Edge_Cuts, poly_page(outline), 0.1, closed=True)
     bb.edge_band_keepout(poly_page(outline), inset=0.3)
+    # the long edges y 0 and y 34 are the V-cut lines of JLC's 1 x 2 panel (the only panel it offers for this board):
+    # no pour within VCUT_POUR_BAND of them on any layer (JLC: copper >= 0.4 mm from a V-cut). Tracks are already
+    # >= 0.45 away; this pulls back the pours, which the 0.25 edge clearance left at 0.35 (2026-11-13)
+    for y0, y1 in ((-1.0, VCUT_POUR_BAND), (34.0 - VCUT_POUR_BAND, 35.0)):
+        bb.keepout([pcbnew.F_Cu, pcbnew.In1_Cu, pcbnew.In2_Cu, pcbnew.B_Cu], poly_page(rect(-7.0, y0, 69.0, y1)),
+                   tracks=False, vias=False, pads=False, pours=True, name="VCUT_NO_POUR")
     ds = b.GetDesignSettings()
     ds.SetBoardThickness(MM(1.0))
     # SPEC antenna keep-out: all layers, no tracks / vias / pads / pours (parts: the module itself only)

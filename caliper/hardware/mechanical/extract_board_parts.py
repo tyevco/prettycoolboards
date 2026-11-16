@@ -19,7 +19,7 @@ What is written
   parts     one axis-aligned box per footprint with a body: its F.Fab/B.Fab outline
             (courtyard shrunk 0.25 if it has no Fab outline), extruded by a height from
             HEIGHTS.  Plus the items that are not footprints but sit on the board:
-              * the SMT M2 standoff on each tab hole (H2-H5, SPEC D3), 4.0 x 2.0
+              * the SMT M2 spacer on each tab hole (H2-H5, SPEC D3), Ø4.35 x 2.0
               * (H1: nothing on the board since 2026-11-09: its nylon screw comes from the lid, through a
                 tube on the lid underside that the housing model carries)
               * the mated JST-SH plug in front of J2's mouth (side entry)
@@ -70,7 +70,7 @@ HEIGHTS = [
 ]
 
 # Bodies that are not footprints (SPEC 2.1 / D3), added per hole or per part.
-STANDOFF = dict(d=4.0, h=2.0, note="SMT M2 standoff, PEM SMTSO-M2-2ET class (SPEC D3), on the tab's top pad")
+STANDOFF = dict(d=4.35, h=2.0, note="SMT M2 spacer, Wuerth WA-SMSI 9774020243R (SPEC D3, §18), on the tab's top pad")
 JST_PLUG = dict(w=4.4, depth=4.6, h=2.95, note="mated JST SHR-02V-S plug + crimp, verify")
 
 
@@ -182,7 +182,7 @@ def main(argv):
     for fp in sorted(b.GetFootprints(), key=lambda f: f.GetReference()):
         fpname = str(fp.GetFPID().GetLibItemName())
         ref = fp.GetReference()
-        if "MountingHole" in fpname:
+        if "MountingHole" in fpname or "WA-SMSI" in fpname:     # H1; H2-H5 carry the Wuerth spacer land
             hx, hy = wv(fp.GetPosition())
             holes.append(dict(ref=ref, x=round(hx, 3), y=round(hy, 3)))
             if hx < 0 or hx > 62:      # tab hole: SMT standoff on the top pad
@@ -191,6 +191,7 @@ def main(argv):
                                   aabb=[round(hx - r, 3), round(hx + r, 3), round(hy - r, 3), round(hy + r, 3)],
                                   h=STANDOFF["h"], note=STANDOFF["note"]))
             # H1: no board-side body (the lid's tube and the nylon screw are housing parts)
+            continue
         h, note = height_for(fpname)
         if h is None:
             continue

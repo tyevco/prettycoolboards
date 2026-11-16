@@ -1,0 +1,51 @@
+# LCSC code -> manufacturer part and US distributor part numbers for the vendor-neutral BOM (release.py).
+# Researched 2026-11-10/11 (DigiKey product pages; Mouser numbers marked 'not checked' follow Mouser's
+# prefix convention). A SUBSTITUTE row names a part with the same value, rating and package as the LCSC part,
+# for assemblers that buy in the US. No stock or prices here: check them when ordering.
+LCSC,Manufacturer,MPN,DigiKey,Mouser,Note
+C1523,Murata,GRM155R71H102KA01D,490-1303-1-ND,81-GRM155R71H102KA01D,"SUBSTITUTE for FH 0402B102K500NT (Fenghua, not at DigiKey/Mouser): same 1n 50V X7R 10% 0402; Mouser PN not checked"
+C1525,Samsung Electro-Mechanics,CL05B104KO5NNNC,1276-1001-1-ND,187-CL05B104KO5NNNC,exact LCSC part; Mouser PN not checked
+C1545,Samsung Electro-Mechanics,CL05C100JB5NNNC,1276-1139-1-ND,187-CL05C100JB5NNNC,"SUBSTITUTE for FH 0402CG100J500NT (Fenghua, not at DigiKey/Mouser): Samsung CL05C100JB5NNNC, same 10p 50V C0G 5% 0402; Mouser PN not checked"
+C1546,Murata,GRM1555C1H101GA01D,,81-GRM1555C1H101GA01D,"SUBSTITUTE for FH 0402CG101J500NT: Murata GRM1555C1H101GA01D, 100p 50V C0G 2% (tighter) 0402, 0.55 max (bottom side); Mouser PN not checked"
+C4147,YAGEO,RC0402FR-0791KL,,603-RC0402FR-0791KL,"SUBSTITUTE for UNI-ROYAL (not stocked at DigiKey/Mouser): same value, 1%, 1/16W, 0402; Mouser PN not checked"
+C7519,STMicroelectronics,USBLC6-2SC6,497-5235-1-ND,511-USBLC6-2SC6,exact LCSC part; Mouser PN not checked
+C11702,YAGEO,RC0402FR-071KL,311-1.00KLRCT-ND,603-RC0402FR-071KL,"SUBSTITUTE for UNI-ROYAL (not stocked at DigiKey/Mouser): same value, 1%, 1/16W, 0402; Mouser PN not checked"
+C15127,Alpha & Omega Semiconductor,AO3401A,785-1001-1-ND,,exact LCSC part
+C15525,Samsung Electro-Mechanics,CL05A106MQ5NUNC,1276-CL05A106MQ5NUNCCT-ND,187-CL05A106MQ5NUNC,"exact LCSC part; Alt: TDK C1005X5R0J106M050BC (445-8920-1-ND, 0.5 mm); Mouser PN not checked"
+C16772,Samsung Electro-Mechanics,CL05B224KO5NNNC,1276-1176-1-ND,187-CL05B224KO5NNNC,exact LCSC part; Mouser PN not checked
+C17168,YAGEO,RC0402JR-070RL,,603-RC0402JR-070RL,SUBSTITUTE for UNI-ROYAL 0402WGF0000TCE: 0R 0402 jumper; Mouser PN not checked
+C19666,Samsung Electro-Mechanics,CL10A475KO8NNNC,1276-1784-1-ND,187-CL10A475KO8NNNC,exact LCSC part; Mouser PN not checked
+C19702,Samsung Electro-Mechanics,CL10A106KP8NNNC,1276-1192-1-ND,187-CL10A106KP8NNNC,exact LCSC part; Mouser PN not checked
+C20917,Alpha & Omega Semiconductor,AO3400A,785-1000-1-ND,,exact LCSC part
+C22810,YAGEO,RC0603FR-0715RL,,603-RC0603FR-0715RL,"SUBSTITUTE for UNI-ROYAL 0603WAF150JT5E: same value, 1%, 0603; Mouser PN not checked"
+C25076,YAGEO,RC0402FR-07100RL,,603-RC0402FR-07100RL,"SUBSTITUTE for UNI-ROYAL (not stocked at DigiKey/Mouser): same value, 1%, 1/16W, 0402; Mouser PN not checked"
+C25109,YAGEO,RC0402FR-07390RL,,603-RC0402FR-07390RL,"SUBSTITUTE for UNI-ROYAL (not stocked at DigiKey/Mouser): same value, 1%, 1/16W, 0402; Mouser PN not checked"
+C25741,YAGEO,RC0402FR-07100KL,311-100KLRCT-ND,603-RC0402FR-07100KL,"SUBSTITUTE for UNI-ROYAL (not stocked at DigiKey/Mouser): same value, 1%, 1/16W, 0402; Mouser PN not checked"
+C25744,YAGEO,RC0402FR-0710KL,311-10.0KLRCT-ND,603-RC0402FR-0710KL,"SUBSTITUTE for UNI-ROYAL (not stocked at DigiKey/Mouser): same value, 1%, 1/16W, 0402; Mouser PN not checked"
+C25879,YAGEO,RC0402FR-072K2L,,603-RC0402FR-072K2L,"SUBSTITUTE for UNI-ROYAL (not stocked at DigiKey/Mouser): same value, 1%, 1/16W, 0402; Mouser PN not checked"
+C25905,YAGEO,RC0402FR-075K1L,,603-RC0402FR-075K1L,"SUBSTITUTE for UNI-ROYAL (not stocked at DigiKey/Mouser): same value, 1%, 1/16W, 0402; Mouser PN not checked"
+C26082,YAGEO,RC0402FR-0710ML,,603-RC0402FR-0710ML,"SUBSTITUTE for UNI-ROYAL (not stocked at DigiKey/Mouser): same value, 1%, 1/16W, 0402; Mouser PN not checked"
+C51721,YAGEO,RC0402FR-073K9L,,603-RC0402FR-073K9L,"SUBSTITUTE for UNI-ROYAL (not stocked at DigiKey/Mouser): same value, 1%, 1/16W, 0402; Mouser PN not checked"
+C52923,Samsung Electro-Mechanics,CL05A105KA5NQNC,1276-1445-1-ND,187-CL05A105KA5NQNC,exact LCSC part; Alt: TDK C1005X5R1E105K050BC (445-9066-1-ND); Mouser PN not checked
+C59461,Samsung Electro-Mechanics,CL10A226MQ8NRNC,1276-CL10A226MQ8NRNCCT-ND,187-CL10A226MQ8NRNC,"exact LCSC part; US: DigiKey 0 stock; use TDK C1608X5R0J226M080DC (22u 6.3V X5R 20% 0603, DigiKey parametric equivalent) or Mouser exact part if stock is real; Mouser PN not checked"
+C64042,YAGEO,RC0402FR-07511KL,,603-RC0402FR-07511KL,"SUBSTITUTE for UNI-ROYAL (not stocked at DigiKey/Mouser): same value, 1%, 1/16W, 0402; Mouser PN not checked"
+C77131,Murata,NCP15XH103F03RC,490-4801-1-ND,81-NCP15XH103F03RC,exact LCSC part; DigiKey status: Not For New Designs (successor family NCU15XH103F60RC class; check B-value 3380/3435K); Mouser PN not checked
+C96446,Samsung Electro-Mechanics,CL10A106MA8NRNC,1276-1869-1-ND,187-CL10A106MA8NRNC,exact LCSC part; Alt: TDK C1608X5R1E106M080AC (10u 25V X5R 0603); Mouser PN not checked
+C151296,Littelfuse,SMF5.0A,F5748CT-ND,576-SMF5.0A,exact LCSC part; Cheaper same-MPN: SMC Diode Solutions SMF5.0A (unverified); Mouser PN not checked
+C160402,JST,SM02B-SRSS-TB(LF)(SN),455-SM02B-SRSS-TBCT-ND,306-SM02B-SRSSTBLFSN,exact LCSC part; Mouser PN not checked
+C165948,Korean Hroparts (HRO),TYPE-C-31-M-12,,,NOT stocked by DigiKey (DigiKey forum); no US distributor found: consign this line (e.g. from LCSC)
+C277470,YAGEO,CC0805KKX7R8BB225,311-1884-1-ND,603-CC0805KKX7R8BB225,exact LCSC part; Alt if short: Murata GRM21BR71E225KA73K (2.2u 25V X7R 0805); Mouser PN not checked
+C398356,Texas Instruments,TLV9062IDGKR,296-50012-1-ND,595-TLV9062IDGKR,"exact LCSC part; Backup: TLV9062IDGKT, same part on a 250-pc reel; Mouser PN not checked"
+C668312,Murata,DFE201612E-R47M=P2,490-DFE201612E-R47M=P2CT-ND,81-DFE201612E-R47MP2,exact LCSC part; Mouser PN not checked
+C720477,XUNPU (XKB),TS-1088-AR02016,,,"NOT carried by DigiKey (DigiKey forum: only similar, not drop-in); no US distributor found: consign this line (e.g. from LCSC)"
+C910763,Murata,PKMCS0909E4000-R1,490-9647-1-ND,81-PKMCS0909E4000-R1,exact LCSC part; Murata LAST TIME BUY 2027-03-31 (DigiKey); Mouser PN not checked
+C2655002,STMicroelectronics,IIS2MDCTR,497-17728-1-ND,511-IIS2MDCTR,"exact LCSC part; DigiKey main listing 0 stock (24 wk, restock 2027); other snapshot 14.3k; Mouser PN not checked"
+C2655100,STMicroelectronics,LSM6DSOTR,497-18181-1-ND,511-LSM6DSOTR,exact LCSC part; Mouser PN not checked
+C2681320,Texas Instruments,TPS22917DBVR,296-50498-1-ND,595-TPS22917DBVR,"exact LCSC part; Backup: TPS22917DBVT, same die/package on a 250-pc reel; Mouser PN not checked"
+C2682616,Analog Devices / Maxim,MAX17048G+T10,MAX17048G+T10CT-ND,700-MAX17048G+T10,exact LCSC part; Mouser PN not checked
+C2845237,Texas Instruments,TPS63802DLAR,296-TPS63802DLARCT-ND,595-TPS63802DLAR,exact LCSC part; Mouser PN not checked
+C2911931,HDGC,0.5K-AX-13PWB,,,NO US source and NO drop-in found; no US distributor found: consign this line (e.g. from LCSC)
+C3013941,Espressif Systems,ESP32-S3-MINI-1-N4R2,1965-ESP32-S3-MINI-1-N4R2CT-ND,,exact LCSC part; No Mouser listing for this exact MINI variant seen
+C3682423,Texas Instruments,BQ25180YBGR,296-BQ25180YBGRCT-ND,595-BQ25180YBGR,exact LCSC part; Mouser PN not checked
+C22459687,ams OSRAM,AS5311-ATST,4991-AS5311-ATSTCT-ND,985-AS5311-ATST-500,"exact LCSC part; AS5311-ATST-500 = same part on 500-pc reel: DigiKey 117 ($14.07), Mouser ~1.5k (findchips); Mouser PN not checked"
+C52917434,Worldsemi,WS2812B-2020-V6,,,NO DigiKey/Mouser listing; no US distributor found: consign this line (e.g. from LCSC)

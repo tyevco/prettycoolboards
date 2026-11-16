@@ -48,7 +48,8 @@ PLACEHOLDER = [
     ("C31", "B", 35.95, 37.05, 5.75, 6.25, 0.55, "0402 1 uF"),
     _sw("SW50", *P.BUTTONS["ZERO"], "ZERO"), _sw("SW51", *P.BUTTONS["HOLD"], "HOLD"),
     _sw("SW52", *P.BUTTONS["MODE"], "MODE"),
-] + [(f"H{i + 2}_standoff", "T", x - 2, x + 2, y - 2, y + 2, P.STANDOFF_H, "SMT M2 standoff")
+] + [(f"H{i + 2}_standoff", "T", x - P.STANDOFF_OD / 2, x + P.STANDOFF_OD / 2, y - P.STANDOFF_OD / 2,
+    y + P.STANDOFF_OD / 2, P.STANDOFF_H, "SMT M2 spacer")
      for i, (x, y) in enumerate(P.TAB_HOLES)]
 
 
@@ -141,8 +142,9 @@ def board():
     if area2 < 0:
         pts = pts[::-1]
     s = Pos(0, 0, P.BOARD_Z0) * extrude(Polygon(*pts, align=None), P.BOARD_T)
-    for _ref, x, y in holes():
-        s -= Pos(P.BOARD_U0 + x, y, (P.BOARD_Z0 + P.BOARD_Z1) / 2) * Cylinder(P.BOARD_HOLE_D / 2, 2)
+    for ref, x, y in holes():
+        d = P.BOARD_HOLE_D if ref == "H1" else P.TAB_HOLE_D
+        s -= Pos(P.BOARD_U0 + x, y, (P.BOARD_Z0 + P.BOARD_Z1) / 2) * Cylinder(d / 2, 2)
     return s
 
 

@@ -67,10 +67,12 @@ SLIDER_OUTLINE = {
     "flatness_mm": 0.03,                                    # over y 0..20, x -6..68, assembled
 }
 # (ref, x, y, role).  H2-H5 carry SMT M2 standoffs and are the Z datum; H1 is a support (nylon screw).
+# 2026-11-13: the tab holes moved to the tab centre line (x -3.0 / 65.0) and y 13.5 for the Wuerth WA-SMSI land
+# (Ø5.3 pad round a Ø3.0 NPTH): 0.35 mm from every tab edge.  Was (-3.5 / 65.5, 5.5 / 14.0) for a Ø4.4 pad.
 SLIDER_HOLES = [
     ("H1", 18.75, 24.0, "support"),
-    ("H2", -3.5, 5.5, "tab"), ("H3", -3.5, 14.0, "tab"),
-    ("H4", 65.5, 5.5, "tab"), ("H5", 65.5, 14.0, "tab"),
+    ("H2", -3.0, 5.5, "tab"), ("H3", -3.0, 13.5, "tab"),
+    ("H4", 65.0, 5.5, "tab"), ("H5", 65.0, 13.5, "tab"),
 ]
 # Rule areas (x0, y0, x1, y1).
 SLIDER_KEEPOUTS = {

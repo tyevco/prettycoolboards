@@ -23,6 +23,8 @@ Pinouts were checked against the primary datasheets:
     (60 typ); VGS(th) -0.5...-1.3 V; RthJA 125 C/W max steady state. Battery reverse-polarity FET (SPEC §3).
 """
 
+import os
+
 from sheets.parts import C0402, C0603, R0402, cap, res, testpoints
 
 SHEET = ("power", "power.kicad_sch", "Power: USB-C, charger, 3V3, rails")
@@ -98,8 +100,44 @@ SYMBOLS = [
 ]
 
 
+SPACER_FP_NAME = "Wuerth_WA-SMSI-M2_H2mm_9774020243_Pullback"
+SPACER_FP = "caliper:" + SPACER_FP_NAME
+
+
+def spacer_footprint(fpgen, lib_dir):
+    """Wuerth WA-SMSI 9774020243R (SMT M2 x 2.0 steel spacer, Ø4.35) on the tab clamp holes H2-H5: KiCad's
+    Mounting_Wuerth_WA-SMSI-M2_H2mm_9774020243 (Wuerth's land: a Ø5.3 copper ring round a Ø3.0 NPTH, paste in four
+    segments) with three changes, made on the library file's text (building custom pads through the pcbnew API
+    crashes it). (1) The ring starts at Ø3.4, 0.2 mm from the hole, not at its edge: the board's hole clearance, and
+    the copper pull-back fabs want round an NPTH. The spacer's Ø2.8 bore and Ø4.35 foot still land on Ø3.4..4.35 of
+    copper; the ring's three anchor dots (Ø0.642 at r 2.075) lie inside it. (2) Solid zone connection, so the GND
+    pours reach the ring. (3) Courtyard Ø5.5 (0.1 over the ring), not Ø5.8: on the left tab the ESP32 module's
+    courtyard ends 0.15 mm past the tab root."""
+    src = os.path.join(os.environ.get("KICAD10_FOOTPRINT_DIR", "/usr/share/kicad/footprints"), "Mounting_Wuerth.pretty",
+                       "Mounting_Wuerth_WA-SMSI-M2_H2mm_9774020243.kicad_mod")
+    with open(src, encoding="utf-8") as f:
+        t = f.read()
+
+    def swap(a, b, n=1):
+        nonlocal t
+        assert t.count(a) == n, (a, t.count(a))
+        t = t.replace(a, b)
+
+    swap('(footprint "Mounting_Wuerth_WA-SMSI-M2_H2mm_9774020243"', f'(footprint "{SPACER_FP_NAME}"')
+    swap("(end 2.9 0)", "(end 2.75 0)")                                      # courtyard
+    swap("(at 2.075 0)\n\t\t(size 1.15 1.15)", "(at 2.175 0)\n\t\t(size 0.95 0.95)")
+    swap("(center -2.075 0)\n\t\t\t\t(end 0 0)\n\t\t\t\t(width 1.15)",
+         "(center -2.175 0)\n\t\t\t\t(end 0 0)\n\t\t\t\t(width 0.95)")
+    swap('(layers "F.Cu")\n\t)', '(layers "F.Cu")\n\t\t(zone_connect 2)\n\t)', n=3)
+    swap('(layers "F.Cu" "F.Mask")\n', '(layers "F.Cu" "F.Mask")\n\t\t(zone_connect 2)\n')
+    os.makedirs(lib_dir, exist_ok=True)
+    with open(os.path.join(lib_dir, SPACER_FP_NAME + ".kicad_mod"), "w", encoding="utf-8", newline="\n") as f:
+        f.write(t)
+
+
 def footprints(fpgen, lib_dir):
     pcbnew = fpgen.pcbnew
+    spacer_footprint(fpgen, lib_dir)
 
     # ---- BQ25180 YBG0008 (copied from dial-me-spinner base.py, TI SLUSE99C pp. 52-54)
     fp = fpgen.Footprint(
@@ -269,11 +307,13 @@ def build(d):
     res(d, "R9", "10k", "+3V3", "FG_ALRT_N")
 
     d.group("Mounting holes and fiducials",
-            "H1 (18.75, 24) support hole; H2-H5 tab clamp holes (-3.5, 5.5) (-3.5, 14) (65.5, 5.5) (65.5, 14), plated, to\n"
-            "GND (SPEC §2.1). H2-H5 carry an SMT M2 standoff, fitted by hand (no LCSC part fits the 6 mm tab). 3 fiducials.")
-    for i in range(1, 6):
-        d.add(f"H{i}", "Mechanical:MountingHole_Pad", "M2", "MountingHole:MountingHole_2.2mm_M2_Pad_Via",
-              pins={"1": "GND"}, in_bom=False)
+            "H1 (18.75, 24) support hole, plated, to GND. H2-H5 tab clamp holes (-3, 5.5) (-3, 13.5) (65, 5.5) (65, 13.5):\n"
+            "Wuerth WA-SMSI 9774020243R SMT M2 x 2 steel spacers on a GND top pad round a 3.0 NPTH (SPEC §2.1),\n"
+            "fitted by hand (not at LCSC). 3 fiducials.")
+    d.add("H1", "Mechanical:MountingHole_Pad", "M2", "MountingHole:MountingHole_2.2mm_M2_Pad_Via",
+          pins={"1": "GND"}, in_bom=False)
+    for i in range(2, 6):
+        d.add(f"H{i}", "Mechanical:MountingHole_Pad", "9774020243R", SPACER_FP, pins={"1": "GND"}, in_bom=False)
     for i in range(1, 4):
         d.add(f"FID{i}", "Mechanical:Fiducial", "Fiducial", "Fiducial:Fiducial_1mm_Mask2mm", in_bom=False)
 

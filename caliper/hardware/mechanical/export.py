@@ -29,7 +29,10 @@ COLOURS = {"steel": (0.62, 0.64, 0.67), "jaw": (0.25, 0.25, 0.28), "body": (0.16
            "shell": (0.20, 0.45, 0.72), "cover": (0.14, 0.30, 0.50), "cap": (0.92, 0.55, 0.15),
            "brass": (0.80, 0.65, 0.25), "rubber": (0.10, 0.10, 0.10), "pcb": (0.10, 0.45, 0.20),
            "parts": (0.35, 0.35, 0.38), "glass": (0.05, 0.05, 0.08), "battery": (0.70, 0.70, 0.75),
-           "tape": (0.35, 0.20, 0.15), "gfrp": (0.85, 0.82, 0.55)}
+           "tape": (0.35, 0.20, 0.15), "gfrp": (0.85, 0.82, 0.55),
+           "aruco_black": (0.02, 0.02, 0.02), "aruco_white": (0.97, 0.97, 0.97)}
+# ArUco inlays (models.aruco_marker): exported in the host part's print frame, to load as parts of that object
+ARUCO_HOSTS = {"fixed_jaw": "fixed", "slider_body": "moving"}
 
 
 def main(argv=None):
@@ -52,6 +55,12 @@ def main(argv=None):
             path = os.path.join(HERE, "stl", "slider_body_rf_modifier.stl")
             export_stl(mod, path, tolerance=0.01, angular_tolerance=0.1)
             print(f"{'  rf modifier':<15} {os.path.getsize(path) / 1024:7.0f} kB stl   (slicer modifier, unfilled PA)")
+        if name in ARUCO_HOSTS:
+            for c in ("black", "white"):
+                path = os.path.join(HERE, "stl", f"{name}_aruco_{c}.stl")
+                export_stl(M.inlay_pose(name, M.aruco_inlays(ARUCO_HOSTS[name], c)), path, tolerance=0.01,
+                           angular_tolerance=0.1)
+                print(f"{'  aruco ' + c:<15} {os.path.getsize(path) / 1024:7.0f} kB stl   (inlay part, same frame)")
     if not a.no_assembly and not a.only:
         kids = []
         for n, s, c in M.assembly(0.0, with_hardware=True):

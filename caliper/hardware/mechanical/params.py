@@ -123,9 +123,10 @@ BOARD_FLATNESS = 0.03     # SPEC D3 fab note: over y 0..20, x -6..68, every boar
 # Holes (SPEC 2.1 / nets.SLIDER_HOLES): H1 is a support (nylon screw), H2-H5 carry the SMT M2
 # standoffs and are the Z datum.  The mechanics' three upper-band holes of the first model are gone.
 H1 = (18.75, 24.0)
-TAB_HOLES = [(-3.5, 5.5), (-3.5, 14.0), (65.5, 5.5), (65.5, 14.0)]   # H2, H3, H4, H5
+TAB_HOLES = [(-3.0, 5.5), (-3.0, 13.5), (65.0, 5.5), (65.0, 13.5)]   # H2, H3, H4, H5 (2026-11-13: Wuerth land)
 BOARD_HOLES = [H1] + TAB_HOLES
-BOARD_HOLE_D = 2.2
+BOARD_HOLE_D = 2.2       # H1
+TAB_HOLE_D = 3.0         # H2-H5: the Wuerth WA-SMSI land's NPTH
 ANTENNA = (0.15, 29.5, 15.55, 34.0)     # the module's PCB antenna (board x0, y0, x1, y1) as placed: U10 origin
                                         # x 7.85 on the routed board (SPEC 2.1 table: 8.3 -> x 0.6..16.0)
 ANTENNA_KEEPOUT = (0.0, 29.0, 21.0, 34.0)
@@ -135,13 +136,14 @@ H_UNDER_GLASS, H_ELSEWHERE = 2.6, 4.2
 BOTTOM_WINDOW = (20.0, 2.4, 41.0, 9.6)  # bottom parts over y 0..20 only here, <= 1.30 tall (SPEC D2)
 BOTTOM_WINDOW_H = 1.30
 
-# Tab clamps (SPEC D3; review fix b).  An SMT M2 standoff (PEM SMTSO-M2-2ET class, 2.0 tall,
-# OD <= 4.0) is reflowed on each tab hole's top pad.  An M2 x 4 low-head screw from the tower's
+# Tab clamps (SPEC D3; review fix b).  An SMT M2 steel spacer (Wuerth WA-SMSI 9774020243R, 2.0 tall,
+# OD 4.35; 2026-11-13, was PEM SMTSO-M2-2ET, which needs a 3.73 hole, a 6.2 pad and a >= 1.53 mm board)
+# is reflowed on each tab hole's top pad.  An M2 x 4 low-head screw from the tower's
 # front face pulls it up against a 2.2 x 4.0 x 0.3 shim washer that is BEDDED IN EPOXY in the
 # tower pocket while the board lies on 0.15 mm shim foil on the beam (liquid shim): the four
 # clamp faces are then coplanar with the beam face, not with a bridged printed surface.
-STANDOFF_OD, STANDOFF_H = 4.0, 2.0
-STANDOFF_POCKET_D = 4.4
+STANDOFF_OD, STANDOFF_H = 4.35, 2.0
+STANDOFF_POCKET_D = 4.8   # 0.22 per side round the 4.35 spacer
 CLAMP_WASHER_T = 0.30
 EPOXY_GAP = 0.20          # nominal bedding gap (0.05..0.35 with the print / tower-height tolerance)
 CLAMP_CEIL_Z = BOARD_Z1 + STANDOFF_H + CLAMP_WASHER_T + EPOXY_GAP     # 3.65
@@ -528,3 +530,28 @@ if __name__ == "__main__":
     print(f"tab clamp ceiling z   {CLAMP_CEIL_Z:.2f}  (standoff {STANDOFF_H} + washer {CLAMP_WASHER_T} + epoxy {EPOXY_GAP})")
     print(f"housing envelope      {HOUSING_SIZE[0]:.1f} x {HOUSING_SIZE[1]:.1f} x {HOUSING_SIZE[2]:.1f}"
           f"  (roller rim at u {ROLLER_RIM_U:.1f})")
+
+
+# ArUco markers for camera work (2026-11-15, owner request): one on each face of each outside jaw, so a camera sees
+# the jaw opening directly (centre distance = R + 14.0) from the front or from behind. OpenCV DICT_4X4_50: ids 0 / 1 on
+# the fixed / moving jaw's front face, ids 2 / 3 on their back faces (the ids tell the side). 6 x 6 cells of 1.5 (the 4 x 4 code plus its black border) = 9.0 mm, inside a 1.0 white quiet zone: 11.0 square,
+# inlaid ARUCO_DEPTH into the face as two separate bodies (black cells, white rest) for a multi-material print
+# (stl/*_aruco_black.stl / *_aruco_white.stl in the host part's print frame). Bits from OpenCV 5.0
+# (cv2.aruco.getPredefinedDictionary(DICT_4X4_50).generateImageMarker(id, 6)): rows top (+y) to bottom, columns
+# -x to +x as seen from the front (+z), "1" = white, "0" = black; a back marker is laid out mirrored (columns +x to
+# -x) so that it reads the right way round from behind. Rev B (machined) jaws get no pocket: laser-mark them.
+ARUCO_CELL = 1.5
+ARUCO_QZ = 1.0
+ARUCO_DEPTH = 0.4
+ARUCO_BITS = {
+    0: ["000000", "010110", "001010", "000110", "000100", "000000"],
+    1: ["000000", "000000", "011110", "010010", "010100", "000000"],
+    2: ["000000", "000110", "000110", "000100", "011010", "000000"],
+    3: ["000000", "010010", "010010", "001000", "001100", "000000"],
+}
+ARUCO = {   # marker: (id, host jaw, face, centre x (fixed jaw) or u (moving jaw), centre y)
+    "fixed": (0, "fixed", "front", -7.0, -10.5),
+    "moving": (1, "moving", "front", 7.0, -10.5),
+    "fixed_back": (2, "fixed", "back", -7.0, -10.5),
+    "moving_back": (3, "moving", "back", 7.0, -10.5),
+}

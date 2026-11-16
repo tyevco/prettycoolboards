@@ -197,6 +197,9 @@ def fixed_jaw(rev="A"):
         s -= hex_prism(x, y, P.FJ_NUT_TRAP_AF, P.FJ_Z0 - 0.01, P.FJ_Z0 + P.FJ_NUT_TRAP_DEPTH)
     for x, y in P.FJ_DOWELS:
         s -= zcyl(x, y, P.DOWEL_D - (0.05 if rev == "A" else 0.0), P.FJ_Z0 - 1, P.FJ_Z1 + 1)
+    if rev == "A":
+        for which in ("fixed", "fixed_back"):
+            s -= aruco_pocket(which)
     return s
 
 
@@ -320,6 +323,9 @@ def slider_body(rev="A"):
     # jaws
     s += prism(outside_jaw_pts(+1), P.JAW_Z0, P.JAW_Z1)
     s += moving_inside_jaw()
+    if rev == "A":
+        for which in ("moving", "moving_back"):
+            s -= aruco_pocket(which)
     # Outside shape: plan radii at the top corners and a 45 deg bevel round the back face (housing_block); the datum
     # faces (end faces, the tunnel, the clamp faces, the jaws and their roots) stay sharp.
     return s
@@ -559,6 +565,65 @@ def tab_clamp_hardware():
 # ---------------------------------------------------------------------------
 # Registry
 # ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# ArUco markers on the outside jaws, front and back faces (params.ARUCO)
+# ---------------------------------------------------------------------------
+def _aruco_z(which):
+    """(z0, z1) of a marker's inlay: ARUCO_DEPTH into its jaw's front face (fixed z 2.5, moving 2.4) or back face."""
+    _mid, host, face, _x, _y = P.ARUCO[which]
+    if face == "back":
+        z0 = P.FJ_Z0 if host == "fixed" else P.JAW_Z0
+        return z0, z0 + P.ARUCO_DEPTH
+    z1 = P.FJ_Z1 if host == "fixed" else P.JAW_Z1
+    return z1 - P.ARUCO_DEPTH, z1
+
+
+def aruco_marker(which, colour):
+    """The inlay body of one marker in its part's frame: colour "black" (the 0 cells) or "white" (the rest of the
+    11.0 square, quiet zone included). Both fill the pocket aruco_pocket() cuts. A back-face marker is mirrored in x,
+    so it reads the right way round from behind."""
+    mid, _host, face, cx, cy = P.ARUCO[which]
+    z0, z1 = _aruco_z(which)
+    c, n = P.ARUCO_CELL, len(P.ARUCO_BITS[mid])
+    y1 = cy + n * c / 2
+    black = None
+    for r, row in enumerate(P.ARUCO_BITS[mid]):
+        for k, bit in enumerate(row):
+            if bit == "0":
+                xa = cx - n * c / 2 + k * c if face == "front" else cx + n * c / 2 - (k + 1) * c
+                cell = box(xa, xa + c, y1 - (r + 1) * c, y1 - r * c, z0, z1)
+                black = cell if black is None else black + cell
+    if colour == "black":
+        return black
+    h = n * c / 2 + P.ARUCO_QZ
+    return box(cx - h, cx + h, cy - h, cy + h, z0, z1) - black
+
+
+def aruco_pocket(which):
+    mid, _host, face, cx, cy = P.ARUCO[which]
+    z0, z1 = _aruco_z(which)
+    h = len(P.ARUCO_BITS[mid]) * P.ARUCO_CELL / 2 + P.ARUCO_QZ
+    return box(cx - h, cx + h, cy - h, cy + h, z0 - (0.01 if face == "back" else 0), z1 + (0.01 if face == "front" else 0))
+
+
+def aruco_inlays(host, colour):
+    """Every marker inlay of one jaw ("fixed" / "moving") in one colour, as one body (one slicer part)."""
+    out = None
+    for which, (_mid, h, _f, _x, _y) in P.ARUCO.items():
+        if h == host:
+            m = aruco_marker(which, colour)
+            out = m if out is None else out + m
+    return out
+
+
+def inlay_pose(host, solid):
+    """An inlay body in its host part's print frame (the host's orient, then the host's own drop onto z = 0), so the
+    STLs load as parts of one object in the slicer."""
+    rx, ry, rz = PARTS[host].orient or (0, 0, 0)
+    bb = (Rot(rx, ry, rz) * build(host)).bounding_box()
+    return Pos(-bb.min.X, -bb.min.Y, -bb.min.Z) * (Rot(rx, ry, rz) * solid)
+
+
 def _p(name, build, material, process, qty=1, orient=None, notes=""):
     return SimpleNamespace(name=name, build=build, material=material, process=process, qty=qty,
                            orient=orient, notes=notes)
@@ -616,6 +681,7 @@ def slider_group(R=0.0, with_hardware=True):
     out += [(f"front_pad_{i}", T * p, "brass") for i, p in enumerate(front_pads())]
     out += [(n, T * p, "gfrp") for n, p in pushers()]
     out.append(("lock_screw", T * lock_screw(), "cap"))                  # nylon
+    out += [(f"aruco_moving_{c}", T * aruco_inlays("moving", c), f"aruco_{c}") for c in ("black", "white")]
     out += [(f"y_set_screw_u{u:g}", T * p, "cap") for u, p in zip(P.YGIB_PLUNGERS_U, y_set_screws())]
     if with_hardware:
         import board_envelope
@@ -631,7 +697,8 @@ def slider_group(R=0.0, with_hardware=True):
 def fixed_group():
     return [("beam", beam(), "steel"), ("fixed_jaw", fixed_jaw(), "jaw"),
             ("tape", tape(), "tape"), ("scale_pcb", scale_pcb(), "pcb"),
-            ("stop_screw", stop_screw(), "steel")]
+            ("stop_screw", stop_screw(), "steel")] + \
+        [(f"aruco_fixed_{c}", aruco_inlays("fixed", c), f"aruco_{c}") for c in ("black", "white")]
 
 
 def assembly(R=0.0, with_hardware=True):

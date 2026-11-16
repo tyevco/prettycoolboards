@@ -34,6 +34,14 @@ def gerbers(pcb, outdir, layers=4):
     return zpath
 
 
+def pos_csv(pcb, out_csv):
+    """KiCad's own placement file (both sides, mm, from the drill/plot origin like the gerbers, DNP left out). Its
+    rotations follow the footprints' library zero, not JLC's: for assemblers other than JLC."""
+    run("kicad-cli", "pcb", "export", "pos", "--format", "csv", "--units", "mm", "--side", "both",
+        "--use-drill-file-origin", "--exclude-dnp", "-o", out_csv, pcb)
+    return out_csv
+
+
 def jlc_bom(netlist_path, out_csv):
     comps, _ = pcbgen.load_netlist(netlist_path)
     groups: "OrderedDict[tuple, list]" = OrderedDict()

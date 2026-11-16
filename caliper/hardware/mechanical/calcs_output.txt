@@ -94,18 +94,18 @@ screwed only at y 44: a 34 mm cantilever that bent 0.6-1.1 mm in PA-CF and lost 
 
 4. Thermal error (zeroed at T0, read at T0 + dT)
 -------------------------------------------------
-The board is clamped at both end tabs (u 4.5 and 73.5); the AS5311 sits at u 39, exactly midway.  FR4 (E 20 GPa, 34 mm2) is far stiffer
+The board is clamped at both end tabs (u 5 and 73); the AS5311 sits at u 39, exactly midway.  FR4 (E 20 GPa, 34 mm2) is far stiffer
 than the printed towers in shear, so two bounds bracket the AS5311's position relative to the jaw face:
-  A: the board follows the left clamp:  4.5 mm of body + 34.5 mm of FR4
+  A: the board follows the left clamp:  5 mm of body + 34 mm of FR4
   B: the board stays centred between the clamps: 39 mm of body (the midpoint moves with the body)
 Fixed jaw: 5 mm of body from the dowels (x -5) to the face.  The tape is bonded to the beam (follows the steel).
 body     beam      A um/K  B um/K fixed um/K  scale um/K @150 worst 10 K um
-PETG     O1         0.429   2.223      0.095           -0.075          23.9
-PETG     1.4301     0.234   2.028      0.070            0.675          27.7
-PA-CF    O1         0.258   0.741      0.095           -0.075           9.1
-PA-CF    1.4301     0.063   0.546      0.070            0.675          12.9
-6061-T6  O1         0.229   0.491      0.063           -0.075           6.3
-6061-T6  1.4301     0.034   0.296      0.038            0.675          10.1
+PETG     O1         0.455   2.223      0.095           -0.075          23.9
+PETG     1.4301     0.260   2.028      0.070            0.675          27.7
+PA-CF    O1         0.265   0.741      0.095           -0.075           9.1
+PA-CF    1.4301     0.070   0.546      0.070            0.675          12.9
+6061-T6  O1         0.233   0.491      0.063           -0.075           6.3
+6061-T6  1.4301     0.038   0.296      0.038            0.675          10.1
 Hand heat warms the slider 5-10 K within minutes (TVP); re-zero after handling.  The scale term is the classic
 one: a 1.4301 beam reads a steel part short by 0.7 um/K at 150 mm -- O1 matches steel workpieces.
 Bound B is the realistic one for a stiff board in soft towers; the first model's chain (body to a boss at
@@ -119,7 +119,7 @@ Nominal chain (beam front face = 0):
   AS5311 face                          -0.950   A nominal 1.1
   tape face                            -1.250   channel 2.00 deep - shim 0.10 (nominal A) - adhesive 0.05 - tape 0.6
   -> capacitive gap 0.150, magnetic gap 0.300
-Board support (review fix b, SPEC D3): the board hangs from four SMT standoffs on its end tabs (u 4.5 / 73.5, y 5.5 / 14), 3.5-12 mm from the AS5311 and electrode rows, instead of bosses at y >= 24.5.
+Board support (review fix b, SPEC D3): the board hangs from four SMT standoffs on its end tabs (u 5 / 73, y 5.5 / 14), 3.5-12 mm from the AS5311 and electrode rows, instead of bosses at y >= 24.5.
 
 (a) Capacitive gap, open loop (no per-unit work: printed clamp faces, no bedding):
     scale PCB thickness (FR4 0.8 +/-10 %)                +/-0.080  JLC standard; 'tight' option +/-0.05

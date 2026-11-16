@@ -1,0 +1,51 @@
+Designator,Qty,Value,Footprint,Side,Manufacturer,MPN,DigiKey,Mouser,LCSC,Note
+BZ50,1,PKMCS0909E4000-R1,Buzzer_Murata_PKMCS0909E,top,Murata,PKMCS0909E4000-R1,490-9647-1-ND,81-PKMCS0909E4000-R1,C910763,exact LCSC part; Murata LAST TIME BUY 2027-03-31 (DigiKey); Mouser PN not checked
+C1,1,2.2u/25V,C_0805_2012Metric,top,YAGEO,CC0805KKX7R8BB225,311-1884-1-ND,603-CC0805KKX7R8BB225,C277470,exact LCSC part; Alt if short: Murata GRM21BR71E225KA73K (2.2u 25V X7R 0805); Mouser PN not checked
+C2,1,10u/25V,C_0603_1608Metric,top,Samsung Electro-Mechanics,CL10A106MA8NRNC,1276-1869-1-ND,187-CL10A106MA8NRNC,C96446,exact LCSC part; Alt: TDK C1608X5R1E106M080AC (10u 25V X5R 0603); Mouser PN not checked
+C3,1,4.7u,C_0603_1608Metric,top,Samsung Electro-Mechanics,CL10A475KO8NNNC,1276-1784-1-ND,187-CL10A475KO8NNNC,C19666,exact LCSC part; Mouser PN not checked
+"C4,C61",2,10u,C_0603_1608Metric,top,Samsung Electro-Mechanics,CL10A106KP8NNNC,1276-1192-1-ND,187-CL10A106KP8NNNC,C19702,exact LCSC part; Mouser PN not checked
+"C5,C6,C20",3,22u,C_0603_1608Metric,top,Samsung Electro-Mechanics,CL10A226MQ8NRNC,1276-CL10A226MQ8NRNCCT-ND,187-CL10A226MQ8NRNC,C59461,"exact LCSC part; US: DigiKey 0 stock; use TDK C1608X5R0J226M080DC (22u 6.3V X5R 20% 0603, DigiKey parametric equivalent) or Mouser exact part if stock is real; Mouser PN not checked"
+"C7,C21,C30,C42,C51,C52,C53,C54,C55,C60,C62,C64,C66",13,100n,C_0402_1005Metric,bottom/top,Samsung Electro-Mechanics,CL05B104KO5NNNC,1276-1001-1-ND,187-CL05B104KO5NNNC,C1525,exact LCSC part; Mouser PN not checked
+"C8,C10,C12,C13,C22,C31,C41,C50",8,1u,C_0402_1005Metric,bottom/top,Samsung Electro-Mechanics,CL05A105KA5NQNC,1276-1445-1-ND,187-CL05A105KA5NQNC,C52923,exact LCSC part; Alt: TDK C1005X5R1E105K050BC (445-9066-1-ND); Mouser PN not checked
+"C9,C11,C43",3,1n,C_0402_1005Metric,top,Murata,GRM155R71H102KA01D,490-1303-1-ND,81-GRM155R71H102KA01D,C1523,"SUBSTITUTE for FH 0402B102K500NT (Fenghua, not at DigiKey/Mouser): same 1n 50V X7R 10% 0402; Mouser PN not checked"
+"C23,C65",2,10u/6.3V,C_0402_1005Metric,bottom/top,Samsung Electro-Mechanics,CL05A106MQ5NUNC,1276-CL05A106MQ5NUNCCT-ND,187-CL05A106MQ5NUNC,C15525,"exact LCSC part; Alt: TDK C1005X5R0J106M050BC (445-8920-1-ND, 0.5 mm); Mouser PN not checked"
+C40,1,10p C0G,C_0402_1005Metric,top,Samsung Electro-Mechanics,CL05C100JB5NNNC,1276-1139-1-ND,187-CL05C100JB5NNNC,C1545,"SUBSTITUTE for FH 0402CG100J500NT (Fenghua, not at DigiKey/Mouser): Samsung CL05C100JB5NNNC, same 10p 50V C0G 5% 0402; Mouser PN not checked"
+C44,1,100p C0G,C_0402_1005Metric,bottom,Murata,GRM1555C1H101GA01D,,81-GRM1555C1H101GA01D,C1546,"SUBSTITUTE for FH 0402CG101J500NT: Murata GRM1555C1H101GA01D, 100p 50V C0G 2% (tighter) 0402, 0.55 max (bottom side); Mouser PN not checked"
+C63,1,220n,C_0402_1005Metric,top,Samsung Electro-Mechanics,CL05B224KO5NNNC,1276-1176-1-ND,187-CL05B224KO5NNNC,C16772,exact LCSC part; Mouser PN not checked
+D1,1,SMF5.0A,D_SMF,top,Littelfuse,SMF5.0A,F5748CT-ND,576-SMF5.0A,C151296,exact LCSC part; Cheaper same-MPN: SMC Diode Solutions SMF5.0A (unverified); Mouser PN not checked
+D50,1,WS2812B-2020-V6,LED_WS2812B-2020_PLCC4_2.0x2.0mm,top,Worldsemi,WS2812B-2020-V6,,,C52917434,NO DigiKey/Mouser listing; no US distributor found: consign this line (e.g. from LCSC)
+J1,1,TYPE-C-31-M-12,USB_C_Receptacle_HRO_TYPE-C-31-M-12,top,Korean Hroparts (HRO),TYPE-C-31-M-12,,,C165948,NOT stocked by DigiKey (DigiKey forum); no US distributor found: consign this line (e.g. from LCSC)
+J2,1,BATT,JST_SH_SM02B-SRSS-TB_1x02-1MP_P1.00mm_Horizontal,bottom,JST,SM02B-SRSS-TB(LF)(SN),455-SM02B-SRSS-TBCT-ND,306-SM02B-SRSSTBLFSN,C160402,exact LCSC part; Mouser PN not checked
+J50,1,LCD_FPC,HDGC_0.5K-AX-13PWB_1x13-1MP_P0.50mm_Horizontal,top,HDGC,0.5K-AX-13PWB,,,C2911931,NO US source and NO drop-in found; no US distributor found: consign this line (e.g. from LCSC)
+L1,1,0.47u,L_Murata_DFE201610P,top,Murata,DFE201612E-R47M=P2,490-DFE201612E-R47M=P2CT-ND,81-DFE201612E-R47MP2,C668312,exact LCSC part; Mouser PN not checked
+Q1,1,AO3401A,SOT-23,top,Alpha & Omega Semiconductor,AO3401A,785-1001-1-ND,,C15127,exact LCSC part
+"Q50,Q51",2,AO3400A,SOT-23,top,Alpha & Omega Semiconductor,AO3400A,785-1000-1-ND,,C20917,exact LCSC part
+"R1,R2",2,5.1k,R_0402_1005Metric,top,YAGEO,RC0402FR-075K1L,,603-RC0402FR-075K1L,C25905,"SUBSTITUTE for UNI-ROYAL (not stocked at DigiKey/Mouser): same value, 1%, 1/16W, 0402; Mouser PN not checked"
+R3,1,511k,R_0402_1005Metric,top,YAGEO,RC0402FR-07511KL,,603-RC0402FR-07511KL,C64042,"SUBSTITUTE for UNI-ROYAL (not stocked at DigiKey/Mouser): same value, 1%, 1/16W, 0402; Mouser PN not checked"
+R4,1,91k,R_0402_1005Metric,top,YAGEO,RC0402FR-0791KL,,603-RC0402FR-0791KL,C4147,"SUBSTITUTE for UNI-ROYAL (not stocked at DigiKey/Mouser): same value, 1%, 1/16W, 0402; Mouser PN not checked"
+"R5,R51,R52,R53,R54,R55,R56,R82,R83",9,100k,R_0402_1005Metric,top,YAGEO,RC0402FR-07100KL,311-100KLRCT-ND,603-RC0402FR-07100KL,C25741,"SUBSTITUTE for UNI-ROYAL (not stocked at DigiKey/Mouser): same value, 1%, 1/16W, 0402; Mouser PN not checked"
+"R6,R7",2,2.2k,R_0402_1005Metric,top,YAGEO,RC0402FR-072K2L,,603-RC0402FR-072K2L,C25879,"SUBSTITUTE for UNI-ROYAL (not stocked at DigiKey/Mouser): same value, 1%, 1/16W, 0402; Mouser PN not checked"
+"R8,R9,R10,R20,R21,R30,R31",7,10k,R_0402_1005Metric,top,YAGEO,RC0402FR-0710KL,311-10.0KLRCT-ND,603-RC0402FR-0710KL,C25744,"SUBSTITUTE for UNI-ROYAL (not stocked at DigiKey/Mouser): same value, 1%, 1/16W, 0402; Mouser PN not checked"
+R50,1,15,R_0603_1608Metric,top,YAGEO,RC0603FR-0715RL,,603-RC0603FR-0715RL,C22810,"SUBSTITUTE for UNI-ROYAL 0603WAF150JT5E: same value, 1%, 0603; Mouser PN not checked"
+R57,1,1k,R_0402_1005Metric,top,YAGEO,RC0402FR-071KL,311-1.00KLRCT-ND,603-RC0402FR-071KL,C11702,"SUBSTITUTE for UNI-ROYAL (not stocked at DigiKey/Mouser): same value, 1%, 1/16W, 0402; Mouser PN not checked"
+"R60,R61,R62,R63,R64,R65,R66,R67,R80",9,0R,R_0402_1005Metric,top,YAGEO,RC0402JR-070RL,,603-RC0402JR-070RL,C17168,SUBSTITUTE for UNI-ROYAL 0402WGF0000TCE: 0R 0402 jumper; Mouser PN not checked
+"R70,R71,R72,R73,R74,R75,R76,R77",8,100,R_0402_1005Metric,top,YAGEO,RC0402FR-07100RL,,603-RC0402FR-07100RL,C25076,"SUBSTITUTE for UNI-ROYAL (not stocked at DigiKey/Mouser): same value, 1%, 1/16W, 0402; Mouser PN not checked"
+R81,1,10M,R_0402_1005Metric,top,YAGEO,RC0402FR-0710ML,,603-RC0402FR-0710ML,C26082,"SUBSTITUTE for UNI-ROYAL (not stocked at DigiKey/Mouser): same value, 1%, 1/16W, 0402; Mouser PN not checked"
+R84,1,390,R_0402_1005Metric,top,YAGEO,RC0402FR-07390RL,,603-RC0402FR-07390RL,C25109,"SUBSTITUTE for UNI-ROYAL (not stocked at DigiKey/Mouser): same value, 1%, 1/16W, 0402; Mouser PN not checked"
+R85,1,3.9k,R_0402_1005Metric,bottom,YAGEO,RC0402FR-073K9L,,603-RC0402FR-073K9L,C51721,"SUBSTITUTE for UNI-ROYAL (not stocked at DigiKey/Mouser): same value, 1%, 1/16W, 0402; Mouser PN not checked"
+RT1,1,10k B3435,R_0402_1005Metric,top,Murata,NCP15XH103F03RC,490-4801-1-ND,81-NCP15XH103F03RC,C77131,exact LCSC part; DigiKey status: Not For New Designs (successor family NCU15XH103F60RC class; check B-value 3380/3435K); Mouser PN not checked
+SW20,1,BOOT,SW_SPST_TS-1088-xR020,top,XUNPU (XKB),TS-1088-AR02016,,,C720477,"NOT carried by DigiKey (DigiKey forum: only similar, not drop-in); no US distributor found: consign this line (e.g. from LCSC)"
+SW50,1,ZERO,SW_SPST_TS-1088-xR020,top,XUNPU (XKB),TS-1088-AR02016,,,C720477,"NOT carried by DigiKey (DigiKey forum: only similar, not drop-in); no US distributor found: consign this line (e.g. from LCSC)"
+SW51,1,HOLD,SW_SPST_TS-1088-xR020,top,XUNPU (XKB),TS-1088-AR02016,,,C720477,"NOT carried by DigiKey (DigiKey forum: only similar, not drop-in); no US distributor found: consign this line (e.g. from LCSC)"
+SW52,1,MODE,SW_SPST_TS-1088-xR020,top,XUNPU (XKB),TS-1088-AR02016,,,C720477,"NOT carried by DigiKey (DigiKey forum: only similar, not drop-in); no US distributor found: consign this line (e.g. from LCSC)"
+U1,1,USBLC6-2SC6,SOT-23-6,top,STMicroelectronics,USBLC6-2SC6,497-5235-1-ND,511-USBLC6-2SC6,C7519,exact LCSC part; Mouser PN not checked
+U2,1,BQ25180YBGR,Texas_DSBGA-8_1.04x1.59mm_Layout2x4_P0.4mm_YBG0008,top,Texas Instruments,BQ25180YBGR,296-BQ25180YBGRCT-ND,595-BQ25180YBGR,C3682423,exact LCSC part; Mouser PN not checked
+U3,1,TPS63802DLAR,Texas_DLA0010A_VSON-HR-10_2x3mm_P0.5mm,top,Texas Instruments,TPS63802DLAR,296-TPS63802DLARCT-ND,595-TPS63802DLAR,C2845237,exact LCSC part; Mouser PN not checked
+U4,1,MAX17048G+T10,TDFN-8-1EP_2x2mm_P0.5mm_EP0.8x1.2mm,top,Analog Devices / Maxim,MAX17048G+T10,MAX17048G+T10CT-ND,700-MAX17048G+T10,C2682616,exact LCSC part; Mouser PN not checked
+"U5,U6",2,TPS22917DBVR,SOT-23-6,top,Texas Instruments,TPS22917DBVR,296-50498-1-ND,595-TPS22917DBVR,C2681320,"exact LCSC part; Backup: TPS22917DBVT, same die/package on a 250-pc reel; Mouser PN not checked"
+U10,1,ESP32-S3-MINI-1-N4R2,ESP32-S2-MINI-1,top,Espressif Systems,ESP32-S3-MINI-1-N4R2,1965-ESP32-S3-MINI-1-N4R2CT-ND,,C3013941,exact LCSC part; No Mouser listing for this exact MINI variant seen
+U30,1,AS5311-ATST,TSSOP-20_4.4x6.5mm_P0.65mm,bottom,ams OSRAM,AS5311-ATST,4991-AS5311-ATSTCT-ND,985-AS5311-ATST-500,C22459687,"exact LCSC part; AS5311-ATST-500 = same part on 500-pc reel: DigiKey 117 ($14.07), Mouser ~1.5k (findchips); Mouser PN not checked"
+U40,1,TLV9062IDGKR,VSSOP-8_3x3mm_P0.65mm,top,Texas Instruments,TLV9062IDGKR,296-50012-1-ND,595-TLV9062IDGKR,C398356,"exact LCSC part; Backup: TLV9062IDGKT, same part on a 250-pc reel; Mouser PN not checked"
+U60,1,LSM6DSOTR,LGA-14_3x2.5mm_P0.5mm_LayoutBorder3x4y,top,STMicroelectronics,LSM6DSOTR,497-18181-1-ND,511-LSM6DSOTR,C2655100,exact LCSC part; Mouser PN not checked
+U61,1,IIS2MDCTR,LGA-12_2x2mm_P0.5mm,top,STMicroelectronics,IIS2MDCTR,497-17728-1-ND,511-IIS2MDCTR,C2655002,"exact LCSC part; DigiKey main listing 0 stock (24 wk, restock 2027); other snapshot 14.3k; Mouser PN not checked"
+"H2,H3,H4,H5",4,SMT M2 x 2.0 steel spacer,Wuerth_WA-SMSI-M2_H2mm_9774020243_Pullback,top,Wurth Elektronik,9774020243R,,,,"not at LCSC, hand-fitted at JLC; on tape with a polyimide pick-up label; centred on the H2-H5 holes"

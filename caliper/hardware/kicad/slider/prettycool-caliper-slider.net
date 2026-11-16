@@ -2,7 +2,7 @@
 	(version "E")
 	(design
 		(source "/mnt/c/source/tyevco/prettycoolboards/caliper/hardware/kicad/slider/prettycool-caliper-slider.kicad_sch")
-		(date "2026-11-10T16:50:50")
+		(date "2026-11-15T16:31:46")
 		(tool "Eeschema 10.0.8-10.0.8~ubuntu24.04.1")
 		(sheet
 			(number "1")
@@ -1556,12 +1556,12 @@
 		)
 		(comp
 			(ref "H2")
-			(value "M2")
-			(footprint "MountingHole:MountingHole_2.2mm_M2_Pad_Via")
+			(value "9774020243R")
+			(footprint "caliper:Wuerth_WA-SMSI-M2_H2mm_9774020243_Pullback")
 			(description "Mounting Hole with connection")
 			(fields
 				(field
-					(name "Footprint") "MountingHole:MountingHole_2.2mm_M2_Pad_Via")
+					(name "Footprint") "caliper:Wuerth_WA-SMSI-M2_H2mm_9774020243_Pullback")
 				(field
 					(name "Datasheet")
 				)
@@ -1610,12 +1610,12 @@
 		)
 		(comp
 			(ref "H3")
-			(value "M2")
-			(footprint "MountingHole:MountingHole_2.2mm_M2_Pad_Via")
+			(value "9774020243R")
+			(footprint "caliper:Wuerth_WA-SMSI-M2_H2mm_9774020243_Pullback")
 			(description "Mounting Hole with connection")
 			(fields
 				(field
-					(name "Footprint") "MountingHole:MountingHole_2.2mm_M2_Pad_Via")
+					(name "Footprint") "caliper:Wuerth_WA-SMSI-M2_H2mm_9774020243_Pullback")
 				(field
 					(name "Datasheet")
 				)
@@ -1664,12 +1664,12 @@
 		)
 		(comp
 			(ref "H4")
-			(value "M2")
-			(footprint "MountingHole:MountingHole_2.2mm_M2_Pad_Via")
+			(value "9774020243R")
+			(footprint "caliper:Wuerth_WA-SMSI-M2_H2mm_9774020243_Pullback")
 			(description "Mounting Hole with connection")
 			(fields
 				(field
-					(name "Footprint") "MountingHole:MountingHole_2.2mm_M2_Pad_Via")
+					(name "Footprint") "caliper:Wuerth_WA-SMSI-M2_H2mm_9774020243_Pullback")
 				(field
 					(name "Datasheet")
 				)
@@ -1718,12 +1718,12 @@
 		)
 		(comp
 			(ref "H5")
-			(value "M2")
-			(footprint "MountingHole:MountingHole_2.2mm_M2_Pad_Via")
+			(value "9774020243R")
+			(footprint "caliper:Wuerth_WA-SMSI-M2_H2mm_9774020243_Pullback")
 			(description "Mounting Hole with connection")
 			(fields
 				(field
-					(name "Footprint") "MountingHole:MountingHole_2.2mm_M2_Pad_Via")
+					(name "Footprint") "caliper:Wuerth_WA-SMSI-M2_H2mm_9774020243_Pullback")
 				(field
 					(name "Datasheet")
 				)

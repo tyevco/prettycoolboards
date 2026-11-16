@@ -296,3 +296,25 @@ def test_fixed_jaw_bolt_engages_the_nut():
     assert -P.BEAM_T - 0.05 - seat >= 0.8                   # web between trap floor and beam slot
     fj = M.fixed_jaw()
     assert fj.is_valid
+
+
+def test_aruco_inlays_fill_their_pockets():
+    """Each ArUco marker (params.ARUCO) is a 6 x 6 grid with a black border and an 11.0 square inlay: the black and
+    white bodies fill the pocket in the jaw exactly, front and back, and neither overlaps the part."""
+    c, d = P.ARUCO_CELL, P.ARUCO_DEPTH
+    side = 6 * c + 2 * P.ARUCO_QZ
+    assert sorted(m[0] for m in P.ARUCO.values()) == [0, 1, 2, 3]
+    for which, (mid, _host, _face, _x, _y) in P.ARUCO.items():
+        bits = P.ARUCO_BITS[mid]
+        assert len(bits) == 6 and all(len(r) == 6 for r in bits)
+        assert bits[0] == bits[5] == "000000" and all(r[0] == r[5] == "0" for r in bits)   # the black border
+        n_black = sum(r.count("0") for r in bits)
+        blk, wht = M.aruco_marker(which, "black"), M.aruco_marker(which, "white")
+        assert blk.volume == pytest.approx(n_black * c * c * d, rel=1e-6)
+        assert blk.volume + wht.volume == pytest.approx(side * side * d, rel=1e-6)
+    fj = M.fixed_jaw()
+    inl = M.aruco_inlays("fixed", "black") + M.aruco_inlays("fixed", "white")
+    assert inl.volume == pytest.approx(2 * side * side * d, rel=1e-6)
+    assert (fj & inl).volume == pytest.approx(0, abs=1e-6)
+    for which in ("fixed", "fixed_back"):
+        assert (fj & M.aruco_pocket(which)).volume == pytest.approx(0, abs=1e-6)

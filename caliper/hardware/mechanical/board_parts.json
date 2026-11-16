@@ -444,23 +444,23 @@
    },
    {
     "ref": "H2",
-    "x": -3.5,
+    "x": -3.0,
     "y": 5.5
    },
    {
     "ref": "H3",
-    "x": -3.5,
-    "y": 14.0
+    "x": -3.0,
+    "y": 13.5
    },
    {
     "ref": "H4",
-    "x": 65.5,
+    "x": 65.0,
     "y": 5.5
    },
    {
     "ref": "H5",
-    "x": 65.5,
-    "y": 14.0
+    "x": 65.0,
+    "y": 13.5
    }
   ],
   "parts": [
@@ -1030,13 +1030,13 @@
     "fp": "(not a footprint)",
     "side": "T",
     "aabb": [
-     -5.5,
-     -1.5,
-     3.5,
-     7.5
+     -5.175,
+     -0.825,
+     3.325,
+     7.675
     ],
     "h": 2.0,
-    "note": "SMT M2 standoff, PEM SMTSO-M2-2ET class (SPEC D3), on the tab's top pad"
+    "note": "SMT M2 spacer, Wuerth WA-SMSI 9774020243R (SPEC D3, \u00a718), on the tab's top pad"
    },
    {
     "ref": "H3_standoff",
@@ -1044,13 +1044,13 @@
     "fp": "(not a footprint)",
     "side": "T",
     "aabb": [
-     -5.5,
-     -1.5,
-     12.0,
-     16.0
+     -5.175,
+     -0.825,
+     11.325,
+     15.675
     ],
     "h": 2.0,
-    "note": "SMT M2 standoff, PEM SMTSO-M2-2ET class (SPEC D3), on the tab's top pad"
+    "note": "SMT M2 spacer, Wuerth WA-SMSI 9774020243R (SPEC D3, \u00a718), on the tab's top pad"
    },
    {
     "ref": "H4_standoff",
@@ -1058,13 +1058,13 @@
     "fp": "(not a footprint)",
     "side": "T",
     "aabb": [
-     63.5,
-     67.5,
-     3.5,
-     7.5
+     62.825,
+     67.175,
+     3.325,
+     7.675
     ],
     "h": 2.0,
-    "note": "SMT M2 standoff, PEM SMTSO-M2-2ET class (SPEC D3), on the tab's top pad"
+    "note": "SMT M2 spacer, Wuerth WA-SMSI 9774020243R (SPEC D3, \u00a718), on the tab's top pad"
    },
    {
     "ref": "H5_standoff",
@@ -1072,13 +1072,13 @@
     "fp": "(not a footprint)",
     "side": "T",
     "aabb": [
-     63.5,
-     67.5,
-     12.0,
-     16.0
+     62.825,
+     67.175,
+     11.325,
+     15.675
     ],
     "h": 2.0,
-    "note": "SMT M2 standoff, PEM SMTSO-M2-2ET class (SPEC D3), on the tab's top pad"
+    "note": "SMT M2 spacer, Wuerth WA-SMSI 9774020243R (SPEC D3, \u00a718), on the tab's top pad"
    },
    {
     "ref": "J1",

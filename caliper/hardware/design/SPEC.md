@@ -92,8 +92,8 @@ is given in the notes.
 | Q51, R56, R57 | piezo driver | top | 47.35 / 46.2 / 33.7 | 20.4 / 23.7 / 19.5 | | Q51 and R56 right of BZ50, R57 at its left (draft: 40.0, 18.0) |
 | TP1–7, TP20–23, TP30–32, TP40–42, TP50–51 | 19 × Ø1.0 test pads | **bottom** | 27.58…47.9 | 22.6 / 25.14 / 30.22 | x 22.5 + 2.54 i, three rows | bench bring-up with the board out of the housing; nothing in the antenna keep-out, on the H1 pad, in J2's courtyard or under the mechanics' ledge (y ≥ 32.6). y 25.14: TP50, TP51, TP7, TP4, TP2, TP3, TP1 (x 32.66…47.9); y 22.6: TP32, TP40, TP41, TP42, TP5, TP6, TP22 (USB, x 42.82), TP23 (USB, x 47.9) from x 27.58; **y 30.22: TP20 MCU_EN, TP21 BOOT_N, TP30 MAG_A, TP31 MAG_B at x 32.66 / 35.2 / 37.74 / 40.28** (moved 2026-11-09 from x 22.5 / 25.04 of the two lower rows, where J2 now is) |
 | H1 | M2 plated hole, Ø4.4 pad | both | 18.75 | 24.0 | | **nylon** M2 × 10 flat-head screw (5 mm from the antenna corner) from the lid's top face through the lid's Ø4.4 tube and the board into a body boss (u 26.75); since 2026-11-09 it is also the lid's upper fastening. Support only, see "Board support". **Top side: a Ø4.6 circle round H1 stays free of parts** (2026-11-09: the lid's Ø4.4 tube ends 0.1 mm above the board there, in place of the old Ø3.8 screw head; `layout.py` `check_h1_tube` checks the courtyards, nearest 0.6 mm outside it). Bottom: J2's nearest nail pad edge is 0.75 mm from the pad |
-| H2, H3 | tab clamp holes | tab | −3.5 | 5.5 / 14.0 | | Ø2.2 plated (GND), top pad Ø4.4 for an SMT M2 standoff; bottom: no exposed copper (0.15 above the beam) |
-| H4, H5 | tab clamp holes | tab | 65.5 | 5.5 / 14.0 | | as H2/H3 (H5 is in the schematic since §12) |
+| H2, H3 | tab clamp holes | tab | −3.0 | 5.5 / 13.5 | | Würth WA-SMSI land: Ø3.0 **non-plated** hole, Ø5.3 top pad (GND) for the SMT M2 spacer 9774020243R; 0.35 mm from every tab edge; bottom: no exposed copper (0.15 above the beam). Moved 2026-11-13 from x −3.5, y 14.0 (Ø2.2 plated, Ø4.4 pad), §18 |
+| H4, H5 | tab clamp holes | tab | 65.0 | 5.5 / 13.5 | | as H2/H3 (H5 is in the schematic since §12); moved from x 65.5, y 14.0 |
 | FID1–3 | fiducials, Ø1 / mask Ø2 | top | (2.0, 1.5), (60.5, 1.2), (33.0, 27.6) | | | outside the antenna keep-out and every courtyard (FID3 draft (60.5, 32.8) was inside J1's courtyard) |
 
 **Antenna (D4).** The ESP32-S3-MINI-1's PCB antenna is the module's top 4.5 mm (the footprint's Fab "Keepout
@@ -109,9 +109,9 @@ J2 and its plug (6.3 mm), the USB-C (39 mm away), the H1 screw (nylon), the SMT 
 9.5 mm below the antenna. Since 2026-11-09 the firmware also caps Wi-Fi TX at 10 dBm for the small cell (§3), about
 10 dB less link margin than at full power: the bring-up range test covers both.
 
-**Board support (D3).** The **Z datum is the four tab clamps H2–H5**: each carries an SMT M2 threaded standoff
-(2.0 mm tall, OD ≤ 4.0 mm, soldered on the top pad; PEM SMTSO-M2-2ET class, **fitted by hand**: no LCSC/JLC part
-fits, §12), and an M2 screw from the tower's top face pulls the standoff's top face up against a
+**Board support (D3).** The **Z datum is the four tab clamps H2–H5**: each carries an SMT M2 threaded steel spacer
+(Würth WA-SMSI **9774020243R**: 2.0 mm tall, Ø4.35, soldered on the top pad, **fitted by hand**: not at LCSC;
+since 2026-11-13, §18; the PEM SMTSO-M2-2ET named before needs a Ø3.73 hole, a Ø6.2 pad and a ≥ 1.53 mm board), and an M2 screw from the tower's top face pulls the standoff's top face up against a
 clamp face in the tower (the left tower spans u 0.5…7.6, the right u 70.4…77.4 (the roller rim reaches u 78.0); the tabs sit at u 2…8 and
 70…76, y 2.5…16.5, which keeps them 0.65 mm clear of the front-pad pockets and the pad set-screw inserts).
 These four points sit at the ends of the sensor band, 3.5 mm and 12 mm from the AS5311 and electrode rows.
@@ -479,7 +479,7 @@ detailed in the section named; this list gives the decision and its reason.
 |---|---|---|---|
 | D1 | Internal resolution **0.488 µm**: PCNT coarse count (1024 edges per 2 mm = 1.953125 µm) combined with the 12-bit SSI fine position (2 mm / 4096 = 488.28125 nm) | 0.488 µm was quoted as the count, but it is the SSI step; interpolating keeps the stated figure with no hardware change, and the PCNT still tracks fast motion between SSI reads | §1, §4.1 |
 | D2 | Tape **8 mm wide** (slit), centred y 6, in a **2.00 mm channel**, **0–0.35 mm Kapton shim per unit** for the 0.30 gap; scale pocket stays flush. No bottom parts over y 0…20 except the AS5311 + its 2 capacitors inside y 2.4…9.6, x 20…41, ≤ 1.30 tall, and the electrodes | A 10 mm tape overlaps the scale band; the AS5311 and the electrodes share the flat board bottom, so the tape must sit lower; a shim can only close the gap, so the channel is cut for A max | §2.1, §7 |
-| D3 | Slider outline **74 × 34**: end **tabs** x −6…0 and 62…68, y 2.5…16.5, with **SMT M2 standoffs** on plated holes H2–H5 clamped by the towers as the **Z datum**; H1 (18.75, 24) the only upper-band hole (support only); **flatness ≤ 0.03 mm over y 0…20** | The lower band (AS5311, electrodes) was held only by bosses at y > 22, 7–24 mm away; nothing can go under the board over the beam (0.15 mm), so the tabs are pulled up from above; y 2.5…16.5 keeps them clear of the front pads | §2, §2.1, §7 |
+| D3 | Slider outline **74 × 34**: end **tabs** x −6…0 and 62…68, y 2.5…16.5, with **SMT M2 spacers** on holes H2–H5 clamped by the towers as the **Z datum**; H1 (18.75, 24) the only upper-band hole (support only); **flatness ≤ 0.03 mm over y 0…20** | The lower band (AS5311, electrodes) was held only by bosses at y > 22, 7–24 mm away; nothing can go under the board over the beam (0.15 mm), so the tabs are pulled up from above; y 2.5…16.5 keeps them clear of the front pads | §2, §2.1, §7 |
 | D4 | **Landscape display** (31 mm along X) over the beam band; **MINI-1 in the top-left corner**, antenna flush with the top edge, all-layer keep-out x 0…21, y 29…34; buttons ZERO / HOLD / MODE at x 31 / 38.5 / 46, y 31; USB-C right edge y 26.5; battery pocket moved to board x ≥ 21.5; full placement table | Portrait glass (y 1.5…32.5) left no room for the module, MODE and USB-C together (the clash check's U_MCU × SW_MODE and MODE cap × USB-C). Landscape frees the upper band and makes the digits ~1.8× wider. The battery behind the old module position (x 39…55) and a USB-C 1 mm from the antenna would have detuned it; the top-left corner keeps both away | §1, §2.1, §7 |
 | D5 | Scale coupler/reflector bands aligned with the slider RX/TX (one coordinate table); scale pattern 38 cells centred on the electrode sweep (SCALE_X0 14.5); scale bonded, no screws; **5 kHz** rotation, position **modulo 2.54 mm**, tracked, **≈ 25 mm/s** limit | The bands only partly overlapped (RX 10.6…11.8 vs coupler 11.0…12.8); the ADC tops out near 83 kS/s; the forward/reverse burst that cancels the ADC delay halves the range | §2.2, §4.2 |
 | D6 | GATT clarifications (magnitudes, upsert, delete, 16 max, id 0, end marker alone, error codes, encrypted SETTINGS write, partial update, field limits, decimals, LOG flags, UUID in the scan response) and **LIVE = 12 bytes** with `u16 active_profile_id` (readers accept 10 or 12); extended to **20 bytes (v3)** for the capture modes on 2026-11-07 (§8) | These were implemented one way in the firmware and guessed in the app; the app could not see a profile chosen on the caliper | §8, caliper_gatt.h, protocol.js |
@@ -719,3 +719,25 @@ and four unconnected pads; net members 402 → 422); `check_contract.py` OK; DRC
 112 envelopes from the routed board, 41 tests passed, clash check 0 not clear, 0 FAIL / 0 RISK, 0 BREAK / THIN;
 firmware: host tests 6 of 6, `idf.py build` without warnings (app 0x1a1c40 bytes, 3 % of the slot free). The scale
 board did not change.
+
+## 18. Order readiness (2026-11-13)
+
+Staging the JLC order (2026-11-10) and costing other vendors (2026-11-11) found two layout faults and some stale
+order notes. Fixed here; the order itself is not placed.
+
+* **Tab clamp spacers.** The PEM SMTSO-M2-2ET of §2.1 / §12 does not fit: PEM's catalogue asks for a Ø3.73 mm hole,
+  a Ø6.2 mm pad and a board at least 1.53 mm thick (its shank is longer than our 1.0 mm board, and the tab bottom is
+  0.15 mm over the beam). It is replaced by the **Würth WA-SMSI 9774020243R** (M2 × 2.0 steel, Ø4.35 body, pure SMT,
+  nothing below the board), on the project's footprint `caliper:Wuerth_WA-SMSI-M2_H2mm_9774020243_Pullback` (`sheets/power.py`): Würth's land, a
+  Ø5.3 pad round a Ø3.0 NPTH with paste in four segments, except that the copper ring starts at Ø3.4, 0.2 mm from
+  the hole (Würth's and KiCad's run the copper to the hole edge, which breaks the board's 0.2 mm hole clearance), and a
+  Ø5.5 courtyard (the ESP32 module's courtyard ends 0.15 mm past the left tab root). A Ø5.3 pad does not fit 2.5 mm from the tab's outer edge, so **H2–H5
+  move to the tab centre line, x −3.0 / 65.0, and y 13.5** (H3 / H5; was 14.0): 0.35 mm from every tab edge. Not
+  found at LCSC: still fitted by hand (paste + hot air), or placed from tape by an assembler that stocks it. The
+  housing follows: `params.TAB_HOLES`, the spacer Ø4.35, the tower pocket Ø4.4 → 4.8.
+* **V-cut clearance.** JLC panels this board only with V-cuts, along the long edges (y 0 and y 34), and asks for
+  copper ≥ 0.4 mm from a V-cut. The pours came to 0.35 mm on F.Cu, In1 and B.Cu. A pour-only rule area `VCUT_NO_POUR`
+  now keeps every pour 0.45 mm from both long edges (`layout.py`, `VCUT_POUR_BAND`); tracks were already ≥ 0.45 mm.
+* **Order notes** (`release.py`): the 0.20 mm via count comes from the board (it said 432); the notes record what the
+  live JLC form does (V-cut-only panel 74 × 78 mm, quantities in panels, tenting upgraded to plugging with the 0.2 mm
+  via option and why Epoxy Filled & Capped suits the electrode vias, a 200-character remark).

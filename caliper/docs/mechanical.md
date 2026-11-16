@@ -239,7 +239,7 @@ mid-plane, so the 5 N measuring force puts a 5.5 N·mm twist into the guide, whi
 
 * **Tab clamps (Z datum).** The board's end tabs (x −6…0 and 62…68, y 2.5…16.5) sit in pockets in
   the towers (u 1.8…8 and 70…76.2, y 2.3…16.7), open to the tunnel below. On each of H2–H5 an SMT
-  M2 standoff (2.0 tall) rises into a Ø4.4 pocket. An **M2 × 4 low-head screw** from the tower's front
+  M2 spacer (Würth WA-SMSI 9774020243R, 2.0 tall, Ø4.35) rises into a Ø4.8 pocket. An **M2 × 4 low-head screw** from the tower's front
   face pulls it up against a **2.2 × 4.0 × 0.3 shim washer bedded in epoxy** under a printed clamp
   plate 1.35 mm thick. The screw tip ends inside the board, never below it.
 * **Bedding instead of printed faces.** A downward printed clamp face is a bridged surface (±0.1).
@@ -351,6 +351,7 @@ slot; PAHT and PAHT-CF bond. Every printed part was run through the `bambu-p2s` 
 |---|---|---|---|---|---|
 | Slider body | [`stl/slider_body.stl`](../hardware/mechanical/stl/slider_body.stl) + [`rf_modifier`](../hardware/mechanical/stl/slider_body_rf_modifier.stl) | **PAHT-CF**; the modifier in PAHT (PETG for fit trials) | back face down | 6 walls, 40 % gyroid, solid jaws | FAIL without supports. **Paint-on supports in two places** (three before the 2026-11-09 slim-down: the battery-pocket ceiling over y 34…48 is gone with the plug relief): (1) the roller-slot roof (7 mm); (2) the tower undersides beside the tab pockets (4.5 mm strips), standing on the back web inside the tunnel and pulled out through the tunnel ends. WARN: the 22 mm tunnel-roof bridges at the towers and a 4 mm² sub-0.8 mm feature at z 0.5, as before; the button ledge (2.5 mm shelf) and the two door-rebate ledges at the pocket ends (2.3 and 2.4 mm shelves). The back bevel and the plan radii add no finding. **The inside jaw no longer needs support** |
 | Fixed jaw | [`stl/fixed_jaw.stl`](../hardware/mechanical/stl/fixed_jaw.stl) | PA-CF | **front face down** (was back face down) | 6 walls, 60 % infill | the beam-slot roof flags as a 5.6 mm cantilever. It is bridged 20 mm between both side walls, as before. **The inside jaw no longer needs support**; its shoulder block and gusset (2026-11-09) are prisms standing on the bed and add no finding (re-checked) |
+| ArUco inlays | `stl/slider_body_aruco_black.stl` + `_white.stl`, `stl/fixed_jaw_aruco_black.stl` + `_white.stl` | black and white (PETG / PLA bond to PA-CF poorly: use PAHT or PA in two AMS colours if you can) | the host part's print frame: load them as parts of the slider body / fixed jaw | 0.4 mm deep, two 0.2 mm layers | not run through the printability check (§16) |
 | Front shell | [`stl/front_shell.stl`](../hardware/mechanical/stl/front_shell.stl) | PETG | top face down (textured) | 4 walls, 100 % | PASS (re-checked 2026-11-09 with the edge bevel and the H1 tube) |
 | Battery door | [`stl/battery_door.stl`](../hardware/mechanical/stl/battery_door.stl) | PETG | outside face down (textured) | 4 walls, 100 % | PASS (re-checked 2026-11-09: now a flat 1.6 plate) |
 | Button cap × 3 | [`stl/button_cap.stl`](../hardware/mechanical/stl/button_cap.stl) | PETG | flange down | 100 % | PASS |
@@ -543,7 +544,7 @@ A 1.4301 beam adds 0.7 µm/K at 150 mm against steel workpieces. Zero after warm
 | Kapton shim | – | 0.025 mm sheet: 0–14 layers under the tape; strips for the H1 boss and the button ledge |
 | Steel shim foil 0.150 | 4 strips | assembly tool for the bedding (step 4); reused |
 | Brass C360 | – | 1.2 × 14 × 64 (back gib), 1.0 × 3 × 60 (Y gib), 1.0 × 3 × 76.9 (reference strip), 1.0 sheet for 4 pads |
-| SMT M2 standoff, 2.0 tall, OD ≤ 4.0 | 4 | PEM SMTSO-M2-2ET class, on H2–H5 (schematics track picks the LCSC part; else hand-fitted) |
+| SMT M2 spacer, 2.0 tall, Ø4.35 | 4 | Würth WA-SMSI 9774020243R on H2–H5, hand-fitted (not at LCSC). Since 2026-11-13; the PEM SMTSO-M2-2ET named before does not fit a 1.0 mm board (SPEC §18) |
 | Shim washer 2.2 × 4.0 × 0.3 | 4 | precision shim washer (e.g. MISUMI); bedded in slow structural epoxy |
 | M2 × 4 low head (k ≤ 1.0) | 4 | tab clamps |
 | LiPo cell, 1S, 501230 class | 1 | Renata ICP501230PS-03 (135 mAh, ≤ 5.4 × 12.5 × 31.5 with its protection circuit, wire leads) or an equivalent protected cell inside that envelope (section 15) |
@@ -885,3 +886,44 @@ rebate stops at the bevel's foot, so the bevel runs on over the door and the top
 bridging 44 mm over an open-topped rebate. A taper was looked at and left out: the top face is set by the cell
 pocket (1.3 mm over it) and the cavity (2.0 mm over it), the end faces are the stop and jaw datums, the back face
 is the print bed and the jaw roots stay as they are, so a taper would take a function or a wall.
+
+## 16. ArUco markers on the jaws (2026-11-15)
+
+Designed, not printed: nothing below has been printed or tried with a camera.
+
+**What for.** The owner asked for markers a camera can track while measuring. Each **outside jaw** carries one marker
+on its front face and one on its back face, so one camera frame, from either side, holds the fixed and the moving jaw:
+the distance between the two marker centres is the reading plus a constant, a direct cross-check of the encoder, and
+each marker gives the tool's pose. The id says which side the camera sees.
+
+| | Fixed jaw | Moving jaw |
+|---|---|---|
+| Front face (display side) | OpenCV `DICT_4X4_50` **id 0**, face z 2.5 | **id 1**, face z 2.4 |
+| Back face | **id 2**, face z −8.6 | **id 3**, face z −8.6 |
+| Centre | x −7.0, y −10.5 (beam frame) | u 7.0, y −10.5 (slider frame: x = R + 7.0) |
+| Centre distance in x | **R + 14.0 mm** on both sides | |
+
+* **Size:** 6 × 6 cells of 1.5 mm (the 4 × 4 code and its black border) = **9.0 mm**, inside a 1.0 mm white quiet
+  zone: an 11.0 mm square. For pose estimation give OpenCV the 9.0 mm marker length. The two front faces differ by
+  0.1 mm in z (2.5 / 2.4); the back faces are level.
+* **Back markers are mirrored** in the model (columns run +x to −x), so they read the right way round, not as mirror
+  images, from behind.
+* **Where:** all on the outside jaws below the beam, y −5…−16, x (u) 1.5…12.5 from the measuring face, front and back
+  behind each other. The jaw is 15.9 mm wide at y −16, so each inlay keeps ≥ 3.4 mm from its tapered edge and clears
+  the root relief notch; the two 0.4 mm pockets leave 10.2 mm of the 11.0 mm jaw between them.
+* **How it is made:** each marker is a pocket 0.4 mm deep (two 0.2 mm layers) filled by two bodies, the black cells
+  and the white rest. Per jaw, the two markers of one colour are one STL in the host part's print frame
+  (`stl/fixed_jaw_aruco_black.stl`, `_white.stl`, `stl/slider_body_aruco_black.stl`, `_white.stl`), so they load in
+  Bambu Studio as parts of the same object and take an AMS colour each. Each jaw then has a marker in its first two
+  layers and one in its last two (the fixed jaw prints front face down, the slider body back face down). Any body
+  colour works because the quiet zone is printed white.
+* **Material:** the jaws are PA-CF. Black and white PAHT (or PA) bond to it; PETG or PLA bond poorly to nylon.
+  Without an AMS, a filament change at the marker layers does one colour, and the other can be painted.
+* **Checked:** each inlay was sampled cell by cell from the model, as seen from its own side, and decoded with OpenCV
+  5.0's ArUco detector as ids 0, 1, 2 and 3; the black and white bodies fill each pocket exactly and do not overlap the
+  part (`tests/test_mechanical.py::test_aruco_inlays_fill_their_pockets`).
+* **Not checked:** whether 1.5 mm FDM cells stay sharp enough for detection at your camera's distance (the bed-side
+  layers come out smoother than the top ones), the colour bond, and the effect of the two pockets on the jaws'
+  stiffness. Rev B (machined) jaws get no pocket: laser-mark the same patterns instead.
+* Source: `params.py` `ARUCO`, `ARUCO_BITS` (from `cv2.aruco.getPredefinedDictionary(DICT_4X4_50).generateImageMarker(id, 6)`),
+  `models.py` `aruco_marker()` / `aruco_pocket()` / `aruco_inlays()`.
