@@ -15,7 +15,7 @@ the prototype; section 13 collects them.
 * **Real board:** [`extract_board_parts.py`](../hardware/mechanical/extract_board_parts.py) reads the routed
   `caliper/hardware/kicad/slider/prettycool-caliper-slider.kicad_pcb` (KiCad 10 `pcbnew`) into
   [`board_parts.json`](../hardware/mechanical/board_parts.json): the Edge.Cuts outline with the end tabs,
-  the five holes, 102 part envelopes (Fab outline × datasheet height), plus the four SMT standoffs
+  the five holes, 107 part envelopes (Fab outline × datasheet height), plus the four SMT spacers
   and the mated JST plug. The routed board has J2 on the bottom side since 2026-11-09 (section 15), so
   [`board_envelope.py`](../hardware/mechanical/board_envelope.py) has no pending board change to apply over it.
 * **Calculations:** [`calcs.py`](../hardware/mechanical/calcs.py) writes everything quoted here to
@@ -261,10 +261,11 @@ mid-plane, so the 5 N measuring force puts a 5.5 N·mm twist into the guide, whi
   | 3 N on | Without the ledge: button / electrode band / AS5311 | With the ledge |
   |---|---|---|
   | ZERO | 46 / 19 / 6 µm | 0.5 / 0.7 / 0.5 µm |
-  | HOLD | 92 / 35 / 8 µm | 0.5 / 1.0 / 0.8 µm |
-  | MODE | 129 / **42** / 12 µm | 0.5 / 1.0 / 0.6 µm |
+  | HOLD | 91 / 34 / 8 µm | 0.5 / 1.0 / 0.7 µm |
+  | MODE | 127 / **40** / 11 µm | 0.5 / 0.9 / 0.5 µm |
 
-  Without support, a MODE press closed the capacitive gap by 28 %. The ledge runs under the board's
+  (Re-run 2026-11-15 with the spacers and holes of SPEC §18; the clamp ceilings move 0.10 µm, was 0.09.)
+  Without support, a MODE press closed the capacitive gap by 27 %. The ledge runs under the board's
   top edge (u 37…65.5, y 32.6…34.4), where the board's bottom is plain solder mask. It is printed
   0.05 low and shimmed to contact like H1. The FEA treats it as rigid; its own compliance as a
   printed 1.8 mm cantilever adds about 6 µm under the full 3 N. Linear tets are stiff in plate
@@ -368,8 +369,8 @@ Clearances: sliding parts get 0.15–0.20 per side (`CLR_SLIDE`); the brass gibs
 0.10–0.15 pockets. Heat-set inserts are M2 × 3 in Ø3.2 holes (pad screws, back plungers); thread-forming
 screws go into Ø1.7 pilots; the nylon screws go into threads tapped in the print: M3 in Ø2.5 (Y plungers,
 lock), M2 in Ø1.6 (H1, the battery door). The STEP of every part is in [`step/`](../hardware/mechanical/step/), in assembly
-pose, plus [`step/caliper_assembly.step`](../hardware/mechanical/step/caliper_assembly.step) (44 named
-solids at R = 0).
+pose, plus [`step/caliper_assembly.step`](../hardware/mechanical/step/caliper_assembly.step) (48 named
+solids at R = 0, the four ArUco inlays included).
 
 ![parts in print pose](../hardware/mechanical/renders/parts.png)
 
@@ -583,7 +584,7 @@ From `clash_report.txt`. The board envelope comes from `board_parts.json`, extra
   time, which had gained C13 and moved R85/C44: 102 part envelopes; and again on 2026-11-09 after the fixed
   inside jaw's stiffening, re-extracted from the committed board: 0 FAIL, 0 RISK, 0 BREAK/THIN). The only overlap is the intended one:
   the O-ring tyre squeezed 0.15 onto the beam.
-  * **Board vs housing:** the board with its tabs, the 102 part envelopes, the four standoffs and the
+  * **Board vs housing:** the board with its tabs, the 107 part envelopes (2026-11-15), the four spacers and the
     mated JST plug (J2 and the plug as moved to the bottom side), against the body, lid, door, caps, roller,
     gibs, pads, GFRP rods and tip pins, nylon screws, display, battery, lock and the clamp hardware. All clear.
   * **Travel:** the slider and the board against the beam, fixed jaw, tape, scale and stop screw at
@@ -923,7 +924,9 @@ each marker gives the tool's pose. The id says which side the camera sees.
   5.0's ArUco detector as ids 0, 1, 2 and 3; the black and white bodies fill each pocket exactly and do not overlap the
   part (`tests/test_mechanical.py::test_aruco_inlays_fill_their_pockets`).
 * **Not checked:** whether 1.5 mm FDM cells stay sharp enough for detection at your camera's distance (the bed-side
-  layers come out smoother than the top ones), the colour bond, and the effect of the two pockets on the jaws'
-  stiffness. Rev B (machined) jaws get no pocket: laser-mark the same patterns instead.
+  layers come out smoother than the top ones), and the colour bond. **Jaw stiffness:** `fea_jaw.py` meshes the jaw
+  from its outline in `params.py`, without the pockets, so its 4.5 µm (PA-CF, 5 N) is for a solid jaw. The two
+  pockets take 0.8 of the 11.0 mm thickness over an 11 mm square near the root, and the inlays filling them are
+  plastic too; the loss of in-plane stiffness is a few per cent at most (*estimate*, not computed). Rev B (machined) jaws get no pocket: laser-mark the same patterns instead.
 * Source: `params.py` `ARUCO`, `ARUCO_BITS` (from `cv2.aruco.getPredefinedDictionary(DICT_4X4_50).generateImageMarker(id, 6)`),
   `models.py` `aruco_marker()` / `aruco_pocket()` / `aruco_inlays()`.

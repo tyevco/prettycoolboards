@@ -160,8 +160,8 @@ Board support (review fix b, SPEC D3): the board hangs from four SMT standoffs o
      The first model (board on bosses at y >= 24.5, set by four set screws) had +/-0.044 RSS / 0.10 worst, with
      an unsupported 7-24 mm overhang behind the 0.03 bow term.
   Transient, not in the stack: a 3 N button press bends the board; with the button-band ledge
-  the electrode band moves 1.0 um and the AS5311 0.8 um (FEA, rigid ledge) plus the
-  ledge's own few um (section 8); without the ledge it was 42 um.  It recovers when the button is released.
+  the electrode band moves 1.0 um and the AS5311 0.7 um (FEA, rigid ledge) plus the
+  ledge's own few um (section 8); without the ledge it was 40 um.  It recovers when the button is released.
 
 6. AS5311 gap budget (SPEC 4.1: 0.30 +/- 0.10)
 -----------------------------------------------
@@ -208,16 +208,16 @@ the board.  fea_slider.py solves the board (FR4, E 20 GPa, outline + tabs from b
 the four standoffs and resting on the H1 boss, 3 N on one switch footprint at a time; linear tets corrected
 x1.75 for bending (cantilever calibration in the same run):
   without a support under the button band:
-    ZERO  at the button   46.5 um, electrode band max  19.4 um, AS5311   6.2 um
-    HOLD  at the button   92.3 um, electrode band max  35.1 um, AS5311   8.2 um
-    MODE  at the button  129.1 um, electrode band max  41.5 um, AS5311  11.8 um
+    ZERO  at the button   46.2 um, electrode band max  19.0 um, AS5311   6.0 um
+    HOLD  at the button   91.2 um, electrode band max  34.1 um, AS5311   7.9 um
+    MODE  at the button  126.9 um, electrode band max  40.1 um, AS5311  11.4 um
   with the button-band ledge (u 37..65.5, y 32.6..34.4, shimmed to contact; rigid in the FEA):
     ZERO  at the button    0.5 um, electrode band max   0.7 um, AS5311   0.5 um
-    HOLD  at the button    0.5 um, electrode band max   1.0 um, AS5311   0.8 um
-    MODE  at the button    0.5 um, electrode band max   1.0 um, AS5311   0.6 um
+    HOLD  at the button    0.5 um, electrode band max   1.0 um, AS5311   0.7 um
+    MODE  at the button    0.5 um, electrode band max   0.9 um, AS5311   0.5 um
   ledge compliance: 1.8 mm cantilever, 0.70 thick, ~10 mm engaged, PA-CF: 525 N/mm, 5.7 um under the full 3 N
-  -> without the ledge the worst press (MODE) moved the electrode band 41.5 um toward the scale (28 % of the 0.15 gap) and the button
-     129 um; with it, about 1.0 um + the ledge's own 5.7 um.  The ledge is kept.
+  -> without the ledge the worst press (MODE) moved the electrode band 40.1 um toward the scale (27 % of the 0.15 gap) and the button
+     127 um; with it, about 1.0 um + the ledge's own 5.7 um.  The ledge is kept.
   battery: cell top z -1.60 (max envelope), 1.00 below the ledge underside (swelling room); the board never reaches the cell.
 
 9. Fixed-jaw bolts (M3 into a hex nut trap)
