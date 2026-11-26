@@ -46,6 +46,7 @@ export default withMermaid(defineConfig({
   themeConfig: {
     nav: [
       { text: 'Caliper', link: '/caliper/' },
+      { text: 'Keyboard', link: '/keyboard/' },
       { text: 'Toolchain', link: '/tools/' },
       { text: 'GitHub', link: REPO },
     ],
@@ -85,6 +86,16 @@ export default withMermaid(defineConfig({
             { text: 'Oh, neat: maybe later', link: '/caliper/docs/ideas/' },
             { text: 'Rev B ideas', link: '/caliper/docs/ideas/rev-b' },
             { text: 'Electronic slide lock (binned)', link: '/caliper/docs/ideas/slide-lock' },
+          ],
+        },
+      ],
+      '/keyboard/': [
+        {
+          text: 'PrettyCool Keyboard (concept)',
+          items: [
+            { text: 'Overview', link: '/keyboard/' },
+            { text: 'Concept and roadmap', link: '/keyboard/docs/concept' },
+            { text: 'Research', link: '/keyboard/docs/research' },
           ],
         },
       ],

@@ -12,12 +12,14 @@ Enclosures and mechanics are in build123d.
 | Board | Status | |
 |---|---|---|
 | [PrettyCool Caliper](caliper/README.md) | rev A in design | 150 mm digital caliper: magnetic and capacitive sensing, ESP32-S3 with BLE + Wi-Fi, colour IPS, reading memory, go/no-go, USB-C |
+| [PrettyCool Keyboard](keyboard/README.md) | concept: researched, nothing designed | Analog keyboard designed as code: shear keys that point, a haptic thumb wheel, two-host KVM, a generated keywell, and a layout compiler with latency and battery gates. Rev A is a sensing testbed |
 
 ## Repository layout
 
 ```
 tools/        shared Python → KiCad generator toolchain (see tools/README.md)
 caliper/      one folder per board: hardware/, firmware/, app/, docs/
+keyboard/     concept and research only (docs/), no hardware yet
 .vitepress/   docs site (VitePress), published to GitHub Pages by .github/workflows/docs.yml
 ```
 
