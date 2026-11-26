@@ -27,6 +27,8 @@ config:
   flowchart:
     nodeSpacing: 14
     rankSpacing: 40
+    # without it the top nodes' borders run through the subgraph title
+    subGraphTitleMargin: { top: 0, bottom: 8 }
 ---
 flowchart TB
   subgraph RS["Researchers (web search)"]
@@ -151,8 +153,8 @@ sceptic's 1–10 for worth building. The owner picked none of these, but the sce
 keep for the memory-LCD strip, strain analytics and the pose-aware IMU, and keep as a moonshot for the FIDO2
 authenticator, typing data designing the next PCB, the sensed column rig and the fingertip clusters.
 
-Every proposed idea with its sceptic's score, and which ones the owner picked (the figure is tall: open it on its own
-to read it at full size):
+Every proposed idea with its sceptic's score, and which ones the owner picked (the figure is tall:
+[open it on its own](figures/data_idea_scores.png) to read it at full size):
 
 ![Lollipop chart of all 54 researched keyboard ideas in five research-area groups, each row showing the sceptic's 1-10 score, sorted by score. The 12 picked ideas are blue dots with bold labels and their concept.md section, the 7 folded ideas are orange diamonds, and the 35 not-picked ideas are grey open circles. A right-hand column gives the sceptic's verdict: keep, keep as moonshot, demote or drop. No idea scores above 7, and all six 7s are picked.](figures/data_idea_scores.png)
 

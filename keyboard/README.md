@@ -52,8 +52,10 @@ The twelve chosen features in the three groups above:
 ```mermaid
 ---
 config:
-  # the docs theme sets p { line-height: 28px }, which would clip the labels mermaid measured at 1.5
-  themeCSS: "p { line-height: inherit; }"
+  # the docs theme sets p { line-height: 28px }, which would clip the labels mermaid measured at 1.5;
+  # mermaid only colours the root's and the third branch's HTML labels, so the other branches would take the
+  # page's text colour, which is light grey on these pastel fills in dark mode
+  themeCSS: "p { line-height: inherit; } .mindmap-node .nodeLabel { color: #1a1a1a; }"
   themeVariables:
     git0: "#c3cbf2"
     gitBranchLabel0: "#1a1a1a"

@@ -459,7 +459,7 @@ def shear_cutaway():
         ("TMAG5170 3-axis Hall sensor (VSSOP-8)\nreads Bx, By, Bz under the magnet", (1.4, -1.0, 0.9), "R"),
     ]
     tags = [("Z press", (0, 0, 26.0), 0, 14), ("X push", (-19.5, 0, 14.5), -6, 14),
-            ("Y push", (21.0, -12.0, 21.0), 10, -14)]
+            ("Y push", (21.0, -12.0, 21.0), 44, -14)]
     view3d(os.path.join(OUT, "mech_shear_key_cutaway.png"), [items, arrows], elev=20, azim=-58, labels=labels,
            tags=tags, size=(12, 8.6), zoom=0.74, max_edge=0.8,
            title="Shear key: a stem guide hung on flexure posts over a 3-axis Hall sensor (concept)")
@@ -530,7 +530,7 @@ def shear_section():
         (f"red circle: where the magnet centre\ncan go (\u00b1{lat:.1f} mm, the roof-hole stop)",
          (lat * 0.7, -lat * 0.7), "R"),
         ("dashed: TMAG5170 below (z 0-1 mm)", (1.5, -1.2), "R"),
-        ("housing", (6.9, -6.0), "R"),
+        ("housing", (6.2, -3.5), "R"),
     ]
     label2d(fig, a3, lab3, right_px=18)
     fig.canvas.draw()
@@ -604,6 +604,8 @@ def wheel_section():
     fig = plt.figure(figsize=(17, 8.4), dpi=DPI)
     zc = M.WHEEL_Z
     ax = section_axes(fig, [0.20, 0.09, 0.60, 0.84], items, Plane.XZ, ("X", "Z"), (-30.0, 40.0), (-27.5, 14.0))
+    ax.set_ylabel("")              # the left callout column would hide it: the unit goes at the top of the axis
+    ax.text(-30.0, 14.4, "z (mm)", ha="center", va="bottom", fontsize=9)
     ax.axhline(zc, color=(0.3, 0.3, 0.3), lw=0.6, ls=(0, (8, 3, 2, 3)), zorder=30)
     ax.text(39.5, zc + 0.3, "shaft axis", fontsize=8, color=(0.3, 0.3, 0.3), ha="right", va="bottom")
     labels = [
@@ -730,7 +732,7 @@ def lra_3d_panel(path):
         ("coin LRA, about 10 mm across\nand 2.7 mm thick (cut in half)", (2.0, 0.0, 3.6), "R"),
         ("slot all round the cradle", (9.2, 2.0, 2.4), "R"),
         ("case floor (printed)", (12.0, 6.0, 2.4), "R"),
-        ("cradle, printed with the case", (-6.6, 0.0, 3.0), "L"),
+        ("cradle, printed with the case", (-2.5, 0.0, 1.1), "L"),
         ("flexure arm: the only path\nfrom cradle to case", (-8.2, 0.3, 2.4), "L"),
         ("TPU foot", (-11.0, 0.0, -0.8), "L"),
         ("desk", (-12.0, -6.0, -1.5), "L"),
@@ -746,15 +748,16 @@ def lra_plan_panel(path):
     zc = 0.5 * (c["arm_z"][0] + c["arm_z"][1])
     ax = section_axes(fig, [0.34, 0.10, 0.50, 0.80], items, Plane.XY.offset(zc), ("X", "Y"), (-12.5, 12.5),
                       (-12.5, 12.5))
-    ax.set_ylabel("")
-    ax.set_title(f"plan section at z = {zc:.1f} mm, through the arms", fontsize=11)
+    ax.set_ylabel("")              # the left callout column would hide it: the unit goes at the top of the axis
+    ax.text(-12.5, 12.9, "y (mm)", ha="center", va="bottom", fontsize=9)
+    ax.set_title(f"plan section at z = {zc:.1f} mm, through the arms", fontsize=11, pad=16)
     labels = [
         ("coin LRA", (-2.0, -2.0), "L"),
         ("cradle", (-5.2, -4.0), "L"),
-        ("case floor", (-11.0, 10.0), "L"),
+        ("case floor", (-11.0, 11.5), "L"),
         ("three flexure arms, each about\n95\u00b0 of arc (illustrative)",
          (8.2 * np.cos(np.radians(150)), 8.2 * np.sin(np.radians(150))), "L"),
-        ("arm root in the floor", (9.5 * np.cos(np.radians(183)), 9.5 * np.sin(np.radians(183))), "L"),
+        ("arm root in the floor", (9.5 * np.cos(np.radians(184)), 9.5 * np.sin(np.radians(184))), "L"),
         ("slot (air)", (9.2 * np.cos(np.radians(20)), 9.2 * np.sin(np.radians(20))), "R"),
         ("arm root in the cradle", (7.2 * np.cos(np.radians(334)), 7.2 * np.sin(np.radians(334))), "R"),
     ]
