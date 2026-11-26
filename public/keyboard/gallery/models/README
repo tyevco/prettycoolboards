@@ -1,0 +1,21 @@
+Generated files: do not hand-edit.
+
+The keyboard is a concept. Nothing here is designed, built or measured: every model and image is a concept
+sketch with illustrative geometry, or a simple-model estimate.
+
+models/*.glb.txt  one-line base64 of the binary glTF in keyboard/hardware/concept/models/ (git-ignored there).
+                  The page fetches <name>.glb + ".txt" and decodes it, as the caliper gallery does.
+img/*.png         copies of keyboard/hardware/concept/renders/*.png and keyboard/docs/figures/phys_*.png.
+
+Generators (run from the repo root; see each script's docstring):
+  keyboard/hardware/concept/render_keyboard.py    keyboard_assembly.glb, keyboard_half_exploded.glb, keyboard_*.png
+  keyboard/hardware/concept/render_mechanisms.py  mech_shear_key.glb, mech_thumb_wheel.glb, mech_*.png
+  keyboard/hardware/concept/render_testbed.py     testbed_assembly.glb, testbed_*.png
+  keyboard/docs/figures/physics.py                phys_*.png
+
+After regenerating, refresh this folder and img/ from the repo root:
+
+  for f in keyboard/hardware/concept/models/*.glb; do
+    base64 -w0 "$f" > "public/keyboard/gallery/models/$(basename "$f").txt"
+  done
+  cp keyboard/hardware/concept/renders/*.png keyboard/docs/figures/phys_*.png public/keyboard/gallery/img/

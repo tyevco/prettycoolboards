@@ -17,6 +17,52 @@ Each proposed 8–12 differentiating ideas with the closest prior art. A sceptic
 to refute novelty, check feasibility on this toolchain (JLC assembly, LCSC stock, firmware, power), rate each idea's
 daily-driver value and give it a 1–10 score for worth building. It also added ideas the researcher had missed.
 
+The method in one picture:
+
+```mermaid
+---
+config:
+  # the docs theme sets p { line-height: 28px }, which would clip the labels mermaid measured at 1.5
+  themeCSS: "p { line-height: inherit; }"
+  flowchart:
+    nodeSpacing: 14
+    rankSpacing: 40
+---
+flowchart TB
+  subgraph RS["Researchers (web search)"]
+    direction LR
+    R1["Switch and<br/>sensing"]:::res
+    R2["Input and<br/>feedback"]:::res
+    R3["MCU and<br/>software"]:::res
+    R4["Ergonomics<br/>and form"]:::res
+    R5["Designed-<br/>as-code"]:::res
+  end
+  R1 -->|"8–12 ideas"| S1["sceptic"]:::sk
+  R2 -->|"8–12 ideas"| S2["sceptic"]:::sk
+  R3 -->|"8–12 ideas"| S3["sceptic"]:::sk
+  R4 -->|"8–12 ideas"| S4["sceptic"]:::sk
+  R5 -->|"8–12 ideas"| S5["sceptic"]:::sk
+  S1 --> SC
+  S2 --> SC
+  S3 --> SC
+  S4 --> SC
+  S5 --> SC
+  SC["Each sceptic refutes<br/>novelty; checks JLC,<br/>LCSC stock, firmware<br/>and power; rates<br/>daily-driver value;<br/>scores 1–10; adds<br/>missed ideas"]:::sk
+  SC --> O{"Owner picks<br/>2026-11-25"}
+  SC -.- CAV["Caveat: 4 of the 5<br/>sceptics could not<br/>search the web. Their<br/>prior-art checks rest<br/>on the researchers'<br/>sources and their<br/>own knowledge"]:::cav
+  O -->|picked| C["concept.md<br/>features, roadmap"]:::out
+  O -->|not picked| N["research.md<br/>the rest, with the<br/>sceptic's score and case"]:::out
+
+  classDef res fill:#dcebfb,stroke:#1565c0,stroke-width:1.5px,color:#0d2238
+  classDef sk fill:#fdeec4,stroke:#a86b00,stroke-width:1.5px,color:#2b1d00
+  classDef cav fill:#fbe0e0,stroke:#c62828,stroke-width:1.5px,stroke-dasharray:6 4,color:#3a0d0d
+  classDef out fill:#f4f4f6,stroke:#6b6b78,stroke-width:1.5px,color:#1a1a22
+```
+
+*How the desk research ran: five researchers with web search, each proposing 8–12 ideas; one sceptic per area to
+refute and score them; then the owner's pick on 2026-11-25. Four of the five sceptics could not search the web, so
+some prior-art checks rest on the researchers' sources and the sceptics' own knowledge.*
+
 **Caveats:**
 
 * **Search coverage.** Four of the five sceptics could not run web search, so their prior-art checks rest on the
@@ -25,6 +71,13 @@ daily-driver value and give it a 1–10 score for worth building. It also added 
 * **Stock figures.** Stock and price figures are from 2026-11-25 and change daily. Recheck them at LCSC/JLC, and
   with `tools/lcsc_check.py` once the parts are in a generated netlist.
 * **Links.** The links below are as the research found them. They were not all re-checked.
+
+Where the 54 proposed ideas sit on the sceptics' novelty and feasibility ratings:
+
+![A four-by-four grid with the sceptic's novelty rating across (table stakes, common, niche exists, rare) and feasibility down (straightforward, hard, research needed, impractical). Each cell shows its idea count and one dot per idea, coloured by status (blue picked, orange folded, grey not picked), and lists the picked ideas by name with their concept.md section. Most ideas are 'niche exists' (32), and the largest cell is niche exists by hard (15). The 12 picks fall only in the niche-exists and rare columns and never in the impractical row.](figures/data_novelty_feasibility.png)
+
+*The sceptics' own ratings of the 54 ideas: opinions from desk research, not measurements (some "rare" ratings may be
+generous, as the caveat above says). Only the 12 picked ideas are named; the table below lists the rest.*
 
 ## The landscape (late 2026)
 
@@ -98,6 +151,17 @@ sceptic's 1–10 for worth building. The owner picked none of these, but the sce
 keep for the memory-LCD strip, strain analytics and the pose-aware IMU, and keep as a moonshot for the FIDO2
 authenticator, typing data designing the next PCB, the sensed column rig and the fingertip clusters.
 
+Every proposed idea with its sceptic's score, and which ones the owner picked (the figure is tall: open it on its own
+to read it at full size):
+
+![Lollipop chart of all 54 researched keyboard ideas in five research-area groups, each row showing the sceptic's 1-10 score, sorted by score. The 12 picked ideas are blue dots with bold labels and their concept.md section, the 7 folded ideas are orange diamonds, and the 35 not-picked ideas are grey open circles. A right-hand column gives the sceptic's verdict: keep, keep as moonshot, demote or drop. No idea scores above 7, and all six 7s are picked.](figures/data_idea_scores.png)
+
+*Desk-research opinion data, not measurements: each area's sceptic scored every proposed idea from 1 to 10 for worth
+building, and four of the five sceptics could not search the web. The owner picked all six ideas scored 7, five
+scored 6 and one scored 5 (printed coils, a moonshot). Orange marks the seven ideas that became part of a picked
+feature outright, so they are not in the table below; rows the table describes as folded into a feature, such as the
+sensed column rig, count as not picked here.*
+
 | Idea | Score | The sceptic's case |
 |---|---|---|
 | Load-cell plate fusing force with travel | 4 | Hand-bonded gauges (not JLC), a new mechanical architecture, and a fusion solver that fails under ordinary rollover. Force plates are classic ergonomics lab rigs. A cheaper route if force is ever wanted: capacitive plate-gap sensing with generated electrodes |
@@ -133,6 +197,48 @@ authenticator, typing data designing the next PCB, the sensed column rig and the
 | FEA-optimised flex cuts for uniform feel | 3 | The key tool is off-repo and the claim is unvalidated |
 | Strike-point sensing with 3-axis Hall on every key | 3 | Fitting data read once; at most a 4-key experiment on the sensing coupon panel |
 | Generated pogo-bed production fixture | 3 | Keep generated test pads and a netlist coverage report; point them at the latency rig instead |
+
+Six rows of the table point, in their sceptic's case, to a feature the owner did pick:
+
+```mermaid
+---
+config:
+  # the docs theme sets p { line-height: 28px }, which would clip the labels mermaid measured at 1.5
+  themeCSS: "p { line-height: inherit; }"
+  flowchart:
+    nodeSpacing: 14
+    rankSpacing: 70
+---
+flowchart LR
+  I1["Differential dual-Hall<br/>per key<br/>(score 3)"]:::idea
+  I2["Generated 2D capacitive<br/>thumb trackpad<br/>(score 5)"]:::idea
+  I3["Sensed adjustable<br/>column rig<br/>(score 6)"]:::idea
+  I4["On-device ergonomics<br/>telemetry<br/>(score 4)"]:::idea
+  I5["Ergonomic rule check<br/>as a release gate<br/>(score 5)"]:::idea
+  I6["Generated pogo-bed<br/>production fixture<br/>(score 3)"]:::idea
+
+  T1["§3.4 two to four<br/>switch-free reference<br/>sensors"]:::pick
+  T2["§3.3 a 1D capacitive strip<br/>with LRA ticks"]:::pick
+  T3["§4.4 fit to your hand"]:::pick
+  T4["§3.2 flight recorder"]:::pick
+  T5["§4.1 keycap clearance<br/>gate; other rules<br/>only a report"]:::pick
+  T6["§4.2 latency rig, via<br/>generated test pads"]:::pick
+
+  I1 --> T1
+  I2 --> T2
+  I3 --> T3
+  I4 --> T4
+  I4 --> T3
+  I5 --> T5
+  I6 --> T6
+
+  classDef idea fill:#f4f4f6,stroke:#6b6b78,stroke-width:1.5px,color:#1a1a22
+  classDef pick fill:#dcebfb,stroke:#1565c0,stroke-width:2px,color:#0d2238
+```
+
+*Six not-picked ideas whose sceptic's case points to a feature in [concept.md](concept.md), each with the sceptic's
+1–10 score. They stay in the table as not picked; this only maps the desk research, and none of these features is
+designed.*
 
 **Smaller ideas from the sceptics, not yet placed:** a ToF presence sensor (wake on approach, lock on leave),
 hot-standby BLE links to every host (relaying the user's own BLE mouse is already in [concept §3.1](concept.md#_3-1-two-host-kvm)), a keystroke-timing anonymiser mode, a
