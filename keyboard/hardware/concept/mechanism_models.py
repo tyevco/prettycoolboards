@@ -92,7 +92,9 @@ def rr_loft(w0, d0, r0, z0, w1, d1, r1, z1):
 
 
 def spring(z0, z1, r_mean, wire, turns):
-    """A helical compression spring between z0 and z1 (open ends)."""
+    """A helical compression spring between z0 and z1 (open ends). The wire's centre-line is inset by the wire
+    radius at both ends, so the end coils touch the surfaces at z0 and z1 instead of running into them."""
+    z0, z1 = z0 + wire / 2, z1 - wire / 2
     h = Helix(pitch=(z1 - z0) / turns, height=z1 - z0, radius=r_mean, center=(0, 0, z0))
     prof = Plane(origin=h.position_at(0), z_dir=h.tangent_at(0)) * Circle(wire / 2)
     return sweep(prof, path=h, is_frenet=True)

@@ -79,7 +79,8 @@ Where the 54 proposed ideas sit on the sceptics' novelty and feasibility ratings
 ![A four-by-four grid with the sceptic's novelty rating across (table stakes, common, niche exists, rare) and feasibility down (straightforward, hard, research needed, impractical). Each cell shows its idea count and one dot per idea, coloured by status (blue picked, orange folded, grey not picked), and lists the picked ideas by name with their concept.md section. Most ideas are 'niche exists' (32), and the largest cell is niche exists by hard (15). The 12 picks fall only in the niche-exists and rare columns and never in the impractical row.](figures/data_novelty_feasibility.png)
 
 *The sceptics' own ratings of the 54 ideas: opinions from desk research, not measurements (some "rare" ratings may be
-generous, as the caveat above says). Only the 12 picked ideas are named; the table below lists the rest.*
+generous, as the caveat above says). Only the 12 picked ideas are named here; the scores figure below names all 54,
+and the table lists the not-picked ones (two of its rows cover two ideas each).*
 
 ## The landscape (late 2026)
 
@@ -162,7 +163,9 @@ Every proposed idea with its sceptic's score, and which ones the owner picked (t
 building, and four of the five sceptics could not search the web. The owner picked all six ideas scored 7, five
 scored 6 and one scored 5 (printed coils, a moonshot). Orange marks the seven ideas that became part of a picked
 feature outright, so they are not in the table below; rows the table describes as folded into a feature, such as the
-sensed column rig, count as not picked here.*
+sensed column rig, count as not picked here. Folded does not mean decided as proposed: the adaptive-rate idea's chip
+is not chosen ([concept §5](concept.md#_5-platform-let-the-testbed-decide)), and the 8 kHz Hall bus is a rev A
+test.*
 
 | Idea | Score | The sceptic's case |
 |---|---|---|
@@ -180,7 +183,7 @@ sensed column rig, count as not picked here.*
 | Force-based typing coaching | 3 | Bottom-out force is invisible to position sensors; no evidence of benefit |
 | Built-in FIDO2 authenticator with a trusted input path | 5 | Real but niche: one authenticator for both KVM hosts and a trusted passphrase path. Fingerprint keyboards already give passkeys through Windows Hello and Touch ID (from memory). A candidate for later |
 | Standalone on-device ergonomics telemetry | 4 | Hobby mods already do it, and the fatigue claims are unvalidated. Made a data source for the flight recorder and the fit loop |
-| Typing data designs the next PCB | 5 | Typing on one geometry does not identify a better geometry; geometry comes from fit instead |
+| Typing data designs the next PCB | 5 (software lens, keep as a moonshot); 5 for the designed-as-code lens's telemetry-to-geometry loop (demote) | Typing on one geometry does not identify a better geometry; geometry comes from fit instead |
 | Timestamped sub-ms wireless split | 4 | Mitosis (2017) and several commercial boards; a refinement for the platform choice, not a feature |
 | Sandboxed WebAssembly scripts on the device | 3 | HID Remapper's expressions (and, from memory, UHK's smart macros) already script without reflashing |
 | Channel Sounding walk-away lock | 2 | RSSI proximity locks are good enough at a desk; a gimmick |
@@ -200,7 +203,7 @@ sensed column rig, count as not picked here.*
 | Strike-point sensing with 3-axis Hall on every key | 3 | Fitting data read once; at most a 4-key experiment on the sensing coupon panel |
 | Generated pogo-bed production fixture | 3 | Keep generated test pads and a netlist coverage report; point them at the latency rig instead |
 
-Six rows of the table point, in their sceptic's case, to a feature the owner did pick:
+Ten rows of the table point, in their sceptic's case, to a feature the owner did pick:
 
 ```mermaid
 ---
@@ -215,9 +218,13 @@ flowchart LR
   I1["Differential dual-Hall<br/>per key<br/>(score 3)"]:::idea
   I2["Generated 2D capacitive<br/>thumb trackpad<br/>(score 5)"]:::idea
   I3["Sensed adjustable<br/>column rig<br/>(score 6)"]:::idea
+  I9["Typing data designs<br/>the next PCB<br/>(score 5, two lenses)"]:::idea
   I4["On-device ergonomics<br/>telemetry<br/>(score 4)"]:::idea
   I5["Ergonomic rule check<br/>as a release gate<br/>(score 5)"]:::idea
   I6["Generated pogo-bed<br/>production fixture<br/>(score 3)"]:::idea
+  I10["Force and travel dyno<br/>with a stepper<br/>(score 4)"]:::idea
+  I7["Exact per-user unrolled<br/>flex keywell<br/>(score 4)"]:::idea
+  I8["Strike-point sensing<br/>with 3-axis Hall<br/>on every key<br/>(score 3)"]:::idea
 
   T1["§3.4 two to four<br/>switch-free reference<br/>sensors"]:::pick
   T2["§3.3 a 1D capacitive strip<br/>with LRA ticks"]:::pick
@@ -225,22 +232,30 @@ flowchart LR
   T4["§3.2 flight recorder"]:::pick
   T5["§4.1 keycap clearance<br/>gate; other rules<br/>only a report"]:::pick
   T6["§4.2 latency rig, via<br/>generated test pads"]:::pick
+  T9["§4.2 latency gate,<br/>which needs<br/>no mechanics"]:::pick
+  T7["§2.2 rigid column<br/>boards first"]:::pick
+  T8["§4.3 / §7 sensing coupons:<br/>at most a 4-key experiment<br/>(§7 does not plan one)"]:::pick
 
   I1 --> T1
   I2 --> T2
   I3 --> T3
-  I4 --> T4
+  I9 --> T3
   I4 --> T3
+  I4 --> T4
   I5 --> T5
   I6 --> T6
+  I10 --> T9
+  I7 --> T7
+  I8 --> T8
 
   classDef idea fill:#f4f4f6,stroke:#6b6b78,stroke-width:1.5px,color:#1a1a22
   classDef pick fill:#dcebfb,stroke:#1565c0,stroke-width:2px,color:#0d2238
 ```
 
-*Six not-picked ideas whose sceptic's case points to a feature in [concept.md](concept.md), each with the sceptic's
-1–10 score. They stay in the table as not picked; this only maps the desk research, and none of these features is
-designed.*
+*Ten table rows (eleven not-picked ideas: the typing-data row covers two) whose sceptic's case points to a feature in
+[concept.md](concept.md), each with the sceptic's 1–10 score. They stay in the table as not picked; this only maps
+the desk research, and none of these features is designed. Strike-point sensing points to the sensing testbed only as
+"at most a 4-key experiment"; the §7 coupon plan does not include one.*
 
 **Smaller ideas from the sceptics, not yet placed:** a ToF presence sensor (wake on approach, lock on leave),
 hot-standby BLE links to every host (relaying the user's own BLE mouse is already in [concept §3.1](concept.md#_3-1-two-host-kvm)), a keystroke-timing anonymiser mode, a

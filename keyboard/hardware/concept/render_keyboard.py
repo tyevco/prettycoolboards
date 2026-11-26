@@ -48,6 +48,7 @@ MAX_PNG = 440_000
 INK = (0.12, 0.12, 0.12)
 HL = tuple(RL.COLOURS["highlight"])
 WBOX = dict(boxstyle="round,pad=0.25", fc="white", ec=(0.65, 0.65, 0.65), lw=0.6)
+FS = 10.5          # callout font (pt): about 8.5 px at the ~688 px docs column for a 1400-1450 px image
 
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -109,13 +110,25 @@ def callout(ax, xy, text, xytext, ha="left", va="center", color=INK, fs=9):
                 arrowprops=dict(arrowstyle="-", lw=0.7, color=(0.25, 0.25, 0.25), shrinkA=0, shrinkB=1))
 
 
-def stacked(ax, rows, x, gap=14.0, ha="left", fs=9):
-    """Callouts in one column at x, kept gap mm apart, in the order of their anchors' heights.
+def line_mm(ax, fs):
+    """Height (data mm) of one text line at fs points, from the axes' current scale. Call after the limits and the
+    figure layout are final (frame, subplots_adjust)."""
+    ax.apply_aspect()
+    fig = ax.figure
+    px_per_mm = abs(ax.transData.transform((1.0, 0.0))[0] - ax.transData.transform((0.0, 0.0))[0])
+    return fs * fig.dpi / 72 * 1.25 / px_per_mm
+
+
+def stacked(ax, rows, x, gap=14.0, ha="left", fs=9, lm=None):
+    """Callouts in one column at x, in the order of their anchors' heights, at least gap mm apart and, when lm (the
+    height of a text line in mm, see line_mm) is given, far enough apart for their line counts.
     rows = [(anchor_xy, text, colour)]."""
     rows = sorted(rows, key=lambda r: -r[0][1])
     ys = [r[0][1] for r in rows]
+    n = [r[1].count("\n") + 1 for r in rows]
     for i in range(1, len(ys)):
-        ys[i] = min(ys[i], ys[i - 1] - gap)
+        need = gap if lm is None else max(gap, (n[i] + n[i - 1]) / 2 * lm + 0.9 * lm)
+        ys[i] = min(ys[i], ys[i - 1] - need)
     for (p, t, c), y in zip(rows, ys):
         callout(ax, p, t, (x, y), ha=ha, color=c, fs=fs)
 
@@ -220,34 +233,34 @@ def fig_assembly(hl, hr, ml, mr):
 
 def fig_top(hl, hr, ml, mr):
     cam = camera(90, -90)
-    fig, ax = plt.subplots(figsize=(15, 8.2), dpi=120)
+    fig, ax = plt.subplots(figsize=(13, 7.2), dpi=120)
     lo, hi = paint(ax, KM.moved(visible(hl), ml) + KM.moved(visible(hr), mr), cam, max_edge=4.0)
     P = lambda m, p: project(cam, tf(m, p))[0]          # noqa: E731
 
     def keyc(h, m, name):
         return P(m, h.key(name).m[:3, 3] + h.key(name).m[:3, 2] * (KM.CAP_REST + KM.CAP_H))
 
-    callout(ax, keyc(hl, ml, "F"), "F: shear key", keyc(hl, ml, "F") + (-62, 66), ha="center")
-    callout(ax, keyc(hr, mr, "J"), "J: shear key", keyc(hr, mr, "J") + (30, 62), ha="center")
+    callout(ax, keyc(hl, ml, "F"), "F: shear key", keyc(hl, ml, "F") + (-74, 58), ha="center", fs=FS)
+    callout(ax, keyc(hr, mr, "J"), "J: shear key", keyc(hr, mr, "J") + (30, 62), ha="center", fs=FS)
     tl, tr = keyc(hl, ml, "T2"), keyc(hr, mr, "T2")
     wn = dict((n, s) for n, s, c, g in hl.parts)
     wc = P(ml, np.array(tuple(wn["wheel tyre"].center())))
-    callout(ax, wc, "haptic thumb wheel", wc + (42, 30), ha="left")
+    callout(ax, wc, "haptic thumb wheel", wc + (42, 30), ha="left", fs=FS)
     # hidden parts: dashed silhouettes
     for h, m, t, off in ((hl, ml, tl, (-34, -58)), (hr, mr, tr, (34, -58))):
         nm = dict((n, s) for n, s, c, g in h.parts)
         outline(ax, KM.moved([("lra", nm["LRA"], "lra")], m)[0][1], cam)
-        callout(ax, t, "thumb shear key\n(dashed circle: the LRA,\ninside, under it)", t + off, ha="center")
+        callout(ax, t, "thumb shear key\n(dashed circle: the LRA,\ninside, under it)", t + off, ha="center", fs=FS)
     nm = dict((n, s) for n, s, c, g in hl.parts)
     # A sits right of B in this view: A's label up and right, B's up and left, so the leaders do not cross
     for tag, off in (("A", (22, 24)), ("B", (-22, 38))):
         u = outline(ax, KM.moved([("u", nm[f"USB-C {tag}"], "usb")], ml)[0][1], cam)
         c = u.mean(0)
-        callout(ax, c, f"USB-C {tag} (back wall)", c + off, ha="center")
+        callout(ax, c, f"USB-C {tag} (back wall)", c + off, ha="center", fs=FS)
     ax.text(0.5 * (lo[0] + hi[0]), lo[1] - 44, "Dashed: inside the case, seen through it.  Blue: the shear keys "
-            "(F, J and one thumb key per half).  Orange: the one haptic wheel (which half: not decided).",
-            ha="center", va="top", fontsize=9, color=(0.3, 0.3, 0.3))
-    frame(ax, lo - (0, 50), hi + (0, 24), pad=10)
+            "(F, J and one thumb key per half).\nOrange: the one haptic wheel (which half: not decided).",
+            ha="center", va="top", fontsize=FS, color=(0.3, 0.3, 0.3), linespacing=1.3)
+    frame(ax, lo - (0, 56), hi + (0, 24), pad=10)
     save(fig, "keyboard_top.png", "Rev B keyboard concept: top view (M preset)")
 
 
@@ -261,7 +274,7 @@ def fig_side(hl, hr):
     ml, mr = KM.T(-gap / 2, 0, 0), KM.T(gap / 2, 0, 0)
     lo, hi = paint(ax, KM.moved(visible(hl), ml) + KM.moved(visible(hr), mr), cam, max_edge=4.0)
     ax.plot([lo[0] - 10, hi[0] + 10], [0, 0], color=(0.35, 0.35, 0.35), lw=1.2)
-    ax.text(hi[0] + 8, -2.5, "desk", ha="right", va="top", fontsize=9, color=(0.35, 0.35, 0.35))
+    ax.text(hi[0] + 8, -2.5, "desk", ha="right", va="top", fontsize=10.5, color=(0.35, 0.35, 0.35))
     for h, m, sgn in ((hl, ml, -1), (hr, mr, 1)):
         k = h.key("D" if h.side == "L" else "K")           # middle column home key: no row-curvature tilt
         o = KM.pt(m @ k.m)
@@ -277,12 +290,12 @@ def fig_side(hl, hr):
         r = 62
         ax.plot(p1[0] - sgn * r * np.cos(th), r * np.sin(th), color=HL, lw=1.1)
         ax.text(p1[0] - sgn * (r + 6), 6, f"tent {ang:.0f}°", ha="right" if sgn > 0 else "left", va="bottom",
-                fontsize=11, color=HL, bbox=dict(boxstyle="round,pad=0.2", fc="white", ec="none", alpha=0.9))
+                fontsize=12.5, color=HL, bbox=dict(boxstyle="round,pad=0.2", fc="white", ec="none", alpha=0.9))
     ax.text(0.5 * (lo[0] + hi[0]), hi[1] + 10, "Front elevation, halves untwisted and pushed together. Dashed: the "
-            "plane of the middle column's home key; the inner (thumb) side is up.", ha="center", fontsize=9.5,
+            "plane of the middle column's home key; the inner (thumb) side is up.", ha="center", fontsize=10.5,
             color=(0.3, 0.3, 0.3))
     frame(ax, (lo[0] - 10, -6), (hi[0] + 10, hi[1] + 16), pad=4)
-    ax.set_title("Tent: both halves from the front", fontsize=11.5)
+    ax.set_title("Tent: both halves from the front", fontsize=12.5)
 
     for i, (name, title) in enumerate((("K", "middle finger"), (";", "pinky"))):
         ax2 = fig.add_subplot(gs[1, i])
@@ -305,40 +318,42 @@ def fig_side(hl, hr):
             a = np.radians(row * col["alpha"])
             ax2.plot([0, r * np.sin(a)], [r, r - r * np.cos(a)], ls=":", lw=0.8, color=HL)
         ax2.plot([0], [r], marker="+", ms=11, mew=1.5, color=HL)
-        ax2.text(3, r + 1.5, f"flexion centre (sketch)\nR = {r:.0f} mm at the plate, {col['alpha']:.1f}° per row\n"
-                 f"(caps {KM.PITCH + 0.25:.2f} mm apart at their skirts)", fontsize=8.5, color=HL, va="bottom")
+        ax2.text(3, r + 1.5, f"flexion centre (sketch)\nR = {r:.0f} mm at the plate,\n{col['alpha']:.1f}° per row "
+                 f"(caps {KM.PITCH + 0.25:.2f} mm\napart at their skirts)", fontsize=10.5, color=HL, va="bottom")
         ka = np.radians(col["alpha"])
         cap_pt = (r * np.sin(ka) + 2.0, r - r * np.cos(ka) + 12.0)
-        ax2.annotate("keycaps (rest)", xy=cap_pt, xytext=(cap_pt[0] + 14, cap_pt[1] + 16), fontsize=8.5,
+        ax2.annotate("keycaps (rest)", xy=cap_pt, xytext=(cap_pt[0] + 14, cap_pt[1] + 16), fontsize=10.5,
                      arrowprops=dict(arrowstyle="-", lw=0.6))
         ax2.annotate("plate: top shell", xy=(r * np.sin(ka) + 11, r - r * np.cos(ka) + 2.0),
-                     xytext=(cap_pt[0] + 14, cap_pt[1] - 2), fontsize=8.5, arrowprops=dict(arrowstyle="-", lw=0.6))
+                     xytext=(cap_pt[0] + 14, cap_pt[1] - 2), fontsize=10.5, arrowprops=dict(arrowstyle="-", lw=0.6))
         bb = (r + KM.SW_BOT_H + 0.4)
         bp = (-bb * np.sin(ka * 0.6), r - bb * np.cos(ka * 0.6))
         ax2.annotate("column board: 0.8 mm,\nbent to the column's arc", xy=bp, xytext=(-66, bp[1] + 22),
-                     fontsize=8.5, arrowprops=dict(arrowstyle="-", lw=0.6))
-        ax2.text(-66, dz + 2.5, "desk", fontsize=8, color=(0.3, 0.3, 0.3))
+                     fontsize=10.5, arrowprops=dict(arrowstyle="-", lw=0.6))
+        ax2.text(-66, dz + 2.5, "desk", fontsize=10, color=(0.3, 0.3, 0.3))
         if name == "K":
-            ax2.annotate("main board and MCU module", xy=(-8, dz + 7.0), xytext=(-62, dz + 13), fontsize=8.5,
+            ax2.annotate("main board and MCU module", xy=(-8, dz + 7.0), xytext=(-62, dz + 13), fontsize=10.5,
                          arrowprops=dict(arrowstyle="-", lw=0.6))
         else:
-            ax2.annotate("battery", xy=(-8, dz + 6.0), xytext=(-55, dz + 13), fontsize=8.5,
+            ax2.annotate("battery", xy=(-8, dz + 6.0), xytext=(-55, dz + 13), fontsize=10.5,
                          arrowprops=dict(arrowstyle="-", lw=0.6))
             ax2.text(-66, r - 6, "The pinky column is splayed, so this\nplane is not square to the desk.",
-                     ha="left", va="top", fontsize=8.5, color=(0.3, 0.3, 0.3))
+                     ha="left", va="top", fontsize=10.5, color=(0.3, 0.3, 0.3))
         ax2.set_xlim(-68, 62)
-        ax2.set_ylim(dz - 4, r + 16)
+        ax2.set_ylim(dz - 4, r + 24)
         ax2.set_aspect("equal")
-        ax2.set_xlabel("along the column (mm, + away from the typist)", fontsize=8.5)
-        ax2.set_ylabel("along the home key's axis (mm)", fontsize=8.5)
-        ax2.tick_params(labelsize=7.5)
+        ax2.set_xlabel("along the column (mm, + away from the typist)", fontsize=10.5)
+        ax2.set_ylabel("along the home key's axis (mm)", fontsize=10.5)
+        ax2.tick_params(labelsize=9.5)
         ax2.grid(True, lw=0.3, alpha=0.5)
-        ax2.set_title(f"Keywell arc: cut in the {title} column's plane (right half)", fontsize=11)
+        ax2.set_title(f"Keywell arc: cut in the {title} column's plane (right half)", fontsize=12)
     save(fig, "keyboard_side.png", "Rev B keyboard concept: tent and keywell curvature (M preset)")
 
 
-def layer_labels(ax, cam, items_by_group, labels, x_text, side="right"):
-    """One label per exploded layer, in a column beside the drawing, with a leader to the layer."""
+def layer_labels(ax, cam, items_by_group, labels, x_text, side="right", fs=9, lm=None, at=None):
+    """One label per exploded layer, in a column beside the drawing, with a leader to the layer. lm: the height of
+    a text line in mm (line_mm), so multi-line labels are kept apart by their own heights. at: {group: part name}
+    anchors that group's leader on the centre of that part instead of the layer's outer edge."""
     rows = []
     for g, text in labels:
         pts = []
@@ -353,18 +368,25 @@ def layer_labels(ax, cam, items_by_group, labels, x_text, side="right"):
         if len(near) == 0:
             near = p
         anchor = near[np.argmax(near[:, 0])] if side == "right" else near[np.argmin(near[:, 0])]
+        if at and g in at:
+            part = [s for n, s, _c in items_by_group[g] if n == at[g]][0]
+            anchor = project(cam, np.array(tuple(part.center())))[0]
+            yc = anchor[1]
         rows.append([anchor, yc, text])
     rows.sort(key=lambda r: -r[1])
     ys = [r[1] for r in rows]
-    for i in range(1, len(ys)):                       # keep the text rows at least 13 mm apart
-        ys[i] = min(ys[i], ys[i - 1] - 13.0)
+    n = [r[2].count("\n") + 1 for r in rows]
+    for i in range(1, len(ys)):                       # keep the text rows at least 13 mm (or their height) apart
+        need = 13.0 if lm is None else max(13.0, (n[i] + n[i - 1]) / 2 * lm + 0.9 * lm)
+        ys[i] = min(ys[i], ys[i - 1] - need)
     for (anchor, _yc, text), y in zip(rows, ys):
-        callout(ax, anchor, text, (x_text, y), ha="left" if side == "right" else "right", fs=9)
+        callout(ax, anchor, text, (x_text, y), ha="left" if side == "right" else "right", fs=fs)
+
 
 
 def fig_exploded(hl):
     cam = camera(30, -112)
-    fig, ax = plt.subplots(figsize=(15, 15), dpi=120)
+    fig, ax = plt.subplots(figsize=(13, 13), dpi=120)
     ex = []
     up = hl.info["up"]
     groups = {}
@@ -375,24 +397,26 @@ def fig_exploded(hl):
         ex.append((n, sm, c))
         groups.setdefault(g, []).append((n, sm, c))
     lo, hi = paint(ax, ex, cam, max_edge=3.5)
-    labels = [("cap", "keycaps (blue: the shear keys F and the thumb home key)"),
-              ("switch", "Hall-effect switches, socketless\n(teal: custom centring-stem switches under the shear "
-                         "keys)"),
+    labels = [("cap", "keycaps (blue: the shear keys F\nand the thumb home key)"),
+              ("switch", "magnetic switches, socketless\n(Hall-effect or TMR: rev A decides;\nteal: custom "
+                         "centring-stem\nswitches under the shear keys)"),
               ("case", "top shell: plate and walls (printed)"),
-              ("board", "column boards (0.8 mm, bent to each arc) and a flat thumb board,\njoined by flex links"),
-              ("wheel", "haptic wheel: roller, gimbal motor, MT6701CT encoder"),
-              ("main", "main board: MCU module (chip not chosen), USB-C A and B,\nhost-B controller and isolator "
-                       "(two-host KVM)"),
-              ("battery", "LiPo battery (size not chosen) and coin LRA"),
+              ("board", "column boards (0.8 mm, bent to\neach arc) and a flat thumb\nboard, joined by flex links"),
+              ("wheel", "haptic wheel: roller, BLDC gimbal\nmotor (not chosen; 2804-class in\nthis sketch), "
+                        "MT6701CT or\nAS5047P encoder (candidate)"),
+              ("main", "main board: MCU module (chip\nnot chosen), USB-C A and B,\nhost-B controller and isolator\n"
+                       "(if isolated) for the two-host KVM"),
+              ("battery", "LiPo battery (size not chosen)\nand coin LRA"),
               ("floor", "floor")]
-    layer_labels(ax, cam, groups, labels, hi[0] + 20)
-    frame(ax, lo, (hi[0] + 300, hi[1]), pad=6)
+    frame(ax, lo, (hi[0] + 150, hi[1]), pad=6)
+    fig.subplots_adjust(0.005, 0.005, 0.995, 0.995)
+    layer_labels(ax, cam, groups, labels, hi[0] + 16, fs=FS, lm=line_mm(ax, FS), at={"main": "MCU module"})
     save(fig, "keyboard_half_exploded.png", "Rev B keyboard concept: left half, exploded along the tent normal")
 
 
 def fig_internals(hl):
     cam = camera(30, -36)
-    fig, ax = plt.subplots(figsize=(16, 10), dpi=125)
+    fig, ax = plt.subplots(figsize=(14, 9), dpi=125)
     keep = ("floor", "board", "link", "main", "battery", "lra", "wheel")
     items = [(n, s, c) for n, s, c, g in hl.parts if g in keep]
     lo, hi = paint(ax, items, cam, max_edge=3.0)
@@ -402,34 +426,38 @@ def fig_internals(hl):
     def at(name, frac=(0.5, 0.5, 1.0)):
         b = nm[name].bounding_box()
         return P((b.min.X + frac[0] * b.size.X, b.min.Y + frac[1] * b.size.Y, b.min.Z + frac[2] * b.size.Z))
-    rows = [("column board 4", (0.5, 0.5, 1.0), "column boards: one per column,\n0.8 mm, bent to the column's arc"),
+    rows = [("column board 4", (0.5, 0.5, 1.0), "column boards: one per\ncolumn, 0.8 mm, bent\nto the column's arc"),
             ("column board 0", (0.5, 0.5, 1.0), "inner index column's board"),
-            ("battery", (0.3, 0.3, 1.0), "LiPo battery (size not chosen)"),
+            ("battery", (0.3, 0.3, 1.0), "LiPo battery\n(size not chosen)"),
             # a run that shows between two boards (link column 4's centre is hidden under a board)
-            ("link column 5 run", (0.5, 0.5, 0.5), "flex links from each column board\nto the main board"),
+            ("link column 5 run", (0.5, 0.5, 0.5), "flex links from each column\nboard to the main board"),
             ("LRA", (0.5, 0.5, 1.0), "coin LRA on the floor,\nunder the thumb home key"),
-            ("USB-C B", (0.5, 1.0, 1.0), "USB-C A and B at the back wall\n(two-host KVM)"),
+            ("USB-C B", (0.5, 1.0, 1.0), "USB-C A and B at the\nback wall (two-host KVM)"),
             ("MCU module", (0.5, 0.5, 1.0), "main board: MCU module\n(chip not chosen)"),
-            ("digital isolator", (0.5, 0.5, 1.0), "host-B controller and isolator"),
+            ("digital isolator", (0.5, 0.5, 1.0), "host-B controller and\nisolator (if isolated)"),
             ("thumb board", (0.7, 0.5, 1.0), "thumb board (flat)"),
-            ("wheel tyre", (0.5, 0.5, 1.0), "haptic wheel: roller, gimbal motor,\nMT6701CT encoder")]
+            ("wheel tyre", (0.5, 0.5, 1.0), "haptic wheel: roller, BLDC\ngimbal motor (not chosen;\n2804-class in "
+                                            "this sketch),\nMT6701CT or AS5047P\nencoder (candidate)")]
     mid = 0.5 * (lo[0] + hi[0])
+    frame(ax, (lo[0] - 78, lo[1] - 20), (hi[0] + 80, hi[1] + 4), pad=2)
+    fig.subplots_adjust(0.005, 0.005, 0.995, 0.995)
+    lm = line_mm(ax, FS)
     pts = [(at(n, f), t, INK) for n, f, t in rows]
-    stacked(ax, [r for r in pts if r[0][0] < mid], lo[0] - 14, gap=17.0, ha="right")
-    stacked(ax, [r for r in pts if r[0][0] >= mid], hi[0] + 14, gap=17.0, ha="left")
-    ax.text(mid, lo[1] - 12, "Top shell, keycaps and switches removed; seen from the front, inner (thumb) side. Hall "
-            "sensors and passives are not modelled.", ha="center", va="top", fontsize=9.5, color=(0.3, 0.3, 0.3))
-    frame(ax, (lo[0] - 112, lo[1] - 20), (hi[0] + 116, hi[1] + 4), pad=2)
+    stacked(ax, [r for r in pts if r[0][0] < mid], lo[0] - 10, gap=6.0, ha="right", fs=FS, lm=lm)
+    stacked(ax, [r for r in pts if r[0][0] >= mid], hi[0] + 10, gap=6.0, ha="left", fs=FS, lm=lm)
+    ax.text(mid, lo[1] - 12, "Top shell, keycaps and switches removed; seen from the front, inner (thumb) side.\nHall "
+            "sensors and passives are not modelled.", ha="center", va="top", fontsize=FS, color=(0.3, 0.3, 0.3),
+            linespacing=1.3)
     save(fig, "keyboard_internals.png", "Rev B keyboard concept: left half without its top shell")
 
 
 def fig_fit(hm):
     halves = {"S": KM.build_half("L", "S"), "M": hm, "L": KM.build_half("L", "L")}
     cam = camera(90, -90)
-    fig, ax = plt.subplots(figsize=(16, 6.4), dpi=120)
+    fig, ax = plt.subplots(figsize=(12, 5.6), dpi=120)
     ref = {p: h.key("F").m[:3, 3] for p, h in halves.items()}
     foot_m = None
-    xs, step = 0.0, 232.0
+    xs, step = 0.0, 205.0
     spans = {}
     glo, ghi = np.array([1e9, 1e9]), np.array([-1e9, -1e9])
     for p, h in halves.items():
@@ -445,11 +473,12 @@ def fig_fit(hm):
             foot_m = [np.array([(e.position_at(t).X, e.position_at(t).Y) for e in fc.outer_wire().edges()
                                 for t in np.linspace(0, 1, 6)]) + (-f[0], -f[1]) for fc in h.info["footprint"].faces()]
         cols = h.info["cols"]
-        ax.text(cx, -118, f"{p}: scale {KM.PRESETS[p]:.2f}", ha="center", fontsize=12, weight="bold")
-        ax.text(cx, -129, f"{spans[p][0]:.0f} × {spans[p][1]:.0f} mm, keycaps up to {spans[p][2]:.0f} mm",
-                ha="center", fontsize=9.5, color=(0.25, 0.25, 0.25))
-        ax.text(cx, -139, f"middle R {cols[2]['r']:.0f}, pinky R {cols[4]['r']:.0f}, thumb arc R "
-                f"{h.info['thumb']['radius']:.0f} mm", ha="center", fontsize=9, color=(0.25, 0.25, 0.25))
+        ax.text(cx, -112, f"{p}: scale {KM.PRESETS[p]:.2f}", ha="center", va="top", fontsize=13.5, weight="bold")
+        ax.text(cx, -126, f"{spans[p][0]:.0f} × {spans[p][1]:.0f} mm, keycaps up to {spans[p][2]:.0f} mm",
+                ha="center", va="top", fontsize=FS, color=(0.25, 0.25, 0.25))
+        ax.text(cx, -137, f"middle R {cols[2]['r']:.0f}, pinky R {cols[4]['r']:.0f},\nthumb arc R "
+                f"{h.info['thumb']['radius']:.0f} mm", ha="center", va="top", fontsize=FS, color=(0.25, 0.25, 0.25),
+                linespacing=1.3)
         ax.plot([xs], [0], marker="+", ms=9, color=HL, zorder=30)
         xs += step
     for p in ("S", "L"):                                      # the M outline over S and L, aligned on F
@@ -458,13 +487,13 @@ def fig_fit(hm):
             qq = np.vstack([q, q[:1]]) + (x0, 0)
             ax.plot(qq[:, 0], qq[:, 1], color=HL, lw=1.1, alpha=0.85, zorder=25)
     xm = 0.5 * (glo[0] + ghi[0])
-    ax.text(xm, 62, "+ = the F key, where the three are aligned.  Pink line: the M case outline drawn over S and L.",
-            ha="center", fontsize=9.5, color=(0.3, 0.3, 0.3))
-    ax.text(xm, -158, "Key pitch stays 19.05 mm; the scale acts on the column radii, stagger and the thumb arc. "
-            "Illustrative: the hand-to-layout mapping is not validated (concept.md §4.4).", ha="center",
-            fontsize=9.5, color=(0.3, 0.3, 0.3))
+    ax.text(xm, 60, "+ = the F key, where the three are aligned.  Pink line: the M case outline drawn over S and L.",
+            ha="center", fontsize=FS, color=(0.3, 0.3, 0.3))
+    ax.text(xm, -173, "Key pitch stays 19.05 mm; the scale acts on the column radii, stagger and the thumb arc.\n"
+            "Illustrative: the hand-to-layout mapping is not validated (concept.md §4.4).", ha="center", va="top",
+            fontsize=FS, color=(0.3, 0.3, 0.3), linespacing=1.3)
     ax.set_xlim(glo[0] - 6, ghi[0] + 6)
-    ax.set_ylim(-164, 70)
+    ax.set_ylim(-199, 74)
     ax.set_aspect("equal")
     ax.set_axis_off()
     save(fig, "keyboard_fit_presets.png", "Rev B keyboard concept: fit presets S, M and L (left half, same scale)")
@@ -607,7 +636,7 @@ def fig_gate(hl):
     ax.tick_params(labelsize=7.5)
     ax.set_xlabel(f"across the columns at key {k.name} (mm, + toward the index column)", fontsize=8.5)
     ax.set_ylabel(f"along {k.name}'s axis, from its plate (mm)", fontsize=8.5)
-    ax.set_title(f"(c) The tightest spot the gate found: key {k.name} (middle column, top row),\nwhich sits "
+    ax.set_title(f"(c) The tightest spot the sketch check found: key {k.name} (middle column, top row),\nwhich sits "
                  "deeper than the index column beside it (exact cut)", fontsize=11)
 
     # ---- (d) the ranked list ----

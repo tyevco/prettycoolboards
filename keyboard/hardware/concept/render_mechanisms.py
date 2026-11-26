@@ -45,6 +45,7 @@ INK = (0.15, 0.15, 0.15)
 LEAD = (0.35, 0.35, 0.38)
 BOX = dict(boxstyle="round,pad=0.25", fc="white", ec=(0.70, 0.70, 0.72), lw=0.6)
 MAX_PNG = 440_000
+F = 10            # label font (pt): 18 px at 130 dpi, about 8 px at the docs column width for a 1500 px image
 
 
 # ---------------------------------------------------------------------------
@@ -114,7 +115,7 @@ def callouts(fig, ax, anchors_px, labels, x_left, x_right, font, ylo, yhi, to_da
 
 
 def view3d(path, groups, elev, azim, labels=(), tags=(), size=(11, 7.5), zoom=0.72, tol=0.05, max_edge=1.0,
-           font=9, gap=36, roll=0, finish=True, title=None):
+           font=F, gap=36, roll=0, finish=True, title=None):
     """Shaded orthographic view with callout columns.
     groups: list of item lists, drawn back to front in that order (each depth-sorted inside).
     labels: (text, (x, y, z), 'L' | 'R');  tags: (text, (x, y, z), dx_px, dy_px) placed next to a point."""
@@ -191,29 +192,45 @@ def shrink(path, limit=MAX_PNG):
     im.quantize(colors=256, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE).save(path, optimize=True)
 
 
-def compose(path, panels, title, captions=(), gap=40, valign="center"):
-    """Place cropped panel PNGs side by side, each with a caption above, then title + stamp (render_lib)."""
+def compose(path, panels, title, captions=(), gap=40):
+    """Stack cropped panel PNGs top to bottom (centred), each with a caption above it and a thin rule between
+    them, then title + stamp (render_lib). Stacked, not side by side, so the composite stays about 1400-1500 px
+    wide and its callouts can still be read at the docs column width (~688 px)."""
     from PIL import Image, ImageDraw
     ims = [Image.open(p).convert("RGB") for p in panels]
-    ft = R._font(16)
-    cap_h = 30 if captions else 0
-    h = max(i.height for i in ims) + cap_h
-    w = sum(i.width for i in ims) + gap * (len(ims) - 1)
+    w = max(i.width for i in ims)
+    cap_px = max(17, round(w * 9 / 688))          # about 9 px at the docs column width
+    ft = R._font(cap_px)
+    cap_h = int(cap_px * 1.9) if captions else 0
+    h = sum(i.height for i in ims) + cap_h * len(ims) + gap * (len(ims) - 1)
     out = Image.new("RGB", (w, h), "white")
     d = ImageDraw.Draw(out)
-    x = 0
+    y = 0
     for k, im in enumerate(ims):
-        y = cap_h + ((h - cap_h - im.height) // 2 if valign == "center" else 0)
-        out.paste(im, (x, y))
+        if k:
+            yl = y - gap // 2
+            d.line([(int(w * 0.03), yl), (int(w * 0.97), yl)], fill=(210, 210, 214), width=2)
         if captions:
-            d.text((x + im.width // 2, 4), captions[k], fill=(60, 60, 60), font=ft, anchor="mt")
-        x += im.width + gap
+            d.text((w // 2, y + 2), captions[k], fill=(60, 60, 60), font=ft, anchor="mt")
+        out.paste(im, ((w - im.width) // 2, y + cap_h))
+        y += cap_h + im.height + gap
     out.save(path)
     for p in panels:
         os.remove(p)
     R.autocrop(path, title=title)
     shrink(path)
-    print(os.path.relpath(path, os.getcwd()), os.path.getsize(path) // 1024, "KB")
+    print(os.path.relpath(path, os.getcwd()), os.path.getsize(path) // 1024, "KB", Image.open(path).size)
+
+
+def px_rect(fig, x0, y0, w, h):
+    """A figure-fraction rect from pixels (measured from the figure's bottom left)."""
+    W, H = fig.bbox.width, fig.bbox.height
+    return [x0 / W, y0 / H, w / W, h / H]
+
+
+def px_axes(fig, x0, y0, w, h, **kw):
+    """An axes placed in pixels rather than figure fractions."""
+    return fig.add_axes(px_rect(fig, x0, y0, w, h), **kw)
 
 
 # --- 2D sections --------------------------------------------------------------
@@ -265,7 +282,7 @@ def fill_section(ax, items, plane, axes, lw=0.45, alpha=1.0):
                 ax.add_patch(PathPatch(p, facecolor=R.colour(c), edgecolor="k", lw=lw, alpha=alpha))
 
 
-def section_axes(fig, rect, items, plane, axes, xlim, ylim, xlabel=None, ylabel=None, font=9):
+def section_axes(fig, rect, items, plane, axes, xlim, ylim, xlabel=None, ylabel=None, font=F):
     ax = fig.add_axes(rect)
     fill_section(ax, items, plane, axes)
     ax.set_aspect("equal", adjustable="box")
@@ -275,11 +292,11 @@ def section_axes(fig, rect, items, plane, axes, xlim, ylim, xlabel=None, ylabel=
     ax.set_axisbelow(True)
     ax.tick_params(labelsize=font - 1)
     ax.set_xlabel(xlabel or f"{axes[0].lower()} (mm)", fontsize=font)
-    ax.set_ylabel(ylabel or f"{axes[1].lower()} (mm)", fontsize=font)
+    ax.set_ylabel(f"{axes[1].lower()} (mm)" if ylabel is None else ylabel, fontsize=font)
     return ax
 
 
-def label2d(fig, ax, labels, left_px=52, right_px=14, font=9, ylim=None):
+def label2d(fig, ax, labels, left_px=52, right_px=14, font=F, ylim=None):
     """labels: (text, (x, y), 'L' | 'R') in data coords. The columns sit left_px left of the axes (clear of the
     tick labels) and right_px right of it; ylim (data) limits the band the labels may use."""
     fig.canvas.draw()
@@ -293,12 +310,13 @@ def label2d(fig, ax, labels, left_px=52, right_px=14, font=9, ylim=None):
              y0 + 4, y1 - 4, lambda px: tuple(T.inverted().transform(px)))
 
 
-def dim(ax, x, y0, y1, text, side="R", font=9, colour=None, axis="v", ext=None):
-    """A dimension arrow between y0 and y1 at x (axis 'v'), or between x0=y0 and x1=y1 at height x ('h')."""
+def dim(ax, x, y0, y1, text, side="R", font=F, colour=None, axis="v", ext=None, tx=0.5):
+    """A dimension arrow between y0 and y1 at x (axis 'v'), or between x0=y0 and x1=y1 at height x ('h').
+    tx: how far (mm) the text of a vertical dimension sits from its arrow."""
     c = HI if colour is None else colour
     if axis == "v":
         a, b = (x, y0), (x, y1)
-        t = (x + (0.5 if side == "R" else -0.5), (y0 + y1) / 2)
+        t = (x + (tx if side == "R" else -tx), (y0 + y1) / 2)
         ha, va = ("left" if side == "R" else "right"), "center"
     else:
         a, b = (y0, x), (y1, x)
@@ -313,15 +331,17 @@ def dim(ax, x, y0, y1, text, side="R", font=9, colour=None, axis="v", ext=None):
         ax.plot(*e, color=c, lw=0.6, ls=(0, (3, 2)), zorder=39)
 
 
-def push(ax, p0, p1, text, font=9, offset=(0, 0), ha="center", va="center"):
+def push(ax, p0, p1, text, font=F, offset=(0, 0), ha="center", va="center"):
     ax.annotate("", xy=p1, xytext=p0, arrowprops=dict(arrowstyle="-|>", color=HI, lw=2.4, mutation_scale=18,
                                                       shrinkA=0, shrinkB=0), zorder=45)
     ax.text(p0[0] + offset[0], p0[1] + offset[1], text, ha=ha, va=va, fontsize=font, color=HI * 0.8,
             fontweight="bold", zorder=46)
 
 
-def note(fig, text, x=0.5, y=0.01, font=9):
-    fig.text(x, y, text, ha="center", va="bottom", fontsize=font, color=(0.35, 0.35, 0.35), style="italic")
+def note(fig, text, y_px=14, font=F):
+    """An italic grey note centred at the bottom of the figure, y_px above its lower edge."""
+    fig.text(0.5, y_px / fig.bbox.height, text, ha="center", va="bottom", fontsize=font, color=(0.35, 0.35, 0.35),
+             style="italic", linespacing=1.35)
 
 
 # ---------------------------------------------------------------------------
@@ -347,7 +367,7 @@ def he_cutaway():
         ("cylindrical magnet in the stem\n(axially magnetised)", (0.0, -1.95, 8.2), "R"),
         ("spring", (3.0, -0.6, 5.0), "R"),
         ("compliant TPU bottom stop\n(the aftertouch idea)", (2.2, -1.0, 2.5), "R"),
-        ("TMAG5253-class Hall sensor\n(SOT-23) on the PCB, under the magnet", (1.2, -0.7, 1.05), "R"),
+        ("TMAG5253-class Hall sensor\n(SOT-23) on the PCB,\nunder the magnet", (1.2, -0.7, 1.05), "R"),
     ]
     view3d(os.path.join(OUT, "mech_he_key_cutaway.png"), [items], elev=18, azim=-62, labels=labels,
            size=(11, 8), zoom=0.78, max_edge=0.8,
@@ -355,25 +375,35 @@ def he_cutaway():
 
 
 def he_section():
+    """Two rows: at rest (top), pressed into the TPU (bottom), with a zoom on the squeeze beside the bottom row."""
+    from matplotlib.patches import Rectangle
     rest = M.he_key(0.0)
     press = 4.3
     sq = press - M.TRAVEL
     down = M.he_key(press)
-    fig = plt.figure(figsize=(17, 8.6), dpi=DPI)
+    H = 1420
+    fig = plt.figure(figsize=(1440 / DPI, H / DPI), dpi=DPI)
     pl = Plane.XZ
     xl, yl = (-12.5, 15.0), (-1.6, 18.6)
-    a1 = section_axes(fig, [0.115, 0.10, 0.31, 0.82], rest, pl, ("X", "Z"), xl, yl)
-    a2 = section_axes(fig, [0.495, 0.10, 0.31, 0.82], down, pl, ("X", "Z"), xl, yl)
-    a1.set_ylabel("")
-    a1.set_title("at rest", fontsize=11)
-    a2.set_title(f"pressed {press:.1f} mm: 4.0 mm to the stop, then {sq:.1f} mm into the TPU", fontsize=11)
+    ppm = 24.0                                      # px per mm in both rows
+    aw, ah = (xl[1] - xl[0]) * ppm, (yl[1] - yl[0]) * ppm
+    x0 = 400
+    a1 = section_axes(fig, px_rect(fig, x0, H - 100 - ah, aw, ah), rest, pl, ("X", "Z"), xl, yl, ylabel="")
+    a2 = section_axes(fig, px_rect(fig, x0, 210, aw, ah), down, pl, ("X", "Z"), xl, yl, ylabel="")
+    # the z unit goes at the top of each axis, clear of the callouts and the zoom
+    # the rest row's callouts sit on the left, so its z ticks go on the right, where nothing else is
+    a1.yaxis.tick_right()
+    a1.text(xl[1], yl[1] + 0.35, "z (mm)", ha="center", va="bottom", fontsize=F - 1)
+    a2.text(xl[0], yl[1] + 0.35, "z (mm)", ha="center", va="bottom", fontsize=F - 1)
+    a1.set_title("at rest", fontsize=12, pad=26)
+    a2.set_title(f"pressed {press:.1f} mm: 4.0 mm to the stop, then {sq:.1f} mm into the TPU", fontsize=12, pad=26)
     top = M.HE["cap_top"]
     dim(a1, 11.0, top, top - M.TRAVEL, "4.0 mm\ntravel", side="R",
         ext=[((5.0, 11.6), (top, top)), ((8.2, 11.6), (top - M.TRAVEL, top - M.TRAVEL))])
     mz = M.HE["magnet"][2]
-    dim(a1, 0.0, 1.1, mz, f"{mz - 1.1:.1f} mm", side="R", font=9)
+    dim(a1, 0.0, 1.1, mz, f"{mz - 1.1:.1f} mm", side="R")
     dim(a2, 0.0, 1.1, mz - press, "", side="R")
-    push(a2, (0, top - press + 3.4), (0, top - press + 0.4), "press", offset=(0, 0.7), font=10)
+    push(a2, (0, top - press + 3.4), (0, top - press + 0.4), "press", offset=(0, 0.8), font=F + 1)
     lab_rest = [
         ("keycap", (-7.4, 15.0), "L"),
         ("stem", (-1.2, 14.6), "L"),
@@ -386,39 +416,42 @@ def he_section():
         ("Hall sensor (SOT-23)", (-1.0, 0.6), "L"),
         ("PCB", (-8.0, -0.8), "L"),
     ]
-    label2d(fig, a1, lab_rest)
+    label2d(fig, a1, lab_rest, left_px=26)
     lab_down = [
         ("spring compressed", (3.0, 4.0), "R"),
-        (f"magnet-sensor gap {mz - press - 1.1:.1f} mm\n(was {mz - 1.1:.1f} mm at rest): the field\n"
-         "keeps rising through the squeeze", (2.0, 3.4), "R"),
-        ("stem lands on the TPU stop at 4.0 mm", (2.45, M.HE["pole"][1] - press + 0.05), "R"),
-        (f"TPU squeezed {sq:.1f} mm (shown): the\n0.2-0.5 mm compliant zone that\nwould carry aftertouch",
-         (1.4, 2.0), "R"),
+        (f"magnet-sensor gap {mz - press - 1.1:.1f} mm\n(was {mz - 1.1:.1f} mm at rest): the\n"
+         "field keeps rising through\nthe squeeze", (2.0, 3.4), "R"),
+        ("stem lands on the\nTPU stop at 4.0 mm", (2.45, M.HE["pole"][1] - press + 0.05), "R"),
+        (f"TPU squeezed {sq:.1f} mm (shown)\ninto an illustrative compliant\nzone (the sketch's choice)\n"
+         "that would carry aftertouch", (1.4, 2.0), "R"),
     ]
-    label2d(fig, a2, lab_down, ylim=(-1.6, 10.5))
-    # zoomed inset of the compliant zone, top right, above the labels
-    fig.canvas.draw()
-    bb = a2.get_position()
+    label2d(fig, a2, lab_down, ylim=(-1.6, 12.5))
+    # zoomed inset of the squeeze, left of the pressed row (its labels are on the right), linked by a pink box
     zx, zy = (-3.4, 3.4), (0.9, 3.3)
-    w = 0.165
-    h = w * fig.get_figwidth() / fig.get_figheight() * (zy[1] - zy[0]) / (zx[1] - zx[0])
-    ins = fig.add_axes([bb.x1 + 0.015, bb.y1 - h - 0.03, w, h])
+    a2.add_patch(Rectangle((zx[0], zy[0]), zx[1] - zx[0], zy[1] - zy[0], fill=False, ec=HI, lw=1.1, zorder=35))
+    iw = 330.0
+    k = iw / (zx[1] - zx[0]) / ppm
+    ih = iw * (zy[1] - zy[0]) / (zx[1] - zx[0])
+    ins = px_axes(fig, 22, 210 + (2.1 - yl[0]) * ppm - ih / 2 + 40, iw, ih)
     fill_section(ins, down, pl, ("X", "Z"), lw=0.6)
     ins.set_xlim(*zx)
     ins.set_ylim(*zy)
     ins.set_aspect("equal", adjustable="box")
     ins.set_xticks([])
     ins.set_yticks([])
+    for sp in ins.spines.values():
+        sp.set_edgecolor(HI)
+        sp.set_linewidth(1.1)
     tz = M.HE["floor"][1] + M.HE["tpu"][1]
     ins.axhline(tz, color=HI, lw=1.0, ls=(0, (3, 2)))
-    ins.text(-3.3, tz + 0.05, "free TPU top", ha="left", va="bottom", fontsize=8, color=HI * 0.8,
+    ins.text(-3.3, tz + 0.05, "free TPU top", ha="left", va="bottom", fontsize=F - 1, color=HI * 0.8,
              bbox=dict(boxstyle="round,pad=0.1", fc="white", ec="none", alpha=0.85))
     ins.annotate("", xy=(-2.75, tz - sq), xytext=(-2.75, tz), arrowprops=dict(arrowstyle="-|>", color=HI, lw=1.2,
                                                                            mutation_scale=8, shrinkA=0, shrinkB=0))
-    ins.set_title(f"zoom (2x): the {sq:.1f} mm squeeze", fontsize=9)
-    note(fig, "Concept geometry, not a design: an MX-style 14 mm switch with 4 mm travel. Dimensions in mm. "
-              "The stop's stiffness and the field-versus-squeeze curve are unknowns for the rev A coupon.",
-         y=bb.y0 - 0.12)
+    ins.set_title(f"zoom ({k:.0f}x) on the pink box:\nthe {sq:.1f} mm squeeze", fontsize=F)
+    note(fig, "Concept geometry, not a design: an MX-style 14 mm switch with 4 mm travel. Dimensions in "
+         f"mm.\nThe {mz - 1.1:.1f} mm gap runs from the magnet to the top of the sensor package. The stop's "
+         "stiffness and the\nfield-versus-squeeze curve are unknowns for the rev A coupon.", y_px=12)
     save(fig, os.path.join(OUT, "mech_he_key_section.png"),
          title="Hall-effect key: exact section through the stem (y = 0)")
 
@@ -466,77 +499,81 @@ def shear_cutaway():
 
 
 def shear_section():
+    """Two rows: at rest and pushed sideways (top row, side by side), the plan section (bottom row)."""
     lat = M.SH["lateral"]
     rest = M.shear_key(0.0)
     pushed = M.shear_key(0.0, (lat, 0.0))
-    fig = plt.figure(figsize=(20.5, 8.6), dpi=DPI)
+    W, H = 1500, 1450
+    fig = plt.figure(figsize=(W / DPI, H / DPI), dpi=DPI)
     pl = Plane.XZ
     xl, yl = (-12.5, 12.5), (-1.6, 23.4)
-    a1 = section_axes(fig, [0.10, 0.10, 0.23, 0.80], rest, pl, ("X", "Z"), xl, yl)
-    a2 = section_axes(fig, [0.355, 0.10, 0.23, 0.80], pushed, pl, ("X", "Z"), xl, yl)
-    a1.set_ylabel("")
-    a1.set_title("at rest (section y = 0)", fontsize=11)
-    a2.set_title(f"pushed +X to the stop ({lat:.1f} mm, true scale)", fontsize=11)
+    ppm = 19.0
+    aw, ah = (xl[1] - xl[0]) * ppm, (yl[1] - yl[0]) * ppm
+    y1 = H - 85 - ah
+    a1 = section_axes(fig, px_rect(fig, 250, y1, aw, ah), rest, pl, ("X", "Z"), xl, yl, ylabel="")
+    a2 = section_axes(fig, px_rect(fig, 250 + aw + 78, y1, aw, ah), pushed, pl, ("X", "Z"), xl, yl, ylabel="")
+    # callouts on the outer sides; the shared z scale is read between the two panels, on the pushed one
+    a1.tick_params(labelleft=False)
+    a2.text(xl[0], yl[1] + 0.4, "z (mm)", ha="center", va="bottom", fontsize=F - 1)
+    a1.set_title("at rest (section y = 0)", fontsize=12, pad=26)
+    a2.set_title(f"pushed +X to the stop ({lat:.1f} mm, true scale)", fontsize=12, pad=26)
     top = M.SH["cap_top"]
     push(a1, (0, top + 4.6), (0, top + 0.4), "Z press:\ntypes as usual", offset=(0.7, -0.6), ha="left",
-         va="top", font=10)
+         va="top", font=F + 1)
     dim(a1, 10.0, top, top - M.TRAVEL, "4.0 mm", side="R",
         ext=[((5.0, 10.6), (top, top)), ((8.0, 10.6), (top - M.TRAVEL, top - M.TRAVEL))])
-    push(a2, (-12.0, 15.0), (-8.9 + lat, 15.0), "X push", offset=(0.1, 1.1), ha="left", font=10)
+    push(a2, (-12.0, 15.0), (-8.9 + lat, 15.0), "X push", offset=(0.1, 1.2), ha="left", font=F + 1)
     lab1 = [
         ("keycap", (-6.6, 15.5), "L"),
         ("stem (slides 4 mm)", (-1.0, 13.0), "L"),
-        ("roof hole (side stop)", (-4.6, 11.0), "L"),
+        ("roof hole\n(side stop)", (-4.6, 11.0), "L"),
         ("carrier cup", (-3.7, 9.0), "L"),
         ("magnet", (-1.2, 8.0), "L"),
-        ("flexure post (1 of 4)", (-4.9, 6.5), "L"),
+        ("flexure post\n(1 of 4)", (-4.9, 6.5), "L"),
         ("spring", (-2.8, 5.63), "L"),
         ("housing", (-6.6, 3.5), "L"),
         ("TMAG5170", (-1.0, 0.55), "L"),
         ("PCB", (-8.0, -0.8), "L"),
     ]
-    label2d(fig, a1, lab1)
-    # pushed panel: three notes in a row above the keycap
-    kw = dict(fontsize=9, color=INK, bbox=BOX, ha="left", va="top", zorder=50,
-              arrowprops=dict(arrowstyle="-", color=LEAD, lw=0.7))
-    a2.annotate(f"magnet {lat:.1f} mm off\ncentre: Bx changes\nat the sensor", xy=(0.6 + lat, 8.4),
-                xytext=(-12.1, 23.0), **kw)
-    a2.annotate("posts bend in an S;\nthe carrier shifts\nwithout tilting", xy=(4.9 + lat * 0.5, 6.4),
-                xytext=(-3.7, 23.0), **kw)
-    a2.annotate("gap closed on\nthis side: the\nhard stop", xy=(4.5, 10.9), xytext=(5.0, 23.0), **kw)
+    label2d(fig, a1, lab1, left_px=26)
+    lab2 = [
+        ("gap closed on this\nside: the hard stop", (4.5, 10.9), "R"),
+        (f"magnet {lat:.1f} mm off\ncentre: Bx changes\nat the sensor", (0.6 + lat, 8.4), "R"),
+        ("posts bend in an S;\nthe carrier shifts\nwithout tilting", (4.9 + lat * 0.5, 6.4), "R"),
+    ]
+    label2d(fig, a2, lab2, ylim=(2.0, 21.0))
     a2.axvline(0, color=HI, lw=0.8, ls=(0, (4, 3)), zorder=30)
-    a2.text(0.25, -1.3, "rest centre", fontsize=8, color=HI * 0.8, ha="left", va="bottom", zorder=31,
+    a2.text(0.25, -1.3, "rest centre", fontsize=F - 1, color=HI * 0.8, ha="left", va="bottom", zorder=31,
             bbox=dict(boxstyle="round,pad=0.1", fc="white", ec="none", alpha=0.85))
     # plan section through the magnet (the spring is drawn as its mean circle: a level cut through a helix
     # gives a misleading crescent)
     zc = 8.0
     plan = [it for it in rest if it[0] != "spring"]
-    a3 = section_axes(fig, [0.62, 0.12, 0.22, 0.72], plan, Plane.XY.offset(zc), ("X", "Y"), (-10.5, 10.5),
+    pw = 21.0 * 27.0
+    a3 = section_axes(fig, px_rect(fig, 420, 175, pw, pw), plan, Plane.XY.offset(zc), ("X", "Y"), (-10.5, 10.5),
                       (-10.5, 10.5))
-    a3.set_title(f"plan section at z = {zc:.0f} mm (through the magnet)", fontsize=11)
+    a3.set_title(f"plan section at z = {zc:.0f} mm (through the magnet)", fontsize=12, pad=10)
     from matplotlib.patches import Circle, Rectangle
     a3.add_patch(Circle((0, 0), M.SH["spring"][0], fill=False, ec=R.colour("spring") * 0.75, lw=1.6,
                         ls=(0, (1.5, 1.5)), zorder=18))
     a3.add_patch(Rectangle((-1.5, -1.5), 3.0, 3.0, fill=False, ec=(0.1, 0.1, 0.1), lw=1.0, ls=(0, (3, 2)),
                            zorder=20))
     a3.add_patch(Circle((0, 0), lat, fill=False, ec=HI, lw=1.4, zorder=25))
-    push(a3, (-10.0, 0), (-7.4, 0), "X", offset=(0.3, 0.9), ha="left", font=10)
-    push(a3, (0, -10.0), (0, -6.9), "Y", offset=(0.6, 0.4), ha="left", font=10)
+    push(a3, (-10.0, 0), (-7.4, 0), "X", offset=(0.3, 0.9), ha="left", font=F + 1)
+    push(a3, (0, -10.0), (0, -6.9), "Y", offset=(0.6, 0.4), ha="left", font=F + 1)
     lab3 = [
         ("flexure posts (4)", (0.0, 4.9), "R"),
-        ("carrier cup", (3.8, 1.5), "R"),
-        ("spring (dotted: its mean circle)", (2.0, 1.98), "R"),
+        ("carrier cup", (3.0, 2.6), "R"),
+        ("spring (dotted:\nits mean circle)", (2.6, 0.92), "R"),
         ("stem pole and magnet", (1.0, 0.6), "R"),
-        (f"red circle: where the magnet centre\ncan go (\u00b1{lat:.1f} mm, the roof-hole stop)",
+        (f"red circle: where the magnet\ncentre can go (\u00b1{lat:.1f} mm,\nthe roof-hole stop)",
          (lat * 0.7, -lat * 0.7), "R"),
-        ("dashed: TMAG5170 below (z 0-1 mm)", (1.5, -1.2), "R"),
+        ("dashed: TMAG5170 below\n(z 0-1 mm)", (1.5, -1.2), "R"),
         ("housing", (6.2, -3.5), "R"),
     ]
     label2d(fig, a3, lab3, right_px=18)
-    fig.canvas.draw()
-    note(fig, "Concept geometry, not a design. The post size, the sideways stiffness, and the X/Y signal after "
-              "removing press crosstalk are what the rev A shear coupon would measure.",
-         y=a1.get_position().y0 - 0.11)
+    note(fig, "Concept geometry, not a design. The post size, the sideways stiffness, and the X/Y signal "
+         "after\nremoving press crosstalk are what the rev A shear coupon would measure.", y_px=14)
     save(fig, os.path.join(OUT, "mech_shear_key_section.png"),
          title="Shear key: exact sections, at rest, pushed sideways, and in plan")
 
@@ -559,16 +596,18 @@ def wheel_front_panel(path):
     rot = [("rotation", M.arc_arrow(xm, (0.0, M.WHEEL_Z), M.ROLLER_OD / 2 + 3.0, 62, 118), "highlight")]
     labels = [
         ("thumb key (for scale)", (-19.0, -6.0, 12.0), "L"),
-        ("thumb plate (front half cut away)", (-24.0, 8.0, 0.0), "L"),
-        ("encoder board (MT6701CT on\nthe face towards the motor)", (-9.4, -11.0, -22.0), "L"),
+        ("thumb plate (front\nhalf cut away)", (-24.0, 8.0, 0.0), "L"),
+        ("encoder board: MT6701CT\nor AS5047P (candidate), on\nthe face towards the motor",
+         (-9.4, -11.0, -22.0), "L"),
         ("bracket", (-2.8, -12.0, -24.0), "L"),
-        ("roller, front half cut away:\nprinted hub and rubber tyre", (8.5, 0.0, -24.5), "R"),
-        ("2804-class gimbal motor: its outer\nrotor carries the roller (direct drive)", (4.0, -9.0, -18.5), "R"),
+        ("roller, front half cut away:\nprinted hub, rubber tyre", (8.5, 0.0, -24.5), "R"),
+        ("BLDC gimbal motor (not chosen;\n2804-class in this sketch): its\nouter rotor carries the roller",
+         (4.0, -9.0, -18.5), "R"),
         ("thumb key (for scale)", (29.0, -6.0, 12.0), "R"),
     ]
     tags = [("detents, end stops and free\nspin, set by the profile",
-             (xm, 0.0, M.WHEEL_Z + M.ROLLER_OD / 2 + 3.0), 0, 44)]
-    view3d(path, [items, rot], elev=22, azim=-64, labels=labels, tags=tags, size=(12, 8.5), zoom=0.74,
+             (xm, 0.0, M.WHEEL_Z + M.ROLLER_OD / 2 + 3.0), 0, 48)]
+    view3d(path, [items, rot], elev=22, azim=-64, labels=labels, tags=tags, size=(11, 8.5), zoom=0.74,
            max_edge=2.0, tol=0.08, finish=False)
 
 
@@ -576,50 +615,54 @@ def wheel_rear_panel(path):
     skip = ("thumb plate", "thumb PCB")
     items = [it for it in M.thumb_wheel() if it[0] not in skip and not it[0].startswith(("switch", "keycap"))]
     labels = [
-        ("bracket flange\n(screws under the thumb plate)", (-7.0, 6.0, -1.5), "L"),
+        ("bracket flange (screws\nunder the thumb plate)", (-7.0, 6.0, -1.5), "L"),
         ("encoder board, back face", (-10.2, 9.0, -8.0), "L"),
-        ("DRV8316 motor driver (QFN)", (-11.1, 1.0, -19.0), "R"),
-        ("connector to the main board", (-13.5, -8.5, -21.5), "R"),
-        ("roller (printed hub, rubber tyre)", (5.0, 12.0, 3.0), "R"),
-        ("decoupling parts (illustrative)", (-10.9, 6.5, -18.0), "L"),
+        ("DRV8316 motor driver\n(QFN, candidate)", (-11.1, 1.0, -19.0), "R"),
+        ("connector to the\nmain board", (-13.5, -8.5, -21.5), "R"),
+        ("roller (printed hub,\nrubber tyre)", (5.0, 12.0, 3.0), "R"),
+        ("decoupling parts\n(illustrative)", (-10.9, 6.5, -18.0), "L"),
         ("standoff to the bracket", (-6.0, 10.0, -21.0), "L"),
     ]
-    view3d(path, [items], elev=24, azim=146, labels=labels, size=(11, 8.5), zoom=0.72, max_edge=2.0, tol=0.08,
+    view3d(path, [items], elev=24, azim=146, labels=labels, size=(10, 8.0), zoom=0.72, max_edge=2.0, tol=0.08,
            finish=False)
 
 
 def wheel_3d():
+    """Top: the module in the thumb cluster, from the front. Bottom: the module alone, from behind."""
     a = os.path.join(OUT, "_wheel_a.png")
     b = os.path.join(OUT, "_wheel_b.png")
     wheel_front_panel(a)
     wheel_rear_panel(b)
     compose(os.path.join(OUT, "mech_thumb_wheel.png"), [a, b],
             "Haptic thumb wheel module between two thumb keys (concept)",
-            captions=["in the thumb cluster, from the front (plate and roller cut away)",
-                      "the module alone, from behind"])
+            captions=["top: in the thumb cluster, from the front (plate and roller cut away)",
+                      "bottom: the module alone, from behind"])
 
 
 def wheel_section():
     items = M.thumb_wheel()
-    fig = plt.figure(figsize=(17, 8.4), dpi=DPI)
+    W, H = 1500, 810
+    fig = plt.figure(figsize=(W / DPI, H / DPI), dpi=DPI)
     zc = M.WHEEL_Z
-    ax = section_axes(fig, [0.20, 0.09, 0.60, 0.84], items, Plane.XZ, ("X", "Z"), (-30.0, 40.0), (-27.5, 14.0))
-    ax.set_ylabel("")              # the left callout column would hide it: the unit goes at the top of the axis
-    ax.text(-30.0, 14.4, "z (mm)", ha="center", va="bottom", fontsize=9)
+    xl, yl = (-30.0, 40.0), (-27.5, 14.0)
+    ppm = 13.5
+    aw, ah = (xl[1] - xl[0]) * ppm, (yl[1] - yl[0]) * ppm
+    ax = section_axes(fig, px_rect(fig, 300, H - 70 - ah, aw, ah), items, Plane.XZ, ("X", "Z"), xl, yl, ylabel="")
+    ax.text(xl[0], yl[1] + 0.5, "z (mm)", ha="center", va="bottom", fontsize=F - 1)   # clear of the callouts
     ax.axhline(zc, color=(0.3, 0.3, 0.3), lw=0.6, ls=(0, (8, 3, 2, 3)), zorder=30)
-    ax.text(39.5, zc + 0.3, "shaft axis", fontsize=8, color=(0.3, 0.3, 0.3), ha="right", va="bottom")
+    ax.text(39.5, zc + 0.3, "shaft axis", fontsize=F - 1, color=(0.3, 0.3, 0.3), ha="right", va="bottom")
     labels = [
         ("thumb key (for scale)", (-19.0, 10.5), "L"),
         ("thumb plate", (-27.0, -0.75), "L"),
         ("thumb PCB (cut back)", (-27.0, -5.8), "L"),
         ("bracket", (-2.8, -22.0), "L"),
         ("encoder board", (-9.4, -18.0), "L"),
-        ("DRV8316 driver (QFN)", (-10.65, -19.0), "L"),
-        ("MT6701CT encoder (SOP-8)", (-7.8, zc + 1.5), "L"),
-        ("diametric magnet on the shaft", (-5.6, zc - 2.0), "L"),
+        ("DRV8316 driver\n(QFN, candidate)", (-10.65, -19.0), "L"),
+        ("encoder IC: MT6701CT\nor AS5047P (candidate)", (-7.8, zc + 1.5), "L"),
+        ("diametric magnet\non the shaft", (-5.6, zc - 2.0), "L"),
         ("bearings (2)", (-1.1, zc + 2.5), "L"),
         ("rubber tyre", (5.0, 7.6), "R"),
-        ("printed roller hub", (9.0, 3.0), "R"),
+        ("printed roller hub", (9.0, 5.5), "R"),
         ("rotor bell (outer rotor)", (3.5, zc + 13.5), "R"),
         ("rotor magnets", (3.0, zc + 12.5), "R"),
         ("stator core", (3.3, zc + 8.0), "R"),
@@ -629,10 +672,9 @@ def wheel_section():
         ("thumb key (for scale)", (29.0, 10.5), "R"),
     ]
     label2d(fig, ax, labels, left_px=56, right_px=16)
-    fig.canvas.draw()
-    note(fig, "Concept geometry, not a design. Motor, magnet and roller are fitted by hand (concept \u00a72.3); "
-              "the board parts are the stocked candidates. Detent strength, cogging and current are rev A unknowns.",
-         y=ax.get_position().y0 - 0.10)
+    note(fig, "Concept geometry, not a design. The motor is not chosen: the sketch draws a 2804-class "
+         "gimbal motor,\nwith magnet and roller fitted by hand (concept \u00a72.3); the board parts are the "
+         "stocked candidates.\nDetent strength, cogging and current are rev A unknowns.", y_px=14)
     save(fig, os.path.join(OUT, "mech_thumb_wheel_section.png"),
          title="Haptic thumb wheel: exact section through the shaft (y = 0), concept")
 
@@ -660,65 +702,77 @@ def coil_3d_panel(path):
     rest = [it for it in items if it[0] not in ("pcb", "coil L1", "coil L2")]
     labels = [
         ("keycap", (-6.0, 0.0, 16.8 + lift), "L"),
-        ("stock MX switch (3-pin), cut in half\nand lifted 11 mm off the board", (-6.6, 0.0, 9.0 + lift), "L"),
+        ("stock MX switch (3-pin),\ncut in half and lifted\n11 mm off the board", (-6.6, 0.0, 9.0 + lift), "L"),
         ("contact leaves: it still\nswitches as before", (-4.5, 2.5, 4.0 + lift), "L"),
         ("spiral on L1 (top copper)", (-2.43, -2.43, 0.07), "L"),
         ("MX centre-post hole", (-1.4, -1.4, 0.0), "L"),
-        ("PCB: no copper pour under the coil", (-9.0, -8.0, 0.0), "L"),
-        ("steel spring: the coil's target", (2.5, -0.3, 5.0 + lift), "R"),
-        ("plate", (10.0, 3.0, 5.0 + lift), "R"),
-        ("leads to an inductance-to-digital\nconverter (LDC1614-class)", (0.0, 8.0, 0.07), "R"),
-        ("the same spiral on L2: L1 and\n0.2 mm of prepreg peeled off here", (2.4, -1.7, -0.14), "R"),
+        ("PCB: no copper pour\nunder the coil", (-9.0, -8.0, 0.0), "L"),
+        ("steel spring:\nthe coil's target", (2.5, -0.3, 5.0 + lift), "R"),
+        ("plate", (10.0, 8.0, 5.0 + lift), "R"),
+        ("leads to an inductance-\nto-digital converter\n(LDC1614-class)", (0.0, 8.0, 0.07), "R"),
+        ("the same spiral on L2:\nL1 and 0.2 mm of prepreg\npeeled off here", (2.4, -1.7, -0.14), "R"),
     ]
-    view3d(path, [board, copper, rest], elev=40, azim=-64, labels=labels, size=(12, 11), zoom=0.80,
+    view3d(path, [board, copper, rest], elev=40, azim=-64, labels=labels, size=(10.5, 10), zoom=0.80,
            max_edge=0.7, tol=0.03, finish=False)
 
 
 def coil_section_panel(path):
+    """The exact section (left) and a zoom on the copper (right), side by side under the 3D panel."""
     from matplotlib.patches import Rectangle
     items = M.coil_key(step_cut=False)
-    fig = plt.figure(figsize=(8.6, 9.0), dpi=DPI)
-    ax = section_axes(fig, [0.25, 0.46, 0.50, 0.48], items, Plane.XZ, ("X", "Z"), (-5.2, 5.2), (-1.8, 8.2))
-    ax.set_title("exact section at y = 0", fontsize=11)
+    W, H = 1460, 600
+    fig = plt.figure(figsize=(W / DPI, H / DPI), dpi=DPI)
+    xl, yl = (-5.2, 5.2), (-1.8, 8.2)
+    ppm = 42.0
+    ax = section_axes(fig, px_rect(fig, 190, 75, (xl[1] - xl[0]) * ppm, (yl[1] - yl[0]) * ppm), items, Plane.XZ,
+                      ("X", "Z"), xl, yl, ylabel="")
+    # the callouts sit on the left, so the z ticks go on the right and the dimension texts beyond them
+    ax.yaxis.tick_right()
+    ax.text(xl[1], yl[1] + 0.15, "z (mm)", ha="center", va="bottom", fontsize=F - 1)
+    ax.set_title("exact section at y = 0", fontsize=12, pad=24)
     cu = M.COIL["cu"]
-    dim(ax, 4.7, cu, 1.0 + cu, "1 mm", side="R", font=9, ext=[((3.4, 5.0), (1.0 + cu, 1.0 + cu))])
-    dim(ax, 4.0, 1.0 + cu, 7.5 + cu, "spring:\n1-7.5 mm\nabove L1", side="R", font=9,
-        ext=[((2.9, 4.3), (7.5 + cu, 7.5 + cu))])
+    dim(ax, 4.7, cu, 1.0 + cu, "1 mm", side="R", ext=[((3.4, 5.0), (1.0 + cu, 1.0 + cu))], tx=1.45)
+    dim(ax, 4.0, 1.0 + cu, 7.5 + cu, "spring:\n1-7.5 mm\nabove L1", side="R",
+        ext=[((2.9, 4.3), (7.5 + cu, 7.5 + cu))], tx=2.15)
     labels = [
         ("stem pole", (-0.6, 5.5), "L"),
-        ("spring wire (steel)", (-2.5, 4.1), "L"),
-        ("housing floor", (-4.0, 0.5), "L"),
+        ("spring wire\n(steel)", (-2.5, 4.1), "L"),
+        ("housing\nfloor", (-4.0, 0.5), "L"),
         ("centre post", (-1.7, -1.0), "L"),
         ("PCB (FR4)", (-4.0, -1.0), "L"),
     ]
     label2d(fig, ax, labels, left_px=48, right_px=14)
     zx, zz = (1.95, 3.85), (-0.42, 0.26)
     ax.add_patch(Rectangle((zx[0], zz[0]), zx[1] - zx[0], zz[1] - zz[0], fill=False, ec=HI, lw=1.0, zorder=35))
-    z2 = section_axes(fig, [0.25, 0.15, 0.50, 0.19], items, Plane.XZ, ("X", "Z"), zx, zz)
-    z2.set_title("zoom on the copper (pink box above)", fontsize=10)
-    z2.set_ylabel("")
-    labels2 = [
-        ("L1 turns (top copper)", (2.5, 0.035), "L"),
-        ("L2 turns (inner layer)", (2.5, -0.175), "L"),
-        ("via, L1 to L2", (2.25, -0.07), "R"),
+    zw, zx0 = 390.0, 845.0
+    zh = zw * (zz[1] - zz[0]) / (zx[1] - zx[0])
+    z2 = section_axes(fig, px_rect(fig, zx0, 260, zw, zh), items, Plane.XZ, ("X", "Z"), zx, zz, ylabel="z (mm)")
+    for sp in z2.spines.values():
+        sp.set_edgecolor(HI)
+    z2.set_title("zoom on the copper (pink box, left)", fontsize=F + 1, pad=8)
+    labels2 = [                  # one column, right of the zoom, clear of its z ticks
         ("housing floor", (3.5, 0.2), "R"),
+        ("L1 turns (top copper)", (2.53, 0.035), "R"),
+        ("via, L1 to L2", (2.25, -0.07), "R"),
+        ("L2 turns (inner layer)", (2.53, -0.175), "R"),
         ("prepreg / core", (3.6, -0.3), "R"),
     ]
-    label2d(fig, z2, labels2, left_px=48, right_px=14)
-    fig.text(0.5, 0.06, "copper drawn 70 \u00b5m thick (exaggerated); trace and space 0.125 mm",
-             ha="center", va="bottom", fontsize=9, color=(0.35, 0.35, 0.35), style="italic")
+    label2d(fig, z2, labels2, right_px=14, ylim=(-0.62, 0.48))
+    fig.text((zx0 + zw / 2) / W, 130 / H, "copper drawn 70 \u00b5m thick (exaggerated);\ntrace and space 0.125 mm",
+             ha="center", va="top", fontsize=F, color=(0.35, 0.35, 0.35), style="italic", linespacing=1.35)
     save(fig, path, finish=False)
 
 
 def coil_key():
+    """Top: the exploded 3D cutaway. Bottom: the exact section and a zoom on the copper."""
     a = os.path.join(OUT, "_coil_a.png")
     b = os.path.join(OUT, "_coil_b.png")
     coil_3d_panel(a)
     coil_section_panel(b)
     compose(os.path.join(OUT, "mech_coil_key.png"), [a, b],
             "Printed-coil key: a generated spiral under a stock MX switch (concept, unproven)",
-            captions=["exploded cutaway: the switch lifted off its coil",
-                      "assembled: the gap the coil has to read across"])
+            captions=["top: exploded cutaway, the switch lifted off its coil",
+                      "bottom: assembled, the gap the coil has to read across"])
 
 
 # ---------------------------------------------------------------------------
@@ -728,51 +782,56 @@ def lra_3d_panel(path):
     keep_whole = {"desk", "flex tail"}
     items = [(n, sol if n in keep_whole else M.half(sol, "y+"), c) for n, sol, c in M.lra_mount()]
     labels = [
-        ("flex tail, up to the haptic driver\n(DRV2605L, on the main PCB above)", (11.6, 3.0, 8.5), "R"),
-        ("coin LRA, about 10 mm across\nand 2.7 mm thick (cut in half)", (2.0, 0.0, 3.6), "R"),
+        ("flex tail, up to the haptic\ndriver (DRV2605L, on the\nmain PCB above)", (11.6, 3.0, 8.5), "R"),
+        ("coin LRA, about 10 mm\nacross and 2.7 mm thick\n(cut in half)", (2.0, 0.0, 3.6), "R"),
         ("slot all round the cradle", (9.2, 2.0, 2.4), "R"),
-        ("case floor (printed)", (12.0, 6.0, 2.4), "R"),
-        ("cradle, printed with the case", (-2.5, 0.0, 1.1), "L"),
-        ("flexure arm: the only path\nfrom cradle to case", (-8.2, 0.3, 2.4), "L"),
+        ("case floor (printed)", (13.0, 1.0, 2.4), "R"),
+        ("cradle, printed\nwith the case", (-2.5, 0.0, 1.1), "L"),
+        ("flexure arm: the only\npath from cradle to case", (-8.2, 0.3, 2.4), "L"),
         ("TPU foot", (-11.0, 0.0, -0.8), "L"),
         ("desk", (-12.0, -6.0, -1.5), "L"),
     ]
-    view3d(path, [items], elev=38, azim=-64, labels=labels, size=(12, 8.5), zoom=0.82, max_edge=1.0, tol=0.04,
+    view3d(path, [items], elev=38, azim=-64, labels=labels, size=(11, 8.0), zoom=0.82, max_edge=1.0, tol=0.04,
            finish=False)
 
 
 def lra_plan_panel(path):
     c = M.LRA
     items = [it for it in M.lra_mount() if it[0] in ("case floor", "flexure arms", "cradle", "coin LRA")]
-    fig = plt.figure(figsize=(9.6, 8.0), dpi=DPI)
+    W, H = 1200, 860
+    fig = plt.figure(figsize=(W / DPI, H / DPI), dpi=DPI)
     zc = 0.5 * (c["arm_z"][0] + c["arm_z"][1])
-    ax = section_axes(fig, [0.34, 0.10, 0.50, 0.80], items, Plane.XY.offset(zc), ("X", "Y"), (-12.5, 12.5),
-                      (-12.5, 12.5))
-    ax.set_ylabel("")              # the left callout column would hide it: the unit goes at the top of the axis
-    ax.text(-12.5, 12.9, "y (mm)", ha="center", va="bottom", fontsize=9)
-    ax.set_title(f"plan section at z = {zc:.1f} mm, through the arms", fontsize=11, pad=16)
+    pw = 25.0 * 26.0
+    ax = section_axes(fig, px_rect(fig, 400, 90, pw, pw), items, Plane.XY.offset(zc), ("X", "Y"), (-12.5, 12.5),
+                      (-12.5, 12.5), ylabel="")
+    # every callout sits on the left, so the y ticks and the unit go on the right
+    ax.yaxis.tick_right()
+    ax.text(12.5, 12.9, "y (mm)", ha="center", va="bottom", fontsize=F - 1)
+    ax.set_title(f"plan section at z = {zc:.1f} mm, through the arms", fontsize=12, pad=24)
     labels = [
         ("coin LRA", (-2.0, -2.0), "L"),
         ("cradle", (-5.2, -4.0), "L"),
         ("case floor", (-11.0, 11.5), "L"),
-        ("three flexure arms, each about\n95\u00b0 of arc (illustrative)",
+        ("three flexure arms,\neach about 95\u00b0 of\narc (illustrative)",
          (8.2 * np.cos(np.radians(150)), 8.2 * np.sin(np.radians(150))), "L"),
         ("arm root in the floor", (9.5 * np.cos(np.radians(184)), 9.5 * np.sin(np.radians(184))), "L"),
-        ("slot (air)", (9.2 * np.cos(np.radians(20)), 9.2 * np.sin(np.radians(20))), "R"),
-        ("arm root in the cradle", (7.2 * np.cos(np.radians(334)), 7.2 * np.sin(np.radians(334))), "R"),
+        ("slot (air)", (9.2 * np.cos(np.radians(200)), 9.2 * np.sin(np.radians(200))), "L"),
+        ("arm root in the cradle", (7.2 * np.cos(np.radians(94)), 7.2 * np.sin(np.radians(94))), "L"),
     ]
     label2d(fig, ax, labels, left_px=48, right_px=14)
     save(fig, path, finish=False)
 
 
 def lra_mount():
+    """Top: a half-section of the pocket in 3D. Bottom: the suspension in plan."""
     a = os.path.join(OUT, "_lra_a.png")
     b = os.path.join(OUT, "_lra_b.png")
     lra_3d_panel(a)
     lra_plan_panel(b)
     compose(os.path.join(OUT, "mech_lra_mount.png"), [a, b],
             "Coin LRA in a decoupled flexure pocket in the case floor (concept, untested)",
-            captions=["half-section of the pocket (main PCB above not drawn)", "the suspension in plan"])
+            captions=["top: half-section of the pocket (main PCB above not drawn)",
+                      "bottom: the suspension in plan"])
 
 
 # ---------------------------------------------------------------------------

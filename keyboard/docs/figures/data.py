@@ -15,7 +15,8 @@ Run from the repo root (the interpreter needs matplotlib, numpy and Pillow):
     $PY keyboard/docs/figures/data.py scores grid prior    # a subset
     $PY keyboard/docs/figures/data.py --rebuild-json RESEARCH.json   # re-trim ideas.json from the raw output
 
-It writes keyboard/docs/figures/data_*.png in a few seconds.
+It writes keyboard/docs/figures/data_*.png in a few seconds, and prints each figure's size and its smallest text's
+height at the ~688 px docs column width (the target is at least 8 px).
 
 The data
 --------
@@ -25,7 +26,9 @@ raw research file. One record per idea that a researcher proposed and a sceptic 
 sceptics added themselves carry no score and are left out). Fields: lens (research area), name (as the researcher
 wrote it), label (a short name, matching the names on research.md and concept.md), score (the sceptic's 1-10),
 verdict (keep, keep_as_moonshot, demote, drop), novelty, feasibility, daily_driver_value (all the sceptic's
-ratings), status, section (the concept.md section a picked or folded idea lives in) and, where needed, a note.
+ratings), status, section (the concept.md section a picked or folded idea lives in) and, where needed, a note
+(NOTES below: the one exception to the status rule, the two folded ideas whose names carry a chip or a rate that is
+not decided, and the one not-picked idea that shares a research.md table row with another lens's idea).
 
 status is the owner's choice on 2026-11-25, by idea-name prefix (STATUS_RULE below):
     picked      one of the owner's twelve features, concept.md sections 2.1-4.4
@@ -62,6 +65,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt                                     # noqa: E402
+import matplotlib.text                                              # noqa: E402
 from matplotlib.patches import FancyBboxPatch, Rectangle            # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -88,6 +92,14 @@ TINT = "#eaf2fc"            # blue step 100 lightened: the "claimed new" column
 STAMP_RED = "#8c1a1a"
 C_PICKED, C_FOLDED, C_NOT = "#257de0", "#f47230", "#b4b4b4"
 DPI = 150
+
+# Legibility: the docs column is about 688 px wide, and the smallest text should read at least 8 px tall there. A
+# figure W inches wide is scaled by 688 / (W * DPI), so its smallest font must be at least 8 * 72 * W / 688 pt: about
+# 8.4 pt at 10 in. The figures are 10 in wide or less (1500 px at 150 dpi) with no text below FS_SMALL, and save()
+# prints the smallest text's size at the docs width as a check.
+DOCS_COLUMN_PX = 688
+MIN_DOCS_PX = 8.0
+FS_SMALL = 8.5              # notes, source line, ticks, cell text: the smallest text on any figure
 
 plt.rcParams.update({
     "font.family": "DejaVu Sans",
@@ -127,18 +139,34 @@ STATUS_RULE = {
     },
     "folded": {   # prefix -> the picked feature's section it is folded into
         "Compliant-stop": "4.3",              # section 7: the Hall-effect coupon's compliant-stop aftertouch sites
-        "Hybrid scanning core": "4.3",        # section 7: the Hall coupon's shared-bus topology at 1 and 8 kHz
+        "Hybrid scanning core": "4.3",        # section 7: the Hall coupon tests a shared bus at 1 and 8 kHz
         "Haptic vocabulary engine": "3.3",    # section 3.3: DRV2605L and a coin LRA per half, a small vocabulary
-        "Adaptive-rate single-chip": "4.2",   # section 5: a candidate chip the battery-budget gate chooses between
+        "Adaptive-rate single-chip": "4.2",   # section 4.2's duty cycle; the chip itself is not chosen (section 5)
         "Fork-to-fab": "4.1",                 # section 4.1: the same gates on every fork
         "Generated sensor geometry": "2.4",   # section 2.4: the generated coils and the ~20-variant coupon
         "One source for board": "4.1",        # see the module docstring: the documented exception
     },
 }
-FOLDED_NOTE = {
+NOTES = {   # prefix -> a note carried in the idea's record
     "One source for board": ("The one documented exception to the prefix rule: research.md does not list it as "
                              "not picked, the sceptic said keep it as foundation work, and concept.md section 4.1 "
                              "covers it, so it is counted as folded into section 4.1."),
+    "Adaptive-rate single-chip": ("The researcher's idea names the nRF54LM20A, but concept.md section 5 chooses "
+                                  "no chip: the nRF54LM20A is one of six candidates, and a battery-budget gate on "
+                                  "rev A measurements is to pick the rev B chip. Only the adaptive-rate scanning "
+                                  "(the scan rate in the firmware duty cycle that the section 4.2 battery gate "
+                                  "models) is counted as folded into section 4.2; the label says the chip is not "
+                                  "chosen."),
+    "Hybrid scanning core": ("Folded into the section 4.3 sensing testbed as a test, not a decision: the rev A "
+                             "Hall-effect coupon is to test a shared, enable-gated bus at 1 and 8 kHz (concept.md "
+                             "section 7), and section 8 says 8 kHz is likely wired-only. The ESP32-S3 co-processor "
+                             "in the researcher's name is not chosen either."),
+    "Telemetry-to-geometry loop": ("Not picked. The designed-as-code lens's version of the pitch that the MCU, "
+                                   "connectivity and software lens called 'Fit-to-you: typing data drives the next "
+                                   "PCB' (label 'Typing data designs the next PCB'): typing data shaping the next "
+                                   "board's geometry. Each lens's sceptic scored its own entry (5 and 5), so both "
+                                   "are kept here; research.md's 'Typing data designs the next PCB' row is the "
+                                   "table entry for both."),
 }
 LABELS = {   # prefix -> short label (picked: the concept.md feature name; others: research.md's table names)
     # Switch and sensing
@@ -150,7 +178,7 @@ LABELS = {   # prefix -> short label (picked: the concept.md feature name; other
     "Generated printed-coil": "Analog from stock switches (printed coils)",
     "Adaptive analog ergonomics": "Per-finger analog tuning and load budget",
     "Hover and resting-hand": "Hover and resting-hand sensing",
-    "Hybrid scanning core": "Hybrid scanning core (8 kHz Hall bus)",
+    "Hybrid scanning core": "Hybrid scanning core (8 kHz Hall bus, a rev A test)",
     "A sensing testbed": "Sensing testbed with an open dataset",
     # Extra input and feedback
     "Haptic thumb wheel": "Haptic thumb wheel",
@@ -174,7 +202,7 @@ LABELS = {   # prefix -> short label (picked: the concept.md feature name; other
     "One source for board": "One source for board, firmware and web app",
     "Behaviour flight recorder": "Tap/hold flight recorder and tuner",
     "Sandboxed on-device scripts": "Sandboxed WebAssembly scripts",
-    "Adaptive-rate single-chip": "Adaptive-rate single chip (nRF54LM20A)",
+    "Adaptive-rate single-chip": "Adaptive-rate scanning on one chip (chip not chosen, §5)",
     "Channel Sounding": "Channel Sounding walk-away lock",
     # Ergonomics and form
     "Pose-aware halves": "Pose-aware halves (sensed tent and tilt)",
@@ -234,8 +262,9 @@ def rebuild_json(research_path):
                 if key is not None:
                     rec["status"] = status
                     rec["section"] = STATUS_RULE[status][key]
-                    if key in FOLDED_NOTE:
-                        rec["note"] = FOLDED_NOTE[key]
+            note_key = _match(name, NOTES)
+            if note_key is not None:
+                rec["note"] = NOTES[note_key]
             ideas.append(rec)
     out = {
         "source": "Keyboard desk research, 2026-11-25: five researchers proposed ideas, one sceptic per area "
@@ -290,20 +319,30 @@ def header(ax, w, title, subtitle_lines):
         ax.text(0.25, 0.58 + 0.2 * k, line, ha="left", va="top", fontsize=9.5, color=INK2)
 
 
-NOTE_PITCH = 0.18          # inches per note line
+NOTE_PITCH = 0.19          # inches per note line
 
 
-def footer_height(note_lines):
-    return 0.42 + NOTE_PITCH * len(note_lines) + 0.12
+def note_lines(text, w):
+    """The figure note, wrapped to the figure width as rendered (paragraphs split on newlines)."""
+    fig, ax = inch_canvas(w, 5)
+    lines = []
+    for para in text.split("\n"):
+        lines += wrap_measured(ax, para, w - 0.5, FS_SMALL, balance=0.15)
+    plt.close(fig)
+    return lines
 
 
-def footer(ax, w, h, note_lines, source=SOURCE_NOTE, stamp=STAMP):
+def footer_height(note):
+    return 0.45 + NOTE_PITCH * len(note) + 0.12
+
+
+def footer(ax, w, h, note, source=SOURCE_NOTE, stamp=STAMP):
     """Note lines (secondary ink), then the source line, then the status stamp at the bottom right."""
-    y = h - 0.42 - NOTE_PITCH * len(note_lines)
-    for k, line in enumerate(note_lines):
-        ax.text(0.25, y + NOTE_PITCH * k, line, ha="left", va="top", fontsize=8, color=INK2)
-    ax.text(0.25, h - 0.3, source, ha="left", va="top", fontsize=8, color=INK2, style="italic")
-    ax.text(w - 0.15, h - 0.12, stamp, ha="right", va="bottom", fontsize=8.5, color=STAMP_RED, weight="bold")
+    y = h - 0.45 - NOTE_PITCH * len(note)
+    for k, line in enumerate(note):
+        ax.text(0.25, y + NOTE_PITCH * k, line, ha="left", va="top", fontsize=FS_SMALL, color=INK2)
+    ax.text(0.25, h - 0.31, source, ha="left", va="top", fontsize=FS_SMALL, color=INK2, style="italic")
+    ax.text(w - 0.15, h - 0.12, stamp, ha="right", va="bottom", fontsize=9, color=STAMP_RED, weight="bold")
 
 
 def marker(ax, x, y, status, scale=1.0, z=5):
@@ -325,8 +364,10 @@ def legend_row(ax, x, y, statuses=STATUSES, gap=0.35):
         x += 0.2 + bb.width / fig.dpi + gap
 
 
-def wrap_measured(ax, text, width_in, fontsize, **font):
-    """textwrap.wrap at the widest character count whose longest line, as rendered, fits width_in inches."""
+def wrap_measured(ax, text, width_in, fontsize, balance=0.0, **font):
+    """textwrap.wrap at the widest character count whose longest line, as rendered, fits width_in inches. While the
+    last line is shorter than balance times the longest, the wrap is narrowed a character at a time (never adding a
+    line), so the text does not end on an orphaned word."""
     fig = ax.figure
     rend = fig.canvas.get_renderer()
     n = max(8, int(width_in / (0.5 * fontsize / 72)))      # start a little wide of the average advance
@@ -338,8 +379,14 @@ def wrap_measured(ax, text, width_in, fontsize, **font):
             widest = max(widest, t.get_window_extent(renderer=rend).width / fig.dpi)
             t.remove()
         if widest <= width_in or n <= 8:
-            return lines
+            break
         n -= 1
+    while len(lines) > 1 and len(lines[-1]) < balance * max(len(s) for s in lines) and n > 8:
+        narrower = textwrap.wrap(text, n - 1)
+        if len(narrower) != len(lines):
+            break
+        n, lines = n - 1, narrower
+    return lines
 
 
 def save(fig, name):
@@ -348,11 +395,16 @@ def save(fig, name):
     from PIL import Image
     path = os.path.join(HERE, name)
     fig.savefig(path, dpi=DPI, facecolor="white")
+    small = min(t.get_fontsize() for t in fig.findobj(matplotlib.text.Text)
+                if t.get_visible() and t.get_text().strip())
     plt.close(fig)
     im = Image.open(path).convert("RGB").quantize(colors=256, method=Image.Quantize.MEDIANCUT,
                                                   dither=Image.Dither.NONE)
     im.save(path, optimize=True)
-    print(f"  wrote {path}  ({os.path.getsize(path) / 1024:.0f} KB)")
+    print(f"  wrote {path}  ({im.width} x {im.height} px, {os.path.getsize(path) / 1024:.0f} KB)")
+    docs_px = small * DPI / 72 * DOCS_COLUMN_PX / im.width
+    flag = "" if docs_px >= MIN_DOCS_PX else f"  WARNING: below {MIN_DOCS_PX:g} px"
+    print(f"  smallest text {small:g} pt: {docs_px:.1f} px tall at the {DOCS_COLUMN_PX} px docs width{flag}")
     return path
 
 
@@ -370,16 +422,16 @@ def fig_scores(ideas):
     ROW, GROUP_HEAD, GROUP_GAP = 0.2, 0.44, 0.2
     TOP = 1.82                                   # below the title, subtitle and legend
     w = 9.6
-    x_sec, x_label = 0.62, 3.95                  # section ref column (right-aligned), label column (right-aligned)
-    x0, x1 = 4.2, 7.9                            # score 0 and score 10
-    x_verdict = 8.12
+    x_sec, x_label = 0.62, 4.2                   # section ref column (right-aligned), label column (right-aligned)
+    x0, x1 = 4.45, 8.05                          # score 0 and score 10
+    x_verdict = 8.27
     body = sum(GROUP_HEAD + ROW * len(r) for _, r in groups) + GROUP_GAP * (len(groups) - 1)
-    note = [
-        "Score: each research area's sceptic, 1-10, for worth building (novelty, feasibility on this toolchain,",
-        "daily-driver value). One sceptic per area, so scores compare best within an area. Four of the five",
-        "sceptics could not search the web. Ideas the sceptics added themselves carry no score and are not shown.",
-        "§ = the concept.md section a picked idea became; → § = the feature a folded idea is part of.",
-    ]
+    note = note_lines(
+        "Score: each research area's sceptic, 1-10, for worth building (novelty, feasibility on this toolchain, "
+        "daily-driver value). One sceptic per area, so scores compare best within an area. Four of the five "
+        "sceptics could not search the web. Ideas the sceptics added themselves carry no score and are not shown.\n"
+        "§ = the concept.md section a picked idea became; → § = the feature a folded idea is part of. Folded "
+        "does not mean decided as proposed: the chip is not chosen (§5), and 8 kHz is a rev A test.", w)
     h = TOP + 0.32 + body + 0.3 + footer_height(note)
     fig, ax = inch_canvas(w, h)
 
@@ -401,12 +453,12 @@ def fig_scores(ideas):
 
     def ticks(y, va):
         for s in range(0, 11):
-            ax.text(sx(s), y, f"{s}", ha="center", va=va, fontsize=8.5, color=INK2)
+            ax.text(sx(s), y, f"{s}", ha="center", va=va, fontsize=FS_SMALL, color=INK2)
 
     y = TOP + 0.32
     ticks(y - 0.08, "bottom")
-    ax.text(x_verdict, y - 0.08, "sceptic's verdict", ha="left", va="bottom", fontsize=8.5, color=INK2)
-    ax.text(x_label, y - 0.08, "score for worth building →", ha="right", va="bottom", fontsize=8.5,
+    ax.text(x_verdict, y - 0.08, "sceptic's verdict", ha="left", va="bottom", fontsize=FS_SMALL, color=INK2)
+    ax.text(x_label, y - 0.08, "score for worth building →", ha="right", va="bottom", fontsize=FS_SMALL,
             color=INK2)
     for gi, (title, rows) in enumerate(groups):
         n = Counter(i["status"] for i in rows)
@@ -414,7 +466,7 @@ def fig_scores(ideas):
         tw = ax.texts[-1].get_window_extent(renderer=fig.canvas.get_renderer()).width / fig.dpi
         ax.text(0.25 + tw + 0.12, y + 0.275,
                 f"{len(rows)} ideas: {n['picked']} picked, {n['folded']} folded, {n['not picked']} not picked",
-                ha="left", va="center", fontsize=8.5, color=INK2)
+                ha="left", va="center", fontsize=FS_SMALL, color=INK2)
         top = y + GROUP_HEAD - 0.06
         bottom = top + ROW * len(rows) + 0.02
         for s in range(0, 11):   # vertical grid hairlines, per group block
@@ -424,16 +476,16 @@ def fig_scores(ideas):
             yc = top + ROW * (k + 0.5) + 0.01
             st = idea["status"]
             weight = "bold" if st == "picked" else "normal"
-            ax.text(x_label, yc, idea["label"], ha="right", va="center", fontsize=8.5,
+            ax.text(x_label, yc, idea["label"], ha="right", va="center", fontsize=FS_SMALL,
                     color=INK if st != "not picked" else "#4a4a4a", weight=weight)
             if idea.get("section"):
                 ref = f"§{idea['section']}" if st == "picked" else f"→ §{idea['section']}"
-                ax.text(x_sec, yc, ref, ha="right", va="center", fontsize=8, color=INK2)
+                ax.text(x_sec, yc, ref, ha="right", va="center", fontsize=FS_SMALL, color=INK2)
             stem = C_PICKED if st == "picked" else ("#f9b38f" if st == "folded" else "#dcdcdc")
             ax.plot([sx(0), sx(idea["score"])], [yc, yc], color=stem, lw=1.6 if st == "picked" else 1.2,
                     zorder=2)
             marker(ax, sx(idea["score"]), yc, st, z=4)
-            ax.text(x_verdict, yc, VERDICT_TEXT[idea["verdict"]], ha="left", va="center", fontsize=8.5,
+            ax.text(x_verdict, yc, VERDICT_TEXT[idea["verdict"]], ha="left", va="center", fontsize=FS_SMALL,
                     color=INK2)
         y = bottom + GROUP_GAP - 0.02
     ticks(y - GROUP_GAP + 0.06, "top")
@@ -448,7 +500,7 @@ def fig_grid(ideas):
     x_axis_label = 0.25
     gx0 = 1.75                              # grid left edge
     # Column widths follow the text they hold, not the counts: the count is the number and the dots in a cell.
-    col_w = {"table_stakes": 1.5, "common": 1.5, "niche_exists": 2.8, "rare": 2.8}
+    col_w = {"table_stakes": 1.2, "common": 1.2, "niche_exists": 2.8, "rare": 2.8}
     col_x = {}
     x = gx0
     for nk, _ in NOVELTY:
@@ -456,15 +508,12 @@ def fig_grid(ideas):
         x += col_w[nk]
     w = x + 0.25
     gy0 = 2.05                              # grid top edge (below the column headers)
-    NAME_FS, NAME_LINE, NAME_GAP = 8.3, 0.155, 0.045
-    note = [
+    NAME_FS, NAME_LINE, NAME_GAP = FS_SMALL, 0.16, 0.045
+    note = note_lines(
         "Both axes are the sceptics' ratings, one sceptic per research area. Novelty is how much prior art the "
-        "sceptic found or knew of;",
-        "four of the five sceptics could not search the web, so some 'rare' ratings may be generous. Feasibility "
-        "is on this toolchain",
-        "(JLC assembly, LCSC stock, firmware, power). Each dot is one idea. Only the 12 picked ideas are named; "
-        "research.md lists the rest.",
-    ]
+        "sceptic found or knew of; four of the five sceptics could not search the web, so some 'rare' ratings may "
+        "be generous. Feasibility is on this toolchain (JLC assembly, LCSC stock, firmware, power). Each dot is one "
+        "idea. Only the 12 picked ideas are named; the scores figure names the rest.", w)
     fig, ax = inch_canvas(w, 20)            # a scratch canvas to measure the names on
     cells = {}
     for i in ideas:
@@ -655,24 +704,21 @@ PRIOR_ART = [
 
 def fig_prior(_ideas):
     cols = [  # (x left, width, header, sub-header)
-        (0.25, 1.95, "Feature", "§ = concept.md section"),
-        (2.25, 2.3, "Commercial product", "or vendor design"),
-        (4.6, 2.3, "Open project", "or public write-up"),
-        (6.95, 1.85, "Research or patent", ""),
-        (8.85, 2.05, "Not found", "by this research: the new part"),
+        (0.25, 1.7, "Feature", "§ = concept.md section"),
+        (2.0, 2.1, "Commercial product", "or vendor design"),
+        (4.15, 2.1, "Open project", "or public write-up"),
+        (6.3, 1.6, "Research or patent", ""),
+        (7.95, 1.95, "Not found", "by this research: the new part"),
     ]
     w = cols[-1][0] + cols[-1][1] + 0.2
-    FS = 8.3
-    LINE = 0.152            # line pitch at FS, inches
+    FS = FS_SMALL
+    LINE = 0.157            # line pitch at FS, inches
     BLOCK_GAP = 0.05        # extra space between two entries in a cell
-    note = [
+    note = note_lines(
         "Each entry is a name concept.md gives as prior art for that feature, shortened, in the column it fits. "
-        "An empty cell means",
-        "concept.md names nothing of that kind, not that nothing exists. 'Not found' means not found by this desk "
-        "research, in which",
-        "four of the five sceptics could not search the web. '(unchecked)' is concept.md's flag for the sceptic's "
-        "unverified memory.",
-    ]
+        "An empty cell means concept.md names nothing of that kind, not that nothing exists. 'Not found' means not "
+        "found by this desk research, in which four of the five sceptics could not search the web. '(unchecked)' "
+        "is concept.md's flag for the sceptic's unverified memory.", w)
 
     fig, ax = inch_canvas(w, 30)         # a scratch canvas: measure and wrap every cell first
     layout = []
@@ -711,7 +757,7 @@ def fig_prior(_ideas):
     for x, wid, title, subt in cols:
         ax.text(x + 0.1, y + 0.08, title, ha="left", va="top", fontsize=9.5, color=INK, weight="bold")
         if subt:
-            ax.text(x + 0.1, y + 0.29, subt, ha="left", va="top", fontsize=8, color=INK2)
+            ax.text(x + 0.1, y + 0.29, subt, ha="left", va="top", fontsize=FS_SMALL, color=INK2)
     y += HEAD
     ax.plot([0.25, w - 0.2], [y - 0.04, y - 0.04], color=AXIS, lw=0.9, solid_capstyle="butt")
 
@@ -720,7 +766,7 @@ def fig_prior(_ideas):
         y += GHEAD
         for sec, name_lines, cells, new_lines, rh in rows:
             ty = y + 0.15
-            ax.text(cols[0][0] + 0.1, ty, f"§{sec}", ha="left", va="top", fontsize=8.5, color=INK2)
+            ax.text(cols[0][0] + 0.1, ty, f"§{sec}", ha="left", va="top", fontsize=FS_SMALL, color=INK2)
             for li, line in enumerate(name_lines):
                 ax.text(cols[0][0] + 0.52, ty + li * LINE, line, ha="left", va="top", fontsize=8.8,
                         color=INK, weight="bold")

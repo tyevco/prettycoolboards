@@ -113,9 +113,16 @@ def _font(size):
     return ImageFont.truetype(font_manager.findfont("DejaVu Sans"), size)
 
 
+def stamp_sizes(width):
+    """Title and stamp font sizes (px) for an image `width` px wide. The docs column shows images about 688 px wide,
+    so both scale with the width: the stamp stays about 8 px tall there and the title about 11 px."""
+    return max(20, width // 60), max(13, width // 86)
+
+
 def autocrop(path, margin=16, title=None):
     """3D axes keep a square-ish canvas: trim the white border off the PNG, then add the title above the
-    picture and the concept stamp below it (after the crop, so neither holds the border open)."""
+    picture and the concept stamp below it (after the crop, so neither holds the border open). Both fonts, and
+    the bands that hold them, grow with the cropped width (stamp_sizes)."""
     from PIL import Image, ImageDraw
     im = Image.open(path).convert("RGB")
     a = np.asarray(im)
@@ -125,17 +132,19 @@ def autocrop(path, margin=16, title=None):
     y0, y1 = max(ink[0].min() - margin, 0), min(ink[0].max() + margin, a.shape[0])
     x0, x1 = max(ink[1].min() - margin, 0), min(ink[1].max() + margin, a.shape[1])
     im = im.crop((x0, y0, x1, y1))
-    ft, fs = _font(20), _font(13)
-    th = 34 if title else 0
+    t_px, s_px = stamp_sizes(im.width)
+    ft, fs = _font(t_px), _font(s_px)
+    th = int(round(t_px * 1.7)) if title else 0
+    sh = int(round(s_px * 1.7))
     tw = int(ImageDraw.Draw(im).textlength(title, font=ft)) + 24 if title else 0
     sw = int(ImageDraw.Draw(im).textlength(STAMP, font=fs)) + 16
     w = max(im.width, tw, sw)
-    out = Image.new("RGB", (w, im.height + th + 22), "white")
+    out = Image.new("RGB", (w, im.height + th + sh), "white")
     out.paste(im, ((w - im.width) // 2, th))
     d = ImageDraw.Draw(out)
     if title:
-        d.text((w // 2, 6), title, fill=(20, 20, 20), font=ft, anchor="mt")
-    d.text((w - 8, out.height - 4), STAMP, fill=(140, 25, 25), font=fs, anchor="rd")
+        d.text((w // 2, int(t_px * 0.3)), title, fill=(20, 20, 20), font=ft, anchor="mt")
+    d.text((w - 8, out.height - int(s_px * 0.3)), STAMP, fill=(140, 25, 25), font=fs, anchor="rd")
     out.save(path, optimize=True)
 
 

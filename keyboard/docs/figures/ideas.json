@@ -112,14 +112,15 @@
   {
    "lens": "sensing",
    "name": "Hybrid scanning core: EN-gated Hall bus, an 8 kHz HS-USB scanner and an ESP32-S3 radio/app co-processor",
-   "label": "Hybrid scanning core (8 kHz Hall bus)",
+   "label": "Hybrid scanning core (8 kHz Hall bus, a rev A test)",
    "score": 6,
    "verdict": "keep",
    "novelty": "table_stakes",
    "feasibility": "hard",
    "daily_driver_value": "high",
    "status": "folded",
-   "section": "4.3"
+   "section": "4.3",
+   "note": "Folded into the section 4.3 sensing testbed as a test, not a decision: the rev A Hall-effect coupon is to test a shared, enable-gated bus at 1 and 8 kHz (concept.md section 7), and section 8 says 8 kHz is likely wired-only. The ESP32-S3 co-processor in the researcher's name is not chosen either."
   },
   {
    "lens": "sensing",
@@ -377,14 +378,15 @@
   {
    "lens": "smarts",
    "name": "Adaptive-rate single-chip platform (nRF54LM20A)",
-   "label": "Adaptive-rate single chip (nRF54LM20A)",
+   "label": "Adaptive-rate scanning on one chip (chip not chosen, §5)",
    "score": 6,
    "verdict": "keep",
    "novelty": "common",
    "feasibility": "hard",
    "daily_driver_value": "high",
    "status": "folded",
-   "section": "4.2"
+   "section": "4.2",
+   "note": "The researcher's idea names the nRF54LM20A, but concept.md section 5 chooses no chip: the nRF54LM20A is one of six candidates, and a battery-budget gate on rev A measurements is to pick the rev B chip. Only the adaptive-rate scanning (the scan rate in the firmware duty cycle that the section 4.2 battery gate models) is counted as folded into section 4.2; the label says the chip is not chosen."
   },
   {
    "lens": "smarts",
@@ -636,7 +638,8 @@
    "feasibility": "research_needed",
    "daily_driver_value": "medium",
    "status": "not picked",
-   "section": null
+   "section": null,
+   "note": "Not picked. The designed-as-code lens's version of the pitch that the MCU, connectivity and software lens called 'Fit-to-you: typing data drives the next PCB' (label 'Typing data designs the next PCB'): typing data shaping the next board's geometry. Each lens's sceptic scored its own entry (5 and 5), so both are kept here; research.md's 'Typing data designs the next PCB' row is the table entry for both."
   },
   {
    "lens": "as_code",
