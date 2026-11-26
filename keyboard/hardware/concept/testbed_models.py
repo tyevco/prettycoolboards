@@ -3,9 +3,11 @@
 
 What it builds (mm, Z up, the motherboard's top copper at z = 0, +Y away from the viewer's front edge, X right):
 
-    motherboard   about 160 x 110 mm on four standoffs: the candidate MCU (AT32F405, drawn as a generic QFN), a USB-C
-                  port, a power and charging section, one mezzanine socket per coupon, injection and current-sense test
-                  pads, and the latency rig's header (marker GPIO)
+    motherboard   about 160 x 110 mm on four standoffs: the rev A MCU (STM32U5A5, the owner's pick of 2026-11-26,
+                  drawn as its LQFP100 14 x 14 mm body with gull-wing leads at 0.5 mm), a 16 MHz HSE crystal beside it,
+                  a USB-C port next to the MCU with a short high-speed pair drawn between them, reset and boot buttons,
+                  a power and charging section, one mezzanine socket per coupon, injection and current-sense test pads,
+                  and the latency rig's header (marker GPIO)
     coupons       each a small board on a 2 x 10 mezzanine header, 11 mm above the motherboard:
                     Hall-effect   4 keys over TMAG5253-class sensors, two switch-free reference sensors, thermistors
                     TMR           the same 4 keys over a TMR sensor (part not chosen)
@@ -25,7 +27,11 @@ Status: CONCEPT SKETCH. Nothing in keyboard/ is designed, built or measured (key
 Every position and size below is an illustrative placeholder chosen to give a believable picture, not a decision: the
 board size, the coupon footprints, the connector type (concept.md says only "coupon connectors with analog and SPI
 lanes"), the mezzanine height, the parts' packages and the rig's parts. The parts named are the candidates in
-concept.md. Solder-mask colours only tell the coupons apart.
+concept.md, except the MCU: the STM32U5A5 (STM32U5A5VJT6, LQFP100) is the owner's rev A choice of 2026-11-26, and the
+motherboard around it is not designed, built or measured. Its placement, the crystal's and the USB-C's, and the HS
+pair's route are illustrative: which package side carries the USB pins (PA11/PA12) and the oscillator pins is not
+checked, and 16 MHz is the HSE value on the NUCLEO-U5A5ZJ-Q, not a checked entry in the list of values the U5's HS PHY
+accepts. Solder-mask colours only tell the coupons apart.
 """
 import math
 from dataclasses import dataclass, field
@@ -294,6 +300,45 @@ def qfn(name, x, y, w, z0, h=0.9, d=None, dot=True):
     if dot:
         items.append((name + " pin 1", zcyl(x - w / 2 + 0.7, y + d / 2 - 0.7, 0.5, z0 + h, z0 + h + 0.02),
                       (0.6, 0.6, 0.6)))
+    return items
+
+
+def _gullwing(reach, zm, t=0.15, w=0.22):
+    """One gull-wing lead as (vertices (4k, 3), triangles) in a local (r, s, z) frame: r outward from the body edge,
+    s across the lead, z up from the board. It leaves the body at mid-height, bends down and ends in a flat foot."""
+    prof = np.array([(-0.05, zm), (0.20, zm), (0.30, zm - 0.10), (0.40, t / 2 + 0.10), (0.50, t / 2),
+                     (reach, t / 2)])
+    o = CO.band(prof, t)
+    k = len(prof)
+    top, bot = o[:k], o[k:][::-1]
+    v = np.vstack([np.c_[top[:, 0], np.full(k, -w / 2), top[:, 1]], np.c_[bot[:, 0], np.full(k, -w / 2), bot[:, 1]],
+                   np.c_[top[:, 0], np.full(k, w / 2), top[:, 1]], np.c_[bot[:, 0], np.full(k, w / 2), bot[:, 1]]])
+    A, B, C, D = 0, k, 2 * k, 3 * k
+    tris = []
+    for i in range(k - 1):
+        for p, q in ((A, C), (B, D), (A, B), (C, D)):       # top, bottom and the two side faces
+            tris += [(p + i, p + i + 1, q + i + 1), (p + i, q + i + 1, q + i)]
+    for i in (0, k - 1):                                     # end caps
+        tris += [(A + i, B + i, D + i), (A + i, D + i, C + i)]
+    return v, np.array(tris)
+
+
+def lqfp(name, x, y, z0, body=14.0, span=16.0, n_side=25, pitch=0.5, h=1.4, standoff=0.1):
+    """LQFP-class package: a body with n_side gull-wing leads per side and a pin-1 dot. The defaults are an LQFP100
+    14 x 14 mm at 0.5 mm pitch, 16 mm tip to tip, 1.4 mm body (the JEDEC MS-026 class outline, not a datasheet
+    drawing)."""
+    items = [(name, cbox(body, body, z0 + standoff, z0 + standoff + h, x, y), "ic")]
+    lv, lt = _gullwing((span - body) / 2, standoff + h / 2)
+    leads = []
+    for i in range(n_side):
+        s = (i - (n_side - 1) / 2) * pitch
+        r, ss, z = lv[:, 0], lv[:, 1] + s, lv[:, 2] + z0
+        for px, py in ((x + body / 2 + r, y + ss), (x - body / 2 - r, y + ss),
+                       (x + ss, y + body / 2 + r), (x + ss, y - body / 2 - r)):
+            leads.append(MeshSolid(np.c_[px, py, z], lt))
+    items.append((name + " gull-wing leads", MeshSolid.merge(leads), "steel"))
+    items.append((name + " pin 1", zcyl(x - body / 2 + 1.4, y + body / 2 - 1.4, 1.0, z0 + standoff + h,
+                                        z0 + standoff + h + 0.02), (0.6, 0.6, 0.6)))
     return items
 
 
@@ -694,9 +739,14 @@ def coupons():
 # injection and current-sense test pads: one INJ pad per coupon lane, a pair of I-sense pads per coupon
 INJ_PADS = [(8.0 + 4.0 * i, 47.0) for i in range(6)]
 ISENSE_PADS = [(7.0 + 4.0 * i + 1.6 * j, 41.0) for i in range(6) for j in (0, 1)]
-RIG_HEADER = (29.5, 96.0)
-USB_A_PORT = (2.675, 94.5)       # the motherboard's USB-C (x is the receptacle's centre)
-MCU_XY = (15.0, 79.0)
+RIG_HEADER = (31.5, 96.0)
+USB_C_PORT = (2.675, 96.5)       # the motherboard's USB-C (x is the receptacle's centre), beside the MCU
+MCU_XY = (15.5, 80.0)            # the STM32U5A5's centre: an LQFP100, 16 mm tip to tip
+MCU_NAME = "STM32U5A5 (rev A MCU)"
+HSE_XY = (3.4, 78.5)             # the 16 MHz HSE crystal, beside the MCU
+# the USB high-speed pair from the USB-C to the MCU, kept short (centreline; which MCU pins it lands on is not checked)
+HS_PAIR = [(USB_C_PORT[0] + 3.7, USB_C_PORT[1]), (10.6, USB_C_PORT[1]), (13.0, USB_C_PORT[1] - 2.4),
+           (13.0, MCU_XY[1] + 8.1)]
 
 
 def motherboard(with_sockets=True, cps=None):
@@ -707,16 +757,25 @@ def motherboard(with_sockets=True, cps=None):
         for j, y in enumerate((4.0, MB_D - 4.0)):
             items += standoff_under(f"standoff {i}{j}", x, y, -PCB_T)
             items += screw_head(f"screw {i}{j}", x, y, z)
-    # USB-C, ESD, MCU (candidate AT32F405; QFN-class body, size illustrative), crystal, buttons
-    items += usb_c("USB-C", USB_A_PORT[0], USB_A_PORT[1], z, facing="-x")
-    items += sot23("ESD array", 10.0, 94.5, z, rot=90)
-    items += qfn("MCU (candidate AT32F405)", MCU_XY[0], MCU_XY[1], 7.0, z)
-    items += crystal("crystal", MCU_XY[0], MCU_XY[1] - 7.0, z)
-    for k, (dx, dy) in enumerate(((-5.2, 0), (5.2, 0), (0, 5.2), (-5.2, 2.5), (5.2, -2.5), (2.5, 5.2))):
-        rot = 90 if dx else 0
+    # the rev A MCU (STM32U5A5, LQFP100) with its decoupling, the 16 MHz HSE crystal and its load capacitors, the
+    # USB-C beside it with ESD and a short HS pair (copper under the mask), and the reset and boot buttons
+    items += lqfp(MCU_NAME, MCU_XY[0], MCU_XY[1], z)
+    for k, (dx, dy) in enumerate(((2.0, 9.4), (6.0, 9.4), (9.4, 4.0), (9.4, -3.0), (-3.0, -9.4), (4.0, -9.4),
+                                  (-9.4, 6.0))):
+        rot = 90 if abs(dx) > abs(dy) else 0
         items += passive(f"MCU C{k}", MCU_XY[0] + dx, MCU_XY[1] + dy, z, size=(1.0, 0.5), h=0.5, rot=rot)
-    items += tact("reset button", 5.5, 76.0, z)
-    items += tact("boot button", 5.5, 83.0, z)
+    items += crystal("HSE crystal (16 MHz)", HSE_XY[0], HSE_XY[1], z)
+    for k, dy in enumerate((-2.6, 2.6)):
+        items += passive(f"HSE load C{k}", HSE_XY[0], HSE_XY[1] + dy, z, size=(1.0, 0.5), h=0.5)
+    items += usb_c("USB-C", USB_C_PORT[0], USB_C_PORT[1], z, facing="-x")
+    items += sot23("ESD array", 9.6, USB_C_PORT[1] + 3.7, z)
+    centre = np.asarray(HS_PAIR)
+    o = CO.band(centre, 0.75)
+    n = len(centre)
+    items.append(("USB HS pair copper", MeshSolid.merge([flat_band(o[:n], 0.4, z + 0.01),
+                                                          flat_band(o[n:][::-1], 0.4, z + 0.01)]), (0.30, 0.68, 0.36)))
+    items += tact("reset button", RIG_HEADER[0], 79.5, z)
+    items += tact("boot button", RIG_HEADER[0], 73.0, z)
     # power and charging (from the caliper's power sheets; parts here are generic envelopes)
     items += jst2("battery connector", 2.25, 58.0, z, facing="-x")
     items += qfn("charger", 10.0, 62.0, 3.0, z, h=0.8)
@@ -759,7 +818,7 @@ def assembly(lift=0.0, key_lift=0.0, cps=None, keep=None):
 # ---------------------------------------------------------------------------------------------------------------
 RIG = dict(x0=-118.0, x1=-62.0, y0=64.0, y1=114.0)
 RIG_IDC = (-90.0, 100.0)
-RIG_USB_A = (-69.0, USB_A_PORT[1])       # in line with the motherboard's USB-C, mouth facing +x
+RIG_USB_A = (-69.0, USB_C_PORT[1])       # in line with the motherboard's USB-C, mouth facing +x
 RIG_PROBE_CONN = (-76.0, 68.0)
 
 
@@ -788,7 +847,7 @@ def latency_rig():
 
 def rig_paths():
     """Centrelines (N, 3) of the USB cable, the ribbon and the probe lead (also used to place the callouts)."""
-    ux, uy, zc = USB_A_PORT[0] - 3.675, USB_A_PORT[1], 1.63
+    ux, uy, zc = USB_C_PORT[0] - 3.675, USB_C_PORT[1], 1.63
     ax_, ay_, za = RIG_USB_A[0] + 7.0, RIG_USB_A[1], 2.85
     p0, p1 = np.array([ax_ + 19.0, ay_, za]), np.array([ux - 17.0, uy, zc])
     usb = bezier([p0, p0 + (14, -2, 0), (-33.0, 66.0, 2.0), p1 + (-14, -2, 0), p1], 64)
@@ -808,7 +867,7 @@ def rig_cables():
     paths = rig_paths()
     plug = (0.18, 0.18, 0.20)
     # USB-C plug into the motherboard's receptacle (its mouth at x = -1.0)
-    ux, uy = USB_A_PORT[0] - 3.675, USB_A_PORT[1]
+    ux, uy = USB_C_PORT[0] - 3.675, USB_C_PORT[1]
     zc = 1.63
     items.append(("USB-C plug", box(ux - 13.0, ux - 0.5, uy - 6.0, uy + 6.0, zc - 3.0, zc + 3.0), plug))
     items.append(("USB-C plug strain relief", xcyl(uy, zc, 4.2, ux - 17.0, ux - 13.0), plug))

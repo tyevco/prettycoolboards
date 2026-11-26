@@ -2,8 +2,9 @@
 
 > **Status (2026-11-26): concept sketches. Nothing here is designed, built or measured.** The 3D renders come from
 > rough build123d models whose geometry is illustrative: round numbers near an MX-style switch and the candidate parts
-> that [concept.md](../../docs/concept.md) names, none of them a decision. The plots are simple models, arithmetic or
-> desk-research opinion, not measurements. Every image carries a stamp that says which kind it is.
+> that [concept.md](../../docs/concept.md) names. The one decision among them is the rev A MCU, the STM32U5A5 (owner,
+> 2026-11-26, [mcu.md](../../docs/mcu.md)); the board around it is not designed. The plots are simple models,
+> arithmetic or desk-research opinion, not measurements. Every image carries a stamp that says which kind it is.
 
 Every picture made for the keyboard [concept](../../docs/concept.md) and its [research](../../docs/research.md), in
 one place. Each one also sits in the page section it illustrates, which its caption links to. To rotate the models,
@@ -122,20 +123,23 @@ The motherboard and its plug-in coupons ([concept §7](../../docs/concept.md#_7-
 `testbed_models.py` and `coils.py`. Board size, connector, coupon footprints and layout are illustrative, and the
 solder-mask colours only tell the coupons apart.
 
-![3/4 view of the green motherboard on standoffs with the Hall-effect, TMR, shear, coil and haptics coupons plugged in, and a translucent optional KVM coupon.](renders/testbed_assembly.png)
+![3/4 view of the green motherboard on standoffs with the Hall-effect, TMR, shear, coil and haptics coupons plugged in, and a translucent optional KVM coupon. On the motherboard's left side: the USB-C port, the STM32U5A5 (rev A MCU) drawn as an LQFP with its 16 MHz HSE crystal, and the latency-rig header.](renders/testbed_assembly.png)
 
-*Assembled: one motherboard (candidate AT32F405, USB-C, power, latency-rig hooks) and a coupon per sensing method;
-the optional KVM coupon is a ghost.*
+*Assembled: one motherboard (the STM32U5A5, the owner's rev A MCU of 2026-11-26, [mcu.md](../../docs/mcu.md); USB-C,
+power, latency-rig hooks) and a coupon per sensing method; the optional KVM coupon is a ghost.*
 
-![The coupons lifted out of their sockets at two heights, with dashed guides from each header to its socket, and the keys lifted further off so the sensor packages show.](renders/testbed_exploded.png)
+![The coupons lifted out of their sockets at two heights, with dashed guides from each header to its socket, and the keys lifted further off so the sensor packages show; the haptics coupon's callout puts its capacitive strip on a touch controller.](renders/testbed_exploded.png)
 
-*Exploded: each coupon out of its 2 × 10 mezzanine socket (connector type not decided), and the keys off the
-TMAG5253, TMR and TMAG5170 sites.*
+*Exploded: each coupon out of its 2 × 10 mezzanine socket (connector type not decided; the draft
+[SPEC](../design/SPEC.md#_4-1-connector) proposes a 2 × 20, 2.54 mm socket), and the keys off the TMAG5253, TMR and
+TMAG5170 sites.*
 
-![Top view of the testbed to scale, with a callout for USB-C, the candidate MCU, power and charging, the injection and current-sense test pads, the latency-rig header, the pale optional KVM coupon with its host-B controller and isolator (if isolated), and each key, shear, coil and haptics coupon.](renders/testbed_top.png)
+![Top view of the testbed to scale, with callouts for USB-C with a short high-speed pair to the MCU, the STM32U5A5 (rev A MCU) drawn as an LQFP100, a 16 MHz HSE crystal, power and charging, the injection and current-sense test pads, the latency-rig header, the pale optional KVM coupon with its host-B controller and isolator (if isolated), each key, shear and coil coupon, and the haptics coupon with its capacitive strip on an external touch controller.](renders/testbed_top.png)
 
 *Top view to scale (a motherboard of about 160 × 110 mm in this sketch), with a short label for each coupon and
-motherboard section. Positions and sizes are illustrative, and the parts named are candidates.*
+motherboard section. Positions and sizes are illustrative. The MCU is the owner's rev A decision; the other parts
+named are candidates. The 16 MHz HSE is the Nucleo's value: Zephyr's PHY driver accepts it, and ST's reference-manual
+list is not checked ([SPEC §5.2](../design/SPEC.md#_5-2-constraints-behind-the-choices)).*
 
 ![A small latency-rig board beside the motherboard, which carries only the Hall-effect coupon, joined by a USB cable, a ribbon to the rig header and a probe lead to an injection test pad, above a five-box strip of the planned measurement path.](renders/testbed_latency_rig.png)
 

@@ -1,7 +1,8 @@
 # Research: the keyboard landscape and the ideas we weighed
 
 Desk research from 2026-11-25. It fed the owner's choices in [concept.md](concept.md). **Nothing here was built or
-measured.**
+measured.** A dated [addendum](#addendum-2026-11-26-the-rev-a-mcu) records the MCU research that followed on
+2026-11-26.
 
 ## How this was researched
 
@@ -337,3 +338,24 @@ The researchers' and sceptics' main sources, grouped by area. They are not all r
 * keymap-drawer: <https://github.com/caksoylar/keymap-drawer>
 * ZMK physical layouts: <https://zmk.dev/docs/hardware-integration/physical-layouts>
 * keyboard-latency-tester: <https://github.com/joelspadin/keyboard-latency-tester>
+
+## Addendum (2026-11-26): the rev A MCU
+
+On the strength of the research above, concept.md named the Artery AT32F405 as the rev A testbed chip, but nobody
+had checked its Zephyr support.
+On 2026-11-26 a second desk-research run did: four researchers, one per family of chips with an on-chip high-speed
+USB PHY, then an adversarial verifier that re-checked the deciding claims on primary sources (the Zephyr tree and its
+USB device drivers, the JLC parts API, distributor pages). It found that the AT32F405 has no upstream Zephyr support,
+only a blinky-level upstream PR and a stale vendor fork, and the owner chose the **STM32U5A5** for rev A instead,
+with the NXP i.MX RT1021 as the fallback and the nRF54LM20A as the rev B front-runner. Nothing was built or measured.
+
+Two notes on this page's 2026-11-25 text, left as written above:
+
+* libhmk's 8 kHz on the AT32F405 (the landscape) is libhmk's own claim, on bare-metal TinyUSB firmware, not Zephyr;
+  neither run measured it.
+* Of the "new parts with high-speed USB and BLE", the 2026-11-26 run found that the WCH CH585 has no Zephyr
+  support and that its 48-pin package is at 0.35 mm pitch. The nRF54LM20A's high-speed USB is upstream in Zephyr, but its QFN52 had no
+  stock. The ESP32-S31 was not checked.
+
+The full record, with the requirements, the ranked candidates, the corrections, the conditions and the sources, is
+[Rev A MCU: STM32U5A5 (decision record)](mcu.md).

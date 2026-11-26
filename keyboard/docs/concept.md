@@ -1,10 +1,11 @@
 # Concept: features, decisions and the rev A testbed
 
-The owner chose these features and decisions on 2026-11-25, from a researched shortlist ([research.md](research.md)).
+The owner chose these features and decisions on 2026-11-25, from a researched shortlist ([research.md](research.md)),
+and the rev A testbed MCU, the STM32U5A5, on 2026-11-26 ([rev A MCU decision](mcu.md)).
 **Nothing here is designed, built or measured.** Parts, stock figures and currents come from desk research on
-2026-11-25. Recheck stock at LCSC/JLC before designing around a part, and with `tools/lcsc_check.py` once the part
-is in a generated netlist (the tool reads LCSC codes from a KiCad netlist). Every figure is a candidate until the
-testbed measures it.
+2026-11-25, and the MCU figures from 2026-11-26. Recheck stock at LCSC/JLC before designing around a part, and with
+`tools/lcsc_check.py` once the part is in a generated netlist (the tool reads LCSC codes from a KiCad netlist). Every
+figure is a candidate until the testbed measures it.
 
 ## 1. What makes it different
 
@@ -69,8 +70,8 @@ flowchart TB
   MCU --> FB
 ```
 
-*Concept sketch. The MCU is not chosen yet (the battery gate picks it), the key sensing is whichever method wins on
-rev A, and every part named is a candidate from desk research. Whether host B's controller is isolated is still
+*Concept sketch. The rev B MCU is not chosen yet (the battery gate picks it, §5), the key sensing is whichever method
+wins on rev A, and every part named is a candidate from desk research. Whether host B's controller is isolated is still
 open (§3.1).*
 
 Each piece has prior art somewhere, listed honestly below. As far as the research found, the integration, the
@@ -558,8 +559,9 @@ haptic controller, so Windows gives per-app dial menus and ticks with nothing in
 WebHID or Web Bluetooth. (3) An optional small host agent for the foreground app, CI state or agent prompts.
 Feedback: a DRV2605L haptic driver (C527464) and a coin LRA per half, with a small, user-tested vocabulary (tick,
 double tick, long buzz), plus a capacitive strip with LRA-synthesised detents as the low-power wheel. The research
-reads the strip with the ESP32-S3's touch peripheral; whether the chosen MCU has touch pins is unchecked, otherwise it
-needs a touch controller.
+reads the strip with the ESP32-S3's touch peripheral. The rev A STM32U5A5 has a touch-sensing controller, but Zephyr
+has no devicetree node for it on the U5, so rev A plans an external touch controller ([mcu.md](mcu.md)); on rev B it
+depends on the chip the battery gate picks.
 
 From context to one profile:
 
@@ -973,11 +975,12 @@ current).
 
 The testbed as a concept sketch:
 
-![3/4 view concept sketch of a green motherboard on four standoffs with coupon boards plugged in on mezzanine headers: a blue Hall-effect coupon and a purple TMR coupon with four grey keys each, a red shear coupon with two blue keys, a black coil coupon with 20 copper spirals and two stock switches, a white haptics coupon with a gimbal-motor roller, coin LRA and gold capacitive pads, and a translucent optional KVM coupon. The candidate MCU, USB-C port and latency-rig header sit on the motherboard's left side.](../hardware/concept/renders/testbed_assembly.png)
+![3/4 view concept sketch of a green motherboard on four standoffs with coupon boards plugged in on mezzanine headers: a blue Hall-effect coupon and a purple TMR coupon with four grey keys each, a red shear coupon with two blue keys, a black coil coupon with 20 copper spirals and two stock switches, a white haptics coupon with a gimbal-motor roller, coin LRA and gold capacitive pads, and a translucent optional KVM coupon. The rev A MCU, labelled STM32U5A5 and drawn as an LQFP, its 16 MHz HSE crystal, the USB-C port and the latency-rig header sit on the motherboard's left side.](../hardware/concept/renders/testbed_assembly.png)
 
-*Concept sketch of the rev A testbed: one motherboard (candidate AT32F405, USB-C, power, latency-rig hooks) and one
-plug-in coupon per sensing method. Board size, connector, coupon footprints and layout are illustrative, not decided;
-the optional KVM coupon is drawn as a ghost, and the mask colours only tell the coupons apart. §7 has more views.*
+*Concept sketch of the rev A testbed: one motherboard (the STM32U5A5, the owner's rev A MCU of 2026-11-26
+([mcu.md](mcu.md)); USB-C, power, latency-rig hooks) and one plug-in coupon per sensing method. Board size,
+connector, coupon footprints and layout are illustrative, not decided; the optional KVM coupon is drawn as a ghost,
+and the mask colours only tell the coupons apart. §7 has more views.*
 
 **Prior art:** ThereminGoat's force curves (a huge open set, but mechanical only), and vendor blog comparisons of HE
 and TMR without raw data. **New:** an open, measured comparison across sensing methods.
@@ -1048,23 +1051,36 @@ than a standard Corne. Each unique board pays JLC's setup and extended-part fees
 
 ## 5. Platform: let the testbed decide
 
-The owner's decision: the rev A testbed measures the sensors' real current, and the battery-budget gate (§4.2) picks
-the rev B chip. The candidates, from the research:
+Two owner decisions, a day apart. On 2026-11-25: the rev A testbed measures the sensors' real current, and the
+battery-budget gate (§4.2) picks the rev B chip. On 2026-11-26: the **rev A chip is the STM32U5A5**
+(STM32U5A5VJT6, LQFP100, JLC C22455480), on the motherboard, with bring-up on the NUCLEO-U5A5ZJ-Q. Of the stocked
+parts the research found with a high-speed USB PHY on chip *and* upstream Zephyr support for it, it has the strongest
+analog: three ADCs, two of them 14-bit, and two motor-control timers. The [rev A MCU decision record](mcu.md) has the
+requirements, the ranked candidates, the conditions and the bring-up risks. The rev B chip is still open.
+
+The candidates, from the research (the STM32U5A5, i.MX RT1021 and AT32F405 rows from the MCU research of
+2026-11-26, the rest from 2026-11-25 unless marked):
 
 | Chip | For | Against |
 |---|---|---|
-| **Artery AT32F405** (rev A testbed) | On-chip high-speed USB PHY. Artery's own magnetic-keyboard reference design reaches 8 kHz polling and 16 kHz scanning on it, and libhmk 8 kHz polling | No radio. LCSC/JLC stock not checked. **Zephyr support not checked** (§6) |
-| **Nordic nRF54LM20A** | High-speed USB (Nordic says 8 kHz HID), BLE 6, 4 Mbps proprietary link for a split or dongle, low BLE current | The 66-GPIO part is the CSP98 (3.67 × 3.85 mm, roughly 0.35 mm pitch, *estimate*), which likely needs via-in-pad or HDI; JLC capability unverified. The QFN52 (32 GPIO) was still sampling. Nordic says 8 kHz USB plus the proprietary link together are CPU-bound |
+| **ST STM32U5A5** (rev A testbed, chosen 2026-11-26) | High-speed USB with the PHY on chip, upstream in Zephyr: the `nucleo_u5a5zj_q` board has it on by default in v4.4.0, v4.5.0 and `main`. Three 2.5 Msps ADCs (two 14-bit) with a DMA-capable Zephyr driver, the TIM1 and TIM8 motor timers, 4 MB flash, a 0.5 mm LQFP | About $19 per MCU. Thin stock: 13 at JLC and none at DigiKey before Feb–Mar 2027 (2026-11-26), so the parts must be reserved. No radio. 8 kHz HID on Zephyr's STM32 USB driver is unproven ([mcu.md](mcu.md#conditions-before-the-schematic-is-committed)) |
+| NXP i.MX RT1021 (rev A fallback) | The most mature high-speed USB path in Zephyr (EHCI). Good stock: 300 at JLC at $6.26 (C5119758, 2026-11-26). Two 12-bit ADCs, FlexPWM | No on-chip flash (a QSPI NOR and FlexSPI boot). Zephyr's ADC driver takes one interrupt per sample with no DMA, so the scan engine must be written. No radio |
+| Artery AT32F405 (the rev A candidate until 2026-11-26; **dropped**) | On-chip high-speed USB PHY. Artery's own magnetic-keyboard reference design reaches 8 kHz polling and 16 kHz scanning on it, and libhmk 8 kHz polling on bare-metal TinyUSB. Cheap and in stock at JLC: 92–329 per part number at $1.85–2.82 (2026-11-26) | **No upstream Zephyr**: only a blinky-level upstream PR (#101409) and a vendor fork on Zephyr 4.3.99, not pushed since 2026-02-28, whose high-speed USB nobody has shown working. No radio. It may still serve as a known-good libhmk 8 kHz reference to calibrate the latency rig |
+| **Nordic nRF54LM20A** (rev B front-runner) | High-speed USB upstream in Zephyr since v4.3.0, on the same dwc2 driver Nordic runs at about 8 kHz; nRF Desktop sets a 125 µs polling period on the nrf54lm20dk (2026-11-26). BLE 6, 4 Mbps proprietary link for a split or dongle, low BLE current | The QFN52 (0.4 mm, 32 GPIO) is still "Early sampling" with no stock; the 66-GPIO CSP98 is stocked but at 0.35 mm pitch needs via-in-pad or HDI (2026-11-26). One 10-bit SAADC. Nordic says 8 kHz USB plus the proprietary link together are CPU-bound |
 | nRF52840 (optionally with an nRF54L15 as a split radio) | Mature in Zephyr; weeks to months on a charge with lighting off (nRF52840-class ZMK boards) | Full-speed USB: 1 kHz on the nRF52840 (the nRF54L15 has no USB) |
 | Espressif ESP32-S31 | High-speed USB, stays in ESP-IDF | Preliminary datasheet; weaker BLE power than Nordic |
-| WCH CH585 | BLE 5.4 plus high- and full-speed USB, listed at LCSC (stock not checked), cheap | Weaker open-source ecosystem |
+| WCH CH585 | BLE 5.4 plus high- and full-speed USB, cheap and in stock (JLC, 2026-11-26: CH585F QFN32 2590 at $1.45, CH585M QFN48 5347 at $1.70) | Weaker open-source ecosystem. No Zephyr support, and its 48-pin package is 0.35 mm pitch (2026-11-26 research) |
 | ESP32-S3 (the caliper's) | Familiar, gated sheets exist | Full-speed USB only (1 kHz cap); BLE HID current in the mA range |
 
-Whatever wins, prefer a pre-certified radio module if one is stocked: a bare-chip RF design (matching network,
-50 Ω feed) would be a first for this toolchain. High-speed USB needs 90 Ω pairs on JLC's controlled-impedance stack,
-pre-routed, because Freerouting is not impedance-aware.
+The MCU research of 2026-11-26 also named two rev B alternatives: the STM32WBA65 (BLE 5.4 plus high-speed USB, thin
+analog, 0–3 in stock) and the NXP RW612 (Wi-Fi 6, BLE 5.4 and high-speed USB; only the u-blox IRIS-W106 module is
+stocked). See the [split advice](mcu.md#split-advice-rev-b-and-the-dev-kit-side-track).
 
-How rev A would pick the rev B chip, following the owner's decisions in §5 and §6:
+Whatever wins rev B, prefer a pre-certified radio module if one is stocked: a bare-chip RF design (matching network,
+50 Ω feed) would be a first for this toolchain. High-speed USB needs 90 Ω pairs on JLC's controlled-impedance stack,
+pre-routed, because Freerouting is not impedance-aware; that now applies to the rev A motherboard too.
+
+How the rev A chip was settled, and how rev A would pick the rev B chip, following the owner's decisions in §5 and §6:
 
 ```mermaid
 ---
@@ -1072,52 +1088,70 @@ config:
   # the docs theme sets p { line-height: 28px }, which would clip the labels mermaid measured at 1.5
   themeCSS: "p { line-height: inherit; }"
   flowchart:
+    wrappingWidth: 400
     nodeSpacing: 24
     rankSpacing: 38
 ---
 flowchart TB
-  Z{"Zephyr supports<br/>the AT32F405?<br/>(§6)"}
-  Z -->|yes| A1["AT32F405,<br/>Zephyr firmware"]
-  Z -->|no| A2["nRF54LM20A<br/>module or dev kit"]
-  Z -->|no| A3["AT32F405, bare-metal<br/>test firmware;<br/>Zephyr from rev B"]
-  A1 --> T
-  A2 --> T
-  A3 --> T
+  OLD["AT32F405<br/>the rev A candidate<br/>until 2026-11-26"]:::old
+  OLD -.->|"no upstream<br/>Zephyr: dropped"| A
+  A["Rev A: STM32U5A5<br/>on the motherboard,<br/>Zephyr (upstream)<br/>chosen 2026-11-26"]:::reva
+  A --> C{"MCUs reserved and<br/>8 kHz HID proven<br/>on the Nucleo?"}
+  C -->|"no"| FB["Fallback:<br/>i.MX RT1021"]:::cand
+  C -->|yes| T
+  FB --> T
   T["Rev A testbed runs"]
   T --> M["Hall and TMR coupons:<br/>measure sensor current<br/>at 1 kHz and 8 kHz"]:::meas
   T --> W["Wheel coupon:<br/>measure peak and<br/>average current"]:::meas
+  DK["Side track, now:<br/>nRF54LM20 dev kit,<br/>8 kHz HID with BLE,<br/>radio current"]:::meas
   M --> G
   W --> G
+  DK --> G
   G["Battery gate (§4.2)<br/>measured logs replace<br/>the BOM estimates"]
-  CAND["Candidates (§5)<br/>nRF54LM20A, nRF52840,<br/>ESP32-S31, CH585,<br/>AT32F405, ESP32-S3"]:::cand -.-> G
+  CAND["Rev B candidates (§5)<br/>nRF54LM20A<br/>(front-runner),<br/>STM32WBA65, RW612,<br/>nRF52840, ESP32-S31,<br/>CH585, ESP32-S3"]:::cand -.-> G
   G --> R["Battery life per chip<br/>at 1 kHz and 8 kHz;<br/>8 kHz likely wired-only (§8)"]
   R --> B["Best candidate<br/>on measured numbers"]
   B --> ZC{"Zephyr support<br/>confirmed?"}
   ZC -->|"no: next candidate"| B
   ZC -->|yes| PICK["Rev B chip<br/>(a stocked, pre-certified<br/>radio module if possible)"]:::pick
 
+  classDef old fill:#f4f4f6,stroke:#9a9aa6,stroke-width:1px,stroke-dasharray:4 3,color:#55555f
+  classDef reva fill:#fdeec4,stroke:#a86b00,stroke-width:2px,color:#2b1d00
   classDef meas fill:#d9eed9,stroke:#2e7d32,stroke-width:2px,stroke-dasharray:6 4,color:#102410
   classDef cand fill:#f4f4f6,stroke:#6b6b78,stroke-width:1.5px,stroke-dasharray:4 3,color:#1a1a22
   classDef pick fill:#dcebfb,stroke:#1565c0,stroke-width:2px,color:#0d2238
 ```
 
-*A concept sketch of the platform decision. Zephyr support for the AT32F405 (not checked yet, §6) sets the rev A
-route. Rev A would then measure sensor and wheel currents, the battery gate would rank the candidate chips on those
-numbers, and Zephyr support would be checked again for the pick. The ranking is this sketch's reading of "the
-battery-budget gate picks the rev B chip", and the Zephyr check on the rev B pick follows from the Zephyr firmware
-decision: it is this sketch's reading, not a stated step. No measurement or ranking exists yet.*
+*A concept sketch of the platform decision. The rev A chip is chosen: the STM32U5A5 (2026-11-26), which replaced the
+AT32F405 once that chip turned out to have no upstream Zephyr support. Two conditions come before its schematic,
+and if they fail the i.MX RT1021 takes over ([mcu.md](mcu.md)). Rev A would then measure sensor and wheel currents, an
+nRF54LM20 dev kit would measure 8 kHz HID with BLE and the radio current, and the battery gate would rank the rev B
+candidates on those numbers, with Zephyr support checked again for the pick. The ranking is this sketch's reading of
+"the battery-budget gate picks the rev B chip", and the Zephyr check on the rev B pick follows from the Zephyr
+firmware decision: it is this sketch's reading, not a stated step. No measurement or ranking exists yet.*
 
 ## 6. Firmware: custom on Zephyr
 
 Owner decision: **custom firmware on Zephyr**, with ZMK-compatible keymap files where possible. ZMK mainline has no
 analog keys and no USB host, and this board needs both, plus haptics, a second USB controller and the flight
 recorder. Patching ZMK would mean carrying those changes forever. Nordic's SDK is built on Zephyr, and Zephyr supports the
-ESP32-S3. **Zephyr support for the AT32F405 (the rev A chip), the ESP32-S31 and the CH585 was not checked** and must
-be confirmed before rev A firmware starts. If the AT32F405 is not supported, rev A either moves to a Zephyr-supported
-part with high-speed USB (the nRF54LM20A on a module or dev kit) or runs its scanning experiments on bare-metal test
-firmware, with the keyboard firmware on Zephyr from rev B. The hold-tap and combo logic is kept free of hardware calls, so the same code runs in `native_sim` for
-the recorder's replay and the CI tests, and later in WebAssembly for the web app. The caliper's ESP-IDF firmware stays
-as it is.
+ESP32-S3.
+
+**Zephyr support for the rev A chip is now checked: it is upstream.** The STM32U5A5 is in `soc/st/stm32/stm32u5x`,
+and the `nucleo_u5a5zj_q` board has the high-speed USB device on its on-chip PHY (`zephyr_udc0 = &usbotg_hs`) in the
+v4.4.0, v4.5.0 and `main` trees, checked on 2026-11-26 ([mcu.md](mcu.md)). That support is not old: it has needed
+fixes, and nobody has published 8 kHz HID on Zephyr's STM32 USB driver. So rev A pins Zephyr v4.5.0 or a known-good
+`main` commit, and proves 8 kHz HID on the Nucleo before the schematic is committed. The AT32F405, the rev A candidate
+until 2026-11-26, has no upstream Zephyr support (only a vendor fork) and was dropped rather than run on bare-metal
+test firmware.
+
+The caveat moves to rev B. Of its candidates, the nRF54LM20A is upstream (the SoC since v4.2.0, its high-speed USB
+since v4.3.0), the STM32WBA65 and the RW612 are upstream with high-speed USB, the CH585 has no Zephyr support (the
+2026-11-26 research), and the **ESP32-S31 is still not checked**. Whatever the battery gate picks must be confirmed
+in Zephyr before rev B firmware starts.
+
+The hold-tap and combo logic is kept free of hardware calls, so the same code runs in `native_sim` for the recorder's
+replay and the CI tests, and later in WebAssembly for the web app. The caliper's ESP-IDF firmware stays as it is.
 
 The planned layers:
 
@@ -1158,22 +1192,26 @@ flowchart TB
 
 *Concept sketch of the planned firmware layers, top to bottom in the order a key press travels. The behaviour layer
 makes no hardware calls, so the same source runs in `native_sim` for the flight recorder's replay and the CI tests,
-and later as WebAssembly in the web app. No firmware exists yet, and Zephyr support for the AT32F405, ESP32-S31 and
-CH585 is not checked yet (§6).*
+and later as WebAssembly in the web app. No firmware exists yet. Zephyr support is upstream for the rev A STM32U5A5
+(checked 2026-11-26), but 8 kHz HID on it is unproven; for the rev B candidates it is upstream for the nRF54LM20A,
+absent for the CH585 and not checked for the ESP32-S31 (§6).*
 
 ## 7. Rev A testbed
 
 A **motherboard plus plug-in coupons**. Each coupon is generated by compiler v0, so rev A also proves the compiler.
+The testbed's draft architecture of record is [hardware/design/SPEC.md](../hardware/design/SPEC.md). It is a draft
+on paper: no schematic or board exists. The draft proposes, for the owner to confirm, no charger on rev A, a 2 × 20
+2.54 mm slot connector and a 190 × 150 mm motherboard (SPEC §1, §2, §11); until then this table is the plan.
 
 | Board | Carries | Measures / proves |
 |---|---|---|
-| Motherboard | AT32F405 (high-speed USB), USB-C, power and charging (from the caliper's power sheets), coupon connectors with analog and SPI lanes, test pads and a marker GPIO for the latency rig, current-sense points per coupon | 8 kHz scanning, per-coupon current, the latency gate's hooks |
+| Motherboard | **STM32U5A5** (STM32U5A5VJT6, LQFP100: high-speed USB with the PHY on chip, upstream Zephyr; chosen 2026-11-26, [mcu.md](mcu.md)), USB-C with a hand-routed 90 Ω pair, power and charging (from the caliper's power sheets), coupon connectors with analog and SPI lanes, test pads and a marker GPIO for the latency rig, current-sense points per coupon, kept apart from the MCU's own current and its HS PHY's (about 13 mA at idle) | 8 kHz scanning, per-coupon current, the latency gate's hooks |
 | Hall-effect coupon | TMAG5253 per key (enable-gated, outputs high-impedance when off), compliant-stop aftertouch sites, two switch-free reference sensors and thermistors | Noise, drift, the bottom-out knee, a shared-bus topology at 1 and 8 kHz |
 | TMR coupon | The same keys on a TMR sensor | Hall-effect against TMR on noise and current |
 | Shear coupon | TMAG5170 under a stock stem and under a centring-stem prototype | The lateral signal and press crosstalk |
 | Coil coupon | About 20 generated coil variants under stock MX switches and slug-stem switches, read by an LDC1614-class converter | Whether a stock spring gives a usable analog signal |
-| Haptics coupon | DRV8316 + MT6701CT + gimbal motor; DRV2605L + LRA; a capacitive strip (on a touch controller, or on MCU touch pins if the motherboard MCU has them: unchecked for the AT32F405) | Wheel current and detent feel, LRA localisation and noise |
-| Latency rig | A generated board that injects at a sensor node and is the USB host for the report | Press-to-report p50/p99 per mode |
+| Haptics coupon | DRV8316 (in 3x PWM mode first) + MT6701CT + gimbal motor; DRV2605L + LRA; a capacitive strip on an external touch controller (I2C), since Zephyr has no node for the STM32U5A5's touch-sensing controller | Wheel current and detent feel, LRA localisation and noise |
+| Latency rig | A generated board that injects at a sensor node and is the USB host for the report: a high-speed host with microframe (125 µs) timestamps, to time 8 kHz | Press-to-report p50/p99 per mode |
 
 The same plan as a block diagram, with what each coupon is meant to answer:
 
@@ -1189,7 +1227,7 @@ config:
     subGraphTitleMargin: { top: 0, bottom: 8 }
 ---
 flowchart LR
-  MB["Motherboard<br/>AT32F405 (HS USB),<br/>candidate: Zephyr<br/>support not checked (§6)<br/>USB-C, power, charging<br/>coupon connectors<br/>(analog + SPI lanes)<br/>current sense per coupon<br/>test pads, marker GPIO"]:::mb
+  MB["Motherboard<br/>STM32U5A5 (HS USB,<br/>upstream Zephyr;<br/>chosen 2026-11-26)<br/>USB-C, power, charging<br/>coupon connectors<br/>(analog + SPI lanes)<br/>current sense per coupon<br/>test pads, marker GPIO"]:::mb
 
   subgraph CP["Coupons (compiler v0)"]
     direction TB
@@ -1215,7 +1253,7 @@ flowchart LR
   HAP --> mHAP["wheel current,<br/>detent feel,<br/>LRA localisation,<br/>noise"]:::q
   KVM -.-> mKVM["power from<br/>either host (§8)"]:::q
 
-  RIG["Latency rig<br/>generated board,<br/>the USB host"]:::mb
+  RIG["Latency rig<br/>generated board,<br/>a high-speed<br/>USB host"]:::mb
   RIG -->|"stimulus at a<br/>sensor node"| MB
   MB -->|"HID report,<br/>marker GPIO"| RIG
   RIG --> mRIG["press-to-report<br/>p50 and p99<br/>per mode"]:::q
@@ -1227,20 +1265,24 @@ flowchart LR
 ```
 
 *Concept block diagram of the rev A testbed: the motherboard, the plug-in coupons (each to be generated by compiler
-v0), what each coupon is meant to measure, and the latency rig. Nothing is designed or built. The AT32F405 is the
-candidate rev A chip, and its Zephyr support is not checked yet (§6, §9). The two-host KVM coupon happens only if the
-motherboard's connector can carry it.*
+v0), what each coupon is meant to measure, and the latency rig. Nothing is designed or built. The rev A chip is the
+STM32U5A5, chosen on 2026-11-26 (the AT32F405 was the candidate until then): its Zephyr support is upstream, but 8 kHz
+HID on it is not proven yet (§6, §9). The two-host KVM coupon happens only if the motherboard's connector can carry
+it.*
 
 And as a concept sketch, top view to scale:
 
-![Top-view concept sketch of the testbed motherboard, to scale, with callouts: USB-C, MCU (candidate AT32F405), power and charging, injection and current-sense test pads, the latency-rig header, the optional KVM coupon (pale), the Hall-effect and TMR key coupons, the shear coupon, the coil DOE coupon with 20 spirals and five converters, and the haptics coupon with its motor and roller, coin LRA and capacitive strip.](../hardware/concept/renders/testbed_top.png)
+![Top-view concept sketch of the testbed motherboard, to scale, with callouts: USB-C with a short high-speed pair to the MCU, the STM32U5A5 (rev A MCU) drawn as an LQFP100, a 16 MHz HSE crystal, power and charging, injection and current-sense test pads, the latency-rig header, the optional KVM coupon (pale), the Hall-effect and TMR key coupons, the shear coupon, the coil DOE coupon with 20 spirals and five converters, and the haptics coupon with its motor and roller, coin LRA and a capacitive strip on an external touch controller.](../hardware/concept/renders/testbed_top.png)
 
-*Concept sketch, top view to scale (a motherboard of about 160 × 110 mm in this sketch), with a short label for each
-coupon and motherboard section. Parts are the candidates in the table above; positions and sizes are illustrative.*
+*Concept sketch, top view to scale (a motherboard of about 160 × 110 mm in this sketch, the MCU drawn as its
+14 × 14 mm LQFP100), with a short label for each coupon and motherboard section. The MCU is the owner's rev A
+decision ([mcu.md](mcu.md)); the other parts are the candidates in the table above. The 16 MHz HSE is the
+NUCLEO-U5A5ZJ-Q's: which HSE values the U5's high-speed PHY accepts is not checked. Positions and sizes are
+illustrative.*
 
 With the coupons lifted out of their sockets, and the keys lifted off, the sensor sites show:
 
-![Exploded concept sketch of the testbed: the six coupons float above the motherboard at two heights, with dashed pink guides from each coupon's header down to its black socket, and the switches and keycaps lifted further off the Hall-effect, TMR, shear and coil coupons so the small sensor packages on the coupon boards show.](../hardware/concept/renders/testbed_exploded.png)
+![Exploded concept sketch of the testbed: the six coupons float above the motherboard at two heights, with dashed pink guides from each coupon's header down to its black socket, and the switches and keycaps lifted further off the Hall-effect, TMR, shear and coil coupons so the small sensor packages on the coupon boards show; the haptics coupon's callout puts its capacitive strip on a touch controller.](../hardware/concept/renders/testbed_exploded.png)
 
 *Concept sketch: each coupon lifted out of its 2 × 10 mezzanine socket, and the keys lifted off to show the TMAG5253,
 TMR and TMAG5170 sites under them. The connector stands in for "coupon connectors with analog and SPI lanes"; its
@@ -1392,4 +1434,15 @@ peak is a desk estimate.*
 * How many shear keys: two index keys plus the thumbs, or all eight home keys.
 * Wi-Fi: the keyboard research's MCU lens recommends dropping it, and the caliper's rev B ideas list it as something
   that may go (rev A keeps it). The keyboard's companion app works over USB and BLE.
-* Zephyr on the rev A chip: confirm Zephyr supports the AT32F405, or pick the rev A chip again (§6).
+* Zephyr on the rev A chip: **resolved on 2026-11-26.** The AT32F405 has no upstream Zephyr support, so the owner
+  picked the rev A chip again: the STM32U5A5, whose high-speed USB device is upstream in Zephyr (§5, §6,
+  [mcu.md](mcu.md)).
+* Reserve the rev A MCUs before the schematic is committed: buy JLC's stock of the STM32U5A5VJT6 into a private parts
+  library, or consign 4–6 parts. On 2026-11-26 JLC had 13 (possibly already committed to other orders, an
+  unverified reading of its API; [SPEC §1](../hardware/design/SPEC.md#_1-purpose-and-what-rev-a-must-prove)), and
+  DigiKey none before February–March 2027. If they cannot be secured, the i.MX RT1021 takes over.
+* Prove 8 kHz HID on the NUCLEO-U5A5ZJ-Q before the schematic is committed: Zephyr's `usbd` at high speed with
+  `in-polling-period-us = <125>` (bInterval 1), the report rate and jitter measured for at least 10 minutes. Nobody has
+  published this for Zephyr's STM32 USB driver ([mcu.md](mcu.md#conditions-before-the-schematic-is-committed)).
+* Rev B side track: measure 8 kHz HID together with BLE, and the radio current, on an nRF54LM20 dev kit (XIAO
+  nRF54LM20A or nRF54LM20 DK) for the battery gate.

@@ -22,8 +22,9 @@ concept stamp to every image.
 
 Status: CONCEPT SKETCH. Nothing in keyboard/ is designed, built or measured (keyboard/docs/concept.md). The geometry
 is illustrative (testbed_models.py): board sizes, coupon footprints, the mezzanine connector and every position are
-placeholders, the parts are the candidates concept.md names, and the coil parameters are an illustrative spread. Every
-image carries the render_lib concept stamp.
+placeholders, the parts are the candidates concept.md names (the MCU is the owner's rev A choice of 2026-11-26, the
+STM32U5A5, drawn as its LQFP100), and the coil parameters are an illustrative spread. Every image carries the render_lib
+concept stamp.
 """
 import argparse
 import math
@@ -56,7 +57,7 @@ FS = 13.0          # callout font (pt at 100 dpi = 18 px): about 8.5 px at the ~
 FS_NOTE = 12.0
 
 DECAL_WORDS = ("pads", "contacts", "pin 1", "mouth", "tongue", "copper", "vias", "core", "slot", "INJ pad",
-               "I-sense pad", "touch pad", "stripe", "holes")
+               "I-sense pad", "touch pad", "stripe", "holes", "gull-wing")
 
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -382,9 +383,10 @@ def fig_assembly():
     callout(ax, q((132, 8, ZT)), "haptics coupon", (150, 36))
     callout(ax, q((68, 6, ZT)), "coil DOE coupon", (66, 4))
     callout(ax, q((19, 20, ZT)), "KVM coupon (optional:\ndrawn as a ghost)", (-30, -2))
-    callout(ax, q((-1, 94.5, 1.6)), "USB-C", (-68, 62))
-    callout(ax, q((15, 79, 0.9)), "MCU (candidate\nAT32F405)", (-66, 24))
-    callout(ax, q((29.5, 96, 9.1)), "latency-rig header", (-56, 82))
+    callout(ax, q((-1, M.USB_C_PORT[1], 1.6)), "USB-C", (-68, 62))
+    callout(ax, q((*M.MCU_XY, 1.5)), "STM32U5A5\n(rev A MCU)", (-56, 12))
+    callout(ax, q((*M.HSE_XY, 0.8)), "16 MHz HSE\ncrystal", (-68, 32))
+    callout(ax, q((*M.RIG_HEADER, 9.1)), "latency-rig header", (-56, 82))
     u0, u1, v0, v1 = fr.extent()
     note(ax, u0 - 24, v0 - 6, "Solder-mask colours only tell the coupons apart. Board size, connector, coupon "
          "footprints\nand layout are illustrative, not decided.")
@@ -416,7 +418,7 @@ def fig_exploded():
     callout(ax, q((144, 93.5, zb)), "shear coupon: TMAG5170\nunder a stock stem and\nunder a centring-stem\n"
             "prototype", (158, 150))
     callout(ax, q((132, 8, zf)), "haptics coupon: DRV8316\nand MT6701CT (candidates),\ngimbal motor; DRV2605L,\n"
-            "coin LRA; capacitive strip", (158, 40))
+            "coin LRA; capacitive strip\non a touch controller", (158, 50))
     callout(ax, q((45, 10, zf)), "coil DOE coupon: 20\ngenerated spirals,\nLDC1614-class converters", (-66, 82))
     callout(ax, q((19, 19, zf)), "KVM coupon (optional,\nonly if the connector\ncan carry it)", (-70, 46))
     callout(ax, q((28, 19, 8.5)), "2 x 10 mezzanine socket per\ncoupon (connector type\nnot decided)", (-44, 2))
@@ -440,18 +442,20 @@ def fig_top():
             "prototype (back)", (190, 90))
     callout(ax, (150.0, 40.0), "haptics: gimbal motor\nand roller, DRV8316,\nMT6701CT encoder\n(candidates)",
             (190, 50))
-    callout(ax, (149.5, 6.0), "capacitive strip", (190, 12))
+    callout(ax, (149.5, 6.0), "capacitive strip on an\nexternal touch controller", (190, 12))
     callout(ax, (120.5, 37.0), "coin LRA + DRV2605L", (130, -14))
     callout(ax, (74.0, 3.0), "coil DOE: 20 generated spirals,\nLDC1614-class converters (U1-U5)", (62, -16))
     callout(ax, (19.0, 19.0), "KVM (optional, ghost):\nhost-B controller,\nisolator (if isolated),\nUSB-C B",
             (-32, 18))
-    callout(ax, (1.0, 94.5), "USB-C", (-24, 104))
-    callout(ax, M.MCU_XY, "MCU: candidate\nAT32F405", (-32, 88))
-    callout(ax, (17.0, 62.0), "power + charging,\nbattery connector\n(caliper's power sheets)", (-32, 66))
-    callout(ax, (16.0, 47.0), "injection (INJ) and\ncurrent-sense\ntest pads", (-32, 44))
-    callout(ax, (29.5, 105.0), "latency-rig header\n(marker GPIO)", (6, 124))
-    note(ax, -60, -28, "Top view to scale: motherboard about 160 x 110 mm. The keycaps hide the key sensors (see "
-         "the exploded\nview). Pale and dashed: the optional KVM coupon.")
+    callout(ax, (1.0, M.USB_C_PORT[1]), "USB-C, a short\nHS pair to the MCU", (-32, 108))
+    callout(ax, M.MCU_XY, "STM32U5A5\n(rev A MCU)", (-32, 91))
+    callout(ax, M.HSE_XY, "16 MHz HSE\ncrystal", (-32, 77))
+    callout(ax, (17.0, 62.0), "power + charging,\nbattery connector\n(caliper's power sheets)", (-32, 60))
+    callout(ax, (16.0, 47.0), "injection (INJ) and\ncurrent-sense\ntest pads", (-32, 41))
+    callout(ax, (M.RIG_HEADER[0], 105.0), "latency-rig header\n(marker GPIO)", (6, 124))
+    note(ax, -60, -28, "Top view to scale: motherboard about 160 x 110 mm, the MCU drawn as its LQFP100 (14 x 14 mm). "
+         "The keycaps hide\nthe key sensors (see the exploded view). Pale and dashed: the optional KVM coupon. 16 MHz "
+         "is the HSE on the\nNUCLEO-U5A5ZJ-Q; which HSE values the U5's high-speed USB PHY accepts is not checked.")
     save(fig, "testbed_top.png", "Rev A testbed concept: top view")
 
 
