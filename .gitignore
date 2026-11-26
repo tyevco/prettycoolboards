@@ -31,3 +31,5 @@ node_modules/
 **/hardware/fab/*/jlcplace-report.html
 **/hardware/fab/*/jlcplace-overlay/
 .vitepress/linkcheck.json
+# keyboard concept: raw glTF intermediates (the gallery ships them as public/keyboard/gallery/models/*.glb.txt)
+keyboard/hardware/concept/models/
