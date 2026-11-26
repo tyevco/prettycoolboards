@@ -317,7 +317,7 @@ def fig_he_field():
           " − z/√(z²+R²) ], z from the magnet face to a point sensor on the axis.\n"
           f"Parameters (illustrative, not decisions): Br = {BR} T (about N38–N40), {HE_GAP_REST} mm from magnet "
           f"face to Hall element at rest, {HE_TRAVEL:.0f} mm to the hard stop, then a {HE_SQUASH} mm compliant zone "
-          "(concept §2.1, §7).\n"
+          "(concept §7).\n"
           "Not modelled: steel nearby, neighbouring keys' magnets, stray fields, temperature (NdFeB loses about "
           "0.1 % of Br per K), magnet tolerances, tilt.\n"
           "The noise-to-travel figures assume a 0.1 mT noise floor, only to show the scale. The sensor ranges are "
@@ -369,7 +369,7 @@ def fig_neighbour():
     axa.text(HE_TRAVEL + HE_SQUASH / 2, 0.196, "compliant\nzone", ha="center", va="top", fontsize=8, color=INK2)
     axb.text(HE_TRAVEL + HE_SQUASH / 2, 280, "compliant\nzone", ha="center", va="top", fontsize=8, color=INK2)
     axa.set_xlabel("the neighbour's travel (mm)")
-    axa.set_ylabel("change in this key's Bz (mT)")
+    axa.set_ylabel("fall in this key's Bz (mT)")
     axa.legend(loc="upper left")
     axa.text(0.08, 0.113, f"At rest the neighbours already add an offset\n(row neighbour −{-rows[0][1]:.2f} mT), "
              "which calibration removes.\nThe reading falls as a neighbour is pressed:\nits return flux opposes "
@@ -757,12 +757,12 @@ def fig_haptic():
     ax[2].plot(th, slots_profile(th), color=C3, lw=2.0)
     for i in range(9):
         dot(ax[2], i * 45, 0, C3, size=6)
-        ax[2].text(i * 45, -0.92, f"slot {i % 8 + 1}", ha="center", va="top", fontsize=8, color=INK)
     ax[2].text(0.5, 0.97, "8 slots, 45° apart: a spring into each slot, saturating 8° out;\n"
                "it snaps over to the next slot at each midpoint (the vertical jumps)",
                transform=ax[2].transAxes, ha="center", va="top", fontsize=8, color=INK2, bbox=BOX)
     ax[2].set_xlim(-8, 368)
     ax[2].set_xticks(range(0, 361, 45))
+    ax[2].set_xticklabels([f"{i * 45}\nslot {i % 8 + 1}" for i in range(9)])    # the slots sit on the ticks
     ax[2].set_xlabel("wheel angle (degrees)")
     panel_title(ax[2], "(c) Game weapon wheel: N slots (here 8)")
 

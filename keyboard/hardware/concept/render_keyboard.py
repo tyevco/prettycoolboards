@@ -239,7 +239,8 @@ def fig_top(hl, hr, ml, mr):
         outline(ax, KM.moved([("lra", nm["LRA"], "lra")], m)[0][1], cam)
         callout(ax, t, "thumb shear key\n(dashed circle: the LRA,\ninside, under it)", t + off, ha="center")
     nm = dict((n, s) for n, s, c, g in hl.parts)
-    for tag, off in (("A", (-6, 34)), ("B", (40, 22))):
+    # A sits right of B in this view: A's label up and right, B's up and left, so the leaders do not cross
+    for tag, off in (("A", (22, 24)), ("B", (-22, 38))):
         u = outline(ax, KM.moved([("u", nm[f"USB-C {tag}"], "usb")], ml)[0][1], cam)
         c = u.mean(0)
         callout(ax, c, f"USB-C {tag} (back wall)", c + off, ha="center")
@@ -304,8 +305,8 @@ def fig_side(hl, hr):
             a = np.radians(row * col["alpha"])
             ax2.plot([0, r * np.sin(a)], [r, r - r * np.cos(a)], ls=":", lw=0.8, color=HL)
         ax2.plot([0], [r], marker="+", ms=11, mew=1.5, color=HL)
-        ax2.text(3, r + 1.5, f"flexion centre (sketch)\nR = {r:.0f} mm at the plate, {col['alpha']:.1f}° per row",
-                 fontsize=8.5, color=HL, va="bottom")
+        ax2.text(3, r + 1.5, f"flexion centre (sketch)\nR = {r:.0f} mm at the plate, {col['alpha']:.1f}° per row\n"
+                 f"(caps {KM.PITCH + 0.25:.2f} mm apart at their skirts)", fontsize=8.5, color=HL, va="bottom")
         ka = np.radians(col["alpha"])
         cap_pt = (r * np.sin(ka) + 2.0, r - r * np.cos(ka) + 12.0)
         ax2.annotate("keycaps (rest)", xy=cap_pt, xytext=(cap_pt[0] + 14, cap_pt[1] + 16), fontsize=8.5,
@@ -404,7 +405,8 @@ def fig_internals(hl):
     rows = [("column board 4", (0.5, 0.5, 1.0), "column boards: one per column,\n0.8 mm, bent to the column's arc"),
             ("column board 0", (0.5, 0.5, 1.0), "inner index column's board"),
             ("battery", (0.3, 0.3, 1.0), "LiPo battery (size not chosen)"),
-            ("link column 4", (0.5, 0.5, 0.5), "flex links from each column board\nto the main board"),
+            # a run that shows between two boards (link column 4's centre is hidden under a board)
+            ("link column 5 run", (0.5, 0.5, 0.5), "flex links from each column board\nto the main board"),
             ("LRA", (0.5, 0.5, 1.0), "coin LRA on the floor,\nunder the thumb home key"),
             ("USB-C B", (0.5, 1.0, 1.0), "USB-C A and B at the back wall\n(two-host KVM)"),
             ("MCU module", (0.5, 0.5, 1.0), "main board: MCU module\n(chip not chosen)"),
@@ -603,7 +605,7 @@ def fig_gate(hl):
     ax.set_aspect("equal")
     ax.grid(True, lw=0.3, alpha=0.5)
     ax.tick_params(labelsize=7.5)
-    ax.set_xlabel(f"across the rows at key {k.name} (mm)", fontsize=8.5)
+    ax.set_xlabel(f"across the columns at key {k.name} (mm, + toward the index column)", fontsize=8.5)
     ax.set_ylabel(f"along {k.name}'s axis, from its plate (mm)", fontsize=8.5)
     ax.set_title(f"(c) The tightest spot the gate found: key {k.name} (middle column, top row),\nwhich sits "
                  "deeper than the index column beside it (exact cut)", fontsize=11)
@@ -617,7 +619,8 @@ def fig_gate(hl):
     ax.barh(y, vals, height=0.62, color=cols, edgecolor="white", linewidth=2)
     for yi, r in zip(y, top):
         tag = "  below margin" if r["d"] < margin else ""
-        ax.text(r["d"] + 0.03, yi, f"{r['d']:.2f} mm{tag}", va="center", fontsize=8.5, color=INK)
+        ax.text(r["d"] + 0.03, yi, f"{r['d']:.2f} mm{tag}", va="center", fontsize=8.5, color=INK, zorder=5,
+                bbox=dict(boxstyle="square,pad=0.15", fc="white", ec="none"))     # over the margin line
     ax.set_yticks(y)
     ax.set_yticklabels([_row_text(r) for r in top], fontsize=8.5)
     ax.axvline(margin, color=(0.3, 0.3, 0.3), lw=1.0, ls="--")

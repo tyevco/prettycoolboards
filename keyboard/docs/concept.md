@@ -1123,6 +1123,8 @@ config:
   flowchart:
     nodeSpacing: 30
     rankSpacing: 36
+    # without it the first node's border runs through each subgraph title
+    subGraphTitleMargin: { top: 0, bottom: 8 }
 ---
 flowchart TB
   subgraph DEV["On the keyboard"]
@@ -1176,6 +1178,8 @@ config:
   flowchart:
     nodeSpacing: 18
     rankSpacing: 44
+    # without it the first coupon's border runs through the subgraph title
+    subGraphTitleMargin: { top: 0, bottom: 8 }
 ---
 flowchart LR
   MB["Motherboard<br/>AT32F405 (HS USB)<br/>USB-C, power, charging<br/>coupon connectors<br/>(analog + SPI lanes)<br/>current sense per coupon<br/>test pads, marker GPIO"]:::mb

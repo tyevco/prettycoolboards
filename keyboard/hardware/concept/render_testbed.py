@@ -443,7 +443,7 @@ def fig_top():
     callout(ax, (19.0, 19.0), "KVM (optional, ghost):\nhost-B controller,\nisolator, USB-C B", (-34, 16))
     callout(ax, (1.0, 94.5), "USB-C", (-22, 104))
     callout(ax, M.MCU_XY, "MCU: candidate\nAT32F405", (-30, 84))
-    callout(ax, (17.0, 62.0), "power + charging\n(caliper's power sheets)", (-34, 64))
+    callout(ax, (17.0, 62.0), "power + charging, battery\nconnector (caliper's power sheets)", (-34, 64))
     callout(ax, (16.0, 47.0), "injection (INJ) and\ncurrent-sense test pads", (-34, 44))
     callout(ax, (29.5, 105.0), "latency-rig header\n(marker GPIO)", (12, 124))
     note(ax, -66, -28, "Top view to scale: motherboard about 160 x 110 mm. The keycaps hide the key sensors (see the "
@@ -600,11 +600,11 @@ def fig_coil_coupon():
             ax.add_patch(Circle((lx + 1.5, y), 0.7, fc="none", ec=(0.4, 0.4, 0.4), lw=0.8, ls=(0, (2, 1.5))))
         elif kind == "ldc":
             ax.add_patch(Rectangle((lx + 0.7, y - 0.75), 1.5, 1.5, fc=(0.02, 0.02, 0.02), ec=(0.5, 0.5, 0.5), lw=0.6))
-        elif kind == "hdr":
-            ax.add_patch(Rectangle((lx + 0.3, y - 0.7), 2.4, 1.4, fc="none", ec=(0.5, 0.5, 0.5), lw=0.7,
+        elif kind == "hdr":       # a tall strip, like the header outline on the board
+            ax.add_patch(Rectangle((lx + 1.0, y - 0.8), 1.0, 1.6, fc="none", ec=(0.5, 0.5, 0.5), lw=0.7,
                                    ls=(0, (3, 2))))
-        else:
-            ax.add_patch(Rectangle((lx + 0.3, y - 0.7), 2.4, 1.4, fc="none", ec=(0.45, 0.45, 0.45), lw=0.8,
+        else:                     # a square, like the switch footprints on the board
+            ax.add_patch(Rectangle((lx + 0.75, y - 0.75), 1.5, 1.5, fc="none", ec=(0.45, 0.45, 0.45), lw=0.8,
                                    ls=(0, (1.5, 1.5))))
         ax.text(lx + 4.0, y, txt, fontsize=fs_mm(0.95), color=INK, va="center")
     # inset: one 4-layer coil taken apart layer by layer
