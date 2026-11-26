@@ -14,42 +14,42 @@ Five researchers each covered one area and searched the web for current products
 * designed-as-code.
 
 Each proposed 8–12 differentiating ideas with the closest prior art. A sceptic then reviewed each area. Its job was
-to refute novelty, check feasibility on this toolchain (JLC assembly, LCSC stock, firmware, power) and score each
-idea's daily-driver value. It also added ideas the researcher had missed.
+to refute novelty, check feasibility on this toolchain (JLC assembly, LCSC stock, firmware, power), rate each idea's
+daily-driver value and give it a 1–10 score for worth building. It also added ideas the researcher had missed.
 
 **Caveats:**
 
 * **Search coverage.** Four of the five sceptics could not run web search, so their prior-art checks rest on the
-  researchers' sources plus their own knowledge. A few "rare" ratings may be generous. Where a source says "from
+  researchers' sources, six to nine primary pages each fetched directly, and their own knowledge. A few "rare" ratings may be generous. Where a source says "from
   memory" or "unverified", treat it that way.
-* **Stock figures.** Stock and price figures are from 2026-11-25 and change daily. Recheck them with
-  `tools/lcsc_check.py`.
+* **Stock figures.** Stock and price figures are from 2026-11-25 and change daily. Recheck them at LCSC/JLC, and
+  with `tools/lcsc_check.py` once the parts are in a generated netlist.
 * **Links.** The links below are as the research found them. They were not all re-checked.
 
 ## The landscape (late 2026)
 
 **Sensing.** Magnetic sensing has won gaming: Wooting 60HE/80HE, Razer Huntsman V3 Pro and V3 HE, SteelSeries Apex
-Pro Gen 3, Logitech PRO X2 RAPID, Corsair MAKR PRO 75, Keychron Q1 HE and the Ultra 8K line, Cherry MX 8.2 TMR,
+Pro Gen 3, Logitech PRO X2 RAPID, Corsair MAKR PRO 75, Keychron Q1 HE, Cherry MX 8.2 TMR,
 MonsGeek M1 V5 TMR, Epomaker HE75 V2 and the split ASUS ROG Falcata. TMR sensors are arriving. Wooting's May 2026 post
 says the noise gap with Hall-effect has closed. Capacitive: Topre Realforce GX1 (adjustable actuation, a rapid-trigger
 "Dynamic mode") and Cipulot's open EC boards. Optical analog: the Razer Huntsman V2 Analog, now listed as
-discontinued. Inductive: Epomaker Magcore (PCB coils, five Azoteq IQS9320 readers per board); Cherry showed inductive
+discontinued by retailers. Inductive: Epomaker Magcore (PCB coils, five Azoteq IQS9320 readers per board); Cherry showed inductive
 switches at Computex 2025. Open source is mature: libhmk with hmkconf (rapid trigger, DKS, gamepad, auto-calibration,
 8 kHz on the Artery AT32F405), Macrolev, Woodox, pmk, Silakka54-HE, Plink (velocity-sensitive MIDI) and YKB Skadi
-(June 2026: a wireless Hall-effect keywell split on TMAG5253 sensors and an nRF5340). Multi-axis keys exist only
-as 5-way ergonomic devices (DataHand, Svalboard, CharaChorder). No product was found that senses lateral shear on
-normal typing keys.
+(June 2026: a wireless Hall-effect keywell split on TMAG5253 sensors and an nRF5340). Multi-axis keys exist as
+5-way ergonomic devices (DataHand, Svalboard, CharaChorder), and per-key lateral sensing ships on a music keyboard
+(Expressive E Osmose). No product was found that senses lateral shear on normal typing keys.
 
 **Extra input and feedback.** Commercial knobs are passive encoders (ROG Azoth Extreme, Corsair Galleon 100 SD, Work
 Louder, the Lenovo × AngryMiao knob). Integrated pointing is mainstream on ergonomic boards: Keychron Orca echo
 (trackball, wheel, capacitive scroll pads), ZSA Navigator, MoErgo Go60 (dual Cirque pads), Charybdis, Svalboard
-Lightly, PSKeeb 5, Ploopy Bean. BLDC haptic knobs exist as standalone devices (SmartKnob, MaTouch, Kokensha), one
+Lightly, PSKeeb 5. Ploopy Bean (2026) is a standalone open trackpoint. BLDC haptic knobs exist as standalone devices (SmartKnob, MaTouch, Kokensha), one
 built into a DIY keyboard (HelloWord, 2022) and one in a macropad (Hapticpad, 2026). Keyboard haptics today means
 buzzing on a layer change (QMK's DRV2605L support, zmk-drv2605). Keychron's F4 HE "vibe coding" keypad adds
 approve and reject keys for AI agents.
 
 **MCU, connectivity and software.** QMK with VIA or Vial is the wired default, and ZMK leads wireless. ZMK Studio
-edits keymaps at runtime, and Keychron's Ultra 8K line runs ZMK. RMK (Rust) runs on nRF, ESP32 and RP2040.
+edits keymaps at runtime (its docs still call it alpha), and Keychron's Ultra 8K line runs ZMK. RMK (Rust) runs on nRF, ESP32 and RP2040.
 8 kHz is normal wired on gaming boards and now ships over 2.4 GHz dongles (Keychron Ultra 8K, MonsGeek Fun60 Ultra,
 NuPhy). The caliper's ESP32-S3 has only full-speed USB, which caps polling at 1 kHz, and its BLE HID current is in
 the milliamp range. New parts with high-speed USB and BLE: Nordic nRF54LM20A, Espressif ESP32-S31 (preliminary), WCH
@@ -69,7 +69,7 @@ pressure rises with wrist extension, with under 30° recommended (Rempel, Keir &
 kicad-kbplacer places parts and routes a simple matrix, with a label-wired schematic. Cosmos fits a keywell to a
 phone hand scan and generates firmware, but for its own fixed PCBs, and is open-core. The Dactyl generators make only
 the case. The Corney Island CI already runs Ergogen, Freerouting and DRC to Gerbers on every push. KiBot, KiKit and
-KiRI cover CI exports, panels and diffs. Nobody links one layout source to a readable wired schematic, a routed board
+KiRI cover CI exports, panels and diffs (the sceptic's description, unverified). Nobody links one layout source to a readable wired schematic, a routed board
 that passes DRC and a JLC placement check, the case, the firmware, a test rig and measured data, with gates that make
 a fork fab-ready or fail loudly.
 
@@ -93,9 +93,12 @@ Table stakes in late 2026, so not worth building a pitch on:
 
 ## Ideas we weighed and did not pick
 
-Kept as a record, like the caliper's binned pages. Score is the sceptic's 1–10 for worth building.
+Kept as a record, like the caliper's binned [slide-lock page](../../caliper/docs/ideas/slide-lock.md). Score is the
+sceptic's 1–10 for worth building. The owner picked none of these, but the sceptic did not reject them all: it said
+keep for the memory-LCD strip, strain analytics and the pose-aware IMU, and keep as a moonshot for the FIDO2
+authenticator, typing data designing the next PCB, the sensed column rig and the fingertip clusters.
 
-| Idea | Score | Why not (the sceptic's case) |
+| Idea | Score | The sceptic's case |
 |---|---|---|
 | Load-cell plate fusing force with travel | 4 | Hand-bonded gauges (not JLC), a new mechanical architecture, and a fusion solver that fails under ordinary rollover. Force plates are classic ergonomics lab rigs. A cheaper route if force is ever wanted: capacitive plate-gap sensing with generated electrodes |
 | Differential dual-Hall per key | 3 | The TMAG5253 already compensates magnet drift. Two to four switch-free reference sensors give most of the stray-field rejection for about $2 (now in [concept §3.4](concept.md#_3-4-per-finger-analog-tuning-and-load-budget)) |
@@ -104,16 +107,16 @@ Kept as a record, like the caliper's binned pages. Score is the sceptic's 1–10
 | Generated 2D capacitive thumb trackpad | 5 | Every Azoteq trackpad controller checked was out of stock at JLC, and a first custom pad will likely feel worse than commodity modules. A 1D strip with LRA ticks keeps the idea (now in concept §3.3) |
 | Piezo force-tier thumb keys | 3 | Not JLC-assemblable, adds a high-voltage domain, and analog thumb keys already give depth tiers |
 | Touch-aware keycaps | 3 | Heavily patented, shipped and abandoned (BlackBerry, Mokibo), and incompatible with standard keycaps |
-| IMU per half for tent and splay | 5 | Tent is set once; splay can't be measured next to 60 switch magnets. Kept as optional support (wake on pickup, sleep face-down) |
+| IMU per half for tent and splay | 5 (input lens); 6 for the ergonomics lens's pose-aware halves | Tent is set once, and a magnetometer cannot measure splay reliably next to the switch, motor and LRA magnets and desk steel. Kept as cheap support: accelerometer tent and tilt readout, wake on pickup, sleep when the halves are face to face |
 | Semantic lighting from the keymap | 3 | Lighting the keys a layer uses is table stakes in QMK and Oryx |
-| Memory-LCD status strip | 5 | Table stakes, but a likely label for software-defined controls: keep as a supporting part if needed |
+| Memory-LCD status strip | 5 | Table stakes, and its pairing with a haptic knob was done in 2022 (HelloWord). Still keep it as a necessary supporting part, sized small, because software-defined controls need a label |
 | Actuators as a speaker | 2 | Poor audio; a gimmick |
 | Force-based typing coaching | 3 | Bottom-out force is invisible to position sensors; no evidence of benefit |
-| Built-in FIDO2 authenticator with a trusted input path | 5 | Real but niche: one authenticator for both KVM hosts and a trusted passphrase path. Fingerprint keyboards already give passkeys through Windows Hello and Touch ID. A candidate for later |
-| Standalone on-device ergonomics telemetry | 4 | Hobby mods already do it; folded into the recorder and per-finger tuning |
+| Built-in FIDO2 authenticator with a trusted input path | 5 | Real but niche: one authenticator for both KVM hosts and a trusted passphrase path. Fingerprint keyboards already give passkeys through Windows Hello and Touch ID (from memory). A candidate for later |
+| Standalone on-device ergonomics telemetry | 4 | Hobby mods already do it, and the fatigue claims are unvalidated. Made a data source for the flight recorder and the fit loop |
 | Typing data designs the next PCB | 5 | Typing on one geometry does not identify a better geometry; geometry comes from fit instead |
 | Timestamped sub-ms wireless split | 4 | Mitosis (2017) and several commercial boards; a refinement for the platform choice, not a feature |
-| Sandboxed WebAssembly scripts on the device | 3 | HID Remapper's expressions and UHK's smart macros already script without reflashing |
+| Sandboxed WebAssembly scripts on the device | 3 | HID Remapper's expressions (and, from memory, UHK's smart macros) already script without reflashing |
 | Channel Sounding walk-away lock | 2 | RSSI proximity locks are good enough at a desk; a gimmick |
 | Motorised tenting | 3 | Rigidity and noise kill it. A sensed self-locking tent dial gives "restore my angle" with the human as the actuator |
 | Sensed adjustable column rig | 6 | The round trip from a fitting rig to a gated board is the valuable part, and scales or a photo record the geometry as well as sensors do. Folded into fit (concept §4.4) |
@@ -128,11 +131,11 @@ Kept as a record, like the caliper's binned pages. Score is the sceptic's 1–10
 | Ergonomic rule check as a release gate | 5 | No validated thresholds. Kept as a report; hard gates only for binary physical rules such as keycap clearance |
 | Exact per-user unrolled flex keywell | 4 | Generic stretch flex already conforms. Rigid column boards first (concept §2.2) |
 | FEA-optimised flex cuts for uniform feel | 3 | The key tool is off-repo and the claim is unvalidated |
-| Strike-point sensing with 3-axis Hall on every key | 3 | Fitting data read once; at most a few keys on the shear coupon |
+| Strike-point sensing with 3-axis Hall on every key | 3 | Fitting data read once; at most a 4-key experiment on the sensing coupon panel |
 | Generated pogo-bed production fixture | 3 | Keep generated test pads and a netlist coverage report; point them at the latency rig instead |
 
 **Smaller ideas from the sceptics, not yet placed:** a ToF presence sensor (wake on approach, lock on leave),
-hot-standby BLE links to every host plus relaying the user's own BLE mouse, a keystroke-timing anonymiser mode, a
+hot-standby BLE links to every host (relaying the user's own BLE mouse is already in [concept §3.1](concept.md#_3-1-two-host-kvm)), a keystroke-timing anonymiser mode, a
 sensed self-locking tent dial, and passive magnetic breakaway for per-finger force.
 
 ## Sources

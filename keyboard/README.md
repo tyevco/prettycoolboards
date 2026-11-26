@@ -1,7 +1,7 @@
 # PrettyCool Keyboard (working name)
 
-An analog keyboard designed as code: one layout file in, a gated, JLC-assembled board, case and firmware out. The
-keys also point, and the controls change how they feel to suit what you are doing.
+A planned analog keyboard designed as code: one layout file in, a gated, JLC-assembled board, case and firmware out.
+The plan: keys that also point, and controls that change how they feel to suit what you are doing.
 
 > **Status (2026-11-25): concept.** Nothing is designed, built or measured. This folder holds the research and the
 > feature roadmap the owner chose on 2026-11-25. There are no schematics, boards or firmware yet. Every part, figure
@@ -12,7 +12,7 @@ keys also point, and the controls change how they feel to suit what you are doin
 | | |
 |---|---|
 | What it is not | Another Hall-effect gaming board. Adjustable actuation, rapid trigger, 8 kHz polling, SOCD and browser configurators are now table stakes ([research](docs/research.md#what-no-longer-differentiates)) |
-| What it is | An integrated design that no single product or project combines today: keys that point (shear keys), a profile-driven haptic thumb wheel, two wired hosts at once, a firmware that explains and tunes its own tap/hold decisions, and a layout compiler whose releases are gated on wiring, DRC, placement, latency and battery life |
+| What it is | A planned integration that the desk research found in no single product or project (four of the five sceptics could not search the web): keys that point (shear keys), a profile-driven haptic thumb wheel, two wired hosts at once, a firmware that explains and tunes its own tap/hold decisions, and a layout compiler whose releases are gated on wiring, DRC, placement, latency and battery life |
 | Priorities | All four, by owner decision: daily driver (programming), gaming / performance, ergonomics, and a showcase for the toolchain |
 | Form factor | Open: the features decide. The roadmap points to a split with a generated keywell |
 | Ambition | Moonshot: novel sensing and mechanics that may take several revisions, but it must end up a usable daily driver |
@@ -46,4 +46,4 @@ keys also point, and the controls change how they feel to suit what you are doin
 | Document | Contents |
 |---|---|
 | [docs/concept.md](docs/concept.md) | The chosen features: what each one is, what already exists, the risks, and where it lands in the roadmap. The platform and firmware decisions, the conflicts between features, the rev A testbed |
-| [docs/research.md](docs/research.md) | The landscape (late 2026), what no longer differentiates, the ideas that were demoted or dropped and why, the method and its caveats, sources |
+| [docs/research.md](docs/research.md) | The landscape (late 2026), what no longer differentiates, the ideas the owner did not pick, with the sceptic's score and case, the method and its caveats, sources |

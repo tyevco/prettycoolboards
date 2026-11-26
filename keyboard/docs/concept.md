@@ -2,14 +2,15 @@
 
 The owner chose these features and decisions on 2026-11-25, from a researched shortlist ([research.md](research.md)).
 **Nothing here is designed, built or measured.** Parts, stock figures and currents come from desk research on
-2026-11-25. Recheck stock with `tools/lcsc_check.py` before designing around a part. Every figure is a candidate
-until the testbed measures it.
+2026-11-25. Recheck stock at LCSC/JLC before designing around a part, and with `tools/lcsc_check.py` once the part
+is in a generated netlist (the tool reads LCSC codes from a KiCad netlist). Every figure is a candidate until the
+testbed measures it.
 
 ## 1. What makes it different
 
 Analog Hall-effect keys are no longer a differentiator. Wooting, Razer, SteelSeries, Keychron, Cherry and the ASUS
 ROG Falcata all ship adjustable actuation, rapid trigger and 8 kHz polling, and libhmk does the same in open
-firmware ([research §2](research.md#what-no-longer-differentiates)). The pitch has to come from what nobody
+firmware ([research: what no longer differentiates](research.md#what-no-longer-differentiates)). The pitch has to come from what nobody
 **combines**:
 
 1. **Keys that point.** Push J or F sideways to move the cursor or scroll, with normal keycaps and no nub.
@@ -21,7 +22,9 @@ firmware ([research §2](research.md#what-no-longer-differentiates)). The pitch 
 5. **Hardware as code, with gates.** One layout file generates the schematic, board, case and firmware. A release
    fails on a wiring, DRC, placement, latency or battery-life regression the way it fails on a DRC error today.
 
-Each piece has prior art somewhere, listed honestly below. The integration, the openness and the gates are new.
+Each piece has prior art somewhere, listed honestly below. As far as the research found, the integration, the
+openness and the gates are new (four of the five sceptics could not search the web; see
+[research.md](research.md#how-this-was-researched)).
 
 ## 2. Headline hardware
 
@@ -61,7 +64,8 @@ hot-swap sockets to fail on a curved board. The clash check runs on the folded s
 
 **Prior art:** YKB Skadi (2026) already ships an open Hall-effect keywell on bendable column PCBs (TMAG5253,
 nRF5340, Zephyr). Cosmos generates keywell cases with column-flex and per-key PCBs, and fits them from a phone hand
-scan. janaka, fmcraft and TheBigSkree have hand-drawn Dactyl flex PCBs. **New:** boards generated from the case
+scan. janaka's Dactyl flex and fmcraft's BastardKB flex are hand-drawn flex keywell PCBs, and TheBigSkree sells
+generic fully flexible PCBs. **New:** boards generated from the case
 model and gated in their bent state (DRC, parity, jlcplace, clash) for any fitted geometry.
 
 **Risks:** a splayed keywell is not one developable surface. Real designs end up as per-column strips joined at a
@@ -99,8 +103,8 @@ report motor choice as the hard part. A wheel placed away from the home row may 
 **What:** analog travel with no magnets: a coil printed in the PCB copper under each key. The moonshot version reads
 the compressing steel spring of a **stock** MX switch, so tactile and clicky switches become analog too.
 
-**Mechanism:** the toolchain generates the spiral coils as footprints (`fpgen.py` already generates the caliper's
-capacitive scale electrodes) and computes their inductance in Python. An inductance-to-digital converter reads
+**Mechanism:** the toolchain generates the spiral coils as footprints (the caliper's electrode comb is already generated in Python: a seed footprint from `fpgen.py`, extended
+in `layout.py`) and computes their inductance in Python. An inductance-to-digital converter reads
 them (TI LDC1614-class, or Azoteq IQS9320). A design-of-experiments coupon carries about 20 coil variants (turns,
 trace and space, layers, diameter).
 
@@ -149,13 +153,14 @@ everything.
 ("hold: another key went down at +142 ms"). Mark the misfires, and the tuner computes per-finger timings that would
 have resolved them correctly.
 
-**Mechanism:** an opt-in RAM ring buffer (about 12 B per event, so about 120 KB for 10 000 events) of key, µs
+**Mechanism:** an opt-in RAM ring buffer (about 12 B per event, so about 120 KB for 10 000 events; the sceptic sized
+it for the nRF54LM20A's 512 KB of RAM, so on the rev A chip it must fit that chip's RAM, or use a QSPI NOR) of key, µs
 timestamps, analog samples and the hold-tap and combo decision trace. The tuner replays the recording through the
 firmware's own decision code: first in Zephyr's `native_sim` on the PC, later compiled to WebAssembly in the web
 app. It checks the result on held-out typing before it pushes the new timings.
 
 **Prior art:** hrm-tuner (host-side logging for ZMK home-row mods), ZMK's debug logging and `native_sim` behaviour
-tests (replay, but not from recordings), Keyboard Heaven's calibrator, KeyPath for Kanata. **New:** capture on the
+tests (replay, but not from recordings; both from the sceptic's memory, not checked), Keyboard Heaven's calibrator, KeyPath for Kanata. **New:** capture on the
 device, with the firmware's reasons, and tuning by replay through the real code.
 
 **Risks:** a recording of key positions with µs timing is a keylogger. It must be opt-in, held in RAM, expire on its
@@ -174,8 +179,9 @@ the wheel as a Windows Radial Controller (the Surface Dial usage, with its hapti
 haptic controller, so Windows gives per-app dial menus and ticks with nothing installed. (2) The web app over
 WebHID or Web Bluetooth. (3) An optional small host agent for the foreground app, CI state or agent prompts.
 Feedback: a DRV2605L haptic driver (C527464) and a coin LRA per half, with a small, user-tested vocabulary (tick,
-double tick, long buzz), plus a capacitive strip on the MCU's touch pins with LRA-synthesised detents as the
-low-power wheel.
+double tick, long buzz), plus a capacitive strip with LRA-synthesised detents as the low-power wheel. The research
+reads the strip with the ESP32-S3's touch peripheral; whether the chosen MCU has touch pins is unchecked, otherwise it
+needs a touch controller.
 
 **Prior art:** QMKonnect, auto_layers and komokana switch layers by app. Surface Dial and the Logitech MX Master 4
 give per-app haptics. DRV2605L haptics on home-row-mod holds exist in DIY ZMK builds. **New:** one tested profile
@@ -201,7 +207,8 @@ hot-swapped switch from its field-versus-travel curve, so actuation in mm stays 
 and temperature drift).
 
 **Prior art:** SteelSeries Protection Mode (global accidental-press rejection), adaptive touch targets on phone
-keyboards, Razer Synapse and WhatPulse heatmaps, libhmk's manual per-key actuation. **New:** closed-loop per-key
+keyboards and Razer Synapse and WhatPulse heatmaps (both from the sceptic's memory, not checked), libhmk's manual
+per-key actuation. **New:** closed-loop per-key
 adaptation on analog mechanical keys.
 
 **Risks:** "finger load" is not validated against injury outcomes, so the docs must say designed, not validated.
@@ -227,8 +234,9 @@ key array with no anchor IC still passes R1–R6, and a pose-driven placer in pl
 * a **keycap clearance gate**: real keycap solids swept from rest to bottom-out at every pose, checked against each
   other, the case and tall parts, with a tolerance pass. This reuses `clash_check.py`.
 
-CI runs the same gates on every fork: wiring check, ERC, DRC, schematic parity, the jlcplace placement simulation,
-the clash and keycap checks, the firmware build and tests, and the docs build.
+The plan is for CI to run the same gates on every fork: wiring check, ERC, DRC, schematic parity, the jlcplace
+placement simulation, the clash and keycap checks, the firmware build and tests, and the docs build. Today the
+hardware gates run by hand in WSL, and the repo's only workflow (`docs.yml`) builds the docs and checks links.
 
 **Prior art:** Ergogen (outlines, cases and an un-routed PCB, no schematic), kicad-kbplacer (placement and simple
 matrix routing, a label-wired schematic), Cosmos (cases and firmware for its own fixed PCBs, open-core). The Corney
@@ -282,7 +290,8 @@ and TMR without raw data. **New:** an open, measured comparison across sensing m
 and thumb-arc geometry, and out comes a JLC-assembled board and case that fit you.
 
 **Mechanism:** a parameter mapping into the compiler (§4.1). Rev C adds a phone-photo capture: ArUco fiducials on the
-case (the caliper already prints ArUco inlays, [mechanical §16](../../caliper/docs/mechanical.md#_16-aruco-markers-on-the-jaws-2026-11-15))
+case (the caliper's jaws already carry ArUco inlays in the model, designed but not yet printed or tried with a
+camera: [mechanical §16](../../caliper/docs/mechanical.md#_16-aruco-markers-on-the-jaws-2026-11-15))
 let the web app measure both halves' pose, and a hand tracker estimates wrist angle against the under-30° extension
 target from the ergonomics literature (Rempel, Keir & Bach 2008).
 
@@ -303,11 +312,11 @@ the rev B chip. The candidates, from the research:
 
 | Chip | For | Against |
 |---|---|---|
-| **Artery AT32F405** (rev A testbed) | On-chip high-speed USB PHY. Artery's own magnetic-keyboard reference design and libhmk reach 8 kHz polling and 16 kHz scanning on it | No radio. LCSC/JLC stock not checked |
-| **Nordic nRF54LM20A** | High-speed USB (Nordic says 8 kHz HID), BLE 6, 4 Mbps proprietary link for a split or dongle, low BLE current | The 66-GPIO part is a 0.35 mm-pitch CSP (HDI board). The QFN52 (32 GPIO) was still sampling. Nordic says 8 kHz USB plus the proprietary link together are CPU-bound |
-| nRF52840 / nRF54L15 | Mature in Zephyr, months on a charge | Full-speed USB: 1 kHz |
+| **Artery AT32F405** (rev A testbed) | On-chip high-speed USB PHY. Artery's own magnetic-keyboard reference design reaches 8 kHz polling and 16 kHz scanning on it, and libhmk 8 kHz polling | No radio. LCSC/JLC stock not checked. **Zephyr support not checked** (§6) |
+| **Nordic nRF54LM20A** | High-speed USB (Nordic says 8 kHz HID), BLE 6, 4 Mbps proprietary link for a split or dongle, low BLE current | The 66-GPIO part is the CSP98 (3.67 × 3.85 mm, roughly 0.35 mm pitch, *estimate*), which likely needs via-in-pad or HDI; JLC capability unverified. The QFN52 (32 GPIO) was still sampling. Nordic says 8 kHz USB plus the proprietary link together are CPU-bound |
+| nRF52840 (optionally with an nRF54L15 as a split radio) | Mature in Zephyr; weeks to months on a charge with lighting off (nRF52840-class ZMK boards) | Full-speed USB: 1 kHz on the nRF52840 (the nRF54L15 has no USB) |
 | Espressif ESP32-S31 | High-speed USB, stays in ESP-IDF | Preliminary datasheet; weaker BLE power than Nordic |
-| WCH CH585 | BLE 5.4 plus high- and full-speed USB, stocked at LCSC, cheap | Weaker open-source ecosystem |
+| WCH CH585 | BLE 5.4 plus high- and full-speed USB, listed at LCSC (stock not checked), cheap | Weaker open-source ecosystem |
 | ESP32-S3 (the caliper's) | Familiar, gated sheets exist | Full-speed USB only (1 kHz cap); BLE HID current in the mA range |
 
 Whatever wins, prefer a pre-certified radio module if one is stocked: a bare-chip RF design (matching network,
@@ -318,8 +327,11 @@ pre-routed, because Freerouting is not impedance-aware.
 
 Owner decision: **custom firmware on Zephyr**, with ZMK-compatible keymap files where possible. ZMK mainline has no
 analog keys and no USB host, and this board needs both, plus haptics, a second USB controller and the flight
-recorder. Patching ZMK would mean carrying those changes forever. Zephyr covers the Nordic, Artery and ESP32
-candidates. The hold-tap and combo logic is kept free of hardware calls, so the same code runs in `native_sim` for
+recorder. Patching ZMK would mean carrying those changes forever. Nordic's SDK is built on Zephyr, and Zephyr supports the
+ESP32-S3. **Zephyr support for the AT32F405 (the rev A chip), the ESP32-S31 and the CH585 was not checked** and must
+be confirmed before rev A firmware starts. If the AT32F405 is not supported, rev A either moves to a Zephyr-supported
+part with high-speed USB (the nRF54LM20A on a module or dev kit) or runs its scanning experiments on bare-metal test
+firmware, with the keyboard firmware on Zephyr from rev B. The hold-tap and combo logic is kept free of hardware calls, so the same code runs in `native_sim` for
 the recorder's replay and the CI tests, and later in WebAssembly for the web app. The caliper's ESP-IDF firmware stays
 as it is.
 
@@ -334,7 +346,7 @@ A **motherboard plus plug-in coupons**. Each coupon is generated by compiler v0,
 | TMR coupon | The same keys on a TMR sensor | Hall-effect against TMR on noise and current |
 | Shear coupon | TMAG5170 under a stock stem and under a centring-stem prototype | The lateral signal and press crosstalk |
 | Coil coupon | About 20 generated coil variants under stock MX switches and slug-stem switches, read by an LDC1614-class converter | Whether a stock spring gives a usable analog signal |
-| Haptics coupon | DRV8316 + MT6701CT + gimbal motor; DRV2605L + LRA; a capacitive strip on touch pins | Wheel current and detent feel, LRA localisation and noise |
+| Haptics coupon | DRV8316 + MT6701CT + gimbal motor; DRV2605L + LRA; a capacitive strip (on a touch controller, or on MCU touch pins if the motherboard MCU has them: unchecked for the AT32F405) | Wheel current and detent feel, LRA localisation and noise |
 | Latency rig | A generated board that injects at a sensor node and is the USB host for the report | Press-to-report p50/p99 per mode |
 
 The two-host KVM path (second USB controller and isolator) goes on its own coupon if the motherboard's connector can
@@ -352,7 +364,7 @@ compiler has generated and gated every coupon.
 | Coils against Hall sensors | Coils need copper-free layers under each key, and the Hall analog buses want solid ground | Separate coupons, then a board variant if coils win |
 | Wheel against battery | 0.5–1 A detent peaks (*estimate*) against a LiPo budget | Wheel coupon current; wheel full-strength when wired, a capacitive strip with LRA ticks on battery |
 | 8 kHz against battery | Fresh 8 kHz reports need sensors on nearly all the time; an enable-gated bus only allows one sensor per column at a time | Hall and TMR coupon currents at 1 and 8 kHz; 8 kHz likely wired-only |
-| KVM power | With isolation, the keyboard needs power from whichever host is present | A power design on the KVM coupon |
+| KVM power | With isolation, the keyboard needs power from whichever host is present | A power design on the KVM coupon if rev A carries one (§7), otherwise in rev B |
 | Keywell against flex | A splayed keywell does not unroll into one flat sheet | Rigid columns in rev B, flex only after the bent-state gate works |
 | Magnetometer against magnets | The caliper's compass idea fails next to 60 switch magnets, so splay can't be sensed on board | Phone-photo fiducials (§4.4) |
 
@@ -362,4 +374,6 @@ compiler has generated and gated every coupon.
 * Which layout format the compiler reads: its own Python, or Ergogen or KLE input for compatibility.
 * Hot-swap magnetic switches on rev B (a plate-mount HE ecosystem: Gateron, Lekker, TTC, Kailh) or socketless.
 * How many shear keys: two index keys plus the thumbs, or all eight home keys.
-* Wi-Fi: the caliper's research leans towards dropping it. The keyboard's companion app works over USB and BLE.
+* Wi-Fi: the keyboard research's MCU lens recommends dropping it, and the caliper's rev B ideas list it as something
+  that may go (rev A keeps it). The keyboard's companion app works over USB and BLE.
+* Zephyr on the rev A chip: confirm Zephyr supports the AT32F405, or pick the rev A chip again (§6).
