@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PrettyCool Keyboard concept</title>
+<meta name="description" content="Concept sketches of the PrettyCool Keyboard: 3D models and renders of the rev B keyboard, its mechanisms and the rev A testbed, plus simple-model estimates. Nothing is designed, built or measured.">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: the caliper gallery's engineering sheet. Title block on top, a live 3D bench, then the sketches as plates.
+   Everything on this page is a concept sketch or a simple-model estimate: see the footer. */
+:root {
+  --paper: #f2f5f8; --sheet: #ffffff; --ink: #15202b; --muted: #5a6877; --line: #d3dce5;
+  --anod: #2a62a0; --brass: #a8781e; --warn: #a3302a; --grid: rgba(42, 98, 160, .07); --stage: #e9eef3;
+  --display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #0e1318; --sheet: #151c24; --ink: #e4ebf2; --muted: #93a3b4; --line: #2a3644;
+  --anod: #6fa7e6; --brass: #d8ad55; --warn: #e8857d; --grid: rgba(111, 167, 230, .07); --stage: #111820; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --paper: #0e1318; --sheet: #151c24; --ink: #e4ebf2; --muted: #93a3b4; --line: #2a3644;
+  --anod: #6fa7e6; --brass: #d8ad55; --warn: #e8857d; --grid: rgba(111, 167, 230, .07); --stage: #111820; color-scheme: dark }
+
+body { background: var(--paper); color: var(--ink); font: 15px/1.55 var(--body); }
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 36px; }
+.wrap > * { min-width: 0; }
+
+/* title block */
+.titleblock { display: grid; grid-template-columns: 1fr auto; gap: 18px 28px; align-items: end;
+  border-bottom: 2px solid var(--ink); padding-bottom: 16px; }
+.titleblock > * { min-width: 0; }
+.eyebrow { font: 500 12px/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { font: 700 clamp(34px, 6vw, 56px)/1 var(--display); letter-spacing: .01em; margin: 8px 0 0; text-wrap: balance; }
+h1 span { color: var(--anod); }
+.lede { max-width: 66ch; margin: 10px 0 0; color: var(--muted); }
+.stamp { font: 500 12px/1.3 var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--warn);
+  border: 1.5px solid var(--warn); padding: 8px 10px; transform: rotate(-2deg); text-align: center; }
+.specs { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  border: 1px solid var(--line); background: var(--sheet); margin: 0; }
+.spec { padding: 10px 14px; border-right: 1px solid var(--line); min-width: 0; }
+.spec:last-child { border-right: 0; }
+.spec dt { font: 500 11px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.spec dd { margin: 6px 0 0; font: 600 20px/1.1 var(--display); }
+.spec dd small { font: 400 12px var(--mono); color: var(--muted); }
+
+h2 { font: 600 26px/1.1 var(--display); letter-spacing: .02em; margin: 0; text-wrap: balance; }
+h3 { font: 600 21px/1.15 var(--display); letter-spacing: .02em; margin: 0; }
+.sectionhead { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px 20px; }
+.sectionhead p { margin: 0; color: var(--muted); max-width: 62ch; }
+
+/* 3D bench */
+.bench { display: grid; gap: 12px; }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.tabs button { font: 500 14px var(--body); color: var(--ink); background: var(--sheet); border: 1px solid var(--line);
+  padding: 7px 12px; cursor: pointer; border-radius: 3px; }
+.tabs button[aria-pressed="true"] { background: var(--anod); border-color: var(--anod); color: var(--sheet); }
+.tabs button:focus-visible, .plate button:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+.stage { position: relative; aspect-ratio: 16 / 9; max-width: 100%; border: 1px solid var(--line);
+  background-color: var(--stage);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 20px 20px; overflow: hidden; touch-action: none; }
+.stage canvas { display: block; width: 100%; height: 100%; }
+.hud { position: absolute; left: 12px; bottom: 10px; right: 12px; display: flex; justify-content: space-between; gap: 4px 12px;
+  font: 400 12px var(--mono); color: var(--muted); pointer-events: none; flex-wrap: wrap; }
+.sketch { position: absolute; top: 10px; right: 12px; font: 500 11px/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase;
+  color: var(--warn); border: 1px solid var(--warn); padding: 4px 7px; background: var(--stage); pointer-events: none; }
+.status { position: absolute; inset: 0; display: grid; place-items: center; font: 500 13px var(--mono); color: var(--muted);
+  pointer-events: none; text-align: center; padding: 0 16px; }
+.caption { margin: 0; color: var(--muted); max-width: 78ch; }
+@media (max-width: 640px) { .stage { aspect-ratio: 1 / 1; } .hud { font-size: 11px; } .titleblock { grid-template-columns: 1fr; }
+  .stamp { justify-self: start; } }
+
+/* sketch set: one grid per group; wide plates span two columns where there are two */
+.group { display: grid; gap: 10px; }
+.group > p { margin: 0; color: var(--muted); max-width: 78ch; }
+.plates { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); grid-auto-flow: dense; gap: 18px; }
+.plate { margin: 0; background: var(--sheet); border: 1px solid var(--line); display: grid; grid-template-rows: auto 1fr;
+  grid-template-columns: minmax(0, 1fr); min-width: 0; }
+/* the image is positioned, so its pixel size never widens the grid track */
+.plate button { all: unset; cursor: zoom-in; position: relative; display: block; background: #fff; aspect-ratio: 3 / 2; min-width: 0; }
+.plate img { position: absolute; inset: 10px; width: calc(100% - 20px); height: calc(100% - 20px); max-width: none; object-fit: contain; }
+.plate figcaption { padding: 10px 14px 12px; border-top: 1px solid var(--line); min-width: 0; }
+.plate figcaption b { display: block; font: 600 17px/1.2 var(--display); letter-spacing: .02em; }
+.plate figcaption span { color: var(--muted); font-size: 13.5px; }
+.plate .ref { font: 400 11px var(--mono); color: var(--muted); letter-spacing: .04em; overflow-wrap: anywhere; }
+.plate.wide button { aspect-ratio: 3 / 1; }
+@media (min-width: 760px) { .plate.wide { grid-column: span 2; } }
+
+dialog { border: 1px solid var(--line); background: var(--sheet); color: var(--ink); padding: 0; max-width: min(96vw, 1500px); }
+dialog::backdrop { background: rgba(10, 15, 20, .72); }
+dialog img { display: block; max-width: 100%; max-height: 82vh; background: #fff; }
+dialog form { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px 12px; }
+dialog button { font: 500 13px var(--body); background: var(--anod); color: var(--sheet); border: 0; padding: 6px 12px; border-radius: 3px; cursor: pointer; }
+
+footer { border-top: 1px solid var(--line); padding-top: 14px; font: 400 12.5px var(--mono); color: var(--muted);
+  display: flex; flex-wrap: wrap; gap: 6px 22px; }
+footer a { color: var(--anod); }
+footer .st { color: var(--warn); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+body { margin: 0; } [hidden] { display: none !important; } img { max-width: 100%; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="titleblock">
+    <div>
+      <div class="eyebrow">prettycoolboards · keyboard · concept · sketch set</div>
+      <h1>PrettyCool <span>Keyboard</span> concept</h1>
+      <p class="lede">A planned analog keyboard designed as code: keys that also point, a thumb wheel whose feel follows the task, two wired hosts at once, and releases gated on wiring, DRC, latency and battery life. These are sketches of the owner's 2026-11-25 roadmap. The geometry is illustrative, the parts are candidates from desk research, and nothing is designed, built or measured.</p>
+    </div>
+    <div class="stamp">Concept sketch<br>not designed</div>
+    <dl class="specs" aria-label="Decisions so far (owner, 2026-11-25)">
+      <div class="spec"><dt>Status</dt><dd>Concept <small>· 2026-11-25</small></dd></div>
+      <div class="spec"><dt>Staging</dt><dd>Testbed first <small>· rev A, then rev B</small></dd></div>
+      <div class="spec"><dt>Sensing</dt><dd>Undecided <small>· rev A compares 4</small></dd></div>
+      <div class="spec"><dt>MCU</dt><dd>Testbed decides <small>· battery gate</small></dd></div>
+      <div class="spec"><dt>Firmware</dt><dd>Custom <small>· on Zephyr</small></dd></div>
+      <div class="spec"><dt>Form factor</dt><dd>Open <small>· roadmap: split keywell</small></dd></div>
+    </dl>
+  </header>
+
+  <section class="bench" aria-labelledby="bench-h">
+    <div class="sectionhead">
+      <h2 id="bench-h">3D bench</h2>
+      <p>Drag to orbit, scroll or pinch to zoom, right-drag to pan. The models come from the build123d concept scripts: sketches, not designs.</p>
+    </div>
+    <div class="tabs" role="group" aria-label="Scene">
+      <button id="t-assembly" data-scene="assembly" aria-pressed="true">Rev B keyboard</button>
+      <button id="t-exploded" data-scene="exploded" aria-pressed="false">Left half exploded</button>
+      <button id="t-shear" data-scene="shear" aria-pressed="false">Shear key</button>
+      <button id="t-wheel" data-scene="wheel" aria-pressed="false">Thumb wheel</button>
+      <button id="t-testbed" data-scene="testbed" aria-pressed="false">Rev A testbed</button>
+    </div>
+    <div class="stage" id="stage">
+      <div class="sketch">Concept sketch</div>
+      <div class="status" id="status">Loading model…</div>
+      <div class="hud"><span id="hud-l"></span><span id="hud-r"></span></div>
+    </div>
+    <p class="caption" id="caption"></p>
+  </section>
+
+  <section aria-labelledby="set-h" style="display:grid;gap:22px">
+    <div class="sectionhead">
+      <h2 id="set-h">Sketch set</h2>
+      <p>Renders and figures from the concept scripts. Select a plate to see it full size.</p>
+    </div>
+    <div id="groups" style="display:grid;gap:30px"></div>
+  </section>
+
+  <footer>
+    <span class="st">Status: Concept sketch: nothing designed, built or measured</span>
+    <span>Docs: <a href="../">keyboard overview</a> · <a href="../docs/concept.html">concept and roadmap</a></span>
+    <span>Source: <a href="https://github.com/tyevco/prettycoolboards/tree/main/keyboard">github.com/tyevco/prettycoolboards</a></span>
+    <span>Models and plates are generated by keyboard/hardware/concept/*.py and keyboard/docs/figures/physics.py; do not hand-edit them (models/README)</span>
+  </footer>
+</div>
+
+<dialog id="zoom"><img id="zoom-img" alt=""><form method="dialog"><span id="zoom-cap" class="ref"></span><button>Close</button></form></dialog>
+
+<script>
+// [file, title, caption, source, wide]. Captions stay honest: every plate is a concept sketch or a model estimate.
+const C = "keyboard/hardware/concept/", F = "keyboard/docs/figures/physics.py";
+const GROUPS = [
+  { title: "Rev B keyboard", note: "The split with a generated keywell that the roadmap points to, as one parametric sketch (M preset unless noted). Sizes, angles and positions are illustrative constants, not decisions.", plates: [
+    ["keyboard_assembly.png", "Both halves, 3/4 front", "A generated keywell per half, tented about 18°, with a thumb arc. Blue keys are the shear keys; the orange roller is the haptic thumb wheel, drawn on the left half (which half is not decided).", C + "render_keyboard.py · assembly", 1],
+    ["keyboard_top.png", "Top view: where the features sit", "Shear keys F, J and one thumb key per half, the wheel, and USB-C A and B for the two-host KVM. Dashed parts are inside the case.", C + "render_keyboard.py · top"],
+    ["keyboard_side.png", "Tent and keywell curvature", "The tent from the front, and exact cuts through two columns: each column's keys sit on an arc about the finger's flexion, with a per-finger radius.", C + "render_keyboard.py · side"],
+    ["keyboard_internals.png", "Inside the left half", "Column boards bent to each column's arc, flex links to a main board (MCU module, chip not chosen), battery, coin LRA and the wheel module. Hall sensors and passives are not modelled.", C + "render_keyboard.py · internals"],
+    ["keyboard_half_exploded.png", "Left half exploded", "Keycaps, socketless Hall-effect switches (hot-swap is still open), the printed top shell, column and thumb boards, main board, wheel module, battery, LRA and floor. Sizes are placeholders.", C + "render_keyboard.py · exploded"],
+    ["keyboard_fit_presets.png", "Fit presets S, M and L", "One parametric half at three illustrative sizes: a uniform scale on the column radii, stagger and thumb arc. The hand-to-layout mapping is not validated (concept §4.4).", C + "render_keyboard.py · fit", 1],
+    ["keyboard_keycap_clearance.png", "Keycap clearance gate, sketched", "Every keycap at rest, mid travel and bottom-out against its neighbours, the case and the wheel, computed on the sketch. It flags key E 0.35 mm from the web, under an illustrative 0.5 mm margin: the kind of catch the planned gate is for.", C + "keyboard_models.py · clearance_gate"],
+  ] },
+  { title: "Mechanisms", note: "One way each headline idea could work. The 3D views are half-sections and the section plots are exact cuts through the sketch geometry, not through a design.", plates: [
+    ["mech_shear_key_cutaway.png", "Shear key, cutaway", "The stem slides inside a carrier hung on four flexure posts, so a sideways push moves the magnet about ±0.3–0.5 mm over a TMAG5170 3-axis Hall sensor.", C + "render_mechanisms.py · shear"],
+    ["mech_shear_key_section.png", "Shear key: at rest, pushed, in plan", "Exact cuts at rest, pushed 0.4 mm sideways to the roof-hole stop with the posts bent in an S, and in plan. The stiffness and the X/Y signal are rev A unknowns.", C + "render_mechanisms.py · shear", 1],
+    ["mech_he_key_cutaway.png", "Hall-effect key with a compliant stop", "The stem's magnet travels 4 mm towards a TMAG5253-class sensor, then lands on a TPU stop: the aftertouch idea.", C + "render_mechanisms.py · he"],
+    ["mech_he_key_section.png", "Hall-effect key: at rest and pressed", "4.0 mm of travel to the TPU stop, then a 0.3 mm squeeze into it. The stop's stiffness and the field against squeeze are rev A unknowns.", C + "render_mechanisms.py · he", 1],
+    ["mech_thumb_wheel.png", "Haptic thumb wheel module", "A 2804-class gimbal motor drives the roller directly; a shaft magnet faces an MT6701CT encoder, and a DRV8316 on the same board drives the motor. Sizes are illustrative.", C + "render_mechanisms.py · wheel", 1],
+    ["mech_thumb_wheel_section.png", "Thumb wheel: section through the shaft", "Roller on the motor's outer rotor, stator, bearings, shaft and encoder board. Detent strength, cogging and current are rev A unknowns.", C + "render_mechanisms.py · wheel"],
+    ["mech_coil_key.png", "Printed coil under a stock MX switch", "A generated two-layer spiral under an unmodified switch, read by an LDC1614-class converter; in this sketch the spring starts about 1 mm above the copper. Unproven, and the copper thickness is exaggerated.", C + "render_mechanisms.py · coil"],
+    ["mech_lra_mount.png", "Coin LRA in a flexure pocket", "The LRA's cradle joins the printed floor only through three flexure arms, aimed at keeping buzz out of a hard desk. Untested; the arm geometry is illustrative.", C + "render_mechanisms.py · lra", 1],
+  ] },
+  { title: "Rev A testbed", note: "A motherboard plus one plug-in coupon per sensing method, each meant to be generated by compiler v0. Board size, connector, coupon footprints and layout are illustrative; the solder-mask colours only tell the coupons apart.", plates: [
+    ["testbed_assembly.png", "Testbed, 3/4 view", "One motherboard (candidate AT32F405, USB-C, power, latency-rig hooks) with the Hall-effect, TMR, shear, coil and haptics coupons. The optional KVM coupon is drawn as a ghost.", C + "render_testbed.py · assembly"],
+    ["testbed_exploded.png", "Coupons lifted out", "Each coupon lifted off its socket and the keys lifted off the coupons, to show the sensor sites. The connector type is not decided.", C + "render_testbed.py · exploded"],
+    ["testbed_top.png", "Testbed, top view", "To scale for the sketch (motherboard about 160 × 110 mm), with what each coupon and motherboard section would carry.", C + "render_testbed.py · top"],
+    ["testbed_latency_rig.png", "Latency rig", "The rig would step an injection pad on a coupon's analog lane, read the marker GPIO and, as the USB host, timestamp each HID report. Its parts are not chosen; nothing is built or measured.", C + "render_testbed.py · rig"],
+    ["testbed_coil_coupon.png", "Coil coupon: 20 generated spirals", "Variants by layers, diameter and trace, drawn by coils.py, with one 4-layer coil shown layer by layer. Not checked against JLC's rules or the converter's range.", C + "render_testbed.py · coil"],
+  ] },
+  { title: "Model estimates", note: "Simple models on the sketch geometry, not measurements. Each figure states its model and limits; the rev A testbed exists to measure the real values.", plates: [
+    ["phys_he_field_vs_travel.png", "Hall-effect key: field against travel", "Exact on-axis field of a cylindrical magnet: the field, and with it the travel resolution, climbs steeply towards the stop, so magnet, gap and sensor range must be chosen together.", F + " · he"],
+    ["phys_shear_field.png", "Shear key: sideways signal against depth", "The same sideways push reads about 13 times stronger at 4 mm depth than at rest; dividing by Bz narrows that to about 1.8 times, so the calibration depends on depth.", F + " · shear"],
+    ["phys_he_neighbour_field.png", "A pressed neighbour's stray field", "In this model a fully pressed row neighbour shifts a resting key's reading by about 30 µm of equivalent travel. No steel is modelled.", F + " · neighbour"],
+    ["phys_coil_inductance.png", "Printed coil inductance", "Modified Wheeler for a lone spiral, with an assumed coupling between layers. No spring, slug or ground copper in the model.", F + " · coil"],
+    ["phys_haptic_profiles.png", "Thumb wheel detent profiles", "Illustrative firmware tables a context profile would select: per-line ticks, hard stops, N slots, free spin. Not physics, not measured.", F + " · haptic"],
+    ["phys_polling_latency.png", "Polling wait, 1 kHz against 8 kHz", "Arithmetic: a press waits on average 0.5 ms at 1 kHz and 0.0625 ms at 8 kHz with the scan locked to the report. Sensor, firmware, USB and OS delays are not included.", F + " · latency"],
+  ] },
+];
+const groupsEl = document.getElementById("groups"), dlg = document.getElementById("zoom");
+let n = 0;
+GROUPS.forEach(g => {
+  const sec = document.createElement("div"); sec.className = "group";
+  sec.innerHTML = `<h3>${g.title}</h3><p>${g.note}</p>`;
+  const grid = document.createElement("div"); grid.className = "plates";
+  g.plates.forEach(([f, t, d, r, wide]) => {
+    const fig = document.createElement("figure"); fig.className = "plate" + (wide ? " wide" : "");
+    fig.innerHTML = `<button id="plate-${n++}" aria-label="Enlarge ${t}"><img src="img/${f}" alt="${t}" loading="lazy"></button>
+      <figcaption><b>${t}</b><span>${d}</span><div class="ref">${r}</div></figcaption>`;
+    fig.querySelector("button").addEventListener("click", () => {
+      document.getElementById("zoom-img").src = "img/" + f; document.getElementById("zoom-img").alt = t;
+      document.getElementById("zoom-cap").textContent = t + " · concept sketch"; dlg.showModal();
+    });
+    grid.appendChild(fig);
+  });
+  sec.appendChild(grid); groupsEl.appendChild(sec);
+});
+</script>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
+
+// The models are glTF in metres, Y up, with the front of each part towards +z.
+const SCENES = {
+  assembly: { files: ["models/keyboard_assembly.glb"], dir: [0.3, 0.75, 1], hud: "rev B · M preset · illustrative",
+    caption: "Concept sketch of the rev B split: both halves with keycaps, switches, bent column boards, flex links, main boards, battery, coin LRA, the haptic wheel (left half) and the two-part printed case. Blue keys are the shear keys. Illustrative geometry from keyboard_models.py, not a design." },
+  exploded: { files: ["models/keyboard_half_exploded.glb"], dir: [0.75, 0.5, 1], hud: "left half · exploded along the tent normal",
+    caption: "Concept sketch of the left half pulled apart along its tent normal: keycaps, switches (teal under the shear keys), printed top shell, column and thumb boards, main board, wheel module, battery and LRA, and the floor. Sizes are placeholders." },
+  shear: { files: ["models/mech_shear_key.glb"], dir: [0.6, 0.45, 1], hud: "one way it could work · shell see-through",
+    ghost: ["housing", "plate", "keycap", "carrier"],
+    caption: "Concept sketch of one way a shear key could work: a custom switch whose stem guide, a carrier cup, hangs on four flexure posts (orange) over a TMAG5170 3-axis Hall sensor, with the spring, red stem and magnet inside. The keycap, housing, plate and carrier are drawn see-through here. Illustrative geometry; the stiffness and the signal are rev A unknowns." },
+  wheel: { files: ["models/mech_thumb_wheel.glb"], dir: [0.35, 0.5, 1], hud: "parts are candidates · roller see-through",
+    ghost: ["tyre", "roller hub", "rotor bell"],
+    caption: "Concept sketch of the haptic thumb wheel module: a 2804-class gimbal motor with the roller on its outer rotor (tyre, hub and rotor bell drawn see-through, so the stator and windings show), a diametric magnet over an MT6701CT encoder board that carries a DRV8316, the bracket and thumb plate, and two neighbouring thumb keys for scale. Illustrative geometry, not a design." },
+  testbed: { files: ["models/testbed_assembly.glb"], dir: [0.35, 0.8, 1], hud: "rev A · KVM coupon left out",
+    caption: "Concept sketch of the rev A testbed: a motherboard (candidate AT32F405) with the Hall-effect, TMR, shear, coil and haptics coupons plugged in. The optional KVM coupon is left out; its socket stays. Solder-mask colours only tell the coupons apart; board size and layout are illustrative." },
+};
+
+const stage = document.getElementById("stage"), status = document.getElementById("status");
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+stage.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(30, 16 / 9, 0.01, 1e6);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x8899aa, 1.6));
+const key = new THREE.DirectionalLight(0xffffff, 2.2); key.position.set(1, 1.6, 2); scene.add(key);
+const fill = new THREE.DirectionalLight(0xffffff, 0.8); fill.position.set(-2, -1, -1.5); scene.add(fill);
+
+const loader = new GLTFLoader(); loader.setMeshoptDecoder(MeshoptDecoder);
+const cache = new Map();
+function load(url) {
+  // models ship as base64 text (.glb.txt): artifacts serve text, not .glb
+  if (!cache.has(url)) cache.set(url, fetch(url + ".txt").then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
+    .then(b64 => { const bin = atob(b64.trim()), buf = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+      return new Promise((res, rej) => loader.parse(buf.buffer, "", g => res(g.scene), rej)); }));
+  return cache.get(url).then(s => s.clone(true));
+}
+let group = null, token = 0;
+
+// Frame the bounding box as seen from `dir`: the closest camera distance at which all 8 corners fit the view,
+// so wide and tall models fill the stage instead of a sphere around them.
+function fit(obj, dir, margin = 1.06) {
+  const box = new THREE.Box3().setFromObject(obj), c = box.getCenter(new THREE.Vector3());
+  const r = box.getSize(new THREE.Vector3()).length() / 2, v = new THREE.Vector3(...dir).normalize();
+  camera.position.copy(c).add(v); camera.up.set(0, 1, 0); camera.lookAt(c); camera.updateMatrixWorld();
+  const tv = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)), th = tv * camera.aspect, p = new THREE.Vector3();
+  let d = 0;
+  for (let i = 0; i < 8; i++) {   // corner in camera space with the camera 1 away; at distance d its depth is d - 1 - z
+    p.set(i & 1 ? box.max.x : box.min.x, i & 2 ? box.max.y : box.min.y, i & 4 ? box.max.z : box.min.z)
+      .applyMatrix4(camera.matrixWorldInverse);
+    d = Math.max(d, 1 + p.z + Math.abs(p.x) * margin / th, 1 + p.z + Math.abs(p.y) * margin / tv);
+  }
+  camera.near = r / 100; camera.far = r * 100 + d; camera.updateProjectionMatrix();
+  camera.position.copy(c).addScaledVector(v, d); controls.target.copy(c); controls.update();
+}
+const norm = s => s.replace(/[\s_]+/g, " ").trim();   // GLTFLoader turns spaces in node names into underscores
+
+const fixed = new WeakSet();
+async function show(name) {
+  const S = SCENES[name], my = ++token;
+  document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.scene === name)));
+  status.textContent = "Loading model…"; status.hidden = false;
+  document.getElementById("caption").textContent = S.caption;
+  document.getElementById("hud-r").textContent = S.hud;
+  document.getElementById("hud-l").textContent = "";
+  try {
+    const parts = await Promise.all(S.files.map(load));
+    if (my !== token) return;
+    if (group) scene.remove(group);
+    group = new THREE.Group();
+    parts.forEach(p => {
+      p.traverse(o => { if (o.isMesh) {
+        const m = o.material; m.side = THREE.DoubleSide;
+        // render_lib writes its display (sRGB) palette as baseColorFactor, which glTF reads as linear:
+        // convert once so the 3D colours match the PNG renders
+        if (!fixed.has(m)) { m.color.convertSRGBToLinear(); fixed.add(m); }
+        if (m.metalness !== undefined) { m.metalness = Math.min(m.metalness, 0.25); m.roughness = Math.max(m.roughness ?? 0.6, 0.45); }
+        if ((S.ghost || []).includes(norm(o.name))) {   // see-through shell, so the mechanism inside shows
+          o.material = m.clone(); Object.assign(o.material, { transparent: true, opacity: 0.22, depthWrite: false });
+        }
+      } });
+      group.add(p);
+    });
+    scene.add(group); fit(group, S.dir, stage.clientWidth < 640 ? 1.3 : 1.06);   // narrow stages: room for the two-line HUD
+    const b = new THREE.Box3().setFromObject(group).getSize(new THREE.Vector3()).multiplyScalar(1000);   // m -> mm
+    document.getElementById("hud-l").textContent = `sketch bounds ${b.x.toFixed(0)} × ${b.z.toFixed(0)} × ${b.y.toFixed(0)} mm`;
+    status.hidden = true;
+  } catch (e) {
+    if (my === token) status.textContent = "This model didn't load. The sketch set below has the same views.";
+  }
+}
+
+function resize() {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(stage); resize();
+renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
+document.querySelectorAll(".tabs button").forEach(b => b.addEventListener("click", () => show(b.dataset.scene)));
+const start = (location.hash || "").slice(1);
+show(SCENES[start] ? start : "assembly");
+</script>
+</body>
+</html>

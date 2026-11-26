@@ -96,6 +96,9 @@ export default withMermaid(defineConfig({
             { text: 'Overview', link: '/keyboard/' },
             { text: 'Concept and roadmap', link: '/keyboard/docs/concept' },
             { text: 'Research', link: '/keyboard/docs/research' },
+            { text: 'Concept renders', link: '/keyboard/hardware/concept/' },
+            // a static page from public/: an absolute URL so the router doesn't treat it as a doc page
+            { text: '3D gallery', link: 'https://tyevco.github.io/prettycoolboards/keyboard/gallery/' },
           ],
         },
       ],
