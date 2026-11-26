@@ -43,12 +43,12 @@ config:
 flowchart TB
   K["analog keys"]
   S["2–4 shear keys<br/>TMAG5170"]
-  W["thumb wheel<br/>DRV8316 + motor<br/>MT6701CT encoder"]
+  W["thumb wheel<br/>DRV8316 + motor<br/>MT6701CT or<br/>AS5047P encoder"]
   T["capacitive strip<br/>battery mode"]
   SC["key scanner"]
   MCU["MCU<br/>picked by the battery gate"]
   HA["host A<br/>USB-C"]
-  ISO["digital isolator<br/>ISO7721 class"]
+  ISO["digital isolator<br/>ISO7721 class<br/>(if isolated)"]
   U2["second USB controller<br/>CH32X035 or CH32V305"]
   HB["host B<br/>USB-C"]
   BLE["BLE hosts"]
@@ -70,7 +70,8 @@ flowchart TB
 ```
 
 *Concept sketch. The MCU is not chosen yet (the battery gate picks it), the key sensing is whichever method wins on
-rev A, and every part named is a candidate from desk research.*
+rev A, and every part named is a candidate from desk research. Whether host B's controller is isolated is still
+open (§3.1).*
 
 Each piece has prior art somewhere, listed honestly below. As far as the research found, the integration, the
 openness and the gates are new (four of the five sceptics could not search the web; see
@@ -109,11 +110,11 @@ the sketch's reading of "centring flexure stem". Illustrative geometry, not a de
 
 The same sketch in exact sections: at rest, pushed sideways to its stop, and in plan.
 
-![Three exact 2D sections. First, the key at rest with a Z press arrow and a 4 mm travel dimension. Second, the key pushed +X by 0.4 mm at true scale: the posts bend in an S and the gap at the roof hole closes on one side. Third, a plan section through the magnet, showing four posts, the carrier ring, the spring's mean circle, a small red circle for the magnet's ±0.4 mm range, the dashed TMAG5170 outline below, and X and Y push arrows.](../hardware/concept/renders/mech_shear_key_section.png)
+![Three exact 2D sections. Top row, left: the key at rest with a Z press arrow and a 4 mm travel dimension. Top row, right: the key pushed +X by 0.4 mm at true scale: the posts bend in an S and the gap at the roof hole closes on one side. Bottom: a plan section through the magnet, showing four posts, the carrier ring, the spring's mean circle, a small red circle for the magnet's ±0.4 mm range, the dashed TMAG5170 outline below, and X and Y push arrows.](../hardware/concept/renders/mech_shear_key_section.png)
 
-*Exact sections of the concept shear key: at rest, pushed 0.4 mm to the roof-hole stop with the flexure posts bent
-in an S, and in plan, where the magnet's range over the sensor is the small red circle. Concept geometry; the
-stiffness and the X/Y signal are rev A unknowns.*
+*Exact sections of the concept shear key: at rest (top left), pushed 0.4 mm to the roof-hole stop with the flexure
+posts bent in an S (top right), and in plan (bottom), where the magnet's range over the sensor is the small red
+circle. Concept geometry; the stiffness and the X/Y signal are rev A unknowns.*
 
 The signal path, from one sensor to typing and to pointing:
 
@@ -156,7 +157,7 @@ A simple magnet model shows how strongly that crosstalk depends on depth:
 
 *Model estimate, not measured: a Biot–Savart sum over the magnet's equivalent surface current (checked against the
 exact on-axis formula) has the same sideways push reading about 13 times stronger at 4 mm depth than at rest.
-Normalising by Bz narrows that to about 1.8 times, so in this model too the pointing calibration has to be a
+Normalising by Bz narrows that to about 1.8 times, so in this model too the pointing calibration would have to be a
 function of press depth.*
 
 **Stage:** rev A coupon (TMAG5170 sites under a stock stem and under a centring-stem prototype); rev B on 2–4 keys.
@@ -202,7 +203,7 @@ per-finger radius. Radii, tent and stack heights are illustrative constants, not
 
 And inside the left half, with the top shell, keycaps and switches taken off:
 
-![Left half with the top shell, keycaps and switches removed, seen from the front inner side. Green 0.8 mm column boards follow each column's arc, and amber flex links drop to a flat green main board. The main board carries a grey MCU module, USB-C A and B at the back, and a host-B controller and isolator. A battery sits under the outer columns, a coin LRA sits on the floor under the thumb home key, and a flat thumb board and the wheel module sit at the front.](../hardware/concept/renders/keyboard_internals.png)
+![Left half with the top shell, keycaps and switches removed, seen from the front inner side. Green 0.8 mm column boards follow each column's arc, and amber flex links drop to a flat green main board. The main board carries a grey MCU module, USB-C A and B at the back, and a host-B controller and isolator (if isolated). A battery sits under the outer columns, a coin LRA sits on the floor under the thumb home key, and a flat thumb board and the wheel module sit at the front.](../hardware/concept/renders/keyboard_internals.png)
 
 *Concept sketch: one board per column, joined by flex links to a main board (MCU module, chip not chosen; USB-C A
 and B for the two-host KVM). The sketch bends each 0.8 mm column board to its column's arc, as Skadi's bendable
@@ -270,19 +271,21 @@ not a measurement.*
 
 One way the module could be built, as a concept sketch:
 
-![Two labelled 3D views. Left: the wheel between two thumb keys, seen from the front with the front halves of the thumb plate and the roller cut away, so the grey gimbal motor shows inside the orange roller hub. Right: the module alone from behind, showing the bracket flange, the green encoder board with the DRV8316 driver and small parts, the connector and a standoff, and the black-tyred roller.](../hardware/concept/renders/mech_thumb_wheel.png)
+![Two labelled 3D views. Top: the wheel between two thumb keys, seen from the front with the front halves of the thumb plate and the roller cut away, so the grey gimbal motor shows inside the orange roller hub. Bottom: the module alone from behind, showing the bracket flange, the green encoder board with the DRV8316 driver (a candidate) and small parts, the connector and a standoff, and the black-tyred roller.](../hardware/concept/renders/mech_thumb_wheel.png)
 
-*Concept sketch of the haptic thumb wheel: a 2804-class gimbal motor drives the roller directly. A diametric magnet
-on the shaft faces an MT6701CT encoder, and a DRV8316 on the same small board drives the motor. Motor, magnet and
-roller would be fitted by hand; illustrative geometry.*
+*Concept sketch of the haptic thumb wheel: a gimbal motor drives the roller directly (a 2804-class motor in this
+sketch; the motor is not chosen). A diametric magnet on the shaft faces an MT6701CT encoder (or the AS5047P), and a
+DRV8316 on the same small board drives the motor. The board parts are the stocked candidates from the stock check
+above. Motor, magnet and roller would be fitted by hand; illustrative geometry.*
 
 The same module in an exact section through the shaft:
 
-![Exact 2D section through the wheel's shaft axis, with thumb key sections on both sides for scale. Labels mark the rubber tyre, the orange printed roller hub, the rotor bell and magnets, the stator core and windings, the stator base, two bearings, the shaft, the pink diametric magnet facing the MT6701CT encoder on the green encoder board, the DRV8316 on the board's back, the bracket, the thumb plate and the cut-back thumb PCB.](../hardware/concept/renders/mech_thumb_wheel_section.png)
+![Exact 2D section through the wheel's shaft axis, with thumb key sections on both sides for scale. Labels mark the rubber tyre, the orange printed roller hub, the rotor bell and magnets, the stator core and windings, the stator base, two bearings, the shaft, the pink diametric magnet facing the encoder IC (MT6701CT or AS5047P, a candidate) on the green encoder board, the DRV8316 driver (a candidate) on the board's back, the bracket, the thumb plate and the cut-back thumb PCB.](../hardware/concept/renders/mech_thumb_wheel_section.png)
 
 *Exact section through the shaft of the concept module: the roller on the motor's outer rotor, the stator, bearings
-and shaft, and the diametric magnet facing the MT6701CT on the encoder board. Illustrative geometry; detent strength,
-cogging and current are rev A unknowns.*
+and shaft, and the diametric magnet facing the encoder IC (MT6701CT or AS5047P) on the encoder board. The motor is
+not chosen (the sketch draws a 2804-class one), and the board parts are candidates. Illustrative geometry; detent
+strength, cogging and current are rev A unknowns.*
 
 **Prior art:** Peng Zhihui's HelloWord keyboard (2022, GPLv3) has a built-in FOC haptic knob on its own MCU and
 battery. CNCDan's Hapticpad (2026) is a macropad with nearly this exact horizontal haptic wheel. SmartKnob and its
@@ -303,7 +306,7 @@ the compressing steel spring of a **stock** MX switch, so tactile and clicky swi
 
 The idea under one key, as a concept sketch:
 
-![Left: an exploded 3D cutaway. A stock MX switch, cut in half to show its grey steel spring, red stem and copper contact leaves, is lifted 11 mm above a green PCB that carries a copper spiral around the MX centre-post hole. In one small patch the top layer is peeled to show the same spiral on L2. Right: an exact section showing the spring wires starting about 1 mm above the copper, behind the housing floor, and a zoom on the board showing L1 and L2 turns joined by a via.](../hardware/concept/renders/mech_coil_key.png)
+![Top: an exploded 3D cutaway. A stock MX switch, cut in half to show its grey steel spring, red stem and copper contact leaves, is lifted 11 mm above a green PCB that carries a copper spiral around the MX centre-post hole. In one small patch the top layer is peeled to show the same spiral on L2. Bottom, assembled: on the left an exact section showing the spring wires starting about 1 mm above the copper, behind the housing floor, and on the right a zoom on the board showing L1 and L2 turns joined by a via.](../hardware/concept/renders/mech_coil_key.png)
 
 *Concept sketch of analog sensing from a stock MX switch: a generated two-layer spiral under the switch, read by an
 LDC1614-class converter. In this sketch the steel spring starts about 1 mm above the copper and runs up to about
@@ -316,14 +319,14 @@ trace and space, layers, diameter).
 
 Such a coupon, as the concept's `coils.py` draws it:
 
-![PCB-style top view of the coil coupon: a 4 by 5 grid of copper spirals, each labelled with turns, trace width and layers (rows of 1, 2 and 4 layers inside the stock-MX pin positions and a row of larger 2-layer coils), five converter chips on the right, a legend, and an inset that shows one 4-layer coil layer by layer, with arrows showing the current turning the same way on every layer.](../hardware/concept/renders/testbed_coil_coupon.png)
+![PCB-style top view of the coil coupon: a 4 by 5 grid of copper spirals with five converter chips on the right. Column headers give each column's trace width, row headers each row's layers and size (rows of 1, 2 and 4 layers inside the stock-MX pin positions and a row of larger 2-layer coils), and each coil is labelled with its turns. Below the coupon: a legend on the left, and on the right one 4-layer coil drawn layer by layer, with arrows showing the current turning the same way on every layer.](../hardware/concept/renders/testbed_coil_coupon.png)
 
 *Concept sketch drawn by `coils.py`: 20 spiral variants (layers and diameter by row, trace = space by column) and one
 4-layer coil shown layer by layer. The parameters are an illustrative spread around a stock MX footprint, not checked
 against JLC's rules or the LDC1614-class converter; nothing is measured.*
 
-A simple inductance model for coils of this kind. The model ignores the switch pins; the coupon sketch keeps three
-of its four rows inside them, so those coils are smaller than the model's:
+A simple inductance model for coils of this kind. The model ignores the switch pins, and its 10–14 mm coils are all
+larger than the coupon sketch's: rows A–C sit inside the MX pins, and row D is 9 mm across:
 
 ![Three log-scale line plots of inductance against turns per layer, for 1, 2 and 4 layers in series, each with lines for outer diameters of 10, 12 and 14 mm that end where the inner diameter reaches 4.5 mm. End values: 1.1, 2.1 and 3.3 µH on one layer; 3.7, 7.0 and 11.2 µH on two; 13.6, 25.5 and 40.9 µH on four. Shaded bands show a layer coupling factor from 0.45 to 0.9 around the assumed 0.7.](figures/phys_coil_inductance.png)
 
@@ -381,7 +384,7 @@ MCU's on host A, a small second MCU (CH32X035 full speed, or CH32V305 high speed
 digital isolator (ISO7721 or ADuM1201 class), the split DeskHop uses. Switching only changes which controller gets
 the reports. Rev B can add a downstream port for a mouse (a MAX3421E-class USB host) or relay a BLE mouse instead.
 
-How the two hosts would connect across the isolation barrier:
+How the two hosts would connect in the isolated option, one of the two power choices below:
 
 ```mermaid
 ---
@@ -419,7 +422,7 @@ flowchart TB
 
 *Concept sketch: host B's USB controller sits on host B's ground and reaches the main MCU through a digital isolator.
 The keyboard side runs from host A's VBUS or the battery, with an isolated DC-DC from VBUS B as an option. The parts
-are candidates.*
+are candidates. This is the isolated option; whether to isolate is still open (see below).*
 
 **Prior art:** DeskHop (two RP2040s behind an isolator, a box), HID Remapper (dual RP2040, USB host), USB-C KVM
 monitors, Logitech Easy-Switch (reconnects) and Flow (needs host software). **New:** inside the keyboard.
@@ -607,7 +610,7 @@ audible on a hard desk.
 
 One way to keep the buzz out of a hard desk, as an untested concept sketch:
 
-![Left: a labelled 3D half-section of a dark printed case floor standing on teal TPU feet on a grey desk. A yellow coin LRA, cut in half, sits in an orange cradle inside a round slot, joined to the floor only by thin orange flexure arms, and an amber flex tail rises towards the main PCB, which is not drawn. Right: a plan section through the arms, showing the cradle, the coin LRA, three curved arms, their roots in the floor and in the cradle, and the air slot.](../hardware/concept/renders/mech_lra_mount.png)
+![Top: a labelled 3D half-section of a dark printed case floor standing on teal TPU feet on a grey desk. A yellow coin LRA, cut in half, sits in an orange cradle inside a round slot, joined to the floor only by thin orange flexure arms, and an amber flex tail rises towards the main PCB, which is not drawn. Bottom: a plan section through the arms, showing the cradle, the coin LRA, three curved arms, their roots in the floor and in the cradle, and the air slot.](../hardware/concept/renders/mech_lra_mount.png)
 
 *Concept sketch of a coin LRA in a cradle printed with the case floor. The cradle joins the floor only through three
 flexure arms inside a slot, aimed at keeping buzz out of a hard desk. Untested; the mount and the arm geometry are
@@ -810,7 +813,7 @@ flowchart TB
   CLASH --> XC
   FWB --> XC
   DOCB --> XC
-  XC["Cross-domain<br/>contract checks<br/>pins, switch centres,<br/>scan map"]:::extend
+  XC["Cross-domain<br/>contract checks<br/>pins (exists, caliper);<br/>switch centres, scan map<br/>(planned)"]:::extend
 
   XC --> OK{"All gates<br/>green?"}
   OK -->|yes| REL["Fab-ready<br/>release"]:::good
@@ -831,13 +834,13 @@ flowchart TB
 
 *Concept sketch of the planned compiler. One layout source drives the generators, and every output must pass the
 gates before a fab-ready release. Green gates exist in this repo today (run by hand in WSL; only the docs build runs
-in CI). Amber parts exist for the caliper and need generalising, and dashed parts are planned; nothing here exists
-for the keyboard yet.*
+in CI). Amber parts exist for the caliper and need generalising, and dashed parts are planned; of the cross-domain
+checks, only the pins check exists. Nothing here exists for the keyboard yet.*
 
-Run on the concept sketch's own geometry, a keycap clearance check already finds a tight spot, which is what such a
-gate is for:
+A rough version of that check in the concept model's own script (not `clash_check.py`, and not the planned gate), run
+on the sketch geometry, finds a tight spot, which is what such a gate is for:
 
-![Four panels. (a) Left thumb arc seen square to its plate, with red closest-point marks: T2/wheel 5.73 mm at bottom-out, T2/T3 and T3/T4 1.38 mm at rest. (b) The thumb arc seen from its centre, keycaps shaded at rest and dashed at 4 mm bottom-out. (c) An exact cut at key E showing the pressed cap 0.40 mm from the web up to the higher index column in that cut, and 0.35 mm at its back corner, below an illustrative 0.5 mm margin. (d) A bar chart of the 12 tightest of 97 checks, with E vs case at 0.35 mm highlighted as below the margin.](../hardware/concept/renders/keyboard_keycap_clearance.png)
+![Four panels. (a) Left thumb arc seen square to its plate, with red closest-point marks: T2/wheel 5.73 mm at bottom-out, T2/T3 and T3/T4 1.38 mm at rest. (b) The thumb arc seen from its centre, keycaps shaded at rest and dashed at 4 mm bottom-out. (c) The tightest spot the sketch check found: an exact cut at key E showing the pressed cap 0.40 mm from the web up to the higher index column in that cut, and 0.35 mm at its back corner, below an illustrative 0.5 mm margin. (d) A bar chart of the 12 tightest of 97 checks, with E vs case at 0.35 mm highlighted as below the margin.](../hardware/concept/renders/keyboard_keycap_clearance.png)
 
 *Model estimate on sketch geometry, not measured: every keycap at rest, mid travel and bottom-out against its
 neighbours, the case and the wheel. The thumb arc clears (1.38 mm at rest), but the deeper middle column's top cap
@@ -1030,7 +1033,8 @@ flowchart TB
 
 *Concept sketch of the fit loop. Presets or hand measurements set the stagger, splay and thumb arc through a mapping
 nobody has validated yet. Rev C adds a phone-photo capture whose measured pose and wrist angle feed the next fit; the
-camera wrist angle (±5–10°, an estimate) has to be checked against a goniometer.*
+camera wrist angle (±5–10°, an estimate) would have to be checked against a goniometer. Feeding the measured pose
+back into the mapping is this sketch's reading; §4.4 does not state it.*
 
 **Prior art:** Cosmos fits a keywell from a phone hand scan, but for its own fixed PCBs. Ergogen users hand-tune
 stagger and splay in YAML. Squeezebox, FCS42S and key-yack's magnetic columns are passive adjustable rigs. **New:**
@@ -1060,7 +1064,7 @@ Whatever wins, prefer a pre-certified radio module if one is stocked: a bare-chi
 50 Ω feed) would be a first for this toolchain. High-speed USB needs 90 Ω pairs on JLC's controlled-impedance stack,
 pre-routed, because Freerouting is not impedance-aware.
 
-How rev A would pick the rev B chip, as the owner framed it:
+How rev A would pick the rev B chip, following the owner's decisions in §5 and §6:
 
 ```mermaid
 ---
@@ -1097,9 +1101,11 @@ flowchart TB
   classDef pick fill:#dcebfb,stroke:#1565c0,stroke-width:2px,color:#0d2238
 ```
 
-*The platform decision as the owner framed it. Zephyr support for the AT32F405 (not checked yet, §6) sets the rev A
-route. Rev A then measures sensor and wheel currents, the battery gate ranks the candidate chips on those numbers,
-and Zephyr support is checked again for the pick. A concept sketch: no measurement or ranking exists yet.*
+*A concept sketch of the platform decision. Zephyr support for the AT32F405 (not checked yet, §6) sets the rev A
+route. Rev A would then measure sensor and wheel currents, the battery gate would rank the candidate chips on those
+numbers, and Zephyr support would be checked again for the pick. The ranking is this sketch's reading of "the
+battery-budget gate picks the rev B chip", and the Zephyr check on the rev B pick follows from the Zephyr firmware
+decision: it is this sketch's reading, not a stated step. No measurement or ranking exists yet.*
 
 ## 6. Firmware: custom on Zephyr
 
@@ -1152,7 +1158,8 @@ flowchart TB
 
 *Concept sketch of the planned firmware layers, top to bottom in the order a key press travels. The behaviour layer
 makes no hardware calls, so the same source runs in `native_sim` for the flight recorder's replay and the CI tests,
-and later as WebAssembly in the web app. No firmware exists yet.*
+and later as WebAssembly in the web app. No firmware exists yet, and Zephyr support for the AT32F405, ESP32-S31 and
+CH585 is not checked yet (§6).*
 
 ## 7. Rev A testbed
 
@@ -1182,7 +1189,7 @@ config:
     subGraphTitleMargin: { top: 0, bottom: 8 }
 ---
 flowchart LR
-  MB["Motherboard<br/>AT32F405 (HS USB)<br/>USB-C, power, charging<br/>coupon connectors<br/>(analog + SPI lanes)<br/>current sense per coupon<br/>test pads, marker GPIO"]:::mb
+  MB["Motherboard<br/>AT32F405 (HS USB),<br/>candidate: Zephyr<br/>support not checked (§6)<br/>USB-C, power, charging<br/>coupon connectors<br/>(analog + SPI lanes)<br/>current sense per coupon<br/>test pads, marker GPIO"]:::mb
 
   subgraph CP["Coupons (compiler v0)"]
     direction TB
@@ -1220,8 +1227,9 @@ flowchart LR
 ```
 
 *Concept block diagram of the rev A testbed: the motherboard, the plug-in coupons (each to be generated by compiler
-v0), what each coupon is meant to measure, and the latency rig. Nothing is designed or built. The two-host KVM coupon
-happens only if the motherboard's connector can carry it.*
+v0), what each coupon is meant to measure, and the latency rig. Nothing is designed or built. The AT32F405 is the
+candidate rev A chip, and its Zephyr support is not checked yet (§6, §9). The two-host KVM coupon happens only if the
+motherboard's connector can carry it.*
 
 And as a concept sketch, top view to scale:
 
@@ -1251,19 +1259,22 @@ a compliant stop, drawn here as a TPU disc. Illustrative geometry, not a design.
 
 The same key in an exact section, at rest and pressed into the stop:
 
-![Two exact 2D sections through the key's stem, side by side. Left, at rest, with a 4.0 mm travel dimension at the keycap and a 5.8 mm magnet-to-sensor gap. Right, pressed 4.3 mm: the stem sits on the teal TPU stop, the spring is compressed, and labels give the 1.5 mm gap. A zoomed inset shows the TPU squeezed 0.3 mm below its free top.](../hardware/concept/renders/mech_he_key_section.png)
+![Two exact 2D sections through the key's stem, one above the other. Top, at rest, with a 4.0 mm travel dimension at the keycap and a 5.8 mm gap from the magnet to the top of the sensor package. Bottom, pressed 4.3 mm: the stem sits on the teal TPU stop, the spring is compressed, and labels give the 1.5 mm gap. A 2x zoom inset at the bottom left, linked to a pink box on the pressed section, shows the TPU squeezed 0.3 mm below its free top.](../hardware/concept/renders/mech_he_key_section.png)
 
-*Exact section of the concept key: 4.0 mm of travel to the stop, then a 0.3 mm squeeze into the 0.2–0.5 mm
-compliant zone the desk research suggested (inset). In this sketch the magnet-to-sensor gap closes from 5.8 to
-1.5 mm. The stop's stiffness and the field-versus-squeeze curve are rev A unknowns.*
+*Exact section of the concept key: 4.0 mm of travel to the stop, then a 0.3 mm squeeze into an illustrative
+compliant zone, the sketch's own choice (inset; the field model below uses 0.5 mm). In this sketch the gap from the
+magnet to the top of the sensor package closes from 5.8 to 1.5 mm; to the Hall element inside the package, the gap
+the field model uses, it is 6.3 mm at rest. The stop's stiffness and the field-versus-squeeze curve are rev A
+unknowns.*
 
 A simple magnet model shows why the coupon has to choose the magnet, the gap and the sensor range together:
 
-![Two line plots against key travel from 0 to 4.5 mm. Left: the field at the Hall element for two magnets (4 x 2 mm and 3 x 3 mm) rises from about 12 mT at rest to about 95 mT at the 4 mm hard stop and about 135 mT at the end of a shaded 0.5 mm compliant zone, with dashed lines at candidate sensor ranges of 40, 80 and 160 mT. Right: the field change per 0.01 mm of travel, about 0.046 mT at rest and 0.65 mT at the stop, 14 times steeper.](figures/phys_he_field_vs_travel.png)
+![Two line plots against key travel from 0 to 4.5 mm. Left: the field at the Hall element for two magnets (4 x 2 mm and 3 x 3 mm) rises from about 12 mT at rest to about 95 mT at the 4 mm hard stop and about 135 mT at the end of a shaded, illustrative 0.5 mm compliant zone, with dashed lines at candidate sensor ranges of 40, 80 and 160 mT. Right: the field change per 0.01 mm of travel, about 0.046 mT at rest and 0.65 mT at the stop, 14 times steeper.](figures/phys_he_field_vs_travel.png)
 
 *Model estimate, not measured: the exact on-axis field of a cylindrical NdFeB magnet (Br 1.25 T, an illustrative
-6.3 mm rest gap) rises steeply toward the hard stop, and the travel resolution with it, so the magnet, gap and sensor
-range have to be chosen together. The TMAG5253 ranges drawn are approximate and unchecked against the datasheet.*
+6.3 mm rest gap to the Hall element; the section above gives 5.8 mm, to the package top) rises steeply toward the
+hard stop, and the travel resolution with it, so the magnet, gap and sensor range have to be chosen together. The
+TMAG5253 ranges drawn are approximate and unchecked against the datasheet.*
 
 **Rev A is done when:** each coupon has a measured current and noise figure in the docs, the coil coupon says yes or
 no to stock-spring sensing, the shear coupon says whether a centring stem gives a usable pointing signal, the wheel

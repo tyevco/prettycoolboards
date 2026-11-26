@@ -52,6 +52,8 @@ MAX_PNG = 440_000
 INK = (0.12, 0.12, 0.12)
 GREY = (0.38, 0.38, 0.40)
 HL = tuple(RL.COLOURS["highlight"])
+FS = 13.0          # callout font (pt at 100 dpi = 18 px): about 8.5 px at the ~688 px docs column for a 1450 px image
+FS_NOTE = 12.0
 
 DECAL_WORDS = ("pads", "contacts", "pin 1", "mouth", "tongue", "copper", "vias", "core", "slot", "INJ pad",
                "I-sense pad", "touch pad", "stripe", "holes")
@@ -312,7 +314,7 @@ def canvas(fr, img, pad=(10, 10, 10, 10), px_per_mm=None):
     return fig, ax
 
 
-def callout(ax, xy, text, xytext, ha="center", va="center", fs=10.5, color=INK, lw=0.8):
+def callout(ax, xy, text, xytext, ha="center", va="center", fs=FS, color=INK, lw=0.8):
     ax.annotate(text, xy=xy, xytext=xytext, ha=ha, va=va, fontsize=fs, color=color, zorder=20,
                 bbox=dict(boxstyle="round,pad=0.3", fc="white", ec=(0.62, 0.62, 0.62), lw=0.6),
                 arrowprops=dict(arrowstyle="-", lw=lw, color=(0.22, 0.22, 0.22), shrinkA=0, shrinkB=0))
@@ -346,8 +348,8 @@ def P(cam, p):
     return tuple(cam.uv(p)[0])
 
 
-def note(ax, x, y, text, fs=9.5, ha="left", va="top", color=GREY):
-    ax.text(x, y, text, ha=ha, va=va, fontsize=fs, color=color, zorder=20)
+def note(ax, x, y, text, fs=FS_NOTE, ha="left", va="top", color=GREY):
+    ax.text(x, y, text, ha=ha, va=va, fontsize=fs, color=color, zorder=20, linespacing=1.35)
 
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -370,22 +372,22 @@ def fig_assembly():
     items, ghost = M.assembly(cps=cps)
     cam = Camera(*ASSY_VIEW)
     lo, hi = bounds(cam, items + ghost)
-    fr = Frame(cam, lo, hi, px_per_mm=8.0)
+    fr = Frame(cam, lo, hi, px_per_mm=5.4)
     img = render(fr, items, ghost)
-    fig, ax = canvas(fr, img, pad=(40, 40, 10, 14))
+    fig, ax = canvas(fr, img, pad=(26, 30, 20, 12))
     q = lambda p: P(cam, p)                                   # noqa: E731
-    callout(ax, q((50.5, 96.55, ZT + 18)), "Hall-effect coupon", (-48, 102))
-    callout(ax, q((96.5, 96.55, ZT + 18)), "TMR coupon", (22, 120))
+    callout(ax, q((50.5, 96.55, ZT + 18)), "Hall-effect coupon", (-46, 102))
+    callout(ax, q((96.5, 96.55, ZT + 18)), "TMR coupon", (22, 124))
     callout(ax, q((144, 93.5, ZT + 18)), "shear coupon", (98, 124))
-    callout(ax, q((132, 8, ZT)), "haptics coupon", (150, 38))
-    callout(ax, q((68, 6, ZT)), "coil DOE coupon", (62, 6))
-    callout(ax, q((19, 20, ZT)), "KVM coupon (optional:\ndrawn as a ghost)", (-30, 2))
-    callout(ax, q((-1, 94.5, 1.6)), "USB-C", (-66, 62))
-    callout(ax, q((15, 79, 0.9)), "MCU (candidate AT32F405)", (-62, 24))
-    callout(ax, q((29.5, 96, 9.1)), "latency-rig header", (-52, 80))
+    callout(ax, q((132, 8, ZT)), "haptics coupon", (150, 36))
+    callout(ax, q((68, 6, ZT)), "coil DOE coupon", (66, 4))
+    callout(ax, q((19, 20, ZT)), "KVM coupon (optional:\ndrawn as a ghost)", (-30, -2))
+    callout(ax, q((-1, 94.5, 1.6)), "USB-C", (-68, 62))
+    callout(ax, q((15, 79, 0.9)), "MCU (candidate\nAT32F405)", (-66, 24))
+    callout(ax, q((29.5, 96, 9.1)), "latency-rig header", (-56, 82))
     u0, u1, v0, v1 = fr.extent()
-    note(ax, u0 - 38, v0 - 4, "Solder-mask colours only tell the coupons apart. Board size, connector, coupon "
-         "footprints and layout are illustrative, not decided.", fs=10)
+    note(ax, u0 - 24, v0 - 6, "Solder-mask colours only tell the coupons apart. Board size, connector, coupon "
+         "footprints\nand layout are illustrative, not decided.")
     save(fig, "testbed_assembly.png", "Rev A testbed concept: motherboard with plug-in coupons, 3/4 view")
 
 
@@ -394,10 +396,10 @@ def fig_exploded():
     items, ghost = M.assembly(lift=EXPLODE_LIFT, key_lift=EXPLODE_KEYS, cps=cps)
     cam = Camera(*EXPLODE_VIEW)
     lo, hi = bounds(cam, items + ghost)
-    fr = Frame(cam, lo, hi, px_per_mm=6.8)
+    fr = Frame(cam, lo, hi, px_per_mm=5.0)
     keep = {}
     img = render(fr, items, ghost, keep=keep)
-    fig, ax = canvas(fr, img, pad=(58, 74, 16, 18))
+    fig, ax = canvas(fr, img, pad=(42, 50, 24, 18))
     q = lambda p: P(cam, p)                                   # noqa: E731
     # dashed guides from each coupon's header down to its socket, hidden where a part is in front of them
     for c in cps:
@@ -407,20 +409,20 @@ def fig_exploded():
                                 (c.x0 + hx, c.y0 + hy, lift + M.MEZZ - 8.5)):
             ax.plot(run[:, 0], run[:, 1], ls=(0, (4, 3)), lw=1.1, color=HL, zorder=5)
     zb, zf = ZT + EXPLODE_LIFT["hall"], ZT + EXPLODE_LIFT["coil"]
-    callout(ax, q((60, 62.5, zb)),
-            "Hall-effect coupon: a TMAG5253 per key;\nreference sensors and thermistors in front", (-62, 118))
-    callout(ax, q((50.5, 96.55, zb + EXPLODE_KEYS + 18)), "keys lifted off\n(switch + keycap)", (-52, 160))
-    callout(ax, q((96.5, 96.55, zb + EXPLODE_KEYS + 18)), "TMR coupon: the same keys on a TMR sensor", (40, 186))
-    callout(ax, q((144, 93.5, zb)), "shear coupon: TMAG5170 under a stock stem\nand under a centring-stem prototype",
-            (150, 146))
-    callout(ax, q((132, 8, zf)), "haptics coupon: DRV8316 + MT6701CT + gimbal\nmotor; DRV2605L + coin LRA; "
-            "capacitive strip", (156, 56))
-    callout(ax, q((45, 10, zf)), "coil DOE coupon: 20 generated spirals,\nLDC1614-class converters", (-62, 84))
-    callout(ax, q((19, 19, zf)), "KVM coupon (optional,\nonly if the connector\ncan carry it)", (-74, 52))
-    callout(ax, q((28, 19, 8.5)), "2 x 10 mezzanine socket per coupon\n(connector type not decided)", (-40, 4))
+    callout(ax, q((60, 62.5, zb)), "Hall-effect coupon: a\nTMAG5253 per key; reference\nsensors and "
+            "thermistors\nin front", (-66, 118))
+    callout(ax, q((50.5, 96.55, zb + EXPLODE_KEYS + 18)), "keys lifted off\n(switch + keycap)", (-62, 160))
+    callout(ax, q((96.5, 96.55, zb + EXPLODE_KEYS + 18)), "TMR coupon: the same keys\non a TMR sensor", (40, 186))
+    callout(ax, q((144, 93.5, zb)), "shear coupon: TMAG5170\nunder a stock stem and\nunder a centring-stem\n"
+            "prototype", (158, 150))
+    callout(ax, q((132, 8, zf)), "haptics coupon: DRV8316\nand MT6701CT (candidates),\ngimbal motor; DRV2605L,\n"
+            "coin LRA; capacitive strip", (158, 40))
+    callout(ax, q((45, 10, zf)), "coil DOE coupon: 20\ngenerated spirals,\nLDC1614-class converters", (-66, 82))
+    callout(ax, q((19, 19, zf)), "KVM coupon (optional,\nonly if the connector\ncan carry it)", (-70, 46))
+    callout(ax, q((28, 19, 8.5)), "2 x 10 mezzanine socket per\ncoupon (connector type\nnot decided)", (-44, 2))
     u0, u1, v0, v1 = fr.extent()
-    note(ax, u0 - 56, v0 - 6, "Back-row coupons lifted 66 mm, front-row 36 mm, keys a further 22 mm so the sensors "
-         "show. Dashed: each coupon's header to its socket.", fs=10)
+    note(ax, u0 - 40, v0 - 10, "Back-row coupons lifted 66 mm, front-row 36 mm, keys a further 22 mm so the "
+         "sensors show.\nDashed: each coupon's header to its socket.")
     save(fig, "testbed_exploded.png", "Rev A testbed concept: coupons lifted out of their sockets")
 
 
@@ -429,25 +431,27 @@ def fig_top():
     items, ghost = M.assembly(cps=cps)
     cam = Camera(90, -90)
     lo, hi = bounds(cam, items + ghost)
-    fr = Frame(cam, lo, hi, px_per_mm=9.0)
+    fr = Frame(cam, lo, hi, px_per_mm=5.0)
     img = render(fr, items, ghost, ghost_alpha=0.38)
-    fig, ax = canvas(fr, img, pad=(70, 74, 30, 24))
-    callout(ax, (60.0, 106.0), "Hall-effect: 4 keys on TMAG5253s,\n2 reference sensors, thermistors", (56, 124))
-    callout(ax, (106.0, 106.0), "TMR: the same 4 keys\non a TMR sensor", (112, 124))
-    callout(ax, (158.0, 82.0), "shear: TMAG5170 under\na stock stem (front) and\na centring-stem "
-            "prototype (back)", (196, 92), ha="center")
-    callout(ax, (150.0, 40.0), "haptics: gimbal motor\nand roller, DRV8316,\nMT6701CT encoder", (196, 50))
-    callout(ax, (149.5, 6.0), "capacitive strip", (192, 12))
-    callout(ax, (120.5, 37.0), "coin LRA + DRV2605L", (128, -14))
-    callout(ax, (74.0, 3.0), "coil DOE: 20 generated spirals,\nLDC1614-class converters (U1-U5)", (68, -16))
-    callout(ax, (19.0, 19.0), "KVM (optional, ghost):\nhost-B controller,\nisolator, USB-C B", (-34, 16))
-    callout(ax, (1.0, 94.5), "USB-C", (-22, 104))
-    callout(ax, M.MCU_XY, "MCU: candidate\nAT32F405", (-30, 84))
-    callout(ax, (17.0, 62.0), "power + charging, battery\nconnector (caliper's power sheets)", (-34, 64))
-    callout(ax, (16.0, 47.0), "injection (INJ) and\ncurrent-sense test pads", (-34, 44))
-    callout(ax, (29.5, 105.0), "latency-rig header\n(marker GPIO)", (12, 124))
-    note(ax, -66, -28, "Top view to scale: motherboard about 160 x 110 mm. The keycaps hide the key sensors (see the "
-         "exploded view). Pale and dashed: the optional KVM coupon.", fs=10)
+    fig, ax = canvas(fr, img, pad=(62, 60, 44, 28))
+    callout(ax, (60.0, 106.0), "Hall-effect: 4 keys on\nTMAG5253s, 2 reference\nsensors, thermistors", (58, 126))
+    callout(ax, (106.0, 106.0), "TMR: the same 4 keys\non a TMR sensor", (114, 124))
+    callout(ax, (158.0, 82.0), "shear: TMAG5170 under\na stock stem (front)\nand a centring-stem\n"
+            "prototype (back)", (190, 90))
+    callout(ax, (150.0, 40.0), "haptics: gimbal motor\nand roller, DRV8316,\nMT6701CT encoder\n(candidates)",
+            (190, 50))
+    callout(ax, (149.5, 6.0), "capacitive strip", (190, 12))
+    callout(ax, (120.5, 37.0), "coin LRA + DRV2605L", (130, -14))
+    callout(ax, (74.0, 3.0), "coil DOE: 20 generated spirals,\nLDC1614-class converters (U1-U5)", (62, -16))
+    callout(ax, (19.0, 19.0), "KVM (optional, ghost):\nhost-B controller,\nisolator (if isolated),\nUSB-C B",
+            (-32, 18))
+    callout(ax, (1.0, 94.5), "USB-C", (-24, 104))
+    callout(ax, M.MCU_XY, "MCU: candidate\nAT32F405", (-32, 88))
+    callout(ax, (17.0, 62.0), "power + charging,\nbattery connector\n(caliper's power sheets)", (-32, 66))
+    callout(ax, (16.0, 47.0), "injection (INJ) and\ncurrent-sense\ntest pads", (-32, 44))
+    callout(ax, (29.5, 105.0), "latency-rig header\n(marker GPIO)", (6, 124))
+    note(ax, -60, -28, "Top view to scale: motherboard about 160 x 110 mm. The keycaps hide the key sensors (see "
+         "the exploded\nview). Pale and dashed: the optional KVM coupon.")
     save(fig, "testbed_top.png", "Rev A testbed concept: top view")
 
 
@@ -457,36 +461,41 @@ def fig_latency_rig():
     items = M.motherboard(cps=cps) + hall.items() + M.latency_rig() + M.rig_cables()
     cam = Camera(*RIG_VIEW)
     lo, hi = bounds(cam, items)
-    fr = Frame(cam, lo, hi, px_per_mm=5.8)
+    fr = Frame(cam, lo, hi, px_per_mm=4.5)
     img = render(fr, items)
-    fig, ax = canvas(fr, img, pad=(8, 8, 74, 14))
+    fig, ax = canvas(fr, img, pad=(4, 4, 84, 16))
     paths = M.rig_paths()
     q = lambda p: P(cam, p)                                   # noqa: E731
     u0, u1, v0, v1 = fr.extent()
-    callout(ax, q((-105, 92, 0.9)), "latency rig: host MCU, stimulus\ndriver and DAC (parts not chosen)", (-150, 62))
-    callout(ax, q(paths["ribbon"][30]), "ribbon to the rig header:\nmarker GPIO", (-62, 100))
-    callout(ax, q(paths["usb"][30]), "USB cable: the rig is the USB host and\ntimestamps each HID report", (-106, -26))
-    callout(ax, q(paths["lead"][36]), "probe lead (how the rig reaches\nthe pad is not decided)", (-36, -30))
-    callout(ax, q((8, 47, 0.05)), "injection test pad (INJ) on the\ncoupon's analog lane (sensor ADC node)", (40, -14))
-    callout(ax, q((60, 82, ZT + 18)), "Hall-effect coupon (under test);\nthe other coupons unplugged", (52, 104))
+    # the four lower callouts in one row under the picture, in the order of their anchors, so no leaders cross
+    yl = v0 - 14
+    callout(ax, q((-105, 92, 0.9)), "latency rig: host MCU,\nstimulus driver and DAC\n(parts not chosen)",
+            (-136, yl))
+    callout(ax, q(paths["usb"][30]), "USB cable: the rig is\nthe USB host and time-\nstamps each HID report",
+            (-72, yl))
+    callout(ax, q(paths["lead"][36]), "probe lead (how the\nrig reaches the pad\nis not decided)", (-10, yl))
+    callout(ax, q((8, 47, 0.05)), "injection test pad (INJ)\non the coupon's analog\nlane (sensor ADC node)",
+            (52, yl))
+    callout(ax, q(paths["ribbon"][30]), "ribbon to the rig header:\nmarker GPIO", (-66, 108))
+    callout(ax, q((60, 82, ZT + 18)), "Hall-effect coupon (under\ntest); the other coupons\nunplugged", (34, 114))
     # the measurement path, as a strip of boxes under the picture
     steps = ["rig steps the\ntest pad: t0", "sensor ADC node\non the analog lane", "MCU scan and\nkey decision",
              "HID report\nover USB", "rig (USB host)\ntimestamps it: t1"]
-    xs = np.linspace(u0 + 6, u1 - 6, len(steps) + 1)
-    yb = v0 - 48
-    ax.text((u0 + u1) / 2, yb + 11, "Planned measurement path (concept.md section 4.2)", ha="center", va="bottom",
-            fontsize=11, color=INK, weight="bold")
+    xs = np.linspace(u0 + 2, u1 - 2, len(steps) + 1)
+    yb = v0 - 58
+    ax.text((u0 + u1) / 2, yb + 12, "Planned measurement path (concept.md section 4.2)", ha="center", va="bottom",
+            fontsize=FS + 0.5, color=INK, weight="bold")
     for k, txt in enumerate(steps):
         xa, xb = xs[k] + 5, xs[k + 1] - 5
-        ax.add_patch(FancyBboxPatch((xa, yb - 7), xb - xa, 14, boxstyle="round,pad=0.4,rounding_size=2",
+        ax.add_patch(FancyBboxPatch((xa, yb - 8), xb - xa, 16, boxstyle="round,pad=0.4,rounding_size=2",
                                     fc=(0.96, 0.96, 0.97), ec=(0.55, 0.55, 0.58), lw=0.9, zorder=10))
-        ax.text((xa + xb) / 2, yb, txt, ha="center", va="center", fontsize=10.5, color=INK, zorder=11)
+        ax.text((xa + xb) / 2, yb, txt, ha="center", va="center", fontsize=FS, color=INK, zorder=11)
         if k:
             ax.annotate("", xy=(xa - 0.6, yb), xytext=(xs[k] - 4.4, yb),
                         arrowprops=dict(arrowstyle="-|>", lw=1.3, color=INK), zorder=11)
-    ax.text((u0 + u1) / 2, yb - 11, "Latency = t1 - t0, to be published as p50 and p99 per mode. The marker GPIO "
-            "splits it into capture, decision, queue and transmit. Nothing here is built or measured.",
-            ha="center", va="top", fontsize=10, color=GREY)
+    ax.text((u0 + u1) / 2, yb - 12, "Latency = t1 - t0, to be published as p50 and p99 per mode. The marker GPIO "
+            "splits it into\ncapture, decision, queue and transmit. Nothing here is built or measured.",
+            ha="center", va="top", fontsize=FS_NOTE, color=GREY, linespacing=1.35)
     save(fig, "testbed_latency_rig.png", "Rev A testbed concept: latency rig, motherboard and one coupon")
 
 
@@ -532,9 +541,12 @@ def _draw_coil(ax, coil, centre, lead=M.COIL_LEAD, pts_per_turn=180):
 
 
 def fig_coil_coupon():
-    ppm, dpi = 17.0, 100
+    """The coupon on top (row and column headers beside it), the legend and C3 taken apart layer by layer below it,
+    then the notes: stacked, so the image stays about 1400 px wide and its text readable at the docs width."""
+    import textwrap
+    ppm, dpi = 16.0, 100
     W, D = 72.0, 50.0
-    xl, yl = (-26.0, W + 34.0), (-11.0, D + 8.0)
+    xl, yl = (-11.5, W + 2.0), (-40.0, D + 6.0)
     fig = plt.figure(figsize=((xl[1] - xl[0]) * ppm / dpi, (yl[1] - yl[0]) * ppm / dpi), dpi=dpi)
     ax = fig.add_axes([0, 0, 1, 1])
     ax.set_xlim(*xl)
@@ -555,40 +567,42 @@ def fig_coil_coupon():
             for px, py in CO.MX_PINS:
                 ax.add_patch(Circle((cx + px, cy + py), CO.MX_PIN_HOLE / 2, fc="none", ec=(0.75, 0.75, 0.75),
                                     lw=0.7, ls=(0, (2, 1.5)), zorder=10))
-        ax.text(cx, cy - coil.d_out / 2 - 0.35, coil.label(" · "), ha="center", va="top", fontsize=fs_mm(0.95),
+        # the column gives the trace and the row the layers, so each coil is labelled with its turns only
+        ax.text(cx, cy - coil.d_out / 2 - 0.3, f"{coil.turns:g} turns", ha="center", va="top", fontsize=fs_mm(1.1),
                 color=silk, zorder=12)
-        ax.text(cx, cy, coil.tag, ha="center", va="center", fontsize=fs_mm(0.85), color=(0.72, 0.72, 0.72),
+        ax.text(cx, cy, coil.tag, ha="center", va="center", fontsize=fs_mm(1.0), color=(0.72, 0.72, 0.72),
                 zorder=12)
     # converters and the mezzanine header outline (underneath, dashed)
     for i, yy in enumerate((6.0, 15.0, 24.0, 33.0, 42.0)):
         ax.add_patch(Rectangle((64.0, yy - 2.0), 4.0, 4.0, fc=(0.02, 0.02, 0.02), ec=(0.6, 0.6, 0.6), lw=0.6,
                                zorder=6))
-        ax.text(66.0, yy, f"U{i + 1}", ha="center", va="center", fontsize=fs_mm(0.8), color=silk, zorder=7)
+        ax.text(66.0, yy, f"U{i + 1}", ha="center", va="center", fontsize=fs_mm(1.0), color=silk, zorder=7)
     ax.add_patch(Rectangle((66.0 - 2.54, 30.0 - 12.7), 5.08, 25.4, fc="none", ec=(0.6, 0.6, 0.6), lw=0.7,
                            ls=(0, (3, 2)), zorder=5))
     # row and column headers
     for ri, row in enumerate(CO.ROWS):
         y = M.COIL_ORIGIN[1] + ri * M.COIL_PITCH[1]
-        ax.text(-1.5, y, f"row {'ABCD'[ri]}\n{row['tag']}", ha="right", va="center", fontsize=fs_mm(1.1),
-                color=INK, linespacing=1.25)
+        body = textwrap.fill(row["tag"], width=10, break_on_hyphens=False)
+        ax.text(-1.2, y, f"row {'ABCD'[ri]}\n{body}", ha="right", va="center", fontsize=fs_mm(1.2), color=INK,
+                linespacing=1.2)
     for ci, w in enumerate(CO.TRACES):
         x = M.COIL_ORIGIN[0] + ci * M.COIL_PITCH[0]
-        ax.text(x, D + 1.2, f"trace = space\n{w:g} mm", ha="center", va="bottom", fontsize=fs_mm(1.1), color=INK,
+        ax.text(x, D + 1.0, f"trace = space\n{w:g} mm", ha="center", va="bottom", fontsize=fs_mm(1.2), color=INK,
                 linespacing=1.2)
     # the two coils that carry a stock switch in the 3D renders
     for coil, (cx, cy) in layout:
         if coil.tag in M.COIL_SWITCH_TAGS:
             ax.add_patch(Rectangle((cx - 7.0, cy - 7.0), 14.0, 14.0, fc="none", ec=(0.80, 0.80, 0.80), lw=0.9,
                                    ls=(0, (1.5, 1.5)), zorder=11))
-    # legend on the right
-    lx, ly = W + 3.0, D - 0.5
-    ax.text(lx, ly, "Legend", fontsize=fs_mm(1.2), color=INK, weight="bold", va="top")
+    # legend, under the coupon on the left
+    lx, ly = -10.5, -2.4
+    ax.text(lx, ly, "Legend", fontsize=fs_mm(1.3), color=INK, weight="bold", va="top")
     rows = [("L1, top copper", "layer", 0), ("L2, seen through the board", "layer", 1), ("L3", "layer", 2),
             ("L4", "layer", 3), ("via", "via", None), ("MX centre-post hole", "hole", None),
             ("stock-MX pin positions", "pin", None), ("LDC1614-class converter", "ldc", None),
             ("mezzanine header (underneath)", "hdr", None), ("stock switch in the 3D renders", "sw", None)]
     for k, (txt, kind, li) in enumerate(rows):
-        y = ly - 3.0 - 1.85 * k
+        y = ly - 3.2 - 2.25 * k
         if kind == "layer":
             colr, alpha = LAYER_STYLE[li]
             ax.add_patch(Rectangle((lx, y - 0.45), 3.0, 0.9, fc=colr, alpha=alpha, ec="none"))
@@ -606,14 +620,16 @@ def fig_coil_coupon():
         else:                     # a square, like the switch footprints on the board
             ax.add_patch(Rectangle((lx + 0.75, y - 0.75), 1.5, 1.5, fc="none", ec=(0.45, 0.45, 0.45), lw=0.8,
                                    ls=(0, (1.5, 1.5))))
-        ax.text(lx + 4.0, y, txt, fontsize=fs_mm(0.95), color=INK, va="center")
-    # inset: one 4-layer coil taken apart layer by layer
+        ax.text(lx + 4.0, y, txt, fontsize=fs_mm(1.1), color=INK, va="center")
+    # inset, under the coupon on the right: one 4-layer coil taken apart layer by layer, L1 to L4 left to right
     demo = next((c, xy) for c, xy in layout if c.tag == "C3")[0]
-    k_s, half = 1.75, 6.6
+    k_s, half, gap = 1.75, 6.6, 1.3
+    ix = W + 1.5 - 4 * 2 * half - 3 * gap
     layers, vias = CO.coil_layers(demo, (0.0, 0.0), pts_per_turn=180, end_angle=M.COIL_LEAD_ANGLE)
-    ax.text(lx, 24.6, f"C3 layer by layer ({demo.label(' · ')})", fontsize=fs_mm(1.0), color=INK, weight="bold",
-            va="bottom")
-    centres = [(lx + half, 17.6), (lx + 3 * half + 1.4, 17.6), (lx + half, 3.6), (lx + 3 * half + 1.4, 3.6)]
+    ax.text(ix, ly, f"C3 layer by layer ({demo.label(' · ')})", fontsize=fs_mm(1.2), color=INK, weight="bold",
+            va="top")
+    pcy = ly - 2.2 - half
+    centres = [(ix + half + k * (2 * half + gap), pcy) for k in range(4)]
     for li, (layer, (pcx, pcy)) in enumerate(zip(layers, centres)):
         ax.add_patch(FancyBboxPatch((pcx - half, pcy - half), 2 * half, 2 * half,
                                     boxstyle="round,pad=0,rounding_size=0.8", fc=SUBSTRATE, ec="none", zorder=1))
@@ -629,26 +645,27 @@ def fig_coil_coupon():
         for frac in (0.25, 0.75):          # the current runs in the point order
             i = int(frac * (len(pts) - 14))
             ax.annotate("", xy=pts[i + 12], xytext=pts[i], zorder=7,
-                        arrowprops=dict(arrowstyle="-|>", color="white", lw=1.6, mutation_scale=15))
+                        arrowprops=dict(arrowstyle="-|>", color="white", lw=1.6, mutation_scale=14))
         edge = pcx + half - 0.4
         if li == 0:                        # the current enters at L1's outer end ...
             ax.annotate("", xy=tuple(pts[0]), xytext=(edge, pts[0][1]), zorder=7,
-                        arrowprops=dict(arrowstyle="-|>", color="white", lw=1.6, mutation_scale=13))
+                        arrowprops=dict(arrowstyle="-|>", color="white", lw=1.6, mutation_scale=12))
         if li == len(layers) - 1:          # ... and leaves at the last layer's outer end
             ax.annotate("", xy=(edge, pts[-1][1]), xytext=tuple(pts[-1]), zorder=7,
-                        arrowprops=dict(arrowstyle="-|>", color="white", lw=1.6, mutation_scale=13))
+                        arrowprops=dict(arrowstyle="-|>", color="white", lw=1.6, mutation_scale=12))
         end = " · in" if li == 0 else (" · out" if li == len(layers) - 1 else "")
-        ax.text(pcx - half + 0.45, pcy + half - 0.4, f"L{li + 1}{end}", fontsize=fs_mm(0.85), color=silk, va="top",
+        ax.text(pcx - half + 0.45, pcy + half - 0.4, f"L{li + 1}{end}", fontsize=fs_mm(1.05), color=silk, va="top",
                 zorder=8)
-    ax.text(lx, -3.4, "Mirrored spirals in series, joined by vias (gold). The\narrows follow the current: it turns "
-            "the same way on\nevery layer, so the layers' fields add.", fontsize=fs_mm(0.9), color=GREY, va="top",
-            linespacing=1.3)
-    ax.text(-25.0, -3.0, "Label: turns · trace · layers (trace = space). Generated by coils.py (spiral, coil_layers, "
-            "doe_layout); the parameters are an illustrative spread around a\nstock MX footprint, not checked against "
-            "JLC's rules or the converter's range. Rows A to C fit between the MX centre post and its pins; row D is "
-            "larger,\nfor the slug-stem sites, whose footprint is not designed. Leads leave to +x; the routing to the "
-            "converters is not drawn. Nothing measured.", fontsize=fs_mm(0.95), color=GREY, va="top",
-            linespacing=1.35)
+    ax.text(ix, pcy - half - 0.9, "Mirrored spirals in series, joined by vias (gold). The arrows\nfollow the "
+            "current: it turns the same way on every layer,\nso the layers' fields add.", fontsize=fs_mm(1.1),
+            color=GREY, va="top", linespacing=1.3)
+    foot = ("Under each coil: its turns; each column has one trace (= space), each row one layer count and size. "
+            "Generated by coils.py (spiral, coil_layers, doe_layout); the parameters are an illustrative spread "
+            "around a stock MX footprint, not checked against JLC's rules or the converter's range. Rows A to C fit "
+            "between the MX centre post and its pins; row D is larger, for the slug-stem sites, whose footprint is "
+            "not designed. Leads leave to +x; the routing to the converters is not drawn. Nothing measured.")
+    ax.text(lx, ly - 3.2 - 2.25 * len(rows) - 0.2, textwrap.fill(foot, width=140), fontsize=fs_mm(1.1), color=GREY,
+            va="top", linespacing=1.35)
     path = os.path.join(OUT, "testbed_coil_coupon.png")
     fig.savefig(path, facecolor="white", dpi=dpi)
     plt.close(fig)

@@ -1,0 +1,66 @@
+/* Readability on every page (with index.ts). */
+
+/* Doc images open full size in a dialog. */
+.vp-doc img[data-zoom='on'] {
+  cursor: zoom-in;
+}
+
+.vp-doc img[data-zoom='on']:focus-visible {
+  outline: 2px solid var(--vp-c-brand-1);
+  outline-offset: 2px;
+}
+
+dialog.img-zoom {
+  /* the image at its own size; the dialog scrolls when it is larger than the screen */
+  max-width: calc(100vw - 16px);
+  max-height: calc(100vh - 16px);
+  max-height: calc(100dvh - 16px);
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  background: #fff;
+  cursor: zoom-out;
+}
+
+dialog.img-zoom::backdrop {
+  background: rgba(0, 0, 0, 0.75);
+}
+
+dialog.img-zoom img {
+  display: block;
+  max-width: none;
+  height: auto;
+}
+
+/* the Close button stays in the screen's corner while the image scrolls */
+dialog.img-zoom form {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  margin: 0;
+}
+
+dialog.img-zoom button {
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #fff;
+  background: var(--vp-c-brand-1);
+  cursor: pointer;
+}
+
+/* On a phone, a Mermaid diagram (vitepress-plugin-mermaid renders it into div.mermaid) keeps a readable size and
+   scrolls sideways inside its own box instead of shrinking to the column. index.ts sets --mermaid-min-width per
+   diagram from its own width; 560px is the fallback. */
+@media (max-width: 640px) {
+  .vp-doc .mermaid {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+  }
+
+  .vp-doc .mermaid svg {
+    min-width: var(--mermaid-min-width, 560px);
+  }
+}
