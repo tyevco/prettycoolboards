@@ -1,0 +1,132 @@
+{
+  "board": {
+    "design_settings": {
+      "defaults": {},
+      "diff_pair_dimensions": [],
+      "drc_exclusions": [],
+      "rules": {
+        "min_clearance": 0.1,
+        "min_track_width": 0.1,
+        "min_via_diameter": 0.4,
+        "min_through_hole_diameter": 0.2,
+        "min_copper_edge_clearance": 0.3,
+        "min_hole_clearance": 0.2,
+        "min_resolved_spokes": 1
+      },
+      "track_widths": [],
+      "via_dimensions": [],
+      "rule_severities": {
+        "missing_courtyard": "error",
+        "track_not_centered_on_via": "error",
+        "tuning_profile_track_geometries": "error",
+        "footprint_type_mismatch": "error",
+        "footprint_filters_mismatch": "warning"
+      }
+    }
+  },
+  "boards": [],
+  "libraries": {
+    "pinned_footprint_libs": [],
+    "pinned_symbol_libs": []
+  },
+  "meta": {
+    "filename": "prettycool-keyboard-test-coupon.kicad_pro",
+    "version": 1
+  },
+  "net_settings": {
+    "classes": [
+      {
+        "name": "Default",
+        "track_width": 0.2,
+        "clearance": 0.15,
+        "via_diameter": 0.6,
+        "via_drill": 0.3
+      },
+      {
+        "name": "Rail",
+        "track_width": 0.8,
+        "clearance": 0.2,
+        "via_diameter": 0.8,
+        "via_drill": 0.4
+      },
+      {
+        "name": "Load",
+        "track_width": 0.8,
+        "clearance": 0.2,
+        "via_diameter": 0.8,
+        "via_drill": 0.4
+      }
+    ],
+    "meta": {
+      "version": 0
+    },
+    "netclass_patterns": [
+      {
+        "netclass": "Rail",
+        "pattern": "+3V3"
+      },
+      {
+        "netclass": "Rail",
+        "pattern": "+5V"
+      },
+      {
+        "netclass": "Load",
+        "pattern": "/Calibration and current-limit loads/LOAD0_A"
+      },
+      {
+        "netclass": "Load",
+        "pattern": "/Calibration and current-limit loads/LOAD0_B"
+      },
+      {
+        "netclass": "Load",
+        "pattern": "/Calibration and current-limit loads/LOAD0_D"
+      },
+      {
+        "netclass": "Load",
+        "pattern": "/Calibration and current-limit loads/LOAD1_D"
+      },
+      {
+        "netclass": "Load",
+        "pattern": "/Calibration and current-limit loads/LOAD2_A"
+      },
+      {
+        "netclass": "Load",
+        "pattern": "/Calibration and current-limit loads/LOAD2_B"
+      },
+      {
+        "netclass": "Load",
+        "pattern": "/Calibration and current-limit loads/LOAD2_D"
+      },
+      {
+        "netclass": "Load",
+        "pattern": "/Calibration and current-limit loads/LOAD3_D"
+      }
+    ]
+  },
+  "pcbnew": {
+    "page_layout_descr_file": ""
+  },
+  "sheets": [
+    [
+      "97a1f95b-9102-564f-8ac6-3ddffa62e97e",
+      "Root"
+    ],
+    [
+      "b6463cb5-946c-5322-9057-c033ffd5d159",
+      "Slot header, descriptor EEPROM, mounting"
+    ],
+    [
+      "f356b83b-ad55-548e-93f3-640552e675f9",
+      "Calibration and current-limit loads"
+    ],
+    [
+      "038c8928-d1a4-52ba-bc15-707bb97d15b5",
+      "SPI, G-line, SYNC and INJ loopback; IRQ_N; status LED"
+    ],
+    [
+      "e59cd554-27b6-565e-bffc-a0758c6b6b85",
+      "Ratiometric lane references and test pads"
+    ]
+  ],
+  "text_variables": {}
+}
