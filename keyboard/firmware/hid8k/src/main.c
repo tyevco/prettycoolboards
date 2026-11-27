@@ -18,8 +18,10 @@
 #include <zephyr/sys/printk.h>
 #include <zephyr/sys/util.h>
 
+#if !defined(CONFIG_HID8K_SIM)
 #include <stm32_ll_bus.h>
 #include <stm32_ll_system.h>
+#endif
 
 #include "cdc_console.h"
 #include "hid8k.h"
@@ -219,6 +221,7 @@ static void write_filler(uint32_t bytes, uint32_t *const fill_seq)
  * are written here, before usbd_init(). The LL setters modify only their own bits: TUNER2's
  * bits 31:15 are reserved and must keep their reset value, so never a 32-bit write.
  */
+#if !defined(CONFIG_HID8K_SIM)
 static void phy_tuner2_apply(void)
 {
 	if (!IS_ENABLED(CONFIG_HID8K_PHY_TUNER2)) {
@@ -246,6 +249,16 @@ static void phy_tuner2_report(void)
 	       IS_ENABLED(CONFIG_HID8K_PHY_TUNER2) ? "RM0456 recommended values written"
 						   : "Zephyr default, not written");
 }
+#else
+/* native_sim (sim/): there is no PHY to tune. */
+static void phy_tuner2_apply(void)
+{
+}
+
+static void phy_tuner2_report(void)
+{
+}
+#endif
 
 int main(void)
 {

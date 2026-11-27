@@ -1,0 +1,71 @@
+{
+  "_comment": "Descriptor of the rev A Hall-effect coupon (default slot S1, standard), written from its captured design (keyboard/hardware/design/sheets/coupon_hall.py, DESCRIPTOR_FACTS and the parts notes, 2026-11-27) and its netlist. Not built: the currents are the design's estimates and the scaling is the datasheet's typical sensitivity (placeholder_fields). tests/test_rules.py compares it with DESCRIPTOR_FACTS.",
+  "board": "coupon-hall",
+  "source": "sheets/coupon_hall.py (captured 2026-11-27)",
+  "placeholder_fields": ["rails.+3V3.typ_ma", "rails.+3V3.max_ma", "rails.+3V3.startup_ms", "select.settle_ns",
+                         "lanes.*.offset", "lanes.*.gain"],
+  "notes": [
+    "Lanes: AN0 = U10 TMUX1208 8:1 mux -> U12A OPA2365 follower -> R18 22 ohm (sites SEL 0-7: K1-K4, REF1, REF2, TEMP1, TEMP2); AN1 = K1 (U20) direct -> U12B follower -> R19 22 ohm. R_src 23 ohm: the 22 ohm plus the follower's closed-loop output impedance (< 1 ohm at DC by the design's estimate), rounded up",
+    "AN2 is open as assembled: R26 (0 ohm, DNP) would put the mux output on it unbuffered (the SPEC §11 #21 experiment); fitting R26 needs a new descriptor (AN2 in uses, R_src = TMAG5253 1.27 ohm + TMUX1208 RON 9 typ / 15 max, CLoad 1 nF). AN3 is not connected",
+    "CLoad 1000 pF: the OPA2365 is 'stable with a pure capacitive load up to approximately 1 nF' at unity gain (SBOS365G §8.3.3, the design's reading); the 22 ohm isolates the lane's 1 nF",
+    "Scaling: TMAG5253BA4 7.5 mV/mT at 3.3 V, VQ = VCC/2 (sheets/coupon_hall.py from SBASAI5E): B = (ratio - 0.5) x 3300 / 7.5 = (ratio - 0.5) x 440 mT, a typical figure, not calibrated. Steps 6 and 7 of AN0 are the thermistor taps (ext.sites), which the driver converts itself",
+    "+3V3: the design's estimate is 25 mA typ all-on (6 x 2.6 mA sensors + 9.2 mA buffers + 0.33 mA thermistors), 41 mA max; max_ma 45 adds the descriptor EEPROM's read current and rounds up. +5V is not used",
+    "Bulk on +3V3 at the header: C1 10 uF + ten 100 nF = 11 uF (the netlist)",
+    "G-lines: G0-G2 = SEL[2:0] (mux A0-A2 and latch S0-S2), G3 = SEL_EN (mux EN and latch D), G4 = latch G (active low), G5 = latch CLR (active low); every G-line has a 100 k pull-down on the coupon. Modes in sheets/coupon_hall.py DESCRIPTOR_FACTS['modes']. G4/G5 are slow expander lines on S1-S4: fine, they only set the mode",
+    "needs lanes_14bit: AN1 is a 14-bit key lane; on S5 it would land on the 12-bit ADC4 (SPEC §4.4)",
+    "devices[3] is the SN74HC259 enable latch (U11): format 1.0 has no part ID for it, so 'other' on bus gpio"
+  ],
+  "type": "hall",
+  "rev": "A",
+  "size": "standard",
+  "default_slot": 1,
+  "needs": ["lanes_14bit"],
+  "serial": 0,
+  "date": "2026-11-27",
+  "git": "auto",
+  "uses": ["+3V3", "AN0", "AN1", "SCL", "SDA", "G0", "G1", "G2", "G3", "G4", "G5"],
+  "spi": {"max_khz": 0},
+  "i2c": {"max_khz": 400},
+  "select": {"scheme": "binary", "steps": 8, "settle_ns": 1000},
+  "rails": {
+    "+3V3": {"typ_ma": 25, "max_ma": 45, "bulk_uf": 11.0, "startup_ms": 1},
+    "+5V": {"typ_ma": 0, "max_ma": 0, "bulk_uf": 0, "startup_ms": 0}
+  },
+  "lanes": {
+    "AN0": {"kind": "hall", "unit": "mT", "flags": ["ratiometric", "multiplexed", "buffered", "bipolar"], "sites": 8,
+            "r_src_ohm": 23, "cload_max_pf": 1000, "offset": 0.5, "gain": 440.0,
+            "note": "mux -> OPA2365 follower -> 22 ohm"},
+    "AN1": {"kind": "hall", "unit": "mT", "flags": ["ratiometric", "buffered", "bipolar"], "sites": 1,
+            "r_src_ohm": 23, "cload_max_pf": 1000, "offset": 0.5, "gain": 440.0,
+            "note": "K1 direct -> OPA2365 follower -> 22 ohm"}
+  },
+  "glines": {
+    "G0": {"role": "sel", "arg": 0, "flags": []},
+    "G1": {"role": "sel", "arg": 1, "flags": []},
+    "G2": {"role": "sel", "arg": 2, "flags": []},
+    "G3": {"role": "sel_en", "arg": 0, "flags": []},
+    "G4": {"role": "enable", "arg": 3, "flags": ["active_low"], "note": "latch G: low = transparent"},
+    "G5": {"role": "enable", "arg": 3, "flags": ["active_low"], "note": "latch CLR: low = clear / demultiplexer"}
+  },
+  "cs": {},
+  "devices": [
+    {"part": "tmag5253", "bus": "analog", "addr": ["AN0", "AN1"], "count": 6, "irq": "none", "flags": [],
+     "note": "U20-U25: K1-K4, REF1, REF2; K1 also on AN1"},
+    {"part": "ntc", "bus": "analog", "addr": ["AN0"], "count": 2, "irq": "none", "flags": ["shares_lane"],
+     "note": "TH10, TH11 behind 10 k 0.1 % from +3V3"},
+    {"part": "analog_mux", "bus": "analog", "addr": ["AN0"], "count": 1, "irq": "none", "flags": [],
+     "note": "U10 TMUX1208"},
+    {"part": "other", "bus": "gpio", "addr": 0, "count": 1, "irq": "none", "flags": [],
+     "note": "U11 SN74HC259 enable latch on G0-G5"}
+  ],
+  "ext": {"format": "site_map", "flags": [], "sites": [
+    ["key", "key", "empty", "empty"],
+    ["key", "empty", "empty", "empty"],
+    ["key", "empty", "empty", "empty"],
+    ["key", "empty", "empty", "empty"],
+    ["reference", "empty", "empty", "empty"],
+    ["reference", "empty", "empty", "empty"],
+    ["thermistor", "empty", "empty", "empty"],
+    ["thermistor", "empty", "empty", "empty"]
+  ]}
+}

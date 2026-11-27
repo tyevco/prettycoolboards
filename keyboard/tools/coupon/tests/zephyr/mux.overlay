@@ -1,0 +1,45 @@
+/* The testbed's slot mux as SPEC §4.5 / §8.4 describe it: a TCA9548A at 0x70 on its own I2C bus, channels 0-4 =
+ * S1-S5, and on each channel a descriptor EEPROM at 0x50. Nothing answers on this emulated bus (there is no TCA9548A
+ * emulator): the test checks what the drivers do at build time and at init, and how the devices are named. S1's
+ * EEPROM keeps the default name; S2-S5's carry a `label`. */
+/ {
+	i2c_slot: i2c@200 {
+		compatible = "zephyr,i2c-emul-controller";
+		clock-frequency = <I2C_BITRATE_FAST>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		#forward-cells = <1>;
+		reg = <0x200 4>;
+		status = "okay";
+
+		slot_mux: mux@70 {
+			compatible = "ti,tca9548a";
+			reg = <0x70>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+			i2c-mux-idle-disconnect;
+
+#define COUPON_SLOT(ch, lbl)						\
+			ch_##ch: ch@ch {					\
+				compatible = "ti,tca9548a-channel";		\
+				reg = <ch>;					\
+				#address-cells = <1>;				\
+				#size-cells = <0>;				\
+				ee_s##ch: eeprom@50 {				\
+					compatible = "st,m24c02", "atmel,at24";	\
+					reg = <0x50>;				\
+					size = <256>;				\
+					pagesize = <16>;			\
+					address-width = <8>;			\
+					timeout = <5>;				\
+					lbl					\
+				};						\
+			};
+			COUPON_SLOT(0, )
+			COUPON_SLOT(1, label = "coupon-s2";)
+			COUPON_SLOT(2, label = "coupon-s3";)
+			COUPON_SLOT(3, label = "coupon-s4";)
+			COUPON_SLOT(4, label = "coupon-s5";)
+		};
+	};
+};

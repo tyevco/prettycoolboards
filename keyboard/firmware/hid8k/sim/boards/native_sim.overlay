@@ -1,0 +1,8 @@
+/*
+ * hid8k-sim on 32-bit native_sim (the default native_sim target, built with gcc -m32: the host
+ * needs gcc-multilib): the same virtual controllers, button and USB nodes as the 64-bit target.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#include "native_sim_native_64.overlay"

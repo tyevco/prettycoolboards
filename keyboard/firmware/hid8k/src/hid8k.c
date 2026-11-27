@@ -18,7 +18,9 @@
 #include <errno.h>
 #include <string.h>
 
+#if !defined(CONFIG_HID8K_SIM)
 #include <soc.h>
+#endif
 #include <zephyr/device.h>
 #include <zephyr/devicetree.h>
 #include <zephyr/input/input.h>
@@ -55,9 +57,14 @@ BUILD_ASSERT(!IS_ENABLED(CONFIG_SMP), "the threading argument above assumes one 
 BUILD_ASSERT(CONFIG_SYSTEM_WORKQUEUE_PRIORITY < 0,
 	     "the refill kick must run on a cooperative work queue, like the usbd thread");
 
+#if defined(CONFIG_HID8K_SIM)
+/* native_sim (sim/): Zephyr's cycle counter, k_cycle_get_32(), stands in for the DWT. */
+#define CPU_HZ CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC
+#else
 /* The cycle counter runs at HCLK. */
 #define RCC_NODE DT_NODELABEL(rcc)
 #define CPU_HZ   (DT_PROP(RCC_NODE, clock_frequency) / DT_PROP(RCC_NODE, ahb_prescaler))
+#endif
 
 /* The button that sends the keyboard report: the board's sw0 (the Nucleo's blue USER button). */
 #define BUTTON_CODE DT_PROP(DT_ALIAS(sw0), zephyr_code)
@@ -154,7 +161,11 @@ static uint32_t bucket_cycles;
 
 static inline uint32_t cycles_now(void)
 {
+#if defined(CONFIG_HID8K_SIM)
+	return k_cycle_get_32();
+#else
 	return DWT->CYCCNT;
+#endif
 }
 
 static inline uint16_t frame_number(void)
@@ -598,8 +609,10 @@ uint32_t hid8k_cpu_hz(void)
 
 void hid8k_cycle_counter_keepalive(void)
 {
+#if !defined(CONFIG_HID8K_SIM)
 	DCB->DEMCR |= DCB_DEMCR_TRCENA_Msk;
 	DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+#endif
 }
 
 void hid8k_set_cdc_heavy(const bool heavy)
@@ -635,6 +648,7 @@ int hid8k_init(struct usbd_context *const uds_ctx)
 {
 	int ret;
 
+#if !defined(CONFIG_HID8K_SIM)
 	/* The DWT cycle counter: the timestamps in every stats report. */
 	DCB->DEMCR |= DCB_DEMCR_TRCENA_Msk;
 	if ((DWT->CTRL & DWT_CTRL_NOCYCCNT_Msk) != 0U) {
@@ -643,6 +657,7 @@ int hid8k_init(struct usbd_context *const uds_ctx)
 	}
 	DWT->CYCCNT = 0U;
 	DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+#endif
 
 	late_cycles = (uint32_t)(((uint64_t)CPU_HZ * HID8K_LATE_US_X10) / 10000000U);
 	bucket_cycles = (uint32_t)(((uint64_t)CPU_HZ * HID8K_HIST_BUCKET_US_X10) / 10000000U);

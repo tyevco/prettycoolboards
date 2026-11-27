@@ -1,0 +1,99 @@
+# SPDX-License-Identifier: Apache-2.0
+# Hand-written binding for the generated testbed node of kbd_testbed_a.dts (SPEC §3, §4.3, §7.3, §8.4).
+
+description: |
+  The motherboard-level signals and limits of the PrettyCool Keyboard rev A testbed (SPEC §3, §4.3, §7.3): the
+  interrupt and status lines on U_EXP2, the KVM rail and reset, the frame tick and the latency-rig lines, the
+  board-level monitors, and the power budget's constants. The board does not exist yet.
+
+compatible: "prettycool,kbd-testbed"
+
+properties:
+  exp-int-gpios:
+    type: phandle-array
+    required: true
+    description: EXP_INT_N, U_EXP2's interrupt output on the MCU (PC13).
+  slot-fault-gpios:
+    type: phandle-array
+    required: true
+    description: SLOT_FAULT_N, every TPS2553 FAULT wired together (U_EXP2).
+  pm-alert-gpios:
+    type: phandle-array
+    required: true
+    description: PM_ALERT_N, every INA226 ALERT wired together (U_EXP2).
+  vsys-pg-gpios:
+    type: phandle-array
+    required: true
+    description: VSYS_PG, the input breaker's power-good (U_EXP2).
+  s5-pg-gpios:
+    type: phandle-array
+    required: true
+    description: S5_PG, the S5 5 V breaker's power-good (U_EXP2).
+  usbc-int-gpios:
+    type: phandle-array
+    required: true
+    description: USBC_INT_N, U_CC's interrupt (U_EXP2 P14; no MCU pin).
+  kvm-present-gpios:
+    type: phandle-array
+    required: true
+  mux-rst-gpios:
+    type: phandle-array
+    required: true
+    description: MUX_RST_N (U_EXP2 P10), also the mux node's reset-gpios.
+  kvm-rst-gpios:
+    type: phandle-array
+    required: true
+  en-5v-kvm-gpios:
+    type: phandle-array
+    required: true
+  slot-sync-gpios:
+    type: phandle-array
+    required: true
+    description: SLOT_SYNC (PA15) as a GPIO, while TIM2 does not drive it.
+  rig-mark-gpios:
+    type: phandle-array
+    required: true
+  rig-trig-gpios:
+    type: phandle-array
+    required: true
+  ina226-vsys:
+    type: phandle
+    required: true
+  ina226-mcu:
+    type: phandle
+    required: true
+  ina226-usb:
+    type: phandle
+    required: true
+  typec:
+    type: phandle
+    required: true
+  slot-mux:
+    type: phandle
+    required: true
+  kvm-i2c:
+    type: phandle
+    required: true
+  slot-ldo-milliamps:
+    type: int
+    required: true
+    description: The slot LDO's total budget for the five 3.3 V slot rails (SPEC §3.2).
+  base-load-milliamps:
+    type: int
+    required: true
+    description: VSYS base load with no slot powered (SPEC §3.2, an estimate).
+  vsys-budget-max-milliamps:
+    type: int
+    required: true
+  vsys-budget-unconfigured-milliamps:
+    type: int
+    required: true
+  vsys-trip-milliamps:
+    type: array
+    required: true
+  kvm-trip-milliamps:
+    type: array
+    required: true
+  kvm-rule-milliamps:
+    type: int
+    required: true

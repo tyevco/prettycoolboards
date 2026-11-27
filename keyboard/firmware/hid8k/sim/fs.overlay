@@ -1,0 +1,13 @@
+/*
+ * hid8k-sim, full-speed variant: the virtual device controller limited to full speed, which is
+ * how the firmware sees a full-speed-only port, hub or cable at the bench. Use with
+ * -DEXTRA_DTC_OVERLAY_FILE=fs.overlay. The firmware then builds no high-speed configuration,
+ * streams at 1 ms, and must say so: "fs" on its stats line, the high-speed flag clear in every
+ * report, and the host tool's verdict FAIL with "FULL speed".
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+&zephyr_udc0 {
+	maximum-speed = "full-speed";
+};

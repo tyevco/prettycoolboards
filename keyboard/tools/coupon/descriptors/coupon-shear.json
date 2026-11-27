@@ -1,0 +1,44 @@
+{
+  "_comment": "PLACEHOLDER descriptor of the rev A shear coupon (default slot S3). The board is not designed: these values follow SPEC §4.8's plan and are to be replaced from its captured design. Images made from this file carry the placeholder flag.",
+  "board": "coupon-shear",
+  "source": "SPEC §4.8 (plan only)",
+  "placeholder": true,
+  "placeholder_fields": ["rails", "spi.max_khz", "devices[*].spi_mode", "devices[*].count"],
+  "notes": [
+    "SPEC §4.8: TMAG5170s under a stock stem and under a centring-stem prototype, on CS0_N and CS1_N, G0-G1 as extra chip selects, ALERT outputs wired-OR on IRQ_N; lanes spare",
+    "the TMAG5170's SPI clock limit and mode were not read (SPEC §4.8: 'their SPI clock limit from the datasheet'): spi.max_khz and spi_mode are placeholders",
+    "rails.+3V3: four TMAG5170 in continuous conversion, a few mA each (not read): placeholder"
+  ],
+  "type": "shear",
+  "rev": "A",
+  "size": "standard",
+  "default_slot": 3,
+  "needs": [],
+  "serial": 0,
+  "date": "2026-11-27",
+  "git": "auto",
+  "uses": ["+3V3", "SCK", "MISO", "MOSI", "CS0_N", "CS1_N", "SCL", "SDA", "IRQ_N", "G0", "G1"],
+  "spi": {"max_khz": 1000},
+  "i2c": {"max_khz": 400},
+  "select": {"scheme": "chip_select", "steps": 0, "settle_ns": 0},
+  "rails": {
+    "+3V3": {"typ_ma": 15, "max_ma": 40, "bulk_uf": 10.0, "startup_ms": 1},
+    "+5V": {"typ_ma": 0, "max_ma": 0, "bulk_uf": 0, "startup_ms": 0}
+  },
+  "lanes": {},
+  "glines": {
+    "G0": {"role": "cs", "arg": 2, "flags": ["active_low"], "note": "selects devices[2]"},
+    "G1": {"role": "cs", "arg": 3, "flags": ["active_low"], "note": "selects devices[3]"}
+  },
+  "cs": {
+    "CS0_N": {"role": "spi_cs", "device": 0, "flags": []},
+    "CS1_N": {"role": "spi_cs", "device": 1, "flags": []}
+  },
+  "devices": [
+    {"part": "tmag5170", "bus": "spi", "addr": "CS0_N", "count": 1, "irq": "irq_n", "flags": [], "spi_mode": 0, "note": "under a stock stem"},
+    {"part": "tmag5170", "bus": "spi", "addr": "CS1_N", "count": 1, "irq": "irq_n", "flags": [], "spi_mode": 0, "note": "under the centring-stem prototype"},
+    {"part": "tmag5170", "bus": "spi", "addr": "G0", "count": 1, "irq": "irq_n", "flags": [], "spi_mode": 0},
+    {"part": "tmag5170", "bus": "spi", "addr": "G1", "count": 1, "irq": "irq_n", "flags": [], "spi_mode": 0}
+  ],
+  "ext": {"format": "none"}
+}

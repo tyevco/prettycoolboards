@@ -3,6 +3,17 @@
 
 menu "hid8k: 8 kHz HID proof"
 
+config HID8K_SIM
+	bool "Build for the native_sim USB simulation (sim/)"
+	depends on ARCH_POSIX
+	help
+	  Set only by sim/prj.conf, never for the board. Replaces the three
+	  STM32-only pieces (the DWT cycle counter, the OTG_HS frame number and
+	  the HS PHY tuning) with Zephyr's cycle counter, so that the rest of
+	  the firmware (descriptors, usbd_hid setup, pacing, report layout, CDC
+	  console, stats thread) runs unchanged against Zephyr's virtual USB
+	  host controller. The board build is not affected.
+
 config HID8K_USB_VID
 	hex "USB vendor ID"
 	default 0x1209
@@ -88,6 +99,7 @@ config HID8K_CDC_CHUNK
 
 config HID8K_FRAME_NUMBER
 	bool "Read the (micro)frame number from the OTG_HS register"
+	depends on !HID8K_SIM
 	help
 	  Zephyr's USB device stack does not expose the SOF or (micro)frame
 	  number: the SOF event carries none, and hid_device_ops.sof has no
@@ -99,6 +111,7 @@ config HID8K_FRAME_NUMBER
 
 config HID8K_PHY_TUNER2
 	bool "Write the HS PHY's recommended TUNER2 values before the PHY is enabled"
+	depends on !HID8K_SIM
 	help
 	  RM0456 Rev 7 section 15.2.3 sets SYSCFG_OTGHSPHYTUNER2 to
 	  COMPDISTUNE = 010 (disconnect threshold +5.9 %) and SQRXTUNE = 000

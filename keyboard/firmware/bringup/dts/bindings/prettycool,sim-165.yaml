@@ -1,0 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
+description: Simulated board only (sim/emul_sim165.c) - the test coupon's SN74LV165A loopback on SPI2.
+compatible: "prettycool,sim-165"
+include: spi-device.yaml

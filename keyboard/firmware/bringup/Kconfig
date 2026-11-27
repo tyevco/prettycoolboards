@@ -1,0 +1,61 @@
+# bringup: options. SPDX-License-Identifier: Apache-2.0
+
+menu "Testbed bring-up"
+
+config BRINGUP_BENCH_SUPPLY
+	bool "Bench-supply mode (tb budget bench)"
+	help
+	  Lets the operator declare a current-limited bench supply on J1 with no USB host (SPEC §10 step 5),
+	  which replaces "configured" and U_CC's reading in the VSYS budget, capped at its 2.8 A ceiling.
+	  SPEC §3.5 has no such mode (the report recommends adding one). Off by default: the default build
+	  follows SPEC strictly and powers no slot until a host has configured the device.
+
+config BRINGUP_USB_VID
+	hex "USB vendor ID"
+	default 0x1209
+	help
+	  0x1209:0x0001 is the pid.codes test PID: for private testing only, not unique, never for a device
+	  that is sold or shipped (as in hid8k). Bench use only.
+
+config BRINGUP_USB_PID
+	hex "USB product ID"
+	default 0x0001
+
+config BRINGUP_MON_PERIOD_MS
+	int "Board service poll period (ms)"
+	default 100
+	range 10 2000
+	help
+	  How often the board service reads U_EXP2 and the monitors of the enabled rails, besides waking on
+	  EXP_INT_N. The PCA95XX driver warns it cannot see short pulses, so the poll is the backstop (SPEC §8.4).
+
+config BRINGUP_SETTLE_MS
+	int "Rail settling time before checks (ms)"
+	default 20
+	help
+	  After an enable: the TPS2553's turn-on time is 3 ms max and its FAULT deglitch 5-10 ms (SLVS841E);
+	  20 ms covers both with margin. Faults on a rail younger than this are not attributed to sagging.
+
+config BRINGUP_EVENT_RING
+	int "Event ring entries"
+	default 64
+
+config BRINGUP_USB
+	bool "USB device with the CDC ACM shell"
+	default y
+	help
+	  Off in the simulated build (native_sim), where the sim commands inject the USB events instead.
+
+config BRINGUP_SIM
+	bool "Simulated board: register models of the parts (native_sim)"
+	depends on ARCH_POSIX
+	select EMUL
+	help
+	  Runs this firmware against models of the TCA9535s, the INA226s, the TCA9548A, U_CC, the descriptor
+	  EEPROMs and the test coupon (sim/), on native_sim's emulated I2C, SPI, ADC and GPIO controllers, with
+	  the devicetree that gen_board.py generates from the same nets.py. It tests the firmware's logic and
+	  its protocol, not the hardware.
+
+endmenu
+
+source "Kconfig.zephyr"

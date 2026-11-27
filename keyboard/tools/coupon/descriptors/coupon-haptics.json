@@ -1,0 +1,68 @@
+{
+  "_comment": "Descriptor of the rev A haptics coupon (slot S5 only, wide), written from its captured design (keyboard/hardware/design/sheets/coupon_haptics.py, DESCRIPTOR_FACTS and the parts notes, 2026-11-27) and its netlist. Not built: the currents are the design's estimates (placeholder_fields). tests/test_rules.py compares it with DESCRIPTOR_FACTS.",
+  "board": "coupon-haptics",
+  "source": "sheets/coupon_haptics.py (captured 2026-11-27)",
+  "placeholder_fields": ["rails.+3V3.typ_ma", "rails.+3V3.max_ma", "rails.+5V.typ_ma", "rails.*.startup_ms",
+                         "lanes.AN0.offset", "lanes.AN0.gain"],
+  "notes": [
+    "S5 only: G0-G5 on TIM1 (INHA-INHC on CH1-CH3, INLA-INLC on CH1N-CH3N, held high as enables in 3x PWM), IRQ_N = DRV8316 nFAULT on TIM1_BKIN, the 2 A 5 V rail, AN1-AN3 on ADC4 (SPEC §2, §4.4)",
+    "AN0 = MT6701 OUT (analog angle, ratiometric to VDD = +3V3) through R17 100 ohm: R_src 130 ohm max (100 + R_OUT 15-30 ohm), C_L <= 1 nF (MT6701 Rev. 1.9 §5, the design's reading). Angle scaling 0-360 deg over the full output range is an assumption (placeholder_fields)",
+    "AN1-AN3 = DRV8316 SOA/SOB/SOC through R12-R14 330 ohm (SLVSF16B §9.2.1.1.6): R_src 330 ohm. Declared in volts at the pin (gain 3.3 V per full scale, VDDA nominal), not amps: SOx = AVDD/2 + G x I with G set over SPI (CSA_GAIN) and AVDD the DRV8316's own LDO, so the coupon driver converts; not ratiometric to the slot's +3V3. CLoad: 'supports only capacitive load at output' with no value stated (§8.3.11): 0",
+    "+3V3: about 13 mA idle, about 160 mA peak with the LRA (the design's estimates: MT6701 14 mA max, the LRA's 3.3 V / 24 ohm = 0.14 A peak through the DRV2605L). +5V: DRV8316 4-6 mA awake and idle plus the motor; max_ma is S5's 2 A rule; typ_ma 300 is a guess for a 5-15 ohm gimbal motor",
+    "Bulk: +3V3 36 uF and +5V 284 uF by the design (C19 22 uF sits behind the buck's 22 ohm, so the header sum is 262 uF), within S5's 470 uF rule",
+    "SPI: DRV8316 mode 1, SCLK period >= 100 ns (10 MHz); MT6701 SSI mode 1, CLK period >= 64 ns: spi.max_khz 10000 is the lower. Both reach MISO through SN74LVC1G125 buffers enabled by their chip selects (SPEC §4.9)",
+    "I2C on the coupon's channel: DRV2605L 0x5A (enable it through the expander before any register write), CAP1206 0x28 (polled), TCA9534 0x20 (U16). The TCA9534 is an 8-bit expander with a register map unlike the TCA9535's: format 1.0 has no part ID for it, so 'other'",
+    "Power +3V3 first, then +5V: nFAULT must be pulled above 2.2 V when the DRV8316 powers up (sheets/coupon_haptics.py)"
+  ],
+  "type": "haptics",
+  "rev": "A",
+  "size": "wide",
+  "default_slot": 5,
+  "needs": ["pwm_g0_g3", "tim1", "high_current_5v", "fast_g4_g5", "bkin_on_irq"],
+  "serial": 0,
+  "date": "2026-11-27",
+  "git": "auto",
+  "uses": ["+3V3", "+5V", "AN0", "AN1", "AN2", "AN3", "SCK", "MISO", "MOSI", "CS0_N", "CS1_N", "SCL", "SDA",
+           "IRQ_N", "G0", "G1", "G2", "G3", "G4", "G5"],
+  "spi": {"max_khz": 10000},
+  "i2c": {"max_khz": 400},
+  "select": {"scheme": "none", "steps": 0, "settle_ns": 0},
+  "rails": {
+    "+3V3": {"typ_ma": 13, "max_ma": 160, "bulk_uf": 36.0, "startup_ms": 20},
+    "+5V": {"typ_ma": 300, "max_ma": 2000, "bulk_uf": 284.0, "startup_ms": 2}
+  },
+  "lanes": {
+    "AN0": {"kind": "angle", "unit": "deg", "flags": ["ratiometric"], "sites": 1, "r_src_ohm": 130,
+            "cload_max_pf": 1000, "offset": 0.0, "gain": 360.0, "note": "MT6701 OUT -> R17 100 ohm"},
+    "AN1": {"kind": "current", "unit": "V", "flags": ["bipolar", "adc4_ok"], "sites": 1, "r_src_ohm": 330,
+            "cload_max_pf": 0, "offset": 0.0, "gain": 3.3, "note": "DRV8316 SOA -> R12 330 ohm"},
+    "AN2": {"kind": "current", "unit": "V", "flags": ["bipolar", "adc4_ok"], "sites": 1, "r_src_ohm": 330,
+            "cload_max_pf": 0, "offset": 0.0, "gain": 3.3, "note": "DRV8316 SOB -> R13 330 ohm"},
+    "AN3": {"kind": "current", "unit": "V", "flags": ["bipolar", "adc4_ok"], "sites": 1, "r_src_ohm": 330,
+            "cload_max_pf": 0, "offset": 0.0, "gain": 3.3, "note": "DRV8316 SOC -> R14 330 ohm"}
+  },
+  "glines": {
+    "G0": {"role": "pwm_high", "arg": 0, "flags": ["pwm", "fast"], "note": "INHA, TIM1_CH1"},
+    "G1": {"role": "pwm_high", "arg": 1, "flags": ["pwm", "fast"], "note": "INHB, TIM1_CH2"},
+    "G2": {"role": "pwm_high", "arg": 2, "flags": ["pwm", "fast"], "note": "INHC, TIM1_CH3"},
+    "G3": {"role": "pwm_low", "arg": 0, "flags": ["pwm", "fast"], "note": "INLA, TIM1_CH1N (an enable in 3x PWM)"},
+    "G4": {"role": "pwm_low", "arg": 1, "flags": ["pwm", "fast"], "note": "INLB, TIM1_CH2N"},
+    "G5": {"role": "pwm_low", "arg": 2, "flags": ["pwm", "fast"], "note": "INLC, TIM1_CH3N"}
+  },
+  "cs": {
+    "CS0_N": {"role": "spi_cs", "device": 0, "flags": []},
+    "CS1_N": {"role": "spi_cs", "device": 1, "flags": []}
+  },
+  "devices": [
+    {"part": "drv8316", "bus": "spi", "addr": "CS0_N", "count": 1, "irq": "bkin", "flags": [], "spi_mode": 1,
+     "note": "U10 DRV8316RRGFR"},
+    {"part": "mt6701", "bus": "spi", "addr": "CS1_N", "count": 1, "irq": "none", "flags": [], "spi_mode": 1,
+     "note": "U11 MT6701CT, SSI"},
+    {"part": "drv2605l", "bus": "i2c", "addr": "0x5A", "count": 1, "irq": "none", "flags": [], "note": "U14"},
+    {"part": "touch_controller", "bus": "i2c", "addr": "0x28", "count": 1, "irq": "none", "flags": ["polled"],
+     "note": "U15 CAP1206"},
+    {"part": "other", "bus": "i2c", "addr": "0x20", "count": 1, "irq": "none", "flags": [],
+     "note": "U16 TCA9534 (8-bit; not the TCA9535)"}
+  ],
+  "ext": {"format": "none"}
+}

@@ -1,0 +1,7 @@
+tests:
+  prettycool.lib:
+    tags: prettycool
+    platform_allow:
+      - native_sim/native/64
+    integration_platforms:
+      - native_sim/native/64

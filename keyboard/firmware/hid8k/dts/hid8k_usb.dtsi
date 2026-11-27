@@ -1,0 +1,27 @@
+/*
+ * hid8k: the two USB functions, shared by the board overlay (boards/nucleo_u5a5zj_q.overlay) and
+ * the native_sim simulation (sim/boards/), so that the simulation tests the same HID node: the
+ * bInterval and wMaxPacketSize under test come from here. Include it after zephyr_udc0 is defined.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/ {
+	hid8k_hid: hid8k_hid {
+		compatible = "zephyr,hid-device";
+		label = "hid8k keyboard and stats";
+		/* No boot protocol: report IDs, and one interface for both collections. */
+		protocol-code = "none";
+		/* 64 bytes keeps wMaxPacketSize 64 and the simple interface (no alternate). */
+		in-report-size = <64>;
+		/* USB_HS_INT_EP_INTERVAL(125) = 1: one IN transaction per 125 us microframe. */
+		in-polling-period-us = <125>;
+	};
+};
+
+&zephyr_udc0 {
+	cdc_acm_uart0: cdc_acm_uart0 {
+		compatible = "zephyr,cdc-acm-uart";
+		label = "hid8k console";
+	};
+};

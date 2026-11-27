@@ -1,0 +1,24 @@
+# SPDX-License-Identifier: Apache-2.0
+# Hand-written binding for U_CC (SPEC §3.8, §8.4). Zephyr v4.5.0 has no driver or binding for the TUSB320.
+
+description: |
+  TI TUSB320LAI USB Type-C detect, sink only (PORT tied low), read over I2C for the source's current
+  advertisement (SLLSEQ8D). The firmware only reads it and clears INTERRUPT_STATUS; it never writes
+  DISABLE_TERM, MODE_SELECT, I2C_SOFT_RESET or DISABLE_RD_RP (SPEC §8.4).
+
+compatible: "prettycool,tusb320"
+
+include: i2c-device.yaml
+
+properties:
+  int-gpios:
+    type: phandle-array
+    description: INT_N (open drain), here through an I/O expander input.
+  i2c-ready-ms:
+    type: int
+    required: true
+    description: t_I2C_EN max, VDD up to I2C available (SLLSEQ8D §6.7).
+  decide-ms:
+    type: int
+    required: true
+    description: How long the firmware retries before it decides there is no usable U_CC (SPEC §8.4).

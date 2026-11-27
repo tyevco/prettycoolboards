@@ -1,0 +1,1 @@
+prettycool	PrettyCool Boards (this repository; not a registered Zephyr vendor prefix)

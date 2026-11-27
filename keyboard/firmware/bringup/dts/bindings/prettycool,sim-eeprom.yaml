@@ -1,0 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
+description: Simulated board only (sim/emul_eeprom.c) - every coupon's descriptor EEPROM behind the slot mux.
+compatible: "prettycool,sim-eeprom"
+include: i2c-device.yaml

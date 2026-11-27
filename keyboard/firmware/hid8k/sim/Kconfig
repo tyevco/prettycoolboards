@@ -1,0 +1,37 @@
+# hid8k-sim: the simulation's own options. The firmware's options follow (../Kconfig).
+# SPDX-License-Identifier: Apache-2.0
+
+menu "hid8k simulation (native_sim)"
+
+config HID8K_SIM_UHC_HS_FIX
+	bool "Build the simulation's copy of the virtual host controller (125 us microframes)"
+	help
+	  Zephyr v4.5.0's virtual host controller starts its SOF timer at
+	  125 us when a high-speed device connects, but every bus reset,
+	  resume and SOF enable restarts it at 1 ms, and the host stack resets
+	  the bus as the first step of enumeration. So with the stock driver a
+	  high-speed device is polled once per 1 ms frame. With this option the
+	  simulation builds drivers/uhc_virtual_hs.c instead (set
+	  CONFIG_UHC_VIRTUAL=n with it: hs_fix.conf does both), which keeps the
+	  period the device's speed calls for.
+
+config HID8K_SIM_STREAM_S
+	int "Seconds of undisturbed stream to check and capture"
+	default 3
+	help
+	  The run-time option --hid8k_stream_s overrides it.
+
+config HID8K_SIM_HOST_XFERS
+	int "Interrupt IN transfers the host keeps queued on the HID endpoint"
+	range 1 2
+	default 1
+	help
+	  1, like Linux usbhid's single interrupt URB. 2 shows a limitation of
+	  the virtual host controller: it schedules one transfer per endpoint
+	  per frame and only advances the start frame of the one it schedules,
+	  so a second transfer queued on the same endpoint misses its start
+	  frame and waits until the 16-bit frame counter comes round again.
+
+endmenu
+
+rsource "../Kconfig"

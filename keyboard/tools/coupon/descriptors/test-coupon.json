@@ -1,0 +1,57 @@
+{
+  "_comment": "Descriptor of the rev A test coupon (SPEC §10 step 7). Values from its captured design, keyboard/hardware/design/sheets/test_coupon.py (2026-11-27). Currents are design estimates, not measurements. The board is designed and laid out, not built.",
+  "board": "test-coupon",
+  "source": "keyboard/hardware/design/sheets/test_coupon.py",
+  "placeholder": false,
+  "placeholder_fields": ["spi.max_khz", "rails.+3V3.startup_ms"],
+  "notes": [
+    "rails.+3V3.max_ma = the G0 load (113 mA at 3.37 V with 1 % parts) + the idle draw (1.4 mA, the ladder's 1.32 mA) + the status LED (1.5 mA) + IRQ_N's pull-up (0.33 mA) + the chip-select pull-ups (0.07 mA), rounded up: the largest draw outside a current-limit test (estimate); typ_ma = the idle 1.4 mA rounded up",
+    "rails.+5V.max_ma = the G2 load (30 ohm: 167 mA at 5.00 V, 185 mA at USB-C's 5.5 V maximum with 1 % parts), rounded up (estimate)",
+    "G1 and G3 switch loads that exceed the coupon rules on purpose (current-limit tests, exercises_current_limit); G3 is never driven on S5, whose 2 A breaker would not limit it",
+    "bulk_uf: C1 10 uF + C3, C10, C11 100 nF on +3V3; C2 22 uF on +5V",
+    "spi.max_khz 10000 is a conservative guess through the bus switch and the 2.54 mm header; the SN74LV165A's own limit was not read, and the master's hold time on MISO is to be checked at bring-up (sheets/test_coupon.py); SPI mode 3, as the sheet prefers",
+    "lanes: a 5 x 499 ohm 0.1 % ladder, R_src = k (5 - k) / 5 x 499 = 399 / 599 / 599 / 399 ohm (sheets/test_coupon.py DESCRIPTOR_FACTS; rules.py recomputes it from the netlist)",
+    "ext.tolerance: worst case of five equal 0.1 % resistors (arithmetic: |delta ratio| = 0.00032, 0.00048, 0.00048, 0.00032)"
+  ],
+  "type": "test",
+  "rev": "A",
+  "size": "standard",
+  "default_slot": 1,
+  "slots": [1, 2, 3, 4, 5],
+  "needs": ["exercises_current_limit"],
+  "serial": 0,
+  "date": "2026-11-27",
+  "git": "auto",
+  "uses": ["+3V3", "+5V", "AN0", "AN1", "AN2", "AN3", "INJ", "SYNC", "SCK", "MISO", "MOSI", "CS0_N", "CS1_N",
+           "SCL", "SDA", "IRQ_N", "G0", "G1", "G2", "G3", "G4", "G5"],
+  "spi": {"max_khz": 10000},
+  "i2c": {"max_khz": 400},
+  "select": {"scheme": "none", "steps": 0, "settle_ns": 0},
+  "rails": {
+    "+3V3": {"typ_ma": 2, "max_ma": 120, "bulk_uf": 10.3, "startup_ms": 1},
+    "+5V": {"typ_ma": 0, "max_ma": 190, "bulk_uf": 22.0, "startup_ms": 0}
+  },
+  "lanes": {
+    "AN0": {"kind": "reference", "unit": "ratio", "flags": ["ratiometric", "adc4_ok"], "sites": 1, "r_src_ohm": 399, "cload_max_pf": 0, "offset": 0.0, "gain": 1.0, "note": "ladder tap 1 of 5: 0.2 x +3V3"},
+    "AN1": {"kind": "reference", "unit": "ratio", "flags": ["ratiometric", "adc4_ok"], "sites": 1, "r_src_ohm": 599, "cload_max_pf": 0, "offset": 0.0, "gain": 1.0, "note": "0.4 x +3V3"},
+    "AN2": {"kind": "reference", "unit": "ratio", "flags": ["ratiometric", "adc4_ok"], "sites": 1, "r_src_ohm": 599, "cload_max_pf": 0, "offset": 0.0, "gain": 1.0, "note": "0.6 x +3V3"},
+    "AN3": {"kind": "reference", "unit": "ratio", "flags": ["ratiometric", "adc4_ok"], "sites": 1, "r_src_ohm": 399, "cload_max_pf": 0, "offset": 0.0, "gain": 1.0, "note": "0.8 x +3V3"}
+  },
+  "glines": {
+    "G0": {"role": "load", "arg": 0, "flags": [], "note": "+3V3 30 ohm calibration load (Q10)"},
+    "G1": {"role": "load", "arg": 1, "flags": ["exceeds_rule"], "note": "+3V3 5 ohm current-limit test (Q11)"},
+    "G2": {"role": "load", "arg": 2, "flags": [], "note": "+5V 30 ohm calibration load (Q12)"},
+    "G3": {"role": "load", "arg": 3, "flags": ["exceeds_rule", "not_on_s5"], "note": "+5V 3.33 ohm current-limit test, S1-S4 only (Q13)"},
+    "G4": {"role": "led", "arg": 0, "flags": [], "note": "status LED D10 (Q16)"},
+    "G5": {"role": "irq_test", "arg": 0, "flags": [], "note": "pulls IRQ_N low (Q14)"}
+  },
+  "cs": {
+    "CS0_N": {"role": "spi_cs", "device": 0, "flags": [], "note": "U10 clock inhibit and U11 MISO enable"},
+    "CS1_N": {"role": "strobe", "device": 0, "flags": [], "note": "U10 parallel load (SH/LD low: load)"}
+  },
+  "devices": [
+    {"part": "sn74lv165a", "bus": "spi", "addr": "CS0_N", "count": 1, "irq": "none", "flags": [], "spi_mode": 3, "ref": "U10", "note": "8 bits G0..G5, INJ, SYNC, then MOSI delayed by 8"}
+  ],
+  "ext": {"format": "reference_ratios", "flags": [], "ratio": [0.2, 0.4, 0.6, 0.8],
+          "tolerance": [0.00032, 0.00048, 0.00048, 0.00032]}
+}

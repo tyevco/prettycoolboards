@@ -1,0 +1,13 @@
+/* One coupon EEPROM, emulated (drivers/eeprom/eeprom_at2x_emul.c), straight on native_sim's emulated I2C bus:
+ * the M24C02's geometry (DocID024020 Rev 2: 256 bytes, 16-byte pages, tW 5 ms max). */
+&i2c0 {
+	coupon_ee: eeprom@50 {
+		compatible = "st,m24c02", "atmel,at24";
+		reg = <0x50>;
+		size = <256>;
+		pagesize = <16>;
+		address-width = <8>;
+		timeout = <5>;
+		label = "coupon-s1";	/* the shell finds it by this name (DEVICE_DT_NAME) */
+	};
+};

@@ -1,0 +1,25 @@
+# hid8k-sim for Zephyr's twister (see README.md, "USB simulation"):
+#   west twister -T keyboard/firmware/hid8k/sim -p native_sim/native/64 --outdir <scratch>
+# native_sim (32-bit, gcc -m32) needs gcc-multilib on the host.
+common:
+  platform_allow:
+    - native_sim/native/64
+    - native_sim
+  integration_platforms:
+    - native_sim/native/64
+  harness: console
+  harness_config:
+    type: one_line
+    regex:
+      - "hid8k-sim: PASS: "
+  timeout: 600
+  tags: usb
+tests:
+  hid8k.sim.stock_uhc:
+    extra_args: []
+  hid8k.sim.hs_uhc:
+    extra_args:
+      - EXTRA_CONF_FILE=hs_fix.conf
+  hid8k.sim.fs_device:
+    extra_args:
+      - EXTRA_DTC_OVERLAY_FILE=fs.overlay

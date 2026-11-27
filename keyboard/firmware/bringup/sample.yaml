@@ -1,0 +1,24 @@
+# twister: build the bring-up for the board (default and bench-supply builds) and for the simulated board.
+#   python3 $ZEPHYR_BASE/scripts/twister -T keyboard/firmware/bringup -A keyboard/firmware/boards -p kbd_testbed_a \
+#     -p native_sim/native/64 -O <out> --disable-warnings-as-errors   (Ubuntu GCC: Zephyr's bit_rev.h warns)
+# Build only: the board does not exist, and the simulated board is driven by host/test_sim.py.
+sample:
+  name: PrettyCool testbed bring-up
+tests:
+  prettycool.bringup.board:
+    build_only: true
+    tags: prettycool
+    platform_allow:
+      - kbd_testbed_a
+  prettycool.bringup.board_bench:
+    build_only: true
+    tags: prettycool
+    platform_allow:
+      - kbd_testbed_a
+    extra_configs:
+      - CONFIG_BRINGUP_BENCH_SUPPLY=y
+  prettycool.bringup.sim:
+    build_only: true
+    tags: prettycool
+    platform_allow:
+      - native_sim/native/64

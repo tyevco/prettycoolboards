@@ -1,0 +1,41 @@
+/*
+ * hid8k-sim on native_sim/native/64: Zephyr's virtual USB host controller with the virtual device
+ * controller on its bus, as Zephyr's own host test wires them (tests/subsys/usb/host/boards/), at
+ * high speed; a button on the emulated GPIO for sw0; and the firmware's HID and CDC ACM nodes from
+ * the same file the board overlay uses.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#include <zephyr/dt-bindings/gpio/gpio.h>
+#include <zephyr/dt-bindings/input/input-event-codes.h>
+
+/delete-node/ &zephyr_udc0;
+
+/ {
+	aliases {
+		sw0 = &user_button;
+	};
+
+	zephyr_uhc0: uhc_vrt0 {
+		compatible = "zephyr,uhc-virtual";
+
+		zephyr_udc0: udc_vrt0 {
+			compatible = "zephyr,udc-virtual";
+			num-bidir-endpoints = <8>;
+			maximum-speed = "high-speed";
+		};
+	};
+
+	sim_keys: sim_keys {
+		compatible = "gpio-keys";
+
+		/* The Nucleo's USER button is active high with INPUT_KEY_0; so is this one. */
+		user_button: button {
+			gpios = <&gpio0 1 GPIO_ACTIVE_HIGH>;
+			zephyr,code = <INPUT_KEY_0>;
+		};
+	};
+};
+
+#include "../../dts/hid8k_usb.dtsi"

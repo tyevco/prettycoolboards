@@ -1,0 +1,124 @@
+# SPDX-License-Identifier: Apache-2.0
+# Hand-written binding for the generated slot nodes of kbd_testbed_a.dts (SPEC §4, §8.4).
+
+description: |
+  One coupon slot of the PrettyCool Keyboard rev A testbed motherboard (SPEC §4): its four analog lanes, six
+  G-lines, two chip selects and interrupt, the rail enables and bus-switch enable on the I/O expanders, its
+  PRESENT_N, its two current monitors and its own channel of the slot I2C mux. The board does not exist yet.
+
+  Slot power rules (SPEC §3.5, firmware's job): never power a slot before the host has configured the device or
+  while PRESENT_N reads high; +3V3 first, then the descriptor, then +5V; close the bus switch only after the
+  rails are up and open it before they go down; drive every MCU line into an unpowered slot low or leave it
+  high-impedance; deselect the slot's mux channel before its rails go down.
+
+compatible: "prettycool,coupon-slot"
+
+properties:
+  slot:
+    type: int
+    required: true
+    description: Slot number, 1-5.
+
+  io-channels:
+    type: phandle-array
+    required: true
+    description: Lanes AN0..AN3 on their primary converter (ADC1, or ADC4 for S5's AN1-AN3).
+
+  io-channel-names:
+    type: string-array
+    required: true
+
+  alt-adc-channels:
+    type: array
+    description: |
+      Triples <lane adc channel> for every other converter that reaches a lane's pin (nets.LANE_ADC), for
+      cross-checks: adc is 1, 2 or 4, the channel a child node of that ADC in the board devicetree.
+
+  g-gpios:
+    type: phandle-array
+    required: true
+    description: G0..G5. MCU pins, except G4/G5 of S1-S4 on U_EXP3 (slow, static selects).
+
+  cs-gpios:
+    type: phandle-array
+    required: true
+    description: CS0_N, CS1_N (straight to the MCU; not the SPI controller's cs-gpios, see the board dts).
+
+  irq-gpios:
+    type: phandle-array
+    required: true
+    description: IRQ_N (open drain, pull-up on the coupon, none on the motherboard).
+
+  irq-is-tim1-bkin:
+    type: boolean
+    description: IRQ_N is also TIM1_BKIN (S5); never gpio_pin_configure() it while TIM1 is in use (SPEC §5.3).
+
+  present-gpios:
+    type: phandle-array
+    required: true
+    description: PRESENT_N on U_EXP2 (100 k pull-up; the coupon ties it to GND).
+
+  en-3v3-gpios:
+    type: phandle-array
+    required: true
+
+  en-5v-gpios:
+    type: phandle-array
+    required: true
+
+  busen-gpios:
+    type: phandle-array
+    required: true
+    description: BUSEN_N, the slot bus switch's OE_N (active low; 10 k pull-up keeps it open).
+
+  led-gpios:
+    type: phandle-array
+    required: true
+    description: LED_Sn on U_EXP3, lit while the slot is powered.
+
+  pg-5v-gpios:
+    type: phandle-array
+    description: Power-good of a breaker on the 5 V rail (S5's TPS259474L).
+
+  ina226-3v3:
+    type: phandle
+    required: true
+
+  ina226-5v:
+    type: phandle
+    required: true
+
+  i2c-channel:
+    type: phandle
+    required: true
+    description: The slot's channel node of the TCA9548A.
+
+  rule-3v3-milliamps:
+    type: int
+    required: true
+    description: Coupon rule on +3V3 (SPEC §4.9).
+
+  rule-5v-milliamps:
+    type: int
+    required: true
+    description: Coupon rule on +5V (SPEC §4.9).
+
+  trip-3v3-milliamps:
+    type: array
+    required: true
+    description: The 3.3 V switch's trip, min / typ / max (SPEC §3.1, an estimate).
+
+  trip-5v-milliamps:
+    type: array
+    required: true
+    description: The 5 V switch's trip, min / typ / max (SPEC §3.1, an estimate).
+
+  rail-3v3:
+    type: int
+    required: true
+    description: Rail id of +3V3_Sn in keyboard/firmware/lib (tb/rails.h).
+
+  rail-5v:
+    type: int
+    required: true
+    description: Rail id of +5V_Sn in keyboard/firmware/lib (tb/rails.h).

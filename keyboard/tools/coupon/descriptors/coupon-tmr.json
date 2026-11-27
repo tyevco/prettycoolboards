@@ -1,0 +1,55 @@
+{
+  "_comment": "PLACEHOLDER descriptor of the rev A TMR coupon (default slot S2). The board is not designed and no TMR part is chosen (SPEC §11 #3): these values copy the Hall coupon's plan (SPEC §4.8: 'the same keys on a TMR sensor') and are to be replaced from its captured design. Images made from this file carry the placeholder flag.",
+  "board": "coupon-tmr",
+  "source": "SPEC §4.8 (plan only)",
+  "placeholder": true,
+  "placeholder_fields": ["rails", "lanes", "select", "devices", "ext.sites"],
+  "notes": [
+    "SPEC §4.8: 3.3 V, or 5 V if the chosen sensor wants it; lanes, G-lines and I2C as the Hall coupon",
+    "no TMR part is chosen, so its current, output impedance, CLoad and sensitivity are unknown: every lane field is a placeholder, and cload_max_pf 0 means 'not known' here, not 'no limit'"
+  ],
+  "type": "tmr",
+  "rev": "A",
+  "size": "standard",
+  "default_slot": 2,
+  "needs": ["lanes_14bit"],
+  "serial": 0,
+  "date": "2026-11-27",
+  "git": "auto",
+  "uses": ["+3V3", "AN0", "AN1", "AN2", "AN3", "SCL", "SDA", "G0", "G1", "G2", "G3"],
+  "spi": {"max_khz": 0},
+  "i2c": {"max_khz": 400},
+  "select": {"scheme": "binary", "steps": 8, "settle_ns": 500},
+  "rails": {
+    "+3V3": {"typ_ma": 85, "max_ma": 170, "bulk_uf": 10.0, "startup_ms": 1},
+    "+5V": {"typ_ma": 0, "max_ma": 0, "bulk_uf": 0, "startup_ms": 0}
+  },
+  "lanes": {
+    "AN0": {"kind": "tmr", "unit": "ratio", "flags": ["ratiometric", "multiplexed", "bipolar"], "sites": 8, "r_src_ohm": null, "cload_max_pf": 0, "offset": 0.5, "gain": 1.0},
+    "AN1": {"kind": "tmr", "unit": "ratio", "flags": ["ratiometric", "multiplexed", "bipolar"], "sites": 8, "r_src_ohm": null, "cload_max_pf": 0, "offset": 0.5, "gain": 1.0},
+    "AN2": {"kind": "tmr", "unit": "ratio", "flags": ["ratiometric", "multiplexed", "bipolar"], "sites": 8, "r_src_ohm": null, "cload_max_pf": 0, "offset": 0.5, "gain": 1.0},
+    "AN3": {"kind": "tmr", "unit": "ratio", "flags": ["ratiometric", "multiplexed", "bipolar"], "sites": 8, "r_src_ohm": null, "cload_max_pf": 0, "offset": 0.5, "gain": 1.0}
+  },
+  "glines": {
+    "G0": {"role": "sel", "arg": 0, "flags": []},
+    "G1": {"role": "sel", "arg": 1, "flags": []},
+    "G2": {"role": "sel", "arg": 2, "flags": []},
+    "G3": {"role": "sel_en", "arg": 0, "flags": []}
+  },
+  "cs": {},
+  "devices": [
+    {"part": "tmr_sensor", "bus": "analog", "addr": ["AN0", "AN1", "AN2", "AN3"], "count": 30, "irq": "none", "flags": []},
+    {"part": "ntc", "bus": "analog", "addr": ["AN2", "AN3"], "count": 2, "irq": "none", "flags": ["shares_lane"]},
+    {"part": "analog_mux", "bus": "analog", "addr": ["AN0", "AN1", "AN2", "AN3"], "count": 4, "irq": "none", "flags": []}
+  ],
+  "ext": {"format": "site_map", "flags": [], "sites": [
+    ["key", "key", "key", "key"],
+    ["key", "key", "key", "key"],
+    ["key", "key", "key", "key"],
+    ["key", "key", "key", "key"],
+    ["key", "key", "key", "key"],
+    ["key", "key", "key", "key"],
+    ["aftertouch", "aftertouch", "aftertouch", "aftertouch"],
+    ["reference", "reference", "thermistor", "thermistor"]
+  ]}
+}
