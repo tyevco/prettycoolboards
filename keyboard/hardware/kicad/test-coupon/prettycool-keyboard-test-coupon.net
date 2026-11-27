@@ -2,7 +2,7 @@
 	(version "E")
 	(design
 		(source "/home/user/prettycoolboards/keyboard/hardware/kicad/test-coupon/prettycool-keyboard-test-coupon.kicad_sch")
-		(date "2026-11-27T03:04:43")
+		(date "2026-11-27T03:59:22")
 		(tool "Eeschema 10.0.8-10.0.8~ubuntu24.04.1")
 		(sheet
 			(number "1")
@@ -3465,10 +3465,370 @@
 			)
 		)
 		(comp
+			(ref "R35")
+			(value "100k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(description "Resistor")
+			(fields
+				(field
+					(name "MPN") "0402WGF1003TCE")
+				(field
+					(name "Manufacturer") "UNI-ROYAL")
+				(field
+					(name "LCSC") "C25741")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0402WGF1003TCE")
+			)
+			(property
+				(name "Manufacturer")
+				(value "UNI-ROYAL")
+			)
+			(property
+				(name "LCSC")
+				(value "C25741")
+			)
+			(property
+				(name "Sheetname")
+				(value "SPI, G-line, SYNC and INJ loopback; IRQ_N; status LED")
+			)
+			(property
+				(name "Sheetfile")
+				(value "loopback.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/SPI, G-line, SYNC and INJ loopback; IRQ_N; status LED/")
+				(tstamps "/038c8928-d1a4-52ba-bc15-707bb97d15b5/")
+			)
+			(tstamps "5265d11b-3552-5ceb-a1bb-9f151e5484e0")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R36")
+			(value "100k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(description "Resistor")
+			(fields
+				(field
+					(name "MPN") "0402WGF1003TCE")
+				(field
+					(name "Manufacturer") "UNI-ROYAL")
+				(field
+					(name "LCSC") "C25741")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0402WGF1003TCE")
+			)
+			(property
+				(name "Manufacturer")
+				(value "UNI-ROYAL")
+			)
+			(property
+				(name "LCSC")
+				(value "C25741")
+			)
+			(property
+				(name "Sheetname")
+				(value "SPI, G-line, SYNC and INJ loopback; IRQ_N; status LED")
+			)
+			(property
+				(name "Sheetfile")
+				(value "loopback.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/SPI, G-line, SYNC and INJ loopback; IRQ_N; status LED/")
+				(tstamps "/038c8928-d1a4-52ba-bc15-707bb97d15b5/")
+			)
+			(tstamps "a8d3d353-c889-562a-9193-efe5d596b9f0")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R37")
+			(value "100k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(description "Resistor")
+			(fields
+				(field
+					(name "MPN") "0402WGF1003TCE")
+				(field
+					(name "Manufacturer") "UNI-ROYAL")
+				(field
+					(name "LCSC") "C25741")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0402WGF1003TCE")
+			)
+			(property
+				(name "Manufacturer")
+				(value "UNI-ROYAL")
+			)
+			(property
+				(name "LCSC")
+				(value "C25741")
+			)
+			(property
+				(name "Sheetname")
+				(value "SPI, G-line, SYNC and INJ loopback; IRQ_N; status LED")
+			)
+			(property
+				(name "Sheetfile")
+				(value "loopback.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/SPI, G-line, SYNC and INJ loopback; IRQ_N; status LED/")
+				(tstamps "/038c8928-d1a4-52ba-bc15-707bb97d15b5/")
+			)
+			(tstamps "f0e073b8-8ff8-5a83-9975-9195213b2185")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R38")
+			(value "100k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(description "Resistor")
+			(fields
+				(field
+					(name "MPN") "0402WGF1003TCE")
+				(field
+					(name "Manufacturer") "UNI-ROYAL")
+				(field
+					(name "LCSC") "C25741")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0402WGF1003TCE")
+			)
+			(property
+				(name "Manufacturer")
+				(value "UNI-ROYAL")
+			)
+			(property
+				(name "LCSC")
+				(value "C25741")
+			)
+			(property
+				(name "Sheetname")
+				(value "SPI, G-line, SYNC and INJ loopback; IRQ_N; status LED")
+			)
+			(property
+				(name "Sheetfile")
+				(value "loopback.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/SPI, G-line, SYNC and INJ loopback; IRQ_N; status LED/")
+				(tstamps "/038c8928-d1a4-52ba-bc15-707bb97d15b5/")
+			)
+			(tstamps "c80c4907-09a8-51ea-8d6f-26eb371f44dc")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R39")
+			(value "100k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(description "Resistor")
+			(fields
+				(field
+					(name "MPN") "0402WGF1003TCE")
+				(field
+					(name "Manufacturer") "UNI-ROYAL")
+				(field
+					(name "LCSC") "C25741")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0402WGF1003TCE")
+			)
+			(property
+				(name "Manufacturer")
+				(value "UNI-ROYAL")
+			)
+			(property
+				(name "LCSC")
+				(value "C25741")
+			)
+			(property
+				(name "Sheetname")
+				(value "SPI, G-line, SYNC and INJ loopback; IRQ_N; status LED")
+			)
+			(property
+				(name "Sheetfile")
+				(value "loopback.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/SPI, G-line, SYNC and INJ loopback; IRQ_N; status LED/")
+				(tstamps "/038c8928-d1a4-52ba-bc15-707bb97d15b5/")
+			)
+			(tstamps "5b738977-7add-552e-af9e-936078d8fc2a")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
 			(ref "U10")
 			(value "SN74LV165APWR")
 			(footprint "Package_SO:TSSOP-16_4.4x5mm_P0.65mm")
-			(datasheet "https://www.lcsc.com/datasheet/lcsc_datasheet_2410010332_Texas-Instruments-SN74LV165APWR_C201716.pdf")
+			(datasheet "https://www.ti.com/lit/ds/symlink/sn74lv165a.pdf")
 			(description "8-bit parallel-in serial-out shift register, 2-5.5 V, Ioff, TSSOP-16")
 			(fields
 				(field
@@ -3480,7 +3840,7 @@
 				(field
 					(name "Footprint") "Package_SO:TSSOP-16_4.4x5mm_P0.65mm")
 				(field
-					(name "Datasheet") "https://www.lcsc.com/datasheet/lcsc_datasheet_2410010332_Texas-Instruments-SN74LV165APWR_C201716.pdf")
+					(name "Datasheet") "https://www.ti.com/lit/ds/symlink/sn74lv165a.pdf")
 				(field
 					(name "Description") "8-bit parallel-in serial-out shift register, 2-5.5 V, Ioff, TSSOP-16")
 			)
@@ -3582,7 +3942,7 @@
 			(ref "U11")
 			(value "SN74LVC1G125DBVR")
 			(footprint "Package_TO_SOT_SMD:SOT-23-5")
-			(datasheet "https://www.lcsc.com/datasheet/lcsc_datasheet_1809200051_Texas-Instruments-SN74LVC1G125DBVR_C23654.pdf")
+			(datasheet "https://www.ti.com/lit/ds/symlink/sn74lvc1g125.pdf")
 			(description "Single bus buffer, 3-state (OE low = enabled), Ioff, SOT-23-5")
 			(fields
 				(field
@@ -3594,7 +3954,7 @@
 				(field
 					(name "Footprint") "Package_TO_SOT_SMD:SOT-23-5")
 				(field
-					(name "Datasheet") "https://www.lcsc.com/datasheet/lcsc_datasheet_1809200051_Texas-Instruments-SN74LVC1G125DBVR_C23654.pdf")
+					(name "Datasheet") "https://www.ti.com/lit/ds/symlink/sn74lvc1g125.pdf")
 				(field
 					(name "Description") "Single bus buffer, 3-state (OE low = enabled), Ioff, SOT-23-5")
 			)
@@ -3661,23 +4021,23 @@
 		)
 		(comp
 			(ref "R30")
-			(value "1k")
+			(value "499")
 			(footprint "Resistor_SMD:R_0603_1608Metric")
-			(description "Resistor")
+			(description "Thin-film resistor, 499 Ohm, 0.1 %, 25 ppm/K, 1/10 W, 0603 (lane ladder)")
 			(fields
 				(field
-					(name "MPN") "RT0603BRD071KL")
+					(name "MPN") "AR03BTCX4990")
 				(field
-					(name "Manufacturer") "YAGEO")
+					(name "Manufacturer") "Viking Tech")
 				(field
-					(name "LCSC") "C110776")
+					(name "LCSC") "C2889161")
 				(field
 					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
 				(field
 					(name "Datasheet")
 				)
 				(field
-					(name "Description") "Resistor")
+					(name "Description") "Thin-film resistor, 499 Ohm, 0.1 %, 25 ppm/K, 1/10 W, 0603 (lane ladder)")
 			)
 			(libsource
 				(lib "Device")
@@ -3686,15 +4046,15 @@
 			)
 			(property
 				(name "MPN")
-				(value "RT0603BRD071KL")
+				(value "AR03BTCX4990")
 			)
 			(property
 				(name "Manufacturer")
-				(value "YAGEO")
+				(value "Viking Tech")
 			)
 			(property
 				(name "LCSC")
-				(value "C110776")
+				(value "C2889161")
 			)
 			(property
 				(name "Sheetname")
@@ -3733,23 +4093,23 @@
 		)
 		(comp
 			(ref "R31")
-			(value "1k")
+			(value "499")
 			(footprint "Resistor_SMD:R_0603_1608Metric")
-			(description "Resistor")
+			(description "Thin-film resistor, 499 Ohm, 0.1 %, 25 ppm/K, 1/10 W, 0603 (lane ladder)")
 			(fields
 				(field
-					(name "MPN") "RT0603BRD071KL")
+					(name "MPN") "AR03BTCX4990")
 				(field
-					(name "Manufacturer") "YAGEO")
+					(name "Manufacturer") "Viking Tech")
 				(field
-					(name "LCSC") "C110776")
+					(name "LCSC") "C2889161")
 				(field
 					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
 				(field
 					(name "Datasheet")
 				)
 				(field
-					(name "Description") "Resistor")
+					(name "Description") "Thin-film resistor, 499 Ohm, 0.1 %, 25 ppm/K, 1/10 W, 0603 (lane ladder)")
 			)
 			(libsource
 				(lib "Device")
@@ -3758,15 +4118,15 @@
 			)
 			(property
 				(name "MPN")
-				(value "RT0603BRD071KL")
+				(value "AR03BTCX4990")
 			)
 			(property
 				(name "Manufacturer")
-				(value "YAGEO")
+				(value "Viking Tech")
 			)
 			(property
 				(name "LCSC")
-				(value "C110776")
+				(value "C2889161")
 			)
 			(property
 				(name "Sheetname")
@@ -3805,23 +4165,23 @@
 		)
 		(comp
 			(ref "R32")
-			(value "1k")
+			(value "499")
 			(footprint "Resistor_SMD:R_0603_1608Metric")
-			(description "Resistor")
+			(description "Thin-film resistor, 499 Ohm, 0.1 %, 25 ppm/K, 1/10 W, 0603 (lane ladder)")
 			(fields
 				(field
-					(name "MPN") "RT0603BRD071KL")
+					(name "MPN") "AR03BTCX4990")
 				(field
-					(name "Manufacturer") "YAGEO")
+					(name "Manufacturer") "Viking Tech")
 				(field
-					(name "LCSC") "C110776")
+					(name "LCSC") "C2889161")
 				(field
 					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
 				(field
 					(name "Datasheet")
 				)
 				(field
-					(name "Description") "Resistor")
+					(name "Description") "Thin-film resistor, 499 Ohm, 0.1 %, 25 ppm/K, 1/10 W, 0603 (lane ladder)")
 			)
 			(libsource
 				(lib "Device")
@@ -3830,15 +4190,15 @@
 			)
 			(property
 				(name "MPN")
-				(value "RT0603BRD071KL")
+				(value "AR03BTCX4990")
 			)
 			(property
 				(name "Manufacturer")
-				(value "YAGEO")
+				(value "Viking Tech")
 			)
 			(property
 				(name "LCSC")
-				(value "C110776")
+				(value "C2889161")
 			)
 			(property
 				(name "Sheetname")
@@ -3877,23 +4237,23 @@
 		)
 		(comp
 			(ref "R33")
-			(value "1k")
+			(value "499")
 			(footprint "Resistor_SMD:R_0603_1608Metric")
-			(description "Resistor")
+			(description "Thin-film resistor, 499 Ohm, 0.1 %, 25 ppm/K, 1/10 W, 0603 (lane ladder)")
 			(fields
 				(field
-					(name "MPN") "RT0603BRD071KL")
+					(name "MPN") "AR03BTCX4990")
 				(field
-					(name "Manufacturer") "YAGEO")
+					(name "Manufacturer") "Viking Tech")
 				(field
-					(name "LCSC") "C110776")
+					(name "LCSC") "C2889161")
 				(field
 					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
 				(field
 					(name "Datasheet")
 				)
 				(field
-					(name "Description") "Resistor")
+					(name "Description") "Thin-film resistor, 499 Ohm, 0.1 %, 25 ppm/K, 1/10 W, 0603 (lane ladder)")
 			)
 			(libsource
 				(lib "Device")
@@ -3902,15 +4262,15 @@
 			)
 			(property
 				(name "MPN")
-				(value "RT0603BRD071KL")
+				(value "AR03BTCX4990")
 			)
 			(property
 				(name "Manufacturer")
-				(value "YAGEO")
+				(value "Viking Tech")
 			)
 			(property
 				(name "LCSC")
-				(value "C110776")
+				(value "C2889161")
 			)
 			(property
 				(name "Sheetname")
@@ -3949,23 +4309,23 @@
 		)
 		(comp
 			(ref "R34")
-			(value "1k")
+			(value "499")
 			(footprint "Resistor_SMD:R_0603_1608Metric")
-			(description "Resistor")
+			(description "Thin-film resistor, 499 Ohm, 0.1 %, 25 ppm/K, 1/10 W, 0603 (lane ladder)")
 			(fields
 				(field
-					(name "MPN") "RT0603BRD071KL")
+					(name "MPN") "AR03BTCX4990")
 				(field
-					(name "Manufacturer") "YAGEO")
+					(name "Manufacturer") "Viking Tech")
 				(field
-					(name "LCSC") "C110776")
+					(name "LCSC") "C2889161")
 				(field
 					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
 				(field
 					(name "Datasheet")
 				)
 				(field
-					(name "Description") "Resistor")
+					(name "Description") "Thin-film resistor, 499 Ohm, 0.1 %, 25 ppm/K, 1/10 W, 0603 (lane ladder)")
 			)
 			(libsource
 				(lib "Device")
@@ -3974,15 +4334,15 @@
 			)
 			(property
 				(name "MPN")
-				(value "RT0603BRD071KL")
+				(value "AR03BTCX4990")
 			)
 			(property
 				(name "Manufacturer")
-				(value "YAGEO")
+				(value "Viking Tech")
 			)
 			(property
 				(name "LCSC")
-				(value "C110776")
+				(value "C2889161")
 			)
 			(property
 				(name "Sheetname")
@@ -5482,6 +5842,16 @@
 				(pintype "passive")
 			)
 			(node
+				(ref "R35")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R36")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
 				(ref "TP1")
 				(pin "1")
 				(pinfunction "1_1")
@@ -5889,6 +6259,11 @@
 				(pintype "passive")
 			)
 			(node
+				(ref "R35")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
 				(ref "TP20")
 				(pin "1")
 				(pinfunction "1_1")
@@ -5914,6 +6289,11 @@
 				(ref "J1")
 				(pin "28")
 				(pinfunction "Pin_28_28")
+				(pintype "passive")
+			)
+			(node
+				(ref "R36")
+				(pin "2")
 				(pintype "passive")
 			)
 			(node
@@ -6298,6 +6678,21 @@
 				(pintype "passive")
 			)
 			(node
+				(ref "R37")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R38")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R39")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
 				(ref "TP3")
 				(pin "1")
 				(pinfunction "1_1")
@@ -6447,6 +6842,11 @@
 				(pintype "passive")
 			)
 			(node
+				(ref "R38")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
 				(ref "TP19")
 				(pin "1")
 				(pinfunction "1_1")
@@ -6467,6 +6867,11 @@
 				(ref "J1")
 				(pin "23")
 				(pinfunction "Pin_23_23")
+				(pintype "passive")
+			)
+			(node
+				(ref "R37")
+				(pin "1")
 				(pintype "passive")
 			)
 			(node
@@ -6524,6 +6929,11 @@
 				(ref "J1")
 				(pin "20")
 				(pinfunction "Pin_20_20")
+				(pintype "passive")
+			)
+			(node
+				(ref "R39")
+				(pin "1")
 				(pintype "passive")
 			)
 			(node

@@ -125,7 +125,8 @@ def slot_sheet(d, unused=(), rails=("+3V3", "+5V"), wp="jumper", bulk_3v3="10u",
 
     if wire_pads:
         d.group("Wire pads: rails and ground",
-                "For an external meter or an electronic load at bring-up (SPEC §10), e.g. the S5 breaker's 2 A trip.")
+                "For an external meter or an electronic load at bring-up (SPEC §10). The current they take is what\n"
+                "the coupon's layout sizes the rail copper for (boards/<coupon>.py), not the pads' own rating.")
         testpoints(d, 1, [r for r in ("+3V3", "+5V") if r in rails] + ["GND", "GND"], fp=TP_WIRE)
 
     d.group("Mounting post and fiducials",

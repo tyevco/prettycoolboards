@@ -29,11 +29,15 @@ they do not bottom out in the 8.5 mm socket.
 **Stack** (`STACKUP`): JLC's 4-layer 1.6 mm JLC04161H-7628 (7628 prepreg 0.2104 mm, er 4.4; core 1.065 mm; 1 oz
 outer, 0.5 oz inner: JLC's published figures as remembered here, **unverified**; nothing on a coupon depends on them,
 no impedance control is ordered). L1 F.Cu parts and signals, **L2 In1 solid GND**, L3 In2 +3V3 pour and signals, L4
-B.Cu signals (and the header body).
+B.Cu signals (and the header body). `build()` puts a no-track rule area over In1 (vias and the plane allowed), so no
+router cuts the plane under the lanes (SPEC §4.9: "Route the lanes over a solid ground"); pass `in1_tracks=True` to
+allow tracks there.
 
 **Rules** (`RULES`, JLC 4-layer capability is 0.09 / 0.09 mm and a 0.15 mm drill): default track 0.20 mm,
-clearance 0.15 mm, vias 0.60 / 0.30 mm (JLC's standard, no surcharge); rails 0.80 mm; copper 0.30 mm from the
-edge. The board-level DRC minimums (tools/pcbgen.py) are 0.10 mm track and clearance, 0.40 / 0.20 mm via.
+clearance 0.15 mm, vias 0.60 / 0.30 mm (JLC's standard, no surcharge); +5V 0.80 mm and +3V3 0.30 mm (`NETCLASSES`:
+a 0.30 mm track with 0.15 mm clearance still enters a 0.5 mm-pitch pin, which 0.80 mm could not), but only where
+finish_route lays the track: Freerouting ignores class rules, so a path whose current matters is pre-routed;
+copper 0.30 mm from the edge. The board-level DRC minimums (tools/pcbgen.py) are 0.10 mm track and clearance, 0.40 / 0.20 mm via.
 """
 
 from __future__ import annotations
@@ -72,7 +76,13 @@ WIRE_PAD_XY = [(11.0, 56.5), (15.0, 56.5), (19.0, 56.5), (23.0, 56.5)]
 
 RULES = dict(track=0.20, clearance=0.15, via=0.60, via_drill=0.30, edge=0.30)
 # (name, nets by short name, track, clearance, via, drill)
-NETCLASSES = [("Rail", ["+3V3", "+5V"], 0.80, 0.20, 0.80, 0.40)]
+# Until 2026-11-27 no class reached the board (layout.write_project wrote the project's net settings as schema
+# version 0, which KiCad 10 discards), so every net routed at the Default 0.20 mm. With the classes in force, +3V3 at
+# 0.80 mm could not enter a fine-pitch pin: it is 0.30 mm, enough for the 250 mA coupon rule. Clearances stay at the
+# Default 0.15 mm. Freerouting 2.1.0 ignores class rules (it lays every net at the default width, tested on the test
+# coupon), so a class width reaches only tracks that tools/finish_route.py lays, and a class clearance above the
+# default only makes DRC errors: pre-route (locked, `preroute()`, `PREROUTED_NETS`) any path whose current matters.
+NETCLASSES = [("Rail", ["+5V"], 0.80, 0.15, 0.80, 0.40), ("Rail3V3", ["+3V3"], 0.30, 0.15, 0.60, 0.30)]
 GND_VIA = (0.60, 0.30)
 IN2_POUR = "+3V3"
 
@@ -98,15 +108,19 @@ STACK_ID = "JLC04161H-7628"
 FAB_NOTES = [
     f"**PCB:** 4 layers, 1.6 mm, FR-4, 1 oz outer / 0.5 oz inner copper, JLC's standard 4-layer stack "
     f"({STACK_ID}; no impedance control ordered), ENIG (HASL lead-free would do: the finest pitch is 0.65 mm), "
-    "green mask, white silk. L2 (In1) is a solid GND plane, L3 (In2) a +3V3 pour.",
-    "**Design rules used:** track 0.20 mm and clearance 0.15 mm by default, rails and loads 0.80 mm; vias "
+    "green mask, white silk. L2 (In1) is a solid GND plane (a no-track rule area keeps the routers off it), L3 (In2) "
+    "a +3V3 pour.",
+    "**Design rules used:** track 0.20 mm and clearance 0.15 mm by default (the board's own notes above give its "
+    "wider, pre-routed paths); vias "
     "0.60 / 0.30 mm (JLC's standard via, no surcharge); copper >= 0.30 mm from the edge. JLC's 4-layer minimums are "
     "0.09 / 0.09 mm and a 0.15 mm hole: nothing here is near them.",
     "**J1, the slot header, is through-hole and mounted on the BOTTOM side** (body against the bottom, pins down; "
     "soldered on the top side). Either JLC fits it (JLC stocks the part, LCSC C25503140; check on the order form "
     "that JLC accepts a through-hole part with its body on the bottom), or order J1 as do-not-place and hand-solder "
     "it: 40 joints from the top, the body flat against the bottom, square with the edge. The two halves only mate "
-    "if the header is on the bottom (boards/coupon_common.py check_mating()).",
+    "if the header is on the bottom (boards/coupon_common.py check_mating()). The 2541WV drawing limits soldering "
+    "to 220 C for 10 s (PBT body), below a lead-free wave's temperature, and a wave or selective nozzle from the "
+    "bottom would meet the body: the joints are soldered on the top side.",
     "**The 2 x 20 header has no key.** Plug a coupon with its SLOT EDGE / pin 1 silk over the motherboard socket's "
     "pin 1 and its post hole over the slot's spacer; turned 180 degrees, +5V meets GND pins (the slot switch "
     "limits the current). Never hot-plug: the slot's LED must be off (SPEC §3.5).",
@@ -200,11 +214,17 @@ def keepouts(size=STANDARD):
     return [("F", header_tails), ("*", post), ("B", lambda x, y: True)]
 
 
-def build(bb, size=STANDARD, title="", ref_text=""):
-    """Rule areas and documentation every coupon carries (layout.py draws the outline and the In1 GND plane)."""
+def build(bb, size=STANDARD, title="", ref_text="", in1_tracks=False):
+    """Rule areas and documentation every coupon carries (layout.py draws the outline and the In1 GND plane).
+    Unless `in1_tracks`, In1 gets a no-track rule area (vias, pads and the GND plane allowed): KiCad exports it to
+    Freerouting as a wire keep-out, layout.py's clean-up deletes any track inside it, and DRC flags one."""
     cu = [pcbnew.F_Cu, pcbnew.In1_Cu, pcbnew.In2_Cu, pcbnew.B_Cu]
     bb.keepout(cu, page(circle(*POST, POST_COPPER_R, 36)), tracks=True, vias=True, pads=False, pours=True,
                name="POST_NO_COPPER")
+    if not in1_tracks:
+        w, h = size
+        bb.keepout([pcbnew.In1_Cu], page(rect(0.0, 0.0, w, h)), tracks=True, vias=False, pads=False, pours=False,
+                   name="IN1_PLANE_NO_TRACKS")
     for i, (x, y) in enumerate(fiducial_xy(size), 1):
         bb.keepout([pcbnew.F_Cu], page(circle(x, y, FID_KEEPOUT_R, 24)), pads=False, pours=True,
                    name=f"FID{i}_KEEPCLEAR")

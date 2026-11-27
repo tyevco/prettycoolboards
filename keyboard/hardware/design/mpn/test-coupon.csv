@@ -1,0 +1,18 @@
+# LCSC code -> manufacturer part for the test coupon's vendor-neutral BOM (release.py). One row per LCSC code on the
+# board. Manufacturer and MPN as JLC's parts API lists them on 2026-11-27. DigiKey / Mouser numbers were not looked
+# up: fill them in when ordering from a US distributor. No stock or prices here: check them when ordering.
+LCSC,Manufacturer,MPN,DigiKey,Mouser,Note
+C25503140,HanElectricity,2541WV-2x20P,,,"male 2 x 20 pin header, 2.54 mm, 6.0 mm mating, 2.54 mm plastic, 3.0 mm tail, gold; any 2 x 20 2.54 mm header with a 6 mm mating length mates with the motherboard's 8.5 mm socket; mounted on the BOTTOM side"
+C7562,STMicroelectronics,M24C02-WMN6TP,,,"2 kbit I2C EEPROM, SO8N; the descriptor at 0x50 (E2-E0 to GND)"
+C201716,Texas Instruments,SN74LV165APWR,,,"8-bit PISO shift register with Ioff, TSSOP-16"
+C23654,Texas Instruments,SN74LVC1G125DBVR,,,"single 3-state buffer with Ioff, SOT-23-5"
+C20917,Alpha & Omega Semiconductor,AO3400A,,,"30 V N-MOSFET, SOT-23, RDS(on) < 48 mOhm at VGS 2.5 V"
+C2286,Hubei KENTO Elec,KT-0603R,,,"red LED 0603; any red 0603 LED fits"
+C47019,UNI-ROYAL(Uniroyal Elec),25121WF100JT4E,,,"10 Ohm 1 % 1 W 2512 thick film (400 ppm/K); substitute any 10 Ohm 1 % 2512 rated 1 W"
+C2889161,Viking Tech,AR03BTCX4990,,,"499 Ohm 0.1 % 25 ppm/K 1/10 W 0603 thin film: the lane ladder (R_src <= 600 Ohm), keep 499 Ohm, 0.1 % and <= 25 ppm/K (e.g. FH TD03G4990BT, YAGEO RT0603BRD07499RL)"
+C25741,UNI-ROYAL(Uniroyal Elec),0402WGF1003TCE,,,"100 kOhm 1 % 0402 (pull-downs, WC, the loopback's input pulls); substitute any 100 k 1 % 0402 thick film"
+C25744,UNI-ROYAL(Uniroyal Elec),0402WGF1002TCE,,,"10 kOhm 1 % 0402; substitute any 10 k 1 % 0402 thick film"
+C11702,UNI-ROYAL(Uniroyal Elec),0402WGF1001TCE,,,"1 kOhm 1 % 0402; substitute any 1 k 1 % 0402 thick film"
+C1525,Samsung Electro-Mechanics,CL05B104KO5NNNC,,,"100 nF 16 V X7R 0402"
+C19702,Samsung Electro-Mechanics,CL10A106KP8NNNC,,,"10 uF 10 V X5R 0603 (on +3V3)"
+C45783,Samsung Electro-Mechanics,CL21A226MAQNNNE,,,"22 uF 25 V X5R 0805 (on +5V)"

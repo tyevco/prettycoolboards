@@ -1,0 +1,47 @@
+{
+ "entries": [
+  {
+   "correction": {
+    "dx": 0.0032,
+    "dy": 0.0,
+    "mirror": false,
+    "rot": 270.0
+   },
+   "ee": {
+    "key": "ee-sha1:f788979fa20287bb",
+    "title": "SOT-23-5_L3.0-W1.7-P0.95-LS2.8-BL"
+   },
+   "fit": {
+    "alternatives": [
+     {
+      "conflicts": 4,
+      "dx": 0.0032,
+      "dy": 0.0,
+      "equivalent": false,
+      "matched": 1,
+      "mirror": true,
+      "names": 0,
+      "rot": 270.0
+     }
+    ],
+    "matched": 5,
+    "method": "number",
+    "rms": 0.0158,
+    "score": 92
+   },
+   "fitted": "2026-11-27",
+   "kicad": {
+    "fpid": "Package_TO_SOT_SMD:SOT-23-5",
+    "pad_hash": "sha1:ec51d4856e291c3d"
+   },
+   "reasons": [
+    "fits by pad numbers: 5/5 matched, rms 0.016 mm"
+   ],
+   "status": "auto",
+   "tool": "jlcplace 0.2.1",
+   "verdict": "green",
+   "verifications": []
+  }
+ ],
+ "lcsc": "C23654"
+}

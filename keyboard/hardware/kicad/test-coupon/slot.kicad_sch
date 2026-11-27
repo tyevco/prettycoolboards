@@ -6534,7 +6534,7 @@
 		)
 		(uuid "61824fb3-3cb7-5d7d-8c6e-83c54a3b59cc")
 	)
-	(text "For an external meter or an electronic load at bring-up (SPEC §10), e.g. the S5 breaker's 2 A trip."
+	(text "For an external meter or an electronic load at bring-up (SPEC §10). The current they take is what\nthe coupon's layout sizes the rail copper for (boards/<coupon>.py), not the pads' own rating."
 		(exclude_from_sim no)
 		(at 270.51 19.05 0)
 		(effects
@@ -6548,7 +6548,7 @@
 	)
 	(rectangle
 		(start 267.97 12.7)
-		(end 383.54 38.1)
+		(end 382.27 40.64)
 		(stroke
 			(width 0.1)
 			(type dash)
@@ -6560,7 +6560,7 @@
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
-		(at 273.05 30.48 180)
+		(at 273.05 33.02 180)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -6570,7 +6570,7 @@
 		(dnp no)
 		(uuid "d560ebd4-0f49-57ae-b9d8-c10a8f19bfbe")
 		(property "Reference" "TP1"
-			(at 274.712 32.782 0)
+			(at 274.712 35.322 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -6581,7 +6581,7 @@
 			)
 		)
 		(property "Value" "+3V3"
-			(at 274.712 34.782 0)
+			(at 274.712 37.322 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -6592,7 +6592,7 @@
 			)
 		)
 		(property "Footprint" "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm"
-			(at 273.05 30.48 0)
+			(at 273.05 33.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6603,7 +6603,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 273.05 30.48 0)
+			(at 273.05 33.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6614,7 +6614,7 @@
 			)
 		)
 		(property "Description" "test point"
-			(at 273.05 30.48 0)
+			(at 273.05 33.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6638,7 +6638,7 @@
 	)
 	(symbol
 		(lib_id "power:+3V3")
-		(at 273.05 30.48 0)
+		(at 273.05 33.02 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -6646,9 +6646,9 @@
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
-		(uuid "c1fcae39-3f97-5897-b4cb-4a6821baa290")
+		(uuid "47e4f2e4-99aa-576f-95a2-ab4a090ea098")
 		(property "Reference" "#PWR02022"
-			(at 273.05 30.48 0)
+			(at 273.05 33.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6659,7 +6659,7 @@
 			)
 		)
 		(property "Value" "+3V3"
-			(at 273.05 27.18 0)
+			(at 273.05 29.72 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -6670,7 +6670,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 273.05 30.48 0)
+			(at 273.05 33.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6681,7 +6681,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 273.05 30.48 0)
+			(at 273.05 33.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6692,7 +6692,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 273.05 30.48 0)
+			(at 273.05 33.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6703,7 +6703,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "b7c52509-6f1a-57b4-9bc1-1f955ba44aab")
+			(uuid "1570ab20-2ff6-5290-927c-8cc8ef67678e")
 		)
 		(instances
 			(project "prettycool-keyboard-test-coupon"
@@ -6716,7 +6716,7 @@
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
-		(at 284.48 30.48 180)
+		(at 284.48 33.02 180)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -6726,7 +6726,7 @@
 		(dnp no)
 		(uuid "9450471f-3124-58b0-8c79-70b2676c3522")
 		(property "Reference" "TP2"
-			(at 286.142 32.782 0)
+			(at 286.142 35.322 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -6737,7 +6737,7 @@
 			)
 		)
 		(property "Value" "+5V"
-			(at 286.142 34.782 0)
+			(at 286.142 37.322 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -6748,7 +6748,7 @@
 			)
 		)
 		(property "Footprint" "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm"
-			(at 284.48 30.48 0)
+			(at 284.48 33.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6759,7 +6759,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 284.48 30.48 0)
+			(at 284.48 33.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6770,7 +6770,7 @@
 			)
 		)
 		(property "Description" "test point"
-			(at 284.48 30.48 0)
+			(at 284.48 33.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6794,7 +6794,7 @@
 	)
 	(symbol
 		(lib_id "power:VCC")
-		(at 284.48 30.48 0)
+		(at 284.48 33.02 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -6802,9 +6802,9 @@
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
-		(uuid "44e49ab7-188d-5076-8b88-9960606ef20c")
+		(uuid "a3ee64e3-9a93-53c6-a7f0-d361a6ff7f68")
 		(property "Reference" "#PWR02023"
-			(at 284.48 30.48 0)
+			(at 284.48 33.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6815,7 +6815,7 @@
 			)
 		)
 		(property "Value" "+5V"
-			(at 284.48 27.18 0)
+			(at 284.48 29.72 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -6826,7 +6826,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 284.48 30.48 0)
+			(at 284.48 33.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6837,7 +6837,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 284.48 30.48 0)
+			(at 284.48 33.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6848,7 +6848,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 284.48 30.48 0)
+			(at 284.48 33.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6859,7 +6859,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "4d479ab8-5c42-59bb-844f-30ef8adf5443")
+			(uuid "4161c3c4-22aa-5e9d-8352-935079ff1959")
 		)
 		(instances
 			(project "prettycool-keyboard-test-coupon"
@@ -6872,7 +6872,7 @@
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
-		(at 295.91 30.48 0)
+		(at 295.91 33.02 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -6882,7 +6882,7 @@
 		(dnp no)
 		(uuid "8b941686-ff77-551b-a8bf-f9660ac962fd")
 		(property "Reference" "TP3"
-			(at 297.572 26.178 0)
+			(at 297.572 28.718 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -6893,7 +6893,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 297.572 28.178 0)
+			(at 297.572 30.718 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -6904,7 +6904,7 @@
 			)
 		)
 		(property "Footprint" "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm"
-			(at 295.91 30.48 0)
+			(at 295.91 33.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6915,7 +6915,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 295.91 30.48 0)
+			(at 295.91 33.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6926,7 +6926,7 @@
 			)
 		)
 		(property "Description" "test point"
-			(at 295.91 30.48 0)
+			(at 295.91 33.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6950,7 +6950,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 295.91 30.48 0)
+		(at 295.91 33.02 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -6958,9 +6958,9 @@
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
-		(uuid "68ac1e0f-43d2-5b38-a3bc-210b72bfd1af")
+		(uuid "a24674fd-1e31-5d71-8a32-830ee2d60e53")
 		(property "Reference" "#PWR02024"
-			(at 295.91 30.48 0)
+			(at 295.91 33.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6971,7 +6971,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 295.91 33.78 0)
+			(at 295.91 36.32 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -6982,7 +6982,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 295.91 30.48 0)
+			(at 295.91 33.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6993,7 +6993,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 295.91 30.48 0)
+			(at 295.91 33.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7004,7 +7004,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 295.91 30.48 0)
+			(at 295.91 33.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7015,7 +7015,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "94c59003-f16f-54a1-80f8-7a5dedffdafb")
+			(uuid "b2361bf1-b4dd-5795-961a-ed1229c160b7")
 		)
 		(instances
 			(project "prettycool-keyboard-test-coupon"
@@ -7028,7 +7028,7 @@
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
-		(at 308.61 30.48 0)
+		(at 308.61 33.02 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -7038,7 +7038,7 @@
 		(dnp no)
 		(uuid "af014ec5-13b0-56a0-b47f-7d1dadc48509")
 		(property "Reference" "TP4"
-			(at 310.272 26.178 0)
+			(at 310.272 28.718 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -7049,7 +7049,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 310.272 28.178 0)
+			(at 310.272 30.718 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -7060,7 +7060,7 @@
 			)
 		)
 		(property "Footprint" "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm"
-			(at 308.61 30.48 0)
+			(at 308.61 33.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7071,7 +7071,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 308.61 30.48 0)
+			(at 308.61 33.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7082,7 +7082,7 @@
 			)
 		)
 		(property "Description" "test point"
-			(at 308.61 30.48 0)
+			(at 308.61 33.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7106,7 +7106,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 308.61 30.48 0)
+		(at 308.61 33.02 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -7114,9 +7114,9 @@
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
-		(uuid "4b030fc3-3c19-5483-99c0-2c1cf2a5ceeb")
+		(uuid "b5ef046d-67dd-5174-9c3c-48ec219786f6")
 		(property "Reference" "#PWR02025"
-			(at 308.61 30.48 0)
+			(at 308.61 33.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7127,7 +7127,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 308.61 33.78 0)
+			(at 308.61 36.32 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -7138,7 +7138,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 308.61 30.48 0)
+			(at 308.61 33.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7149,7 +7149,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 308.61 30.48 0)
+			(at 308.61 33.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7160,7 +7160,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 308.61 30.48 0)
+			(at 308.61 33.02 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7171,7 +7171,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "992e5faf-4366-55ec-8d2f-315aa604a210")
+			(uuid "6e877fd4-d17c-59da-9ded-b81140a968a2")
 		)
 		(instances
 			(project "prettycool-keyboard-test-coupon"

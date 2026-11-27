@@ -1,0 +1,89 @@
+{
+ "entries": [
+  {
+   "correction": {
+    "dx": -0.0001,
+    "dy": -0.0001,
+    "mirror": false,
+    "rot": 0.0
+   },
+   "ee": {
+    "key": "ee-sha1:c93491640f639513",
+    "title": "LED-SMD_L1.6-W0.8-R-RD"
+   },
+   "fit": {
+    "alternatives": [
+     {
+      "conflicts": 0,
+      "dx": 0.0001,
+      "dy": -0.0001,
+      "equivalent": false,
+      "matched": 2,
+      "mirror": true,
+      "names": -2,
+      "rot": 0.0
+     },
+     {
+      "conflicts": 0,
+      "dx": 0.0001,
+      "dy": 0.0001,
+      "equivalent": false,
+      "matched": 2,
+      "mirror": false,
+      "names": -2,
+      "rot": 180.0
+     },
+     {
+      "conflicts": 2,
+      "dx": -0.0001,
+      "dy": 0.0001,
+      "equivalent": true,
+      "matched": 0,
+      "mirror": true,
+      "names": 2,
+      "rot": 180.0
+     }
+    ],
+    "doubt": "polarity",
+    "matched": 0,
+    "method": "geometry",
+    "polar": true,
+    "rms": 0.0374,
+    "score": 46
+   },
+   "fitted": "2026-11-27",
+   "kicad": {
+    "fpid": "LED_SMD:LED_0603_1608Metric",
+    "pad_hash": "sha1:215d3884936b4fde"
+   },
+   "reasons": [
+    "pin names pick rot 0 (2 agree, 0 differ), pad numbers pick rot 180; the EasyEDA footprint draws its + beside pad 1, and KiCad's positive pad is 2 (by KiCad's library convention (pad 1 = cathode)): following the pin names and the drawn +",
+    "2 pin names agree"
+   ],
+   "status": "manual",
+   "tool": "jlcplace 0.2.1",
+   "verdict": "yellow",
+   "verifications": [
+    {
+     "board": "prettycool-keyboard-test-coupon.kicad_pcb",
+     "by": "capture review",
+     "correction": {
+      "dx": -0.0001,
+      "dy": -0.0001,
+      "mirror": false,
+      "rot": 0.0
+     },
+     "date": "2026-11-27",
+     "layer": "top",
+     "note": "KENTO KT-0603R datasheet (LCSC C2286) sec. 2: pin 1 = + (anode), pin 2 = cathode (the green mark); EasyEDA pad 1 carries the +, so KiCad pad 2 (A) on EasyEDA pad 1 is right. Checked 2026-11-27.",
+     "ok": true,
+     "presses": null,
+     "ref": "D10",
+     "rotation": 0.0,
+     "source": "manual"
+    }
+   ]
+  }
+ ],
+ "lcsc": "C2286"
+}

@@ -114,6 +114,13 @@ def netclasses(bb, mod, allnets):
     return spec
 
 
+# The fields of a KiCad 10.0.8 net class besides name, widths, clearance and priority (as KiCad writes Default).
+NETCLASS_FIELDS = {"bus_width": 12, "diff_pair_gap": 0.25, "diff_pair_via_gap": 0.25, "diff_pair_width": 0.2,
+                   "line_style": 0, "microvia_diameter": 0.3, "microvia_drill": 0.1,
+                   "pcb_color": "rgba(0, 0, 0, 0.000)", "schematic_color": "rgba(0, 0, 0, 0.000)",
+                   "tuning_profile": "", "wire_width": 6}
+
+
 def write_project(pro, mod, spec):
     """Write the Default class (module RULES), the net classes of `spec` with their net patterns, and the board's
     minimum rules into the project file. pcbnew's SaveBoard does not write the project of a board built in memory,
@@ -122,6 +129,10 @@ def write_project(pro, mod, spec):
         d = json.load(f)
     rules = mod.RULES
     ns = d.setdefault("net_settings", {})
+    # The schematic's project comes from KiCad's template, whose net_settings carry schema version 0: KiCad 10 then
+    # drops every netclass pattern on the next LoadBoard (and SaveBoard writes them back empty), so every net routed
+    # in the Default class. Version 5 is what KiCad 10.0.8 itself writes for the format below (review 2026-11-27).
+    ns["meta"] = {"version": max(5, int(ns.get("meta", {}).get("version", 0)))}
     classes = ns.setdefault("classes", [])
     default = next((c for c in classes if c.get("name") == "Default"), None)
     if default is None:
@@ -137,6 +148,14 @@ def write_project(pro, mod, spec):
             e = dict(default)
             classes.append(e)
         e.update({"name": name, "track_width": track, "clearance": c, "via_diameter": via, "via_drill": drill})
+    # Every class complete, as KiCad 10 writes them: a class with a field missing is composed with the next class
+    # down, Default, and the net's class name becomes "Rail,Default". finish_route's GetNetClassByName then finds
+    # nothing and routes at Default's width and clearance, and the DSN class name carries the comma (review
+    # 2026-11-27: the test coupon's +3V3 came out at 0.20 mm with 29 class-clearance errors).
+    for e in classes:
+        for k, v in NETCLASS_FIELDS.items():
+            e.setdefault(k, v)
+        e["priority"] = 2147483647 if e.get("name") == "Default" else -1
     ns["netclass_patterns"] = [{"netclass": name, "pattern": n} for name, nets_, *_ in spec for n in sorted(nets_)]
     ds = d.setdefault("board", {}).setdefault("design_settings", {})
     # No DRC check is ignored on a keyboard board: the five KiCad 10 leaves at "ignore" by default are turned on
@@ -163,6 +182,20 @@ def _sexpr_end(s, i):
             if not depth:
                 return k + 1
     raise ValueError("unbalanced s-expression")
+
+
+def _class_head_end(block):
+    """Index of the first "(" of a DSN (class ...) block that is not inside a quoted net name. KiCad names an
+    unconnected pin's net "unconnected-(J1-Pin_19-Pad19)", so a plain block.index("(", 1) cut the class header inside
+    a name; rebuilding the header then left an unbalanced quote that could swallow the class's circuit and rules
+    (coupon-haptics, 2026-11-27)."""
+    quoted = False
+    for k in range(1, len(block)):
+        if block[k] == '"':
+            quoted = not quoted
+        elif block[k] == "(" and not quoted:
+            return k
+    raise ValueError("no list in the class block")
 
 
 def stackup_sexpr(items, finish="ENIG"):
@@ -384,13 +417,19 @@ def dsn_plane_as_layer_rule(dsn, net="GND", layer="In1.Cu"):
         return
     while (i := s.find(f"(plane {net} ")) >= 0:
         s = s[:i] + s[_sexpr_end(s, i):]
+    # The plane layer's no-track rule area (coupon_common.build) is exported as a wire_keepout on it. Every routed
+    # class is limited to the other layers below (use_layer), so it adds nothing for Freerouting, and Freerouting
+    # 2.1.0 then placed no via at all (a via crosses that layer): coupon-haptics, 2026-11-27, 0 vias and 74 connections
+    # left with it, vias placed without it. The rule area stays on the board for the grid router and DRC.
+    while (i := s.find(f'(wire_keepout "" (polygon {layer} ')) >= 0:
+        s = s[:i] + s[_sexpr_end(s, i):]
     others = [m for m in re.findall(r"\(layer (\S+)\s*\(type", s) if m != layer]
     out, pos = [], 0
     for m in re.finditer(r"\(class (\S+)", s):
         start = m.start()
         end = _sexpr_end(s, start)
         block = s[start:end]
-        nets_ = re.findall(r'"[^"]*"|[^\s()]+', block[:block.index("(", 1)])[2:]
+        nets_ = re.findall(r'"[^"]*"|[^\s()]+', block[:_class_head_end(block)])[2:]
         if nets_ != [net]:
             c = block.index("(circuit") + len("(circuit")
             block = block[:c] + f"\n        (use_layer {' '.join(others)})" + block[c:]
@@ -415,7 +454,8 @@ def dsn_drop_net(dsn, net="GND"):
             continue
         end = _sexpr_end(s, m.start())
         block = s[m.start():end]
-        head, rest = block[:block.index("(", 1)], block[block.index("(", 1):]
+        cut = _class_head_end(block)
+        head, rest = block[:cut], block[cut:]
         names = re.findall(r'"[^"]*"|[^\s()]+', head)[2:]
         if net in names:
             names = [n for n in names if n != net]
@@ -480,6 +520,8 @@ def route(path, mod, minutes=10, threads=1, optimizer_passes=20, drop_nets=("GND
         dsn_plane_as_layer_rule(dsn)
     for n in drop_nets:
         dsn_drop_net(dsn, n)
+        if not re.fullmatch(r'[^\s()"]+', n):        # KiCad quotes a net name with spaces in the DSN
+            dsn_drop_net(dsn, f'"{n}"')
     dsn_clearance_margin(dsn)
     dsn_add_keepouts(dsn, cfg(mod, "ROUTER_KEEPOUTS", []))
     log = path.replace(".kicad_pcb", ".freerouting.log")
@@ -699,6 +741,13 @@ def finish(board, mod, path):
 
 def route_board(board, mod, out, minutes, attempts, resume=False):
     drop = ("GND",) if mod.LAYERS == 4 else ()
+    # PREROUTED_NETS (board module, short names): nets whose copper the module pre-routes and locks in full. They are
+    # taken out of Freerouting's job like GND (their copper stays as keep-outs): a fixed wire that only passes over a
+    # pad does not connect it in Freerouting's model, which then lays a second, Default-width route beside it.
+    pre = set(cfg(mod, "PREROUTED_NETS", ()))
+    if pre:
+        names = {p.GetNetname() for fp in pcbnew.LoadBoard(out).GetFootprints() for p in fp.Pads()}
+        drop += tuple(sorted(n for n in names if n and net_short(n) in pre))
     if mod.LAYERS == 4 and not resume:
         b = pcbnew.LoadBoard(out)
         v, d = cfg(mod, "GND_VIA", (0.6, 0.3))

@@ -1,0 +1,15 @@
+Designator,Qty,Value,Footprint,Side,Manufacturer,MPN,DigiKey,Mouser,LCSC,Note
+C1,1,10u,C_0603_1608Metric,top,Samsung Electro-Mechanics,CL10A106KP8NNNC,,,C19702,10 uF 10 V X5R 0603 (on +3V3)
+C2,1,22u,C_0805_2012Metric,top,Samsung Electro-Mechanics,CL21A226MAQNNNE,,,C45783,22 uF 25 V X5R 0805 (on +5V)
+"C3,C10,C11",3,100n,C_0402_1005Metric,top,Samsung Electro-Mechanics,CL05B104KO5NNNC,,,C1525,100 nF 16 V X7R 0402
+D10,1,red,LED_0603_1608Metric,top,Hubei KENTO Elec,KT-0603R,,,C2286,red LED 0603; any red 0603 LED fits
+J1,1,SLOT,PinHeader_2x20_P2.54mm_Vertical,bottom,HanElectricity,2541WV-2x20P,,,C25503140,"male 2 x 20 pin header, 2.54 mm, 6.0 mm mating, 2.54 mm plastic, 3.0 mm tail, gold; any 2 x 20 2.54 mm header with a 6 mm mating length mates with the motherboard's 8.5 mm socket; mounted on the BOTTOM side"
+"Q10,Q11,Q12,Q13,Q14,Q15,Q16",7,AO3400A,SOT-23,top,Alpha & Omega Semiconductor,AO3400A,,,C20917,"30 V N-MOSFET, SOT-23, RDS(on) < 48 mOhm at VGS 2.5 V"
+"R1,R10,R11,R12,R13,R26,R27,R29,R35,R36,R37,R38,R39",13,100k,R_0402_1005Metric,top,UNI-ROYAL(Uniroyal Elec),0402WGF1003TCE,,,C25741,"100 kOhm 1 % 0402 (pull-downs, WC, the loopback's input pulls); substitute any 100 k 1 % 0402 thick film"
+"R14,R15,R16,R17,R18,R19,R20,R21,R22,R23,R24",11,10R,R_2512_6332Metric,top,UNI-ROYAL(Uniroyal Elec),25121WF100JT4E,,,C47019,10 Ohm 1 % 1 W 2512 thick film (400 ppm/K); substitute any 10 Ohm 1 % 2512 rated 1 W
+R25,1,10k,R_0402_1005Metric,top,UNI-ROYAL(Uniroyal Elec),0402WGF1002TCE,,,C25744,10 kOhm 1 % 0402; substitute any 10 k 1 % 0402 thick film
+R28,1,1k,R_0402_1005Metric,top,UNI-ROYAL(Uniroyal Elec),0402WGF1001TCE,,,C11702,1 kOhm 1 % 0402; substitute any 1 k 1 % 0402 thick film
+"R30,R31,R32,R33,R34",5,499,R_0603_1608Metric,top,Viking Tech,AR03BTCX4990,,,C2889161,"499 Ohm 0.1 % 25 ppm/K 1/10 W 0603 thin film: the lane ladder (R_src <= 600 Ohm), keep 499 Ohm, 0.1 % and <= 25 ppm/K (e.g. FH TD03G4990BT, YAGEO RT0603BRD07499RL)"
+U1,1,M24C02-WMN6TP,SOIC-8_3.9x4.9mm_P1.27mm,top,STMicroelectronics,M24C02-WMN6TP,,,C7562,"2 kbit I2C EEPROM, SO8N; the descriptor at 0x50 (E2-E0 to GND)"
+U10,1,SN74LV165APWR,TSSOP-16_4.4x5mm_P0.65mm,top,Texas Instruments,SN74LV165APWR,,,C201716,"8-bit PISO shift register with Ioff, TSSOP-16"
+U11,1,SN74LVC1G125DBVR,SOT-23-5,top,Texas Instruments,SN74LVC1G125DBVR,,,C23654,"single 3-state buffer with Ioff, SOT-23-5"

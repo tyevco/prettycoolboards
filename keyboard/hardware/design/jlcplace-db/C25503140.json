@@ -1,0 +1,68 @@
+{
+ "entries": [
+  {
+   "correction": {
+    "dx": 1.27,
+    "dy": 24.13,
+    "mirror": false,
+    "rot": 270.0
+   },
+   "ee": {
+    "key": "ee-sha1:3e7073cae5729470",
+    "title": "HDR-TH_40P-P2.54-V-M-R2-C20-S2.54"
+   },
+   "fit": {
+    "alternatives": [
+     {
+      "conflicts": 30,
+      "dx": 1.27,
+      "dy": 24.13,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": true,
+      "names": 0,
+      "rot": 90.0
+     },
+     {
+      "conflicts": 36,
+      "dx": 1.27,
+      "dy": 24.13,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": true,
+      "names": 0,
+      "rot": 270.0
+     },
+     {
+      "conflicts": 38,
+      "dx": 1.27,
+      "dy": 24.13,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": false,
+      "names": 0,
+      "rot": 90.0
+     }
+    ],
+    "matched": 40,
+    "method": "number",
+    "rms": 0.0,
+    "score": 85
+   },
+   "fitted": "2026-11-27",
+   "kicad": {
+    "fpid": "Connector_PinHeader_2.54mm:PinHeader_2x20_P2.54mm_Vertical",
+    "pad_hash": "sha1:9dd6aab88fd9c64e"
+   },
+   "reasons": [
+    "fits by pad numbers: 40/40 matched, rms 0.000 mm",
+    "rot 90 also lands every pad, on other nets; ruled out by pad numbers"
+   ],
+   "status": "auto",
+   "tool": "jlcplace 0.2.1",
+   "verdict": "green",
+   "verifications": []
+  }
+ ],
+ "lcsc": "C25503140"
+}

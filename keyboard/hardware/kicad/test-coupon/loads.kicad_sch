@@ -3679,7 +3679,7 @@
 		)
 		(uuid "f2784c21-1793-5eba-8952-279c0d7e46e4")
 	)
-	(text "S1-S4 only: above the TPS2553's 644 mA maximum trip. On S5 (2 A breaker) it is NOT limited: do not use there."
+	(text "S1-S4 only: above the TPS2553's 644 mA maximum trip. On S5 (2 A breaker) it is NOT limited: never drive G3 there."
 		(exclude_from_sim no)
 		(at 154.94 74.93 0)
 		(effects
