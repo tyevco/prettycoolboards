@@ -97,6 +97,8 @@ export default withMermaid(defineConfig({
             { text: 'Concept and roadmap', link: '/keyboard/docs/concept' },
             { text: 'Rev A MCU decision', link: '/keyboard/docs/mcu' },
             { text: 'Testbed SPEC (draft)', link: '/keyboard/hardware/design/SPEC' },
+            { text: 'Firmware', link: '/keyboard/firmware/' },
+            { text: '8 kHz HID proof (hid8k)', link: '/keyboard/firmware/hid8k/' },
             { text: 'Research', link: '/keyboard/docs/research' },
             { text: 'Concept renders', link: '/keyboard/hardware/concept/' },
             // a static page from public/: an absolute URL so the router doesn't treat it as a doc page

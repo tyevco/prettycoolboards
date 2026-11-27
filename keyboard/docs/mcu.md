@@ -1,10 +1,11 @@
 # Rev A MCU: STM32U5A5 (decision record)
 
-> **Status (2026-11-26): decided on paper.** The owner chose the rev A testbed MCU on 2026-11-26 after a desk-research
+> **Status (2026-11-27): decided on paper.** The owner chose the rev A testbed MCU on 2026-11-26 after a desk-research
 > run: four researchers, one per chip family, then an adversarial verifier that re-checked the deciding claims on
 > primary sources (the Zephyr tree, the USB device drivers, the JLC parts API). **Designed, not built or measured:** no
-> schematic, board or firmware exists, the Nucleo has not been brought up, and nobody has shown 8 kHz HID on this chip.
-> Stock and prices are from 2026-11-26 and change daily.
+> schematic or board exists, the Nucleo has not been brought up, and nobody has shown 8 kHz HID on this chip. The only
+> firmware is the 8 kHz HID proof for the Nucleo (2026-11-27), compiled and never run
+> ([condition 2](#conditions-before-the-schematic-is-committed)). Stock and prices are from 2026-11-26 and change daily.
 
 ## The decision
 
@@ -17,7 +18,7 @@
 | Fallback | NXP i.MX RT1021 (C5119758), the stock-safe runner-up. Third choice: NXP LPC55S69 |
 | Dropped | Artery AT32F405, the rev A candidate until 2026-11-26: no upstream Zephyr ([verdict below](#the-at32f405-verdict)) |
 | Rev B | Still decided by the battery gate ([concept §5](concept.md#_5-platform-let-the-testbed-decide)). Front-runner: Nordic nRF54LM20A, measured now on a dev kit ([side track](#split-advice-rev-b-and-the-dev-kit-side-track)) |
-| Architecture | The testbed's draft architecture of record: [hardware/design/SPEC.md](../hardware/design/SPEC.md) |
+| Architecture | The testbed's draft architecture of record: [hardware/design/SPEC.md](../hardware/design/SPEC.md). Its pin map uses all 82 I/O pins. The owner's decisions on it of 2026-11-26 ([SPEC §1](../hardware/design/SPEC.md#_1-purpose-and-what-rev-a-must-prove)) leave that budget at 82 of 82: no charger on rev A, a 2 × 20 slot connector at 2.54 mm, and a USB Type-C detect chip on I2C (candidate: TI TUSB320LAI) whose interrupt goes to an I/O expander, not to the MCU. The MCU's own USB-C controller (UCPD1) is not used, so its dead-battery pull-downs are switched off at boot ([SPEC §5.2](../hardware/design/SPEC.md#_5-2-constraints-behind-the-choices)) |
 
 **Why.** It is the only stocked part found that meets the two hardest requirements, high-speed USB with the PHY on
 chip (R1) and upstream Zephyr support for that USB device (R2), **and** leads on analog (R3). The verifier found
@@ -179,7 +180,7 @@ The verifier re-checked the researchers' deciding claims and corrected these:
 
 ## Conditions before the schematic is committed
 
-The owner set two conditions. Both are open on 2026-11-26.
+The owner set two conditions. Both are open on 2026-11-27.
 
 1. **Reserve the MCUs.** Buy the JLC stock into a JLC private parts library, or consign 4–6 parts, before the
    schematic is committed. JLC had 13 STM32U5A5VJT6 on 2026-11-26 and DigiKey had none before February–March 2027.
@@ -194,6 +195,17 @@ The owner set two conditions. Both are open on 2026-11-26.
    samples first. If it fails, fall back to the i.MX RT1021 (EHCI) and record why; the nRF54LM20 dev kit's dwc2
    result is a cross-check, not a rev A fallback.
 
+   **Where it stands (2026-11-27): the firmware is written, nothing is measured.** The proof firmware and its host
+   measurement tool are in [keyboard/firmware/hid8k](../firmware/hid8k/README.md). It builds for `nucleo_u5a5zj_q`
+   with Zephyr v4.5.0 (41d10b5) and Ubuntu's arm-none-eabi GCC 13.2.1, not the Zephyr SDK 1.0.1 that v4.5.0
+   expects, and the built ELF's high-speed interrupt endpoint has wMaxPacketSize 64 and bInterval 1. It paces the
+   reports from the HID completion callback, carries a sequence number and timestamps in a vendor stats report, and
+   keeps a CDC ACM console logging, with a heavy mode for the "CDC logging active" part. The host tool's 49 tests pass
+   on synthetic data. It has **not run on a Nucleo**: enumeration speed, report rate, jitter and the submit cost are
+   all unknown until the four 10-minute runs in its README (Windows and Linux, CDC normal and heavy). Which of the
+   tool's two verdicts closes the condition, its strict "no missed microframes" or its looser PASS, is the owner's
+   call ([SPEC §10](../hardware/design/SPEC.md#_10-bring-up-order)).
+
 ## Bring-up risks
 
 The risks bring-up has to retire first, from the verifier:
@@ -203,7 +215,7 @@ The risks bring-up has to retire first, from the verifier:
 | 8 kHz HID on `udc_stm32` is unproven | Condition 2 above. It is the first gate |
 | ADC throughput per 125 µs frame | Each frame must cover N keys × (mux switch + sensor enable-to-valid settling + conversion + any oversampling) on each ADC. The coupon sensors are enable-gated, so their settling time is probably the real limit, not the ADC; it is not checked. By arithmetic, 16 keys on one ADC leave 7.8 µs per key. Build a timer-triggered, DMA-driven scan (`ADC_STM32_DMA` or `ADC_STREAM`, or LL code) and measure the scan period and CPU load before deciding how many keys share a bus |
 | Parts supply | Condition 1, and keep the RT1021 as a ready alternative |
-| The high-speed hardware | A 90 Ω differential pair on JLC's controlled-impedance stack, routed by hand before Freerouting (it is not impedance-aware). An HSE crystal at a frequency the U5's HS PHY accepts: 16 MHz works on the Nucleo, and the accepted list is unverified. VDDUSB handling per package. The OTG_HS core runs only in voltage ranges 1 and 2. Plan an enumeration and eye check at 480 Mb/s |
+| The high-speed hardware | A 90 Ω differential pair on JLC's controlled-impedance stack, routed by hand before Freerouting (it is not impedance-aware). An HSE crystal at a frequency the U5's HS PHY accepts: 16 MHz, as on the Nucleo, is in the PHY's list of 16, 19.2, 20, 24, 26 and 32 MHz (RM0456 Rev 7, read in a third-party transcription on 2026-11-27; ST's HAL and Zephyr's PHY driver agree) and in the ROM bootloader's DFU crystal list (AN2606), [SPEC §5.2](../hardware/design/SPEC.md#_5-2-constraints-behind-the-choices). VDDUSB handling per package. The OTG_HS core runs only in voltage ranges 1 and 2. Plan an enumeration and eye check at 480 Mb/s |
 | Current-sense separation | The HS PHY draws about 13 mA at idle (datasheet typical, via the research). It and the MCU's own current must stay off the per-coupon sense paths, or the battery gate gets polluted numbers |
 | Zephyr maturity | Pin a version (above). Keep the MCU out of low-power states that gate the OTG clocks until that is tested |
 | Motor drive | Zephyr's STM32 PWM has complementary outputs, but dead-time is not clearly exposed. Run the DRV8316 in 3x PWM mode (its internal dead-time) first; 6-PWM only once the TIM1 or TIM8 dead-time setup is proven |
@@ -245,7 +257,10 @@ toolchain.
   ADC4, TIM1/TIM8 and the OTG_HS node. The STM32 researcher read DS13543 and reported the PHY in every package.
   The SPEC's drafting has since read DS13543 Rev 2 for the LQFP100: ADC1/ADC2 reach 2.5 Msps at 14 bits and ADC4
   2.75 Msps at 12 bits (Tables 97 and 100), and Zephyr's PHY driver accepts a 16 MHz HSE
-  ([SPEC §5.2, §6.2](../hardware/design/SPEC.md#_5-2-constraints-behind-the-choices)).
+  ([SPEC §5.2, §6.2](../hardware/design/SPEC.md#_5-2-constraints-behind-the-choices)). On 2026-11-27 the HSE list was
+  read in RM0456 Rev 7 (16 MHz is in it), but in a third-party transcription, because st.com could not be reached;
+  ST's own PDF, the datasheet's latest revision and the errata sheet ES0553 remain unread
+  ([SPEC §11](../hardware/design/SPEC.md#_11-open-items-and-risks), #24 and #25).
 * The i.MX RT1021's ADC rate and per-package channel and FlexPWM counts (the NXP datasheet download was blocked).
 * The LPC55S69's 1.0 Msps ADC rate (search summaries of the datasheet, not read directly).
 * Mouser stock for every part (the site returned 503).

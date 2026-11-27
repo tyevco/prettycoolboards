@@ -1,0 +1,6 @@
+# hid8k_measure.py host tool. On Linux the default hidraw backend needs neither HID package.
+# One of the two hidapi bindings (both import as "hid"):
+hidapi    # cython-hidapi, bundles the hidapi library (simplest on Windows)
+# hid     # pyhidapi (ctypes): needs the hidapi shared library installed separately
+pyserial  # only for --cdc (hold the CDC console open and log it during the run)
+pytest    # only for the tests

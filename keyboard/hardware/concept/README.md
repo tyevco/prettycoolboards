@@ -120,37 +120,46 @@ buzz out of a hard desk. Untested; the mount and the arm geometry are the sketch
 ## Rev A testbed
 
 The motherboard and its plug-in coupons ([concept §7](../../docs/concept.md#_7-rev-a-testbed)), drawn by
-`testbed_models.py` and `coils.py`. Board size, connector, coupon footprints and layout are illustrative, and the
-solder-mask colours only tell the coupons apart.
+`testbed_models.py` and `coils.py` to match the draft [SPEC](../design/SPEC.md) and the owner's decisions of
+2026-11-26 ([SPEC §1](../design/SPEC.md#_1-purpose-and-what-rev-a-must-prove)): no battery or charger on rev A, a
+2 × 20, 2.54 mm slot connector, and a USB Type-C detect chip. The board and coupon sizes are the SPEC's "about"
+figures ([§2](../design/SPEC.md#_2-boards)) and the slot rows follow its
+[§9](../design/SPEC.md#_9-mechanical-envelope-proposal); every position inside them is this sketch's, not a
+placement. The solder-mask colours only tell the coupons apart.
 
-![3/4 view of the green motherboard on standoffs with the Hall-effect, TMR, shear, coil and haptics coupons plugged in, and a translucent optional KVM coupon. On the motherboard's left side: the USB-C port, the STM32U5A5 (rev A MCU) drawn as an LQFP with its 16 MHz HSE crystal, and the latency-rig header.](renders/testbed_assembly.png)
+![3/4 view of the green motherboard on standoffs with the Hall-effect, TMR and shear coupons in the back row and the coil and haptics coupons in the front row, and a translucent optional KVM coupon at the front right. Callouts mark the USB-C port and the Type-C current-detect chip on the board's left edge, the STM32U5A5 (rev A MCU) just behind them, and the power section in the strip between the rows.](renders/testbed_assembly.png)
 
-*Assembled: one motherboard (the STM32U5A5, the owner's rev A MCU of 2026-11-26, [mcu.md](../../docs/mcu.md); USB-C,
-power, latency-rig hooks) and a coupon per sensing method; the optional KVM coupon is a ghost.*
+*Assembled: one motherboard (the STM32U5A5, the owner's rev A MCU of 2026-11-26, [mcu.md](../../docs/mcu.md); USB-C
+with a Type-C current-detect chip on I2C, the power section, latency-rig hooks) and a coupon per sensing method, S1–S3
+along the back and S4, S5 and the optional KVM coupon (a ghost) along the front. No battery or charger.*
 
-![The coupons lifted out of their sockets at two heights, with dashed guides from each header to its socket, and the keys lifted further off so the sensor packages show; the haptics coupon's callout puts its capacitive strip on a touch controller.](renders/testbed_exploded.png)
+![The coupons lifted off the motherboard, the back row higher than the front row, with dashed guides from each coupon's 2 by 20 header down towards its 2 by 20 socket (the S1 and S4 sockets show as black bars; the front-row coupons hide the others), and the keys lifted further off so the sensor packages show. Callouts name each coupon's contents, the descriptor EEPROM every coupon carries, the M3 nylon post under each coupon, and the female through-hole socket on the motherboard.](renders/testbed_exploded.png)
 
-*Exploded: each coupon out of its 2 × 10 mezzanine socket (connector type not decided; the draft
-[SPEC](../design/SPEC.md#_4-1-connector) proposes a 2 × 20, 2.54 mm socket), and the keys off the TMAG5253, TMR and
-TMAG5170 sites.*
+*Exploded: each coupon off its 2 × 20, 2.54 mm socket (a female through-hole socket on the motherboard, a male header
+on the coupon: the owner's decision, [SPEC §4.1](../design/SPEC.md#_4-1-connector)), and the keys off the TMAG5253, TMR
+and TMAG5170 sites. Every coupon carries a descriptor EEPROM and stands on one M3 nylon post.*
 
-![Top view of the testbed to scale, with callouts for USB-C with a short high-speed pair to the MCU, the STM32U5A5 (rev A MCU) drawn as an LQFP100, a 16 MHz HSE crystal, power and charging, the injection and current-sense test pads, the latency-rig header, the pale optional KVM coupon with its host-B controller and isolator (if isolated), each key, shear and coil coupon, and the haptics coupon with its capacitive strip on an external touch controller.](renders/testbed_top.png)
+![Top view of the testbed to scale: the Hall-effect, TMR and shear coupons along the back, the coil and haptics coupons and the pale optional KVM coupon along the front, and the strip between the rows with the power section on its right. Below it, the strip's left half at twice the scale, with callouts for the USB-C with its ESD array and VBUS TVS, the short high-speed pair, the Type-C current-detect chip, the STM32U5A5 drawn as an LQFP100, the 16 MHz HSE crystal, the reset and BOOT0 buttons, the latency-rig and SWD headers, the I2C mux and I/O expanders, the test pads and the INJ solder jumpers.](renders/testbed_top.png)
 
-*Top view to scale (a motherboard of about 160 × 110 mm in this sketch), with a short label for each coupon and
-motherboard section. Positions and sizes are illustrative. The MCU is the owner's rev A decision; the other parts
-named are candidates. The 16 MHz HSE is the Nucleo's value: Zephyr's PHY driver accepts it, and ST's reference-manual
-list is not checked ([SPEC §5.2](../design/SPEC.md#_5-2-constraints-behind-the-choices)).*
+*Top view to scale: a motherboard of about 190 × 150 mm and coupons of about 58 × 60 and 80 × 60 mm, the SPEC's sizes,
+which follow from the 2 × 20 connector; layout sets the outlines. The power section is the input breaker, the two
+LDOs, a 3.3 V and a 5 V switch per slot and 13 INA226-class current monitors; there is no charger. The MCU is the
+owner's rev A decision, turned so that its USB pins face the USB-C; the other parts named are the SPEC's candidates.
+The 16 MHz HSE is in the high-speed PHY's list of accepted reference clocks (RM0456 Rev 7, read in a third-party
+transcription; ST's HAL and Zephyr's PHY driver agree) and in the ROM bootloader's DFU crystal list
+([SPEC §5.2](../design/SPEC.md#_5-2-constraints-behind-the-choices)).*
 
-![A small latency-rig board beside the motherboard, which carries only the Hall-effect coupon, joined by a USB cable, a ribbon to the rig header and a probe lead to an injection test pad, above a five-box strip of the planned measurement path.](renders/testbed_latency_rig.png)
+![A 100 by 80 mm latency-rig board beside the motherboard, which carries only the Hall-effect coupon, joined to it by a USB cable from the rig's USB-A host port to the motherboard's USB-C and by a grey ribbon arching to the latency-rig header; a callout marks the closed solder jumper that takes the rig's stimulus to slot S1. Below, a five-box strip of the planned measurement path.](renders/testbed_latency_rig.png)
 
-*Latency rig: it would step an injection test pad, read the marker GPIO and, as the USB host, timestamp each HID
-report. Its parts and how it reaches the pad are not decided.
-([concept §4.2](../../docs/concept.md#_4-2-latency-and-battery-gates))*
+*Latency rig: over the ribbon to J_RIG it would drive the stimulus (through slot S1's solder jumper, closed for the
+test) and read the marker GPIO, the frame tick and the USB SOF; as the USB host it would timestamp each HID report. Its
+parts are not chosen; nothing is built or measured. ([SPEC §7.3](../design/SPEC.md#_7-3-latency-rig-j-rig),
+[concept §4.2](../../docs/concept.md#_4-2-latency-and-battery-gates))*
 
-![PCB-style top view of the coil coupon: a 4 by 5 grid of copper spirals, each labelled with its turns, under column headers for the trace width and row headers for the layers and size, with five converter chips on the right. Below it: a legend, and one 4-layer coil drawn layer by layer.](renders/testbed_coil_coupon.png)
+![PCB-style top view of the coil coupon: a 4 by 5 grid of copper spirals, each labelled with its turns, under column headers for the trace width and row headers for the layers and size, with five converter chips and the descriptor EEPROM on the right and the 2 by 20 slot header's pads along the back edge. Below it: a legend, and one 4-layer coil drawn layer by layer.](renders/testbed_coil_coupon.png)
 
-*Coil coupon: 20 spiral variants (layers and diameter by row, trace = space by column), an illustrative spread around
-a stock MX footprint, not checked against JLC's rules or the converter.
+*Coil coupon: 20 spiral variants (layers and diameter by row, trace = space by column) on a wide coupon of about
+80 × 60 mm, an illustrative spread around a stock MX footprint, not checked against JLC's rules or the converter.
 ([concept §2.4](../../docs/concept.md#_2-4-analog-from-stock-switches-printed-coils))*
 
 ## Physics: model estimates
@@ -240,7 +249,7 @@ them are concept sketches with illustrative geometry.
 | `keyboard_half_exploded.glb` | The left half exploded along its tent normal, the same layers as the exploded render |
 | `mech_shear_key.glb` | One shear key: keycap, stem, magnet, spring, the carrier on its flexure posts, housing, plate, PCB and a TMAG5170 |
 | `mech_thumb_wheel.glb` | The thumb wheel module: gimbal motor, roller, encoder board, bracket, thumb plate and two thumb keys for scale |
-| `testbed_assembly.glb` | The rev A motherboard with the Hall-effect, TMR, shear, coil and haptics coupons plugged in (the optional KVM coupon is left out, its socket kept) |
+| `testbed_assembly.glb` | The rev A motherboard (about 190 × 150 mm in this sketch, no charger) with the Hall-effect, TMR, shear, coil and haptics coupons plugged into their 2 × 20 sockets (the optional KVM coupon is left out, its J_KVM header kept) |
 
 ## Regenerating
 

@@ -1,0 +1,26 @@
+/*
+ * hid8k on the NUCLEO-U5A5ZJ-Q. The board file already enables the OTG_HS controller with
+ * its embedded high-speed PHY (zephyr_udc0: &usbotg_hs, &otghs_phy).
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/ {
+	hid8k_hid: hid8k_hid {
+		compatible = "zephyr,hid-device";
+		label = "hid8k keyboard and stats";
+		/* No boot protocol: report IDs, and one interface for both collections. */
+		protocol-code = "none";
+		/* 64 bytes keeps wMaxPacketSize 64 and the simple interface (no alternate). */
+		in-report-size = <64>;
+		/* USB_HS_INT_EP_INTERVAL(125) = 1: one IN transaction per 125 us microframe. */
+		in-polling-period-us = <125>;
+	};
+};
+
+&zephyr_udc0 {
+	cdc_acm_uart0: cdc_acm_uart0 {
+		compatible = "zephyr,cdc-acm-uart";
+		label = "hid8k console";
+	};
+};

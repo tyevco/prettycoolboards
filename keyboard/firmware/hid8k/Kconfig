@@ -1,0 +1,118 @@
+# hid8k: 8 kHz HID proof for the NUCLEO-U5A5ZJ-Q
+# SPDX-License-Identifier: Apache-2.0
+
+menu "hid8k: 8 kHz HID proof"
+
+config HID8K_USB_VID
+	hex "USB vendor ID"
+	default 0x1209
+	help
+	  Default 0x1209 with PID 0x0001: the pid.codes test PID, reserved for
+	  private testing. It is not universally unique and must not be used on
+	  any device that is redistributed, sold or manufactured. Bench use only.
+
+config HID8K_USB_PID
+	hex "USB product ID"
+	default 0x0001
+	help
+	  See HID8K_USB_VID. Change the pair only to another test ID, never to
+	  one that belongs to someone else's product.
+
+config HID8K_USB_MANUFACTURER
+	string "USB manufacturer string"
+	default "prettycoolboards bench test"
+
+config HID8K_USB_PRODUCT
+	string "USB product string"
+	default "hid8k 8 kHz HID proof (bench only)"
+
+config HID8K_USB_MAX_POWER
+	int "bMaxPower in 2 mA units"
+	range 0 250
+	default 50
+	help
+	  The configuration is declared self-powered (the Nucleo is powered from
+	  its ST-LINK USB on the bench); 50 (100 mA) is a conservative
+	  declaration, not a measurement.
+
+config HID8K_QUEUE_DEPTH
+	int "HID reports kept queued on the IN endpoint"
+	range 1 4
+	default 2
+	help
+	  The input_report_done callback tops the queue up to this many
+	  reports. With 2, one report is armed in the controller and one waits
+	  behind it, so the UDC driver arms the next report as soon as a
+	  transfer completes, without waiting for the USB stack thread.
+	  CONFIG_USBD_HID_IN_BUF_COUNT must be at least this plus one.
+
+config HID8K_LOG_PERIOD_MS
+	int "Stats line period on the CDC console (ms)"
+	range 10 20000
+	default 1000
+	help
+	  One stats line per period. Shorter periods put more traffic on the
+	  CDC ACM path; the window rate is computed from the cycle counter,
+	  which wraps every 26.8 s at 160 MHz, hence the upper limit.
+
+config HID8K_HIST_PERIOD_S
+	int "Cumulative histogram dump period (s), 0 = only on the hist command"
+	range 0 3600
+	default 10
+
+config HID8K_CDC_HEAVY_BPS
+	int "Filler bytes per second in heavy CDC mode"
+	range 0 4000000
+	default 100000
+	help
+	  In heavy mode (the "heavy" command, or HID8K_CDC_HEAVY_AT_BOOT) the
+	  stats thread writes this many bytes per second of numbered filler
+	  lines to the CDC console, on top of the stats lines.
+
+config HID8K_CDC_HEAVY_AT_BOOT
+	bool "Start in heavy CDC mode"
+
+config HID8K_CDC_RING_SIZE
+	int "CDC console transmit ring size (bytes)"
+	range 1024 16384
+	default 8192
+
+config HID8K_CDC_CHUNK
+	int "Most bytes handed to the CDC class per callback run"
+	range 64 16384
+	default 512
+	help
+	  The CDC ACM callback runs in a cooperative work queue, which the USB
+	  stack threads cannot preempt. Bounding each run bounds how long it
+	  can hold them off.
+
+config HID8K_FRAME_NUMBER
+	bool "Read the (micro)frame number from the OTG_HS register"
+	help
+	  Zephyr's USB device stack does not expose the SOF or (micro)frame
+	  number: the SOF event carries none, and hid_device_ops.sof has no
+	  argument. With this option the firmware reads OTG_HS DSTS.FNSOF
+	  directly (outside the stack, read-only) in the completion callback
+	  and at each submit, and sets HID8K_FLAG_FN_VALID in the stats report.
+	  The host tool then counts microframes without a completion. Off by
+	  default because it goes around the stack.
+
+config HID8K_PHY_TUNER2
+	bool "Write the HS PHY's recommended TUNER2 values before the PHY is enabled"
+	help
+	  RM0456 Rev 7 section 15.2.3 sets SYSCFG_OTGHSPHYTUNER2 to
+	  COMPDISTUNE = 010 (disconnect threshold +5.9 %) and SQRXTUNE = 000
+	  (squelch threshold +15 %), the recommended values, before it sets
+	  the PHY's EN bit. Zephyr v4.5.0 never writes TUNER2, so the register
+	  keeps its reset defaults (0 %). With this option main() writes the
+	  two fields through the LL read-modify-write setters before
+	  usbd_init(), where Zephyr's UDC driver sets EN. Off by default, so
+	  the default build is what Zephyr does upstream; bring-up runs both.
+
+config HID8K_MIRROR_TO_CONSOLE
+	bool "Mirror stats lines to the board console (ST-LINK VCP), at most 1/s"
+	default y
+
+endmenu
+
+source "Kconfig.zephyr"

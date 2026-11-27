@@ -5,7 +5,9 @@ and the rev A testbed MCU, the STM32U5A5, on 2026-11-26 ([rev A MCU decision](mc
 **Nothing here is designed, built or measured.** Parts, stock figures and currents come from desk research on
 2026-11-25, and the MCU figures from 2026-11-26. Recheck stock at LCSC/JLC before designing around a part, and with
 `tools/lcsc_check.py` once the part is in a generated netlist (the tool reads LCSC codes from a KiCad netlist). Every
-figure is a candidate until the testbed measures it.
+figure is a candidate until the testbed measures it. The testbed's [SPEC](../hardware/design/SPEC.md) is a draft on
+paper, and the only firmware, the 8 kHz HID proof for the Nucleo ([firmware/hid8k](../firmware/hid8k/README.md)), is
+compiled and has not run on hardware.
 
 ## 1. What makes it different
 
@@ -320,7 +322,7 @@ trace and space, layers, diameter).
 
 Such a coupon, as the concept's `coils.py` draws it:
 
-![PCB-style top view of the coil coupon: a 4 by 5 grid of copper spirals with five converter chips on the right. Column headers give each column's trace width, row headers each row's layers and size (rows of 1, 2 and 4 layers inside the stock-MX pin positions and a row of larger 2-layer coils), and each coil is labelled with its turns. Below the coupon: a legend on the left, and on the right one 4-layer coil drawn layer by layer, with arrows showing the current turning the same way on every layer.](../hardware/concept/renders/testbed_coil_coupon.png)
+![PCB-style top view of the coil coupon on an 80 by 60 mm wide coupon: a 4 by 5 grid of copper spirals with five converter chips on the right, the 2 by 20 slot header's pads along its back edge, and the descriptor EEPROM ("ID") beside the converters. Column headers give each column's trace width, row headers each row's layers and size (rows of 1, 2 and 4 layers inside the stock-MX pin positions and a row of larger 2-layer coils), and each coil is labelled with its turns. Below the coupon: a legend on the left, and on the right one 4-layer coil drawn layer by layer, with arrows showing the current turning the same way on every layer.](../hardware/concept/renders/testbed_coil_coupon.png)
 
 *Concept sketch drawn by `coils.py`: 20 spiral variants (layers and diameter by row, trace = space by column) and one
 4-layer coil shown layer by layer. The parameters are an illustrative spread around a stock MX footprint, not checked
@@ -910,11 +912,12 @@ a solenoid on a real key.*
 
 The rig as a concept sketch, beside the rev A motherboard:
 
-![Concept sketch of a small yellow latency-rig board beside the motherboard, which carries only the Hall-effect coupon. A USB cable runs from the motherboard's USB-C to the rig's USB-A host port, a grey ribbon arches from the rig to the motherboard's rig header, and a red probe lead ends on a gold injection test pad. Below, a five-box strip shows the planned measurement path from t0 at the test pad to t1 when the rig timestamps the HID report.](../hardware/concept/renders/testbed_latency_rig.png)
+![Concept sketch of a 100 by 80 mm yellow latency-rig board beside the motherboard, which carries only the Hall-effect coupon. A USB cable runs from the rig's USB-A host port to the motherboard's USB-C. A grey ribbon arches from the rig to the motherboard's latency-rig header, J_RIG. A callout marks the closed solder jumper JP_INJ1, which takes the rig's stimulus to slot S1. Below, a five-box strip shows the planned measurement path from t0, the rig's stimulus edge, to t1, when the rig timestamps the HID report.](../hardware/concept/renders/testbed_latency_rig.png)
 
-*Concept sketch of the latency rig: it steps an injection test pad on the coupon's analog lane, reads the marker GPIO
-over a ribbon, and, as the USB host, timestamps each HID report. The rig's parts and how it reaches the pad are not
-decided; nothing is built or measured.*
+*Concept sketch of the latency rig. Over a ribbon to J_RIG it would drive the stimulus, which reaches the coupon in
+slot S1 through the solder jumper JP_INJ1 (all five are open by default), and read the marker GPIO. As the USB host
+it would timestamp each HID report. The rig's parts are not chosen; nothing is built or measured
+([SPEC §7.3](../hardware/design/SPEC.md#_7-3-latency-rig-j-rig)).*
 
 And the battery gate:
 
@@ -975,12 +978,15 @@ current).
 
 The testbed as a concept sketch:
 
-![3/4 view concept sketch of a green motherboard on four standoffs with coupon boards plugged in on mezzanine headers: a blue Hall-effect coupon and a purple TMR coupon with four grey keys each, a red shear coupon with two blue keys, a black coil coupon with 20 copper spirals and two stock switches, a white haptics coupon with a gimbal-motor roller, coin LRA and gold capacitive pads, and a translucent optional KVM coupon. The rev A MCU, labelled STM32U5A5 and drawn as an LQFP, its 16 MHz HSE crystal, the USB-C port and the latency-rig header sit on the motherboard's left side.](../hardware/concept/renders/testbed_assembly.png)
+![3/4 view concept sketch of a green motherboard of about 190 by 150 mm on four standoffs, with coupons plugged into 2 by 20 sockets. Along the back: a blue Hall-effect coupon and a purple TMR coupon with six grey keys each, and a red shear coupon with two blue keys. Along the front: a black coil coupon with 20 copper spirals and two stock switches, a white haptics coupon with a gimbal-motor roller, a coin LRA and gold capacitive pads, and a translucent optional KVM coupon on its own 2 by 6 header. Callouts mark the USB-C port and the Type-C current-detect chip on the board's left edge, the STM32U5A5 (rev A MCU) just behind them, and the power section (input breaker, slot switches, 13 INA226-class monitors, LDOs) in the strip between the rows.](../hardware/concept/renders/testbed_assembly.png)
 
-*Concept sketch of the rev A testbed: one motherboard (the STM32U5A5, the owner's rev A MCU of 2026-11-26
-([mcu.md](mcu.md)); USB-C, power, latency-rig hooks) and one plug-in coupon per sensing method. Board size,
-connector, coupon footprints and layout are illustrative, not decided; the optional KVM coupon is drawn as a ghost,
-and the mask colours only tell the coupons apart. §7 has more views.*
+*Concept sketch of the rev A testbed, drawn to the draft [SPEC](../hardware/design/SPEC.md). One motherboard of about
+190 × 150 mm carries the STM32U5A5, the owner's rev A MCU of 2026-11-26 ([mcu.md](mcu.md)); USB-C with a Type-C
+current-detect chip on I2C; the power section; and the latency-rig hooks. One plug-in coupon per sensing method sits
+on the owner's 2 × 20, 2.54 mm slot connector: S1–S3 along the back, S4 and S5 along the front. The optional KVM
+coupon, drawn as a ghost, sits beside S5 on its own 2 × 6 header. No battery or charger on rev A. The sizes are the
+SPEC's; the positions on the board are the sketch's, and the mask colours only tell the coupons apart. §7 has more
+views.*
 
 **Prior art:** ThereminGoat's force curves (a huge open set, but mechanical only), and vendor blog comparisons of HE
 and TMR without raw data. **New:** an open, measured comparison across sensing methods.
@@ -1152,6 +1158,8 @@ in Zephyr before rev B firmware starts.
 
 The hold-tap and combo logic is kept free of hardware calls, so the same code runs in `native_sim` for the recorder's
 replay and the CI tests, and later in WebAssembly for the web app. The caliper's ESP-IDF firmware stays as it is.
+The keyboard's firmware lives in [keyboard/firmware/](../firmware/README.md), one Zephyr application per folder. The
+first is the 8 kHz HID proof for the Nucleo, written and compiled on 2026-11-27 and not yet run on hardware.
 
 The planned layers:
 
@@ -1192,7 +1200,9 @@ flowchart TB
 
 *Concept sketch of the planned firmware layers, top to bottom in the order a key press travels. The behaviour layer
 makes no hardware calls, so the same source runs in `native_sim` for the flight recorder's replay and the CI tests,
-and later as WebAssembly in the web app. No firmware exists yet. Zephyr support is upstream for the rev A STM32U5A5
+and later as WebAssembly in the web app. None of these layers exists yet; the only firmware is a bring-up test, the
+8 kHz HID proof for the Nucleo ([keyboard/firmware/hid8k](../firmware/hid8k/README.md)), compiled and not run. Zephyr
+support is upstream for the rev A STM32U5A5
 (checked 2026-11-26), but 8 kHz HID on it is unproven; for the rev B candidates it is upstream for the nRF54LM20A,
 absent for the CH585 and not checked for the ESP32-S31 (§6).*
 
@@ -1200,13 +1210,25 @@ absent for the CH585 and not checked for the ESP32-S31 (§6).*
 
 A **motherboard plus plug-in coupons**. Each coupon is generated by compiler v0, so rev A also proves the compiler.
 The testbed's draft architecture of record is [hardware/design/SPEC.md](../hardware/design/SPEC.md). It is a draft
-on paper: no schematic or board exists. The draft proposes, for the owner to confirm, no charger on rev A, a 2 × 20
-2.54 mm slot connector and a 190 × 150 mm motherboard (SPEC §1, §2, §11); until then this table is the plan.
+on paper: no schematic or board exists. On 2026-11-26 the owner decided three of its proposals
+([SPEC §1](../hardware/design/SPEC.md#_1-purpose-and-what-rev-a-must-prove)):
+
+* **No battery and no charger on rev A.** The charger is deferred to rev B by the owner's choice; rev A measures the
+  currents the battery gate needs without a cell.
+* **The coupon slot connector is 2 × 20 at 2.54 mm**: a female through-hole socket on the motherboard, a male header
+  on each coupon. The board sizes follow from it, about 190 × 150 mm for the motherboard and about 58 × 60 mm and
+  80 × 60 mm for the standard and wide coupons, and stay proposals until layout sets the outlines.
+* **USB-C input power with a Type-C detect chip on I2C**, which reads the current the source advertises (Default,
+  1.5 A or 3.0 A) so that the firmware sets the board's power budget itself, behind an input breaker of about 3.3 A.
+  It uses no MCU pin. The SPEC's candidate is TI's TUSB320LAI
+  ([SPEC §3.8](../hardware/design/SPEC.md#_3-8-usb-type-c-detect-u-cc)).
+
+The table below is the plan; the SPEC has the detail.
 
 | Board | Carries | Measures / proves |
 |---|---|---|
-| Motherboard | **STM32U5A5** (STM32U5A5VJT6, LQFP100: high-speed USB with the PHY on chip, upstream Zephyr; chosen 2026-11-26, [mcu.md](mcu.md)), USB-C with a hand-routed 90 Ω pair, power and charging (from the caliper's power sheets), coupon connectors with analog and SPI lanes, test pads and a marker GPIO for the latency rig, current-sense points per coupon, kept apart from the MCU's own current and its HS PHY's (about 13 mA at idle) | 8 kHz scanning, per-coupon current, the latency gate's hooks |
-| Hall-effect coupon | TMAG5253 per key (enable-gated, outputs high-impedance when off), compliant-stop aftertouch sites, two switch-free reference sensors and thermistors | Noise, drift, the bottom-out knee, a shared-bus topology at 1 and 8 kHz |
+| Motherboard | **STM32U5A5** (STM32U5A5VJT6, LQFP100: high-speed USB with the PHY on chip, upstream Zephyr; chosen 2026-11-26, [mcu.md](mcu.md)), USB-C with a hand-routed 90 Ω pair, USB-C power with a Type-C detect chip that reads the source's current advertisement (no battery or charger: deferred to rev B by the owner's choice, 2026-11-26), 2 × 20 coupon connectors at 2.54 mm with analog and SPI lanes, test pads and a marker GPIO for the latency rig, current-sense points per coupon, kept apart from the MCU's own current and its HS PHY's (about 13 mA at idle) | 8 kHz scanning, per-coupon current, the latency gate's hooks |
+| Hall-effect coupon | TMAG5253 per key (outputs high-impedance when disabled; always on behind an analog mux at 8 kHz, because one re-enabled every 125 µs frame does not settle within it, and enable-gated at 1 kHz: [SPEC §6.3](../hardware/design/SPEC.md#_6-3-per-step-arithmetic-estimate), an *estimate*), compliant-stop aftertouch sites, two switch-free reference sensors and thermistors | Noise, drift, the bottom-out knee, a shared-bus topology at 1 and 8 kHz |
 | TMR coupon | The same keys on a TMR sensor | Hall-effect against TMR on noise and current |
 | Shear coupon | TMAG5170 under a stock stem and under a centring-stem prototype | The lateral signal and press crosstalk |
 | Coil coupon | About 20 generated coil variants under stock MX switches and slug-stem switches, read by an LDC1614-class converter | Whether a stock spring gives a usable analog signal |
@@ -1227,7 +1249,7 @@ config:
     subGraphTitleMargin: { top: 0, bottom: 8 }
 ---
 flowchart LR
-  MB["Motherboard<br/>STM32U5A5 (HS USB,<br/>upstream Zephyr;<br/>chosen 2026-11-26)<br/>USB-C, power, charging<br/>coupon connectors<br/>(analog + SPI lanes)<br/>current sense per coupon<br/>test pads, marker GPIO"]:::mb
+  MB["Motherboard<br/>STM32U5A5 (HS USB,<br/>upstream Zephyr;<br/>chosen 2026-11-26)<br/>USB-C power,<br/>Type-C detect chip<br/>(no charger: rev B)<br/>2 x 20 coupon connectors<br/>(analog + SPI lanes)<br/>current sense per coupon<br/>test pads, marker GPIO"]:::mb
 
   subgraph CP["Coupons (compiler v0)"]
     direction TB
@@ -1236,7 +1258,7 @@ flowchart LR
     SH["Shear<br/>TMAG5170 under stock<br/>and centring stems"]:::cp
     COIL["Coil<br/>~20 coil variants,<br/>LDC1614-class reader"]:::cp
     HAP["Haptics<br/>DRV8316, MT6701CT,<br/>gimbal motor;<br/>DRV2605L, LRA;<br/>capacitive strip"]:::cp
-    KVM["Two-host KVM<br/>only if the connector<br/>can carry it"]:::opt
+    KVM["Two-host KVM<br/>optional, on a<br/>header of its own"]:::opt
   end
 
   MB --- HE
@@ -1265,31 +1287,37 @@ flowchart LR
 ```
 
 *Concept block diagram of the rev A testbed: the motherboard, the plug-in coupons (each to be generated by compiler
-v0), what each coupon is meant to measure, and the latency rig. Nothing is designed or built. The rev A chip is the
-STM32U5A5, chosen on 2026-11-26 (the AT32F405 was the candidate until then): its Zephyr support is upstream, but 8 kHz
-HID on it is not proven yet (§6, §9). The two-host KVM coupon happens only if the motherboard's connector can carry
-it.*
+v0), what each coupon is meant to measure, and the latency rig. Nothing is built; the SPEC is a draft on paper. The
+rev A chip is the STM32U5A5, chosen on 2026-11-26 (the AT32F405 was the candidate until then): its Zephyr support is
+upstream, but 8 kHz HID on it is not proven yet (§6, §9). The owner's decisions of 2026-11-26 are drawn in: no
+charger on rev A, the 2 × 20 slot connector, and USB-C power with a Type-C detect chip. The two-host KVM coupon is
+optional: the draft SPEC gives it a header of its own (J_KVM, SPEC §7.4) rather than a slot.*
 
 And as a concept sketch, top view to scale:
 
-![Top-view concept sketch of the testbed motherboard, to scale, with callouts: USB-C with a short high-speed pair to the MCU, the STM32U5A5 (rev A MCU) drawn as an LQFP100, a 16 MHz HSE crystal, power and charging, injection and current-sense test pads, the latency-rig header, the optional KVM coupon (pale), the Hall-effect and TMR key coupons, the shear coupon, the coil DOE coupon with 20 spirals and five converters, and the haptics coupon with its motor and roller, coin LRA and a capacitive strip on an external touch controller.](../hardware/concept/renders/testbed_top.png)
+![Top-view concept sketch of the testbed to scale. The Hall-effect and TMR coupons with six keys each and the shear coupon run along the back. The coil and haptics coupons and the pale optional KVM coupon run along the front, with a strip between the rows. Callouts name each coupon, the M3 nylon posts, the 2 by 20 header pins, and the power section: input breaker, two LDOs, a 3.3 V and a 5 V switch per slot, 13 INA226-class monitors, and no charger. Below, the strip's left half is drawn at twice the scale, with callouts for the USB-C with its ESD array and VBUS TVS, the short 90-ohm pair, the Type-C current detect (I2C) chip, the STM32U5A5 drawn as an LQFP100, the 16 MHz HSE crystal, the reset and BOOT0 buttons, the J_RIG and J_SWD headers, the I2C mux and I/O expanders, the test pads and the JP_INJ solder jumpers.](../hardware/concept/renders/testbed_top.png)
 
-*Concept sketch, top view to scale (a motherboard of about 160 × 110 mm in this sketch, the MCU drawn as its
-14 × 14 mm LQFP100), with a short label for each coupon and motherboard section. The MCU is the owner's rev A
-decision ([mcu.md](mcu.md)); the other parts are the candidates in the table above. The 16 MHz HSE is the
-NUCLEO-U5A5ZJ-Q's: which HSE values the U5's high-speed PHY accepts is not checked. Positions and sizes are
-illustrative.*
+*Concept sketch, top view to scale. The motherboard is about 190 × 150 mm and the coupons about 58 × 60 and
+80 × 60 mm: the sizes in the draft [SPEC](../hardware/design/SPEC.md#_2-boards), which follow from the owner's
+2 × 20 slot connector. Layout sets the outlines. The rows follow SPEC §9; the positions in them are the sketch's. The
+MCU is the owner's rev A decision ([mcu.md](mcu.md)), drawn as its 14 × 14 mm LQFP100 and turned so that its USB pins
+(PA11/PA12) face the USB-C. Every other part named is a candidate. The 16 MHz HSE is in the high-speed PHY's list of
+accepted reference clocks (RM0456 Rev 7, read in a third-party transcription; ST's HAL and Zephyr's PHY driver agree)
+and in the ROM bootloader's DFU crystal list (AN2606)
+([SPEC §5.2](../hardware/design/SPEC.md#_5-2-constraints-behind-the-choices)).*
 
 With the coupons lifted out of their sockets, and the keys lifted off, the sensor sites show:
 
-![Exploded concept sketch of the testbed: the six coupons float above the motherboard at two heights, with dashed pink guides from each coupon's header down to its black socket, and the switches and keycaps lifted further off the Hall-effect, TMR, shear and coil coupons so the small sensor packages on the coupon boards show; the haptics coupon's callout puts its capacitive strip on a touch controller.](../hardware/concept/renders/testbed_exploded.png)
+![Exploded concept sketch of the testbed. The back-row coupons float high above the motherboard and the front-row coupons just above it. Dashed pink guides drop from each coupon's 2 by 20 header towards its socket on the motherboard. The S1 and S4 sockets show as black bars; the front-row coupons hide the others. The switches and keycaps are lifted further off the Hall-effect, TMR, shear and coil coupons so the sensor packages show. Callouts name each coupon's contents, the descriptor EEPROM every coupon carries, the M3 nylon post under each coupon, and the female through-hole socket on the motherboard.](../hardware/concept/renders/testbed_exploded.png)
 
-*Concept sketch: each coupon lifted out of its 2 × 10 mezzanine socket, and the keys lifted off to show the TMAG5253,
-TMR and TMAG5170 sites under them. The connector stands in for "coupon connectors with analog and SPI lanes"; its
-type is not decided.*
+*Concept sketch: each slot coupon lifted off its 2 × 20, 2.54 mm connector (a female through-hole socket on the
+motherboard and a male header on the coupon, by the owner's decision of 2026-11-26), and the keys lifted off to show
+the sensor sites under them: TMAG5253, TMR and TMAG5170 sites, all candidate parts. Every coupon carries a descriptor
+EEPROM (SOIC-8) and stands on one M3 nylon post.*
 
-The two-host KVM path (second USB controller and isolator) goes on its own coupon if the motherboard's connector can
-carry it. Otherwise it waits for rev B.
+The two-host KVM path (second USB controller and isolator) goes on its own optional coupon, which the draft SPEC
+plugs into a header of its own, J_KVM ([SPEC §7.4](../hardware/design/SPEC.md#_7-4-optional-kvm-slot-j-kvm)), not
+into a slot. If that coupon is not built on rev A, the KVM path waits for rev B.
 
 The Hall-effect coupon's compliant-stop aftertouch sites would test a soft bottom stop: when the key bottoms out, the
 stop compresses a little further, and the sensor reads that extra travel. One way such a key could look:
@@ -1366,7 +1394,7 @@ if the centring stem fails.*
 |---|---|---|
 | Coils against Hall sensors | Coils need copper-free layers under each key, and the Hall analog buses want solid ground | Separate coupons, then a board variant if coils win |
 | Wheel against battery | 0.5–1 A detent peaks (*estimate*) against a LiPo budget | Wheel coupon current; wheel full-strength when wired, a capacitive strip with LRA ticks on battery |
-| 8 kHz against battery | Fresh 8 kHz reports need sensors on nearly all the time; an enable-gated bus only allows one sensor per column at a time | Hall and TMR coupon currents at 1 and 8 kHz; 8 kHz likely wired-only |
+| 8 kHz against battery | Fresh 8 kHz reports need sensors on nearly all the time: by the draft SPEC's arithmetic a TMAG5253 re-enabled every frame cannot settle to 14 bits within it (its datasheet's 20–45 µs turn-on time reaches only 5 %; [SPEC §6.3](../hardware/design/SPEC.md#_6-3-per-step-arithmetic-estimate), an *estimate*), so at 8 kHz its duty is 100 %; an enable-gated bus only allows one sensor per column at a time | Hall and TMR coupon currents at 1 and 8 kHz; 8 kHz likely wired-only |
 | KVM power | With isolation, the keyboard needs power from whichever host is present | A power design on the KVM coupon if rev A carries one (§7), otherwise in rev B |
 | Keywell against flex | A splayed keywell does not unroll into one flat sheet | Rigid columns in rev B, flex only after the bent-state gate works |
 | Magnetometer against magnets | The caliper's compass idea fails next to 60 switch magnets, so splay can't be sensed on board | Phone-photo fiducials (§4.4) |
@@ -1443,6 +1471,10 @@ peak is a desk estimate.*
   DigiKey none before February–March 2027. If they cannot be secured, the i.MX RT1021 takes over.
 * Prove 8 kHz HID on the NUCLEO-U5A5ZJ-Q before the schematic is committed: Zephyr's `usbd` at high speed with
   `in-polling-period-us = <125>` (bInterval 1), the report rate and jitter measured for at least 10 minutes. Nobody has
-  published this for Zephyr's STM32 USB driver ([mcu.md](mcu.md#conditions-before-the-schematic-is-committed)).
+  published this for Zephyr's STM32 USB driver ([mcu.md](mcu.md#conditions-before-the-schematic-is-committed)). The
+  proof firmware and its host measurement tool are written
+  ([keyboard/firmware/hid8k](../firmware/hid8k/README.md), 2026-11-27): it compiles for `nucleo_u5a5zj_q` with
+  Zephyr v4.5.0 and Ubuntu's arm-none-eabi GCC rather than the Zephyr SDK, and its high-speed endpoint descriptor
+  carries bInterval 1, but it has not run on a Nucleo, so nothing is measured yet.
 * Rev B side track: measure 8 kHz HID together with BLE, and the radio current, on an nRF54LM20 dev kit (XIAO
   nRF54LM20A or nRF54LM20 DK) for the battery gate.

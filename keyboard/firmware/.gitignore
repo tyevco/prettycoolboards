@@ -1,0 +1,7 @@
+# Zephyr build directories (west's default "build" in the app folder, and any build-* variants).
+# The root .gitignore already covers keyboard/firmware/build/, which the READMEs use.
+build/
+build-*/
+
+# The root .gitignore drops *.rules (Freerouting intermediates); udev rules here are source.
+!*.rules

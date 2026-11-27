@@ -1,0 +1,19 @@
+# hid8k bench device (keyboard/firmware/hid8k), Linux udev rules.
+#
+# 1209:0001 is the pid.codes test PID: any test device may use it, so these rules also apply
+# to other bench devices that do. Install on a bench machine only:
+#   sudo cp 70-hid8k.rules /etc/udev/rules.d/
+#   sudo udevadm control --reload-rules && sudo udevadm trigger
+# then unplug and replug the Nucleo's user USB port.
+#
+# The file sorts before 73-seat-late.rules, which turns TAG+="uaccess" into an ACL for the
+# logged-in user, and before ModemManager's rules, which read ID_MM_DEVICE_IGNORE.
+
+# hidraw: hid8k_measure.py --backend hidraw (the Linux default), and hidapi's hidraw backend
+KERNEL=="hidraw*", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="0001", MODE="0660", TAG+="uaccess"
+
+# the USB device node: libusb-based tools (hidapi-libusb, lsusb -v as a user)
+SUBSYSTEM=="usb", ATTR{idVendor}=="1209", ATTR{idProduct}=="0001", MODE="0660", TAG+="uaccess"
+
+# the CDC ACM console: let the user open it, and keep ModemManager from probing it
+SUBSYSTEM=="tty", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="0001", MODE="0660", TAG+="uaccess", ENV{ID_MM_DEVICE_IGNORE}="1"

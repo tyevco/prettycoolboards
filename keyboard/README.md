@@ -3,11 +3,13 @@
 A planned analog keyboard designed as code: one layout file in, a gated, JLC-assembled board, case and firmware out.
 The plan: keys that also point, and controls that change how they feel to suit what you are doing.
 
-> **Status (2026-11-26): concept.** Nothing is designed, built or measured. This folder holds the research, the
-> feature roadmap the owner chose on 2026-11-25, and the rev A MCU the owner chose on 2026-11-26
-> ([decision record](docs/mcu.md)). There are no schematics, boards or firmware yet; the testbed's
-> [SPEC](hardware/design/SPEC.md) is a draft on paper. Every part, figure and claim on these pages is a candidate from
-> desk research, to be checked on the rev A testbed.
+> **Status (2026-11-27): concept.** Nothing is built or measured. This folder holds the research, the feature roadmap
+> the owner chose on 2026-11-25, the rev A MCU the owner chose on 2026-11-26 ([decision record](docs/mcu.md)), and
+> three testbed decisions of the same day (no charger on rev A, the slot connector, a USB Type-C detect chip). There
+> are no schematics or boards yet; the testbed's [SPEC](hardware/design/SPEC.md) is a draft on paper. The only
+> firmware is the [8 kHz HID proof](firmware/hid8k/README.md) for the Nucleo, written and compiled, never run on
+> hardware. Every part, figure and claim on these pages is a candidate from desk research, to be checked on the rev A
+> testbed.
 
 ## Concept renders
 
@@ -18,8 +20,8 @@ rotate.
 
 | | |
 |---|---|
-| ![Two keyboard halves seen from the front at an angle, each with a concave, tented keywell of six columns by three rows and a curved thumb arc; the F, J and thumb home keys are blue, and an orange thumb roller sits beside the left thumb keys](hardware/concept/renders/keyboard_assembly.png) | ![Concept sketch of a green motherboard on standoffs with coupon boards plugged in: Hall-effect and TMR coupons with four keys each, a shear coupon with two blue keys, a coil coupon with copper spirals, a haptics coupon with a roller and coin LRA, and a translucent optional KVM coupon](hardware/concept/renders/testbed_assembly.png) |
-| *Rev B as sketched: a generated keywell per half (the sketch tents it about 18°, an illustrative constant), a thumb arc, and one haptic thumb wheel (drawn on the left half; which half is not decided). Blue: the shear keys* | *Rev A, the testbed: one motherboard and a plug-in coupon per sensing method. Board size, connector and layout are illustrative; the optional KVM coupon is drawn as a ghost* |
+| ![Two keyboard halves seen from the front at an angle, each with a concave, tented keywell of six columns by three rows and a curved thumb arc; the F, J and thumb home keys are blue, and an orange thumb roller sits beside the left thumb keys](hardware/concept/renders/keyboard_assembly.png) | ![Concept sketch of a green motherboard on standoffs with coupon boards plugged in: Hall-effect and TMR coupons with six keys each, a shear coupon with two blue keys, a coil coupon with copper spirals, a haptics coupon with a roller and coin LRA, and a translucent optional KVM coupon](hardware/concept/renders/testbed_assembly.png) |
+| *Rev B as sketched: a generated keywell per half (the sketch tents it about 18°, an illustrative constant), a thumb arc, and one haptic thumb wheel (drawn on the left half; which half is not decided). Blue: the shear keys* | *Rev A, the testbed: one motherboard and a plug-in coupon per sensing method, on the owner's 2 × 20, 2.54 mm slot connector. The board sizes are the draft SPEC's "about" figures and the layout is illustrative; the optional KVM coupon is drawn as a ghost* |
 | ![Half-section of a custom key switch with a blue keycap: an orange carrier cup hangs from the housing roof on slender posts, and the stem and its magnet slide inside it over a TMAG5170 sensor on the PCB; arrows mark the press and the two sideways pushes](hardware/concept/renders/mech_shear_key_cutaway.png) | ![Left half exploded into labelled layers: keycaps, magnetic switches (Hall-effect or TMR: rev A decides), the printed top shell, bent column boards and a thumb board, the wheel module, the main board, a battery and coin LRA, and the floor](hardware/concept/renders/keyboard_half_exploded.png) |
 | *A shear key, one way it could work: the stem slides inside a carrier hung on flexure posts, so a sideways push moves its magnet over a TMAG5170 3-axis Hall sensor* | *The left half's parts stack. Sizes are placeholders, and the switches are drawn socketless, though hot-swap is still an open question ([concept §9](docs/concept.md#_9-open-questions))* |
 
@@ -50,6 +52,8 @@ rotate.
 | Rev A MCU: STM32U5A5 (2026-11-26) | **STM32U5A5** (STM32U5A5VJT6, LQFP100, JLC C22455480) on the motherboard, with bring-up on the NUCLEO-U5A5ZJ-Q: of the stocked parts found with a high-speed USB PHY on chip and upstream Zephyr support for it, the one with the strongest analog. Fallback: the NXP i.MX RT1021. The AT32F405, the candidate until then, was dropped for having no upstream Zephyr. Before the schematic: reserve the MCUs, and prove 8 kHz HID on the Nucleo ([decision record](docs/mcu.md)) |
 | Rev B side track (2026-11-26) | An nRF54LM20 dev kit (XIAO nRF54LM20A or nRF54LM20 DK) measures 8 kHz HID together with BLE, and the radio current, for the battery gate. The nRF54LM20A is the rev B front-runner; the gate still decides |
 | Testbed form | **A motherboard plus plug-in coupons**, each coupon generated by the compiler |
+| Rev A power (2026-11-26) | **No battery and no charger on rev A**: the charger is deferred to rev B by the owner's choice. **USB-C input** behind an input breaker of about 3.3 A, with a **USB Type-C detect chip on I2C** that reads the current the source advertises (Default, 1.5 A or 3.0 A), so that the firmware sets the board's power budget itself; it uses no MCU pin. The SPEC's candidate chip is TI's TUSB320LAI ([SPEC §3.8](hardware/design/SPEC.md#_3-8-usb-type-c-detect-u-cc)) |
+| Rev A slot connector (2026-11-26) | **2 × 20 at 2.54 mm**: a female through-hole socket on the motherboard, a male header on each coupon. The board sizes follow from it (motherboard about 190 × 150 mm, coupons about 58 × 60 and 80 × 60 mm); layout sets the exact outlines |
 
 The twelve chosen features in the three groups above:
 
@@ -193,6 +197,8 @@ flowchart LR
 |---|---|
 | [docs/concept.md](docs/concept.md) | The chosen features: what each one is, what already exists, the risks, and where it lands in the roadmap. The platform and firmware decisions, the conflicts between features, the rev A testbed |
 | [docs/mcu.md](docs/mcu.md) | The rev A MCU decision record (2026-11-26): the requirements, the ranked candidates, why the AT32F405 was dropped, the conditions before the schematic, the bring-up risks, the rev B side track, sources |
-| [hardware/design/SPEC.md](hardware/design/SPEC.md) | The rev A testbed's draft architecture of record, on paper |
+| [hardware/design/SPEC.md](hardware/design/SPEC.md) | The rev A testbed's draft architecture of record, on paper, with the owner's decisions of 2026-11-26 on the charger, the slot connector and USB-C power |
+| [firmware/README.md](firmware/README.md) | The keyboard's Zephyr firmware, one application per folder, pinned to Zephyr v4.5.0. Today one bring-up application |
+| [firmware/hid8k/README.md](firmware/hid8k/README.md) | The 8 kHz HID proof for the NUCLEO-U5A5ZJ-Q (condition 2 before the schematic): the firmware, the host tool that measures report rate and jitter, the test procedure and pass criteria. Written and compiled on 2026-11-27, not run on hardware |
 | [docs/research.md](docs/research.md) | The landscape (late 2026), what no longer differentiates, the ideas the owner did not pick, with the sceptic's score and case, the method and its caveats, sources; an addendum on the MCU research of 2026-11-26 |
 | [hardware/concept/README.md](hardware/concept/README.md) | Concept renders: every concept sketch, model-estimate plot and research figure in one place, with captions and the commands that regenerate them |
