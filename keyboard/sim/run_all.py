@@ -16,6 +16,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import bench_input  # noqa: E402
 import bench_lane  # noqa: E402
 import bench_slot  # noqa: E402
+import bench_vdda  # noqa: E402
 import design  # noqa: E402
 import spice  # noqa: E402
 
@@ -26,7 +27,27 @@ def _ms(x):
     return "none" if x is None else f"{x * 1e3:.2f} ms"
 
 
-def table(lane, slot, inp):
+def vdda_rows(v):
+    """Rows for bench 4, the +3V3A branch (SPEC §3.7, owner decision D4)."""
+    out = []
+    cap, leg = v["compare"]["captured"], v["compare"].get("leg", {})
+    out.append(f"| VDDA | +3V3_SLOT to +3V3A peaking, as captured (FB1 0.1 / 0.5 / 2 µH) | risks.md EL-5: resonance "
+               f"at 76-196 kHz | {' / '.join(f'{cap[l]['peak_db']:+.1f} dB at {cap[l]['f_peak'] / 1e3:.0f} kHz' for l in (0.1e-6, 0.5e-6, 2e-6))} "
+               "| **resonates in the scan's band** |")
+    if leg:
+        out.append(f"| VDDA | The same with the leg (0.47 Ω + 10 µF); whole bracket; capacitor at 47 % | D4: damp it | "
+                   f"{' / '.join(f'{leg[l]['peak_db']:+.1f} dB' for l in (0.1e-6, 0.5e-6, 2e-6))}; worst "
+                   f"{v['bracket_leg']['peak_db']:+.1f} dB; {v['bracket_leg_derated']['peak_db']:+.1f} dB | holds (≤ 3 dB) |")
+    for opt, label in (("captured_2uH", "as captured, FB1 2 µH"), ("leg_2uH", "with the leg, FB1 2 µH"),
+                       ("r1", "1 Ω in place of FB1"), ("r2p2", "2.2 Ω in place of FB1")):
+        if f"burst_{opt}" in v:
+            out.append(f"| VDDA | VREF+ swing inside a scan window from the ADCs' 2.66 mA, {label} | – | "
+                       f"{v[f'burst_{opt}']['pp_lsb']:.1f} LSB at mid-scale | "
+                       f"{'holds (≤ 3 LSB)' if v[f'burst_{opt}']['pp_lsb'] <= 3 else '**exceeds 3 LSB**'} |")
+    return out
+
+
+def table(lane, slot, inp, vdda=None):
     b = design.board()
     th = bench_input.thresholds()
     rows = []
@@ -151,6 +172,7 @@ def table(lane, slot, inp):
         f"{bench_input.max_cable() * 1e3:.0f} mΩ round trip ({bench_input.max_cable(r_tol=0) * 1e3:.0f} mΩ with "
         "exact resistors)", "a compliant 3 A cable is 250 mΩ")
     hdr = ["| Area | Case | SPEC says | Simulated | Verdict |", "|---|---|---|---|---|"]
+    rows += vdda_rows(vdda) if vdda else []
     keys = ["", "| SPEC §6.3 one-slot table, keys per slot for t_settle = | " +
             " | ".join(f"{t} µs" for t in (1, 5, 10, 20, 25, 45, 50)) + " |", "|---" * 8 + "|"]
     for label, tab in bench_lane.keys_with_simulated_settling(lane).items():
@@ -172,7 +194,8 @@ def main():
     lane = bench_lane.run_all()
     slot = bench_slot.run_all()
     inp = bench_input.run_all()
-    md, th = table(lane, slot, inp)
+    vdda = bench_vdda.run_all()
+    md, th = table(lane, slot, inp, vdda)
     print(md)
     print()
     print("Provenance of the design values:")
@@ -182,7 +205,7 @@ def main():
         import plots
         for p in (plots.lane_kickback(lane), plots.lane_step(lane), plots.lane_scan(lane), plots.slot_enable(slot),
                   plots.slot_vdda(slot), plots.s5_droop(slot), plots.s5_breaker(slot), plots.input_startup(inp),
-                  plots.input_ceiling(inp, th)):
+                  plots.input_ceiling(inp, th), plots.vdda_damping(vdda)):
             print("wrote", os.path.relpath(p, design.REPO), file=sys.stderr)
 
 

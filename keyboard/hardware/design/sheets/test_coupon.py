@@ -36,6 +36,27 @@ different ratio, so a swapped or open lane shows. Source impedance R_src (Theven
 ones), and the firmware divides the change by the INA226's current step to get the slot's series resistance
 (SPEC §3.1, §10 step 7).
 
+**INJ into the AN0 lane (sheet "lanes"; the owner's decision D7 of 2026-11-27, SPEC §4.7, risks.md ME-2).** D11, a
+1N4148W (Semtech Electronics, C81598, JLC basic), and R40, 1 kOhm, in series from INJ into the AN0 tap: anode on INJ,
+cathode on INJ_AN0, R40 from INJ_AN0 to AN0, so the diode's capacitance sits behind the 1 k. The rig's stimulus then
+reaches a lane, and the rig can time the lane path (lane RC, select step, ADC, the firmware's threshold, the report),
+not only IRQ_N's. Arithmetic from the datasheet (VF max 0.715 V at 1 mA, 0.855 V at 10 mA; IR max 25 nA at 20 V;
+CT max 2 pF), all *estimates*:
+
+* **INJ low or open** (R27 holds it at GND; JP_INJ is open by default): D11 is reverse-biased by AN0's 0.66 V, so the
+  ladder is untouched: AN0 = 0.2 x V(+3V3), R_src 399 Ohm, as before. Leakage under 25 nA through 399 Ohm moves AN0
+  by under 10 uV (0.05 LSB at 14 bits, 3 ppm of the 0.2 ratio, against the ladder's 320 ppm); D11's 2 pF and the
+  INJ_AN0 link's own (about 2 pF: 15 mm on In2, boards/test_coupon.py) sit behind 1 k and add about 0.4 % to the
+  lane's 1 nF.
+* **INJ high** (3.3 V from the rig): about 1.36-1.43 mA flows, and AN0 rises by 0.54 V (VF at its maximum) to
+  0.57 V (VF about 0.1 V lower, typical), to 1.20-1.23 V, about 2700-2840 codes at 14 bits; 0.43-0.58 V over INJ
+  2.9-3.3 V, +3V3 3.2-3.4 V and R40 1 %. Through the ladder the taps above follow: AN1 +0.41 V, AN2 +0.27 V, AN3
+  +0.14 V (3/4, 1/2 and 1/4 of AN0's lift), so the reference ratios hold only with INJ low. AN0's R_src while INJ
+  drives is 289 Ohm (399 || (1 k + 45 Ohm of diode)): the lane settles faster, not slower.
+* **Slot off, INJ high:** INJ back-feeds the coupon's +3V3 through D11, R40 and the ladder, up to about 0.85-0.88 V
+  if nothing loads the rail (1.7 mA from INJ). That sits above the firmware's 500 mV "rail live while off" level
+  (risks.md EL-8): drive INJ only while the slot is powered (the rig's rule, EL-8, not decided).
+
 **Loopback (sheet "loopback").** An SN74LV165A parallel-in shift register on the slot's SPI with a tri-state MISO
 driver (SN74LVC1G125), both with I_off (partial power-down: no back-powering through their inputs when the slot rail
 is off, TI datasheets):
@@ -71,7 +92,8 @@ stimulus reaches the MCU's EXTI through the coupon, a sensor-free path to calibr
 monitor, not the motherboard's).
 
 Idle draw on +3V3 about 1.4 mA (the ladder's 1.32 mA, the logic's quiescent current; *estimate*), +1.5 mA with the
-LED on, +0.33 mA while IRQ_N is low, +33 uA for each chip select held low (R35, R36). The pull-downs on SCK, MOSI
+LED on, +0.33 mA while IRQ_N is low, +33 uA for each chip select held low (R35, R36). While INJ is high the ladder
+takes about 0.27 mA less from +3V3 (INJ supplies the difference through D11 and R40). The pull-downs on SCK, MOSI
 and SYNC load the MCU's drivers (33 uA each while high), not the coupon's rail.
 """
 
@@ -81,12 +103,17 @@ from sheets.parts import R0603, cap, led_red, nfet, res, testpoints
 POWER_NETS = cc.POWER_NETS
 INTERSHEET = cc.INTERSHEET
 REV = "A"
-DATE = "2026-11-27"
+DATE = "2026-11-28"                # the D7 INJ path and the D2 key were captured on 2026-11-28
 
 SR = {"MPN": "SN74LV165APWR", "Manufacturer": "Texas Instruments", "LCSC": "C201716"}       # 6957, $0.335
 BUF = {"MPN": "SN74LVC1G125DBVR", "Manufacturer": "Texas Instruments", "LCSC": "C23654"}    # 181834, $0.068
 SR_DS = "https://www.ti.com/lit/ds/symlink/sn74lv165a.pdf"       # SCLS402R: pinout Figure 5-1, PW package
 BUF_DS = "https://www.ti.com/lit/ds/symlink/sn74lvc1g125.pdf"    # SCES223U: DBV 1 OE, 2 A, 3 GND, 4 Y, 5 VCC
+# INJ-to-lane diode (D7 of 2026-11-27): Semtech Electronics 1N4148W, SOD-123, pin 1 cathode, pin 2 anode (its
+# datasheet Rev 05, "PINNING"), = KiCad Diode:1N4148W (1 K, 2 A) on Diode_SMD:D_SOD-123. JLC parts API 2026-11-27:
+# C81598, basic, 4,137,915 in stock, $0.0123.
+INJ_DIODE = {"MPN": "1N4148W", "Manufacturer": "ST(Semtech)", "LCSC": "C81598"}
+INJ_DIODE_DS = "https://www.lcsc.com/datasheet/lcsc_datasheet_1811061725_ST-Semtech-1N4148W_C81598.pdf"
 # Lane ladder: Viking Tech AR03BTCX4990 = AR03 (0603, 1.55 x 0.80 mm), B 0.1 %, T reel, C 25 ppm/K, X 1/10 W, 499 Ohm
 # (Viking AR series datasheet, part numbering). JLC parts API 2026-11-27: 32,200 in stock, $0.0376, extended.
 LADDER = {"MPN": "AR03BTCX4990", "Manufacturer": "Viking Tech", "LCSC": "C2889161"}
@@ -105,6 +132,11 @@ DESCRIPTOR_FACTS = {
     "spi": "CS1_N = load, CS0_N = select: 8 bits G0..G5, INJ, SYNC, then MOSI delayed by 8 (mode 3, or mode 0)",
     "loopback_loads": "reading G1/G3 back runs their current-limit loads: G3 with +5V off, G1 in a short pulse",
     "irq": "IRQ_N low while G5 or INJ is high",
+    # D7 of 2026-11-27: D11 + R40 (1 k) from INJ into the AN0 tap. Idle (INJ low): AN0 unchanged (0.2 x, 399 ohm).
+    "inj_lane": {"lane": "AN0", "lift_v": (0.43, 0.58), "lift_v_at_3v3": (0.54, 0.57), "r_src_driven_ohm": 289,
+                 "also_moves": {"AN1": 0.75, "AN2": 0.5, "AN3": 0.25},
+                 "note": "INJ high lifts AN0 by about 0.55 V (estimate) and the taps above by 3/4, 1/2, 1/4 of that; "
+                         "drive INJ only while the slot is powered"},
 }
 
 
@@ -202,6 +234,16 @@ def lanes_sheet(d):
     _ladder(d, "R32", "AN2", "AN1")
     _ladder(d, "R33", "AN3", "AN2")
     _ladder(d, "R34", "+3V3", "AN3")
+
+    d.group("INJ into the AN0 lane (D7, 2026-11-27): D11 1N4148W + R40 1k from INJ to the AN0 tap",
+            "INJ high (3.3 V) lifts AN0 by about 0.55 V (0.43-0.58 V over tolerances, estimate) and AN1-AN3 by 3/4,\n"
+            "1/2, 1/4 of that; INJ low leaves the ladder alone (D11 reverse-biased, < 10 uV of leakage error).\n"
+            "The latency rig can then time the lane path, not only IRQ_N. Drive INJ only while the slot is powered.",
+            anchor="D11")
+    d.add("D11", "Diode:1N4148W", "1N4148W", "Diode_SMD:D_SOD-123", pins={"1": "INJ_AN0", "2": "INJ"},
+          datasheet=INJ_DIODE_DS, description="Switching diode, 75 V, 150 mA, SOD-123 (INJ into the AN0 lane)",
+          fields=dict(INJ_DIODE))
+    res(d, "R40", "1k", "INJ_AN0", "AN0", near="D11.1")
 
     d.group("Test pads", "Lanes, frame tick, rig stimulus, interrupt and the SPI loopback, for a scope or logic analyser.")
     testpoints(d, 10, ["AN0", "AN1", "AN2", "AN3", "SYNC", "INJ", "IRQ_N", "SCK", "MISO", "MOSI", "CS0_N", "CS1_N"])

@@ -102,18 +102,25 @@ def _field(node, key):
 
 
 class Netlist:
-    """Components (ref -> value) and nets (bare net name -> {(ref, pin)}) of a KiCad 'E' netlist."""
+    """Components (ref -> value), the parts marked DNP, and nets (bare net name -> {(ref, pin)}) of a KiCad 'E'
+    netlist."""
 
     def __init__(self, path):
         with open(path, encoding="utf-8") as f:
             tree = _sexpr(f.read())
-        self.values, self.nets, self.pins = {}, {}, {}
+        self.values, self.nets, self.pins, self.dnp = {}, {}, {}, set()
         for sec in tree[1:]:
             if not isinstance(sec, list):
                 continue
             if sec[0] == "components":
                 for comp in sec[1:]:
-                    self.values[_field(comp, "ref")] = _field(comp, "value")
+                    ref = _field(comp, "ref")
+                    self.values[ref] = _field(comp, "value")
+                    # KiCad 10 writes `(property (name "dnp"))` for a symbol marked do-not-populate: the part is in
+                    # the netlist but not in the BOM or the CPL, so it is not on the assembled board
+                    if any(isinstance(p, list) and p and p[0] == "property" and _field(p, "name") == "dnp"
+                           for p in comp[1:]):
+                        self.dnp.add(ref)
             elif sec[0] == "nets":
                 for net in sec[1:]:
                     name = _field(net, "name").split("/")[-1]
@@ -126,10 +133,12 @@ class Netlist:
                     self.nets.setdefault(name, set()).update(nodes)
 
     def two_pin(self, prefix, net_a, net_b):
-        """Refs of two-pin parts (R..., C...) whose pins are on net_a and net_b."""
+        """Refs of the fitted two-pin parts (R..., C...) whose pins are on net_a and net_b. A part marked DNP is not
+        on the assembled board, so it is never returned: a bench value or a contract check that finds only a DNP
+        part finds nothing."""
         out = []
         for ref, pins in self.pins.items():
-            if not ref.startswith(prefix) or len(pins) != 2:
+            if not ref.startswith(prefix) or len(pins) != 2 or ref in self.dnp:
                 continue
             if set(pins.values()) == {net_a, net_b} or (net_a == net_b and list(pins.values()) == [net_a] * 2):
                 out.append(ref)
@@ -549,3 +558,35 @@ def tps2553_trip_from_r(r_ohm, r_tol=0.01):
     ty = tps2553_ios(r_ohm / 1e3)[1]
     hi = tps2553_ios(r_ohm * (1 - r_tol) / 1e3)[2]
     return lo, ty, hi
+
+
+def vdda_leg_captured(net):
+    """(R ohm, C F) of the +3V3A damping leg in the netlist: one resistor from +3V3A to `net` and one capacitor from
+    `net` to GND (SPEC §3.7, nets.VDDA_DAMPING). None if the netlist has no such pair; no netlist: None as well."""
+    nl = netlist()
+    if nl is None:
+        return None
+    rr, cc = nl.two_pin("R", "+3V3A", net), nl.two_pin("C", net, "GND")
+    if len(rr) != 1 or len(cc) != 1:
+        return None
+    _note("vdda_leg", f"netlist {rr[0]}+{cc[0]} (+3V3A-{net}-GND)")
+    return nl.value(rr[0]), nl.value(cc[0])
+
+
+def netlist_has_nets(names):
+    """True if every named net is in the netlist (False without a netlist)."""
+    nl = netlist()
+    return nl is not None and all(n in nl.nets for n in names)
+
+
+def predates_decisions_2026_11_27():
+    """True when the motherboard netlist was captured before the owner's decisions of 2026-11-27 (or there is none):
+    it has none of D3's socket-side nets (nets.SLOT_SERIES), the marker that the recapture carrying D2-D5 has
+    happened. Any one of them present counts as recaptured, so a later capture that loses some is not excused.
+    Tests that compare the capture with those decisions are expected failures only before it; once the netlist
+    carries D3, a capture that disagrees with D4 (the PGTH divider, the +3V3A damping leg) is a plain failure."""
+    nets = load_nets()
+    nl = netlist()
+    if nl is None or not hasattr(nets, "SLOT_SERIES"):
+        return True
+    return not any(sock in nl.nets for n in nets.SLOTS for sock, _ohms in nets.SLOT_SERIES[n].values())

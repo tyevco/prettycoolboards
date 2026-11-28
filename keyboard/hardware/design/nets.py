@@ -1,32 +1,56 @@
 """Net names, the coupon slot pinout and the MCU pin map of the rev A testbed motherboard (the capture contract).
 
-Draft architecture of record: SPEC.md. Designed on paper, not captured: no schematic, layout, build or measurement
-yet. The pin map is a DRAFT: its pin numbers and alternate functions agree with the datasheet. The reference manual
-(RM0456 Rev 7) items of SPEC §5.2/§5.3 were read on 2026-11-27 in a third-party transcription, not ST's PDF (SPEC
-§11 #24), and the errata sheet ES0553 is not read (§11 #25). Sources: pin numbers from ST's STM32_open_pin_data
-(mcu/STM32U5A5VJTx.xml, master 45c0459, fetched 2026-11-26); alternate functions and the Zephyr pinctrl node names
-from hal_stm32 (dts/st/u5/stm32u5a5vjtx-pinctrl.dtsi, main ba344b9, fetched 2026-11-26), checked on 2026-11-27
-against the revision Zephyr v4.5.0 pins, c9550199: the file is identical and all 50 node names exist. All 100 pin
-numbers agree with DS13543 Rev 2 Table 27's non-SMPS LQFP100 column, and the timer, bus and USB alternate functions
-with Tables 28-29 (SPEC §5.1). The KiCad 10.0.8 library symbol carries the same 100 functions; five pin names are
-spelled differently (KICAD_PIN_ALIAS). SPEC §5 has the reasoning.
+Draft architecture of record: SPEC.md. Captured on 2026-11-27 (sheets/mb_*.py; check_contract.py gates the netlist
+against this file); not laid out, built or measured at capture. The pin map is a DRAFT: its pin numbers and
+alternate functions agree with the datasheet. The reference manual (RM0456 Rev 7) items of SPEC §5.2/§5.3 were read
+on 2026-11-27 in a third-party transcription, not ST's PDF (SPEC §11 #24), and the errata sheet ES0553 is not read
+(§11 #25). Sources: pin numbers from ST's STM32_open_pin_data (mcu/STM32U5A5VJTx.xml, master 45c0459, fetched
+2026-11-26); alternate functions and the Zephyr pinctrl node names from hal_stm32
+(dts/st/u5/stm32u5a5vjtx-pinctrl.dtsi, main ba344b9, fetched 2026-11-26), checked on 2026-11-27 against the revision
+Zephyr v4.5.0 pins, c9550199: the file is identical and all 50 node names exist. All 100 pin numbers agree with
+DS13543 Rev 2 Table 27's non-SMPS LQFP100 column, and the timer, bus and USB alternate functions with Tables 28-29
+(SPEC §5.1). The KiCad 10.0.8 library symbol carries the same 100 functions; five pin names are spelled differently
+(KICAD_PIN_ALIAS). SPEC §5 has the reasoning.
 
 Run `python nets.py` to self-check: every net on an MCU pin is a power net, an intersheet net, a slot net or one of
 the MCU sheet's local nets; no signal net sits on two pins; every LQFP100 pin is mapped; every slot signal reaches
 the MCU or a named motherboard part; no I2C address is used twice on a bus; the USB Type-C detect chip uses no MCU
-pin and its interrupt lands on an expander input.
+pin and its interrupt lands on an expander input; the slot key pin carries no signal; every series-resistor line is
+a direct slot line and its socket-side net is unique; every INA226 has its own Kelvin sense pair; the +3V3A damping
+leg, the input breaker's power-good divider and the USB pair's geometry are self-consistent.
 
 Owner decisions of 2026-11-26 recorded here (SPEC §1): no battery and no charger on rev A (D1); the slot connector is
 2 x 20 at 2.54 mm (D2); a USB Type-C detect chip on I2C reads the source's advertised current (D3). The parts named
 for them are candidates.
+
+Owner decisions of 2026-11-27 (evening), answering the risk register (keyboard/docs/risks.md; SPEC §1 lists all
+seven, D1-D7 of that day). The contract changes they make here, none of them captured yet (the motherboard, coupon,
+firmware and tools tasks implement them):
+
+* D2, the slot key: SLOT_PINS pin 39 is KEY (was RSV): absent on every coupon, plugged in the socket, unconnected on
+  both sides (SLOT_KEY_PIN, slot_net() returns None for it).
+* D3, the slot guard: 100 ohm in series at each socket on CS0_N, CS1_N, IRQ_N and G0-G3, and on S5's G4/G5
+  (SLOT_SERIES). The MCU-side nets keep their names (MCU_PINS is unchanged); the socket pin carries the resistor's
+  socket-side net, S<n>_<signal>_J (socket_net(), slot_pin_net()).
+* D4, power: U2's PGTH divider 100 k / 44.2 k (INPUT_PGTH_DIVIDER); Kelvin sense nets for every INA226
+  (INA226_SHUNT_NETS, ina226_sense_nets()); the +3V3A damping leg, 0.47 ohm + 10 uF, picked with
+  keyboard/sim/bench_vdda.py (VDDA_DAMPING).
+* D5, layout: the motherboard's stack and the USB pair's geometry (MB_STACK, USB_PAIR).
+* D6: the pin-compatible MCU alternates (MCU_ALTERNATES).
 """
 
 REV = "A-testbed"
 DATE = "2026-11-27"
-STATUS = ("draft: designed on paper, not captured; pin numbers checked against DS13543; RM0456 items read in a "
-          "transcription; ES0553 errata not read")
+STATUS = ("draft: captured 2026-11-27 (schematic generated and gated against this contract), not built or measured; "
+          "the owner's decisions of 2026-11-27 (D2 key, D3 series resistors, D4 Kelvin sense, PGTH and +3V3A damping, "
+          "D5 stack) are in this contract and not captured yet; pin numbers checked against DS13543; RM0456 items "
+          "read in a transcription; ES0553 errata not read (st.com unreachable on 2026-11-27)")
 
 MCU = "STM32U5A5VJT6"          # LQFP100 14 x 14 mm, 0.5 mm pitch, no SMPS (the -Q parts have it). JLC C22455480
+# Pin-compatible alternates (owner's decision D6, 2026-11-27; SPEC §2.1): ST's open pin data gives 0 renamed pins and
+# 0 missing signals against STM32U5A5VJTx (risks.md SF-1); they lack nothing this board uses (they differ in AES,
+# OTFDEC, PKA and SAES). The -Q parts (SMPS, LQFP100) are NOT alternates: 33 pins differ. JLC stock 0 on 2026-11-27.
+MCU_ALTERNATES = {"STM32U599VJT6": "C18213037", "STM32U595VJT6": "C7938448"}
 SLOTS = (1, 2, 3, 4, 5)        # S1-S5 (SPEC §2, §4). S5 is the haptics slot: TIM1, ADC4 lanes, the 2 A 5 V rail
 
 # Nets drawn with power symbols (SPEC §3).
@@ -90,22 +114,62 @@ SLOT_PINS = [
     (36, "G3", "io", "S4: TIM8_CH4; S5: TIM1_CH1N"),
     (37, "G4", "io", "S1-S4: slow, on expander U_EXP3; S5: TIM1_CH2N"),
     (38, "G5", "io", "S1-S4: slow, on expander U_EXP3; S5: TIM1_CH3N"),
-    (39, "RSV", "nc", "reserved, not connected on the rev A motherboard"),
+    (39, "KEY", "nc", "the slot key (owner's decision D2, 2026-11-27): no pin 39 on any coupon (no pad 39; the "
+                      "header's pin 39 pulled), socket hole 39 plugged; unconnected on both sides"),
     (40, "GND", "gnd", ""),
 ]
 
 SLOT_SIGNALS = [s for _, s, d, _ in SLOT_PINS if d not in ("pwr", "gnd", "nc")]
 
+# The slot key (owner's decision D2, 2026-11-27; SPEC §4.2; risks.md EL-2). Turned 180 degrees, socket pin p meets
+# coupon pin 41 - p, so the coupon's pin 2 lands on the plugged hole 39 and the coupon cannot go in. Pin 39 carries
+# no net on the motherboard socket (its pad stays, unconnected) and has no pad on a coupon (footprint without pad 39,
+# the header's pin pulled before soldering). Never key pin 2 as well: 2 and 39 swap under rotation, so a coupon keyed
+# at both would fit either way round.
+SLOT_KEY_PIN = 39
+SLOT_KEY_NEVER_WITH = 41 - SLOT_KEY_PIN        # pin 2
+NO_NET_SIGNALS = ("KEY", "RSV")                # "RSV" was pin 39's name before 2026-11-27; kept for old tables
+
 
 def slot_net(n, signal):
-    """The net on slot n's connector pin for a slot-local signal (None for the reserved pin)."""
+    """The net of a slot-local signal on slot n: its own net, shared by the socket pin and the MCU for the direct
+    lines (None for the key pin). On the motherboard the socket pin of a series-resistor line (SLOT_SERIES) carries
+    socket_net() instead; this name stays the MCU side's."""
     if signal == "GND":
         return "GND"
     if signal in ("+5V", "+3V3"):
         return f"{signal}_S{n}"
-    if signal == "RSV":
+    if signal in NO_NET_SIGNALS:
         return None
     return f"S{n}_{signal}"
+
+
+# The slot guard (owner's decision D3, 2026-11-27; SPEC §4.3; risks.md EL-3): a plain 100 ohm resistor in series at
+# each socket on the slot lines that run straight to MCU pins. No TVS arrays. The lanes keep their 47 ohm + 1 nF; the
+# bus-switched lines (SCK, MISO, MOSI, SYNC), I2C, PRESENT_N, INJ and S1-S4's expander-driven G4/G5 get none.
+# slot n -> {signal: (socket-side net, ohms)}, like J_RIG_SERIES: the MCU side keeps slot_net(n, signal), so MCU_PINS,
+# the firmware's board files and check_dts.py are unchanged; the resistor sits next to its socket pin (SPEC §4.3,
+# §9) and its socket-side net is local to the slot sheet.
+SLOT_SERIES_OHMS = 100
+SLOT_SERIES_SIGNALS = ("CS0_N", "CS1_N", "IRQ_N", "G0", "G1", "G2", "G3")
+SLOT_SERIES_EXTRA = {5: ("G4", "G5")}           # S5's G4/G5 are MCU pins (TIM1_CH2N/CH3N); S1-S4's are on U_EXP3
+SLOT_SERIES = {n: {sig: (f"S{n}_{sig}_J", SLOT_SERIES_OHMS)
+                   for sig in SLOT_SERIES_SIGNALS + SLOT_SERIES_EXTRA.get(n, ())} for n in SLOTS}
+SLOT_SOCKET_NETS = sorted(net for n in SLOTS for net, _ohms in SLOT_SERIES[n].values())   # local to slot sheets
+
+
+def socket_net(n, signal):
+    """The net on slot n's socket pin for a slot-local signal: the series resistor's socket-side net for a
+    SLOT_SERIES line, else slot_net(n, signal) (None for the key pin)."""
+    if signal in SLOT_SERIES.get(n, {}):
+        return SLOT_SERIES[n][signal][0]
+    return slot_net(n, signal)
+
+
+def slot_pin_net(n, pin):
+    """The net on slot n's motherboard socket pin `pin` (1-40), with D3's series resistors: None for the key pin."""
+    sig = next(s for p, s, _d, _note in SLOT_PINS if p == pin)
+    return socket_net(n, sig)
 
 
 # What sits between a slot pin and the MCU (SPEC §4.3). The MCU-side net is mcu_net(n, signal).
@@ -117,11 +181,12 @@ SLOT_PATH = {
     "SYNC": "SN74CBTLV3125 bus switch U_BSn, OE_N = BUSEN_N_Sn, from SLOT_SYNC",
     "SCK": "U_BSn from SLOT_SCK (100 k to GND on SLOT_SCK, see MCU_SIDE_PULLS)", "MISO": "U_BSn to SLOT_MISO",
     "MOSI": "U_BSn from SLOT_MOSI (100 k to GND on SLOT_MOSI)",
-    "CS0_N": "direct", "CS1_N": "direct", "IRQ_N": "direct",
+    "CS0_N": "100 ohm series resistor at the socket (SLOT_SERIES), then straight to the MCU",
+    "CS1_N": "as CS0_N", "IRQ_N": "as CS0_N",
     "SCL": "TCA9548A U_MUX channel n-1, pull-ups to +3V3_Sn", "SDA": "as SCL",
     "PRESENT_N": "U_EXP2 input, 100 k pull-up to +3V3",
-    "G0": "direct", "G1": "direct", "G2": "direct", "G3": "direct",
-    "G4": "S1-S4: U_EXP3 output with 100 k pull-down; S5: direct", "G5": "as G4",
+    "G0": "as CS0_N", "G1": "as CS0_N", "G2": "as CS0_N", "G3": "as CS0_N",
+    "G4": "S1-S4: U_EXP3 output with 100 k pull-down (no series resistor); S5: as CS0_N", "G5": "as G4",
 }
 BUS_SWITCHED = ("SCK", "MISO", "MOSI", "SYNC")
 
@@ -201,8 +266,8 @@ MOTHERBOARD_INTERSHEET = [
 SLOT_NETS = sorted({net for n in SLOTS for s in SLOT_SIGNALS for net in (slot_net(n, s), mcu_net(n, s))
                     if net and net.startswith(f"S{n}_")})
 
-# Nets local to the MCU sheet.
-MCU_LOCAL = ["HSE_IN", "HSE_OUT", "VCAP", "BOOT0", "LED_N"]
+# Nets local to the MCU sheet. VDDA_DAMP: the +3V3A damping leg's middle node (VDDA_DAMPING, owner's decision D4).
+MCU_LOCAL = ["HSE_IN", "HSE_OUT", "VCAP", "BOOT0", "LED_N", "VDDA_DAMP"]
 
 # Nets local to the USB-C input sheet (J1, the ESD array, U_CC). No 5.1 k Rd resistors are fitted: U_CC presents Rd
 # itself, powered or not (SPEC §3.8). Two 5.1 k footprints on USB_CC1/USB_CC2 stay unfitted (a board without U_CC).
@@ -232,15 +297,16 @@ LQFP100 = {
 
 # KiCad 10.0.8 library symbol MCU_ST_STM32U5:STM32U5A5VJTx (kicad-symbols tag 10.0.8, footprint
 # Package_QFP:LQFP-100_14x14mm_P0.5mm), parsed on 2026-11-27: every pin number carries the same function as LQFP100,
-# and 95 names match exactly. The symbol name -> the LQFP100 name for the other five, for the future
-# check_contract.py (as the caliper's PIN_ALIAS). check(): each alias lands on its own pin number.
+# and 95 names match exactly. The symbol name -> the LQFP100 name for the other five, for check_contract.py (as the
+# caliper's PIN_ALIAS). check(): each alias lands on its own pin number.
 KICAD_SYMBOL = "MCU_ST_STM32U5:STM32U5A5VJTx"
 KICAD_PIN_ALIAS = {"PC14": "PC14-OSC32_IN", "PC15": "PC15-OSC32_OUT", "PH0": "PH0-OSC_IN", "PH1": "PH1-OSC_OUT",
                    "PH3": "PH3-BOOT0"}
 KICAD_ALIAS_PIN_NUMBER = {"PC14": 8, "PC15": 9, "PH0": 12, "PH1": 13, "PH3": 94}
 
 # STM32U5A5VJT6 pin name -> net. None = no-connect (none in this draft: every I/O is used).
-# DRAFT: pin numbers checked against DS13543 Rev 2; capture still to come. SPEC §5 has the constraints behind each.
+# DRAFT: pin numbers checked against DS13543 Rev 2; captured 2026-11-27 (check_contract.py). SPEC §5 has the
+# constraints behind each.
 MCU_PINS = {
     # supplies (DS13543 Rev 2 Figure 23: n x 100 nF + 10 uF on VDD, 4.7 uF on VCAP, 100 nF + 1 uF on VDDA and VREF+)
     "VDD": "+3V3_MCU", "VSS": "GND", "VBAT": "+3V3_MCU",       # no backup battery: VBAT tied to VDD
@@ -387,6 +453,68 @@ SWITCH_TRIP = {
 }
 VSYS_BUDGET_MAX = 2.8          # A: the firmware's ceiling on the VSYS budget, below the input breaker's minimum
 
+# U2's power-good divider (owner's decision D4, 2026-11-27; SPEC §3.1, §3.6; risks.md EL-1): (top, bottom) in ohm,
+# E96 1 % parts, from VSYS_IN to U2's PGTH pin to GND (R35/R36 in sheets/mb_power.py; captured 2026-11-27 at
+# 100 k / 39 k). PGTH thresholds from TI SLVSFC9C §6.5 (min, typ, max): rising 1.183 / 1.20 / 1.223 V, falling
+# 1.076 / 1.09 / 1.116 V. With 100 k / 44.2 k VSYS_PG falls at 3.51-3.64 V and rises at 3.86-3.99 V (exact resistors;
+# vsys_pg_thresholds()), so it means "about to brown out", not "loaded through a long cable". U2's EN/UVLO divider
+# (100 k / 39 k) and U5's PGTH divider are not part of this decision.
+INPUT_PGTH_DIVIDER = (100e3, 44.2e3)
+TPS25947_PGTH_V = {"rise": (1.183, 1.20, 1.223), "fall": (1.076, 1.09, 1.116)}
+TPS25947_PGTH_PIN_MAX_V = 5.0  # recommended maximum on PGTH (SLVSFC9C §6.3)
+
+
+def vsys_pg_thresholds(r_tol=0.0):
+    """VSYS_IN at which U2's VSYS_PG falls and rises: {"fall": (min, typ, max), "rise": (...)} in V. r_tol widens the
+    divider (min: top low and bottom high; max: top high and bottom low)."""
+    top, bot = INPUT_PGTH_DIVIDER
+    k_lo = 1 + top * (1 - r_tol) / (bot * (1 + r_tol))
+    k_hi = 1 + top * (1 + r_tol) / (bot * (1 - r_tol))
+    k = 1 + top / bot
+    return {edge: (v[0] * k_lo, v[1] * k, v[2] * k_hi) for edge, v in TPS25947_PGTH_V.items()}
+
+
+# Kelvin sense (owner's decision D4, 2026-11-27; SPEC §3.4, §7.5; risks.md EL-6). Each INA226 reads its shunt through
+# a sense pair of its own: IN+ (pin 10) on PM<aa>_SENSE_P and IN- (pin 9) on PM<aa>_SENSE_N, aa its address in hex
+# (ina226_sense_nets()). Each sense net meets the shunt's power net at that shunt's pad only: a NetTie_2 at the pad,
+# or the sense pads of a 4-terminal shunt. The sense pair is pre-routed from the pads' inner edges, and a post-layout
+# check (layout.py) fails if a sense track or its tie meets copper of the power net anywhere else.
+# INA226_SHUNT_NETS: address -> (power net on the shunt's IN+ side, on its IN- side), as captured on 2026-11-27.
+INA226_SHUNT_NETS = {
+    0x40: ("VSYS_IN", "VSYS"), 0x41: ("+3V3", "+3V3_MCU"), 0x42: ("+3V3", "+3V3_USB"),
+    **{0x43 + n: (f"S{n}_3V3_SW", f"S{n}_3V3_M") for n in SLOTS},      # the meter jumper follows S<n>_3V3_M
+    **{0x48 + n: (f"S{n}_5V_SW", f"+5V_S{n}") for n in SLOTS},
+}
+
+
+def ina226_sense_nets(addr):
+    """(IN+ sense net, IN- sense net) of the INA226 at `addr`."""
+    return f"PM{addr:02X}_SENSE_P", f"PM{addr:02X}_SENSE_N"
+
+
+INA226_SENSE_NETS = sorted(x for a in INA226_SHUNT_NETS for x in ina226_sense_nets(a))
+
+# The +3V3A damping leg (owner's decision D4, 2026-11-27; SPEC §3.1, §3.7; risks.md EL-5), chosen with the model
+# keyboard/sim/bench_vdda.py (the LDO's output impedance, FB1 bracketed at 0.1-2 uH, the VDDA and VREF+ capacitors):
+# (middle net, ohm, F). A resistor from +3V3A to the middle net and a capacitor from it to GND, at FB1's +3V3A end.
+# FB1 and the 2 x (100 nF + 1 uF) at VDDA and VREF+ stay as captured. The capacitor is a 10 uF X5R/X7R rated at least
+# 25 V in 0805 or larger, so that most of it survives 3.3 V of DC bias (the model still damps at 4.7 uF).
+VDDA_DAMPING = ("VDDA_DAMP", 0.47, 10e-6)
+
+# The motherboard's PCB (owner's decision D5, 2026-11-27; SPEC §2, §7.1): JLC's JLC04161H-7628, whose layers JLC's
+# impedance page lists exactly as its "No requirement" stack (fetched 2026-11-27): L1 0.035 mm / 7628 prepreg
+# 0.2104 mm, Dk 4.4 / L2 0.0152 mm / core 1.065 mm, Dk 4.6 / L3 0.0152 mm / 7628 prepreg 0.2104 mm / L4 0.035 mm;
+# solder mask Dk 3.8, 1.2 mil over the laminate, 0.6 mil over copper. The coupons use the same stack
+# (boards/coupon_common.py).
+MB_STACK = "JLC04161H-7628"
+# The USB high-speed pair (J1 -> U_ESD -> U1 PA11/PA12) on L1 over L2's unbroken GND: track width and gap in mm. The
+# differential impedance is an ESTIMATE (SPEC §7.1: two quasi-static 2-D field solves, about 88 ohm; corrected from
+# 88-90 ohm by the review of 2026-11-27), not JLC's calculator, which is to be run on this stack before ordering;
+# USB 2.0 asks 90 ohm +-15 %.
+USB_PAIR = {"nets": ("USB_DP", "USB_DM"), "layer": "F.Cu", "plane": "In1.Cu", "width": 0.25, "gap": 0.15,
+            "zdiff_estimate": (87.0, 89.0), "target": 90.0, "tolerance": 0.15}
+JLC_MIN_TRACK_GAP_4L = 0.09    # mm, JLC 4-layer minimum track and gap (boards/coupon_common.py RULES note)
+
 # --- USB Type-C detect, U_CC (SPEC §3.8; owner decision D3, 2026-11-26; the part is a candidate) ---------------
 # A sink-only CC controller that presents Rd on CC1/CC2 powered or not (dead-battery Rd: SLLSEQ8D §7.3.3, RCC_DB
 # 4.1-6.1 k) and reports the source's Rp advertisement over I2C. It uses no MCU pin.
@@ -499,6 +627,18 @@ J_RIG_PINS = {                 # 2 x 5, 2.54 mm (CJT A2541WV-2x5P, C225520, cand
     1: "RIG_MARK", 2: "GND", 3: "RIG_TRIG", 4: "GND", 5: "SLOT_SYNC", 6: "GND", 7: "USB_SOF", 8: "GND",
     9: "RIG_INJ", 10: "RIG_VREF",          # RIG_VREF: +3V3 through 1 k, a logic-level reference, not a supply
 }
+# The signals above; SPEC §7.3 puts 33 ohm in series on the motherboard's three outputs, so those pins carry the
+# resistor's connector-side net (found at capture, 2026-11-27: the pin table alone named the MCU net).
+J_RIG_SERIES = {"RIG_MARK": ("RIG_MARK_J", 33), "SLOT_SYNC": ("SLOT_SYNC_J", 33), "USB_SOF": ("USB_SOF_J", 33)}
+RIG_VREF = ("+3V3", 1000)      # RIG_VREF = this rail through this many ohms
+
+
+def j_rig_pin_net(pin):
+    """The net on J_RIG's pin: the signal, or the connector side of its series resistor."""
+    sig = J_RIG_PINS[pin]
+    return J_RIG_SERIES[sig][0] if sig in J_RIG_SERIES else sig
+
+
 J_KVM_PINS = {                 # 2 x 6, 2.54 mm (CJT A2541WV-2x6P, C225521, candidate), the optional KVM coupon
     1: "+5V_KVM", 2: "+5V_KVM", 3: "GND", 4: "GND", 5: "KVM_TX", 6: "KVM_RX", 7: "GND", 8: "KVM_RST_N",
     9: "KVM_SCL", 10: "KVM_SDA", 11: "KVM_PRESENT_N", 12: "GND",
@@ -509,9 +649,9 @@ J_SWD_PINS = {                 # STDC14 (Samtec FTSH-107-01-L-DV-K, C5307809): U
 }                              # is the target's RX (the probe's TX), 14 T_VCP_TX the target's TX (UM2448 §7.3.4)
 
 ROOT_NOTES = [
-    "PrettyCool Keyboard rev A testbed motherboard - DRAFT contract, not captured.\n"
+    "PrettyCool Keyboard rev A testbed motherboard - DRAFT contract, captured 2026-11-27.\n"
     "Architecture of record: keyboard/hardware/design/SPEC.md; nets and pin map: nets.py.\n"
-    "Designed on paper: no schematic, layout, build or measurement yet.",
+    "Not built, not measured.",
 ]
 
 
@@ -657,10 +797,88 @@ def check():
                             f"{INA226_FULL_SCALE_V / shunt:.3f} A")
     if VSYS_BUDGET_MAX >= SWITCH_TRIP["VSYS"][0]:
         problems.append("the VSYS budget ceiling must sit below the input breaker's minimum trip")
+    if set(J_RIG_SERIES) - set(J_RIG_PINS.values()):
+        problems.append("J_RIG_SERIES names a signal that is on no J_RIG pin")
+    problems += _check_decisions_2026_11_27(known)
     for hdr in (J_RIG_PINS, J_KVM_PINS, J_SWD_PINS):
         for net in hdr.values():
             if net and net not in known and net != "RIG_VREF":
                 problems.append(f"header net {net} is not declared")
+    return problems
+
+
+def _check_decisions_2026_11_27(known):
+    """The contract the owner's decisions of 2026-11-27 add (D2 key, D3 series resistors, D4 PGTH, Kelvin and +3V3A
+    damping, D5 USB pair, D6 alternates)."""
+    problems = []
+    # D2: pin 39 is the key. It must be unconnected on BOTH sides: no net on the motherboard socket's pin 39 (its hole
+    # plugged), and no pad 39 at all on a coupon (keyboard/tools/coupon/rules.py checks the coupons).
+    key = [(p, sig, d) for p, sig, d, _note in SLOT_PINS if p == SLOT_KEY_PIN]
+    if key != [(SLOT_KEY_PIN, "KEY", "nc")]:
+        problems.append(f"SLOT_PINS pin {SLOT_KEY_PIN} must be the key ('KEY', 'nc'), not {key}")
+    if "KEY" in SLOT_SIGNALS:
+        problems.append("KEY is not a slot signal")
+    for n in SLOTS:
+        if slot_net(n, "KEY") is not None or slot_pin_net(n, SLOT_KEY_PIN) is not None:
+            problems.append(f"S{n} pin {SLOT_KEY_PIN} (KEY) must be unconnected on the socket and absent on the coupon")
+    other = [d for p, _s, d, _n in SLOT_PINS if p == SLOT_KEY_NEVER_WITH]
+    if other == ["nc"]:
+        problems.append(f"pin {SLOT_KEY_NEVER_WITH} must stay a real pin: keyed at {SLOT_KEY_PIN} and "
+                        f"{SLOT_KEY_NEVER_WITH} together, a coupon fits either way round")
+    # D3: a series resistor on every slot line that runs straight to an MCU pin, apart from the lanes; nothing else.
+    # The value is the owner's (100 ohm), not a free parameter: the timing check of SPEC §4.3 is done for it.
+    if SLOT_SERIES_OHMS != 100:
+        problems.append(f"SLOT_SERIES_OHMS is {SLOT_SERIES_OHMS}: the owner's decision D3 (2026-11-27) is 100 ohm")
+    count = 0
+    for n in SLOTS:
+        direct = {sig for sig in SLOT_MCU[n] if not sig.startswith("AN")}
+        if set(SLOT_SERIES[n]) != direct:
+            problems.append(f"S{n}: SLOT_SERIES {sorted(SLOT_SERIES[n])} != the direct MCU lines {sorted(direct)}")
+        for sig, (sock, ohms) in SLOT_SERIES[n].items():
+            count += 1
+            if ohms != SLOT_SERIES_OHMS:
+                problems.append(f"S{n} {sig}: {ohms} ohm, the decision is {SLOT_SERIES_OHMS} ohm")
+            if sock in known or sock == slot_net(n, sig) or not sock.startswith(f"S{n}_"):
+                problems.append(f"S{n} {sig}: socket-side net {sock} must be new and slot-prefixed")
+            pin = next(p for p, s_, _d, _no in SLOT_PINS if s_ == sig)
+            if slot_pin_net(n, pin) != sock or MCU_PINS.get(SLOT_MCU[n][sig]) != slot_net(n, sig):
+                problems.append(f"S{n} {sig}: socket pin {pin} must carry {sock}, the MCU pin {slot_net(n, sig)}")
+    if count != 37 or len(set(SLOT_SOCKET_NETS)) != count:
+        problems.append(f"SLOT_SERIES: {count} lines ({len(set(SLOT_SOCKET_NETS))} distinct nets); D3 names 37")
+    # D4: U2's PGTH divider. VSYS_PG falls 3.4-3.75 V even at the divider's 1 % corners, below the 2.8 A ceiling's
+    # VSYS_IN through a compliant Type-C cable from 4.75 V (about 3.9 V, keyboard/sim bench 3); PGTH stays within its
+    # recommended range up to 6.0 V on VSYS_IN (above OVLO's 5.8 V).
+    pg = vsys_pg_thresholds(0.01)
+    if not (3.4 <= pg["fall"][0] and pg["fall"][2] <= 3.75):
+        problems.append(f"VSYS_PG falls at {pg['fall'][0]:.2f}-{pg['fall'][2]:.2f} V (1 %): outside 3.40-3.75 V")
+    top, bot = INPUT_PGTH_DIVIDER
+    if INPUT_PGTH_DIVIDER != (100e3, 44.2e3):
+        problems.append(f"INPUT_PGTH_DIVIDER {INPUT_PGTH_DIVIDER}: the owner's decision D4 (2026-11-27) is 100 k / 44.2 k")
+    if 6.0 * bot / (top + bot) > TPS25947_PGTH_PIN_MAX_V:
+        problems.append("U2 PGTH pin above its recommended maximum at 6 V")
+    # D4: Kelvin sense pairs, one per INA226, distinct from every other net
+    if set(INA226_SHUNT_NETS) != set(INA226_RAILS):
+        problems.append("INA226_SHUNT_NETS must list every INA226")
+    if len(set(INA226_SENSE_NETS)) != 2 * len(INA226_RAILS) or set(INA226_SENSE_NETS) & (known | set(SLOT_SOCKET_NETS)):
+        problems.append("INA226 sense nets must be distinct and new")
+    for a, (pos, neg) in INA226_SHUNT_NETS.items():
+        if pos == neg:
+            problems.append(f"INA226 0x{a:02X}: the shunt's two sides are one net")
+    # D4: the +3V3A damping leg
+    net, ohms, farads = VDDA_DAMPING
+    if net not in MCU_LOCAL or not 0 < ohms < 10 or not 1e-6 <= farads <= 47e-6:
+        problems.append(f"VDDA_DAMPING {VDDA_DAMPING}: its net must be MCU-local, 0-10 ohm, 1-47 uF")
+    # D5: the USB pair's geometry is buildable at JLC
+    if min(USB_PAIR["width"], USB_PAIR["gap"]) < JLC_MIN_TRACK_GAP_4L or set(USB_PAIR["nets"]) - known:
+        problems.append("USB_PAIR: width or gap below JLC's 4-layer minimum, or nets not in the contract")
+    lo, hi = USB_PAIR["zdiff_estimate"]
+    band = ((1 - USB_PAIR["tolerance"]) * USB_PAIR["target"], (1 + USB_PAIR["tolerance"]) * USB_PAIR["target"])
+    if not band[0] <= lo <= hi <= band[1]:
+        problems.append("USB_PAIR: the estimate is outside 90 ohm +-15 %")
+    # D6: pin-compatible alternates, never a -Q (SMPS) part
+    for part, lcsc in MCU_ALTERNATES.items():
+        if part.endswith("Q") or not lcsc.startswith("C") or part == MCU:
+            problems.append(f"MCU alternate {part} ({lcsc}) is not a non-SMPS pin-compatible part")
     return problems
 
 

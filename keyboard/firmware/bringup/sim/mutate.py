@@ -48,12 +48,15 @@ MUTATIONS = {
                                     "\t\terr |= cfg(&tb_slots[slot - 1].busen, GPIO_OUTPUT_INACTIVE);",
                                     "\t\terr |= cfg(&tb_slots[slot - 1].busen, GPIO_OUTPUT_ACTIVE);")],
                                   "the boot restore closes every bus switch"),
+    "lines_before_descriptor": ([("bringup/src/slot.c", "\tres->on3 = true;\n",
+                                  "\tres->on3 = true;\n\t(void)tb_slot_lines(slot, true);\n")],
+                                "the slot's lines driven before its descriptor is read (risks.md EL-2)"),
     "no_present_check": ([("bringup/src/board.c", "\tif (slot >= 1 && !(tb.present & BIT(slot - 1))) {\n"
                            "\t\treturn -ENODEV;", "\tif (0) {\n\t\treturn -ENODEV;")],
                          "a slot powered with no coupon in it"),
-    "bus_before_5v_no_reopen": ([("bringup/src/slot.c", "\tres->on3 = true;\n\t(void)tb_slot_lines(slot, true);\n",
-                                  "\tres->on3 = true;\n\t(void)tb_slot_lines(slot, true);\n"
-                                  "\t(void)tb_slot_bus(slot, true);\n"),
+    "bus_before_5v_no_reopen": ([("bringup/src/slot.c", "\t(void)tb_slot_lines(slot, true);\n\n\tif (tb.budget.on",
+                                  "\t(void)tb_slot_lines(slot, true);\n\t(void)tb_slot_bus(slot, true);\n\n"
+                                  "\tif (tb.budget.on"),
                                  ("bringup/src/board.c", "\tif (slot >= 1 && (tb.bus_closed & BIT(slot - 1))) {\n"
                                   "\t\t/* SPEC", "\tif (0) {\n\t\t/* SPEC")],
                                 "the bus switch closed before +5V comes up"),
@@ -124,7 +127,8 @@ def main(argv=None):
                            text=True, env=dict(env, TB_SIM_EXE=str(build / "zephyr" / "zephyr.exe")))
         failed = sorted({ln.split("::")[1].split(" ")[0] for ln in t.stdout.splitlines()
                          if ln.startswith(("FAILED", "ERROR")) and "::" in ln})
-        seen = sorted({m.group(1) for m in re.finditer(r"rule broken: (\S+)", t.stdout)})
+        # pytest also echoes the assertion's source line, whose f-string reads "rule broken: {flags[...]}": skip it
+        seen = sorted({m.group(1) for m in re.finditer(r"rule broken: ([^\s{]\S*)", t.stdout)})
         lib_fail = []
         if any(f.startswith("lib/") for f, _o, _n in edits):
             lb = subprocess.run(["west", "build", "-p", "auto", "-b", "native_sim/native/64",

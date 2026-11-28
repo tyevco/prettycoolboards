@@ -146,6 +146,22 @@ def test_empty_slot_is_never_powered(s):
     assert s.cmd("tb slot 2").one("slot")["on3"] == 0
 
 
+def test_turned_coupon_is_refused_without_driving_it(s):
+    """risks.md EL-2 with the slot key's plug missing (D2 of 2026-11-27 plugs socket hole 39, by hand): a coupon
+    turned 180 degrees reads present (its GND on PRESENT_N), and its descriptor cannot be read (its GND on SCL). The
+    firmware reads the descriptor before it drives any slot line (SPEC §4.6), so it turns the slot off without
+    driving CS0_N into the coupon's GND or G0/G1 into its rail: the fixture's monitor (sim/sim.h) sees no line
+    driven and no bus switch closed. The same coupon the right way round is identified and powered."""
+    configure(s)
+    assert s.cmd("sim coupon 2 turned").ok
+    r = s.cmd("tb slot 2 on")
+    assert r.done["rc"] < 0 and r.done["err"] == "desc_bus" and r.one("slot_on")["on3"] == 0
+    assert s.cmd("tb slot 2").one("slot")["on3"] == 0
+    assert s.cmd("sim coupon 2 test").ok
+    on = s.cmd("tb slot 2 on").one("slot_on")
+    assert on["on3"] == 1 and on["bus"] == 1 and on["desc"] == "ok"
+
+
 def test_coupon_pulled_while_powered(s):
     configure(s)
     assert s.cmd("tb slot 1 on").ok

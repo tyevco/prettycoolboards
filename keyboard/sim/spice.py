@@ -49,7 +49,10 @@ class Waves(dict):
 
     @property
     def scale(self):
-        return self["time"] if "time" in self else self["sweep"]
+        for key in ("time", "sweep", "frequency"):
+            if key in self:
+                return self[key]
+        raise KeyError("no scale vector")
 
     def window(self, name, t0, t1):
         """The samples of `name` with t0 <= scale <= t1."""
@@ -72,7 +75,9 @@ def run(netlist, vectors, analysis, options=DEFAULT_OPTIONS, keep_dir=None, time
     os.makedirs(work, exist_ok=True)
     cir = os.path.join(work, "bench.cir")
     dat = os.path.join(work, "bench.dat")
-    scale = "sweep" if analysis.split()[0].lower() == "dc" else "time"
+    # an AC analysis writes its frequency as the scale; ask for real vectors (vr(x), vi(x) or vm(x)), which keep
+    # wrdata's single-scale layout
+    scale = {"dc": "sweep", "ac": "frequency"}.get(analysis.split()[0].lower(), "time")
     text = "\n".join([
         "* keyboard/sim bench",
         netlist.strip(),

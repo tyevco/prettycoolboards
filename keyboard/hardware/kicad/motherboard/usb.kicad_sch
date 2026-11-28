@@ -1,0 +1,6497 @@
+(kicad_sch
+	(version 20260306)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(uuid "9fe62a1d-22c6-54b9-8c92-944baa53d667")
+	(paper "A3")
+	(title_block
+		(title "USB-C input, ESD, Type-C detect")
+		(date "2026-11-27")
+		(rev "A")
+		(company "PrettyCool Boards")
+	)
+	(lib_symbols
+		(symbol "Connector:TestPoint"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0.762)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "TP"
+				(at 0 6.858 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "TestPoint"
+				(at 0 5.08 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 5.08 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 5.08 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "test point"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "test point tp"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "Pin* Test*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "TestPoint_0_1"
+				(circle
+					(center 0 3.302)
+					(radius 0.762)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "TestPoint_1_1"
+				(pin passive line
+					(at 0 0 90)
+					(length 2.54)
+					(name "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "Connector:USB_C_Receptacle_USB2.0_16P"
+			(pin_names
+				(offset 1.016)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "J"
+				(at 0 22.225 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "USB_C_Receptacle_USB2.0_16P"
+				(at 0 19.685 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 3.81 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" "https://www.usb.org/sites/default/files/documents/usb_type-c.zip"
+				(at 3.81 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "USB 2.0-only 16P Type-C Receptacle connector"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "usb universal serial bus type-C USB2.0"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "USB*C*Receptacle*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "USB_C_Receptacle_USB2.0_16P_0_0"
+				(rectangle
+					(start -0.254 -17.78)
+					(end 0.254 -16.764)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start 10.16 15.494)
+					(end 9.144 14.986)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start 10.16 10.414)
+					(end 9.144 9.906)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start 10.16 7.874)
+					(end 9.144 7.366)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start 10.16 2.794)
+					(end 9.144 2.286)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start 10.16 0.254)
+					(end 9.144 -0.254)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start 10.16 -2.286)
+					(end 9.144 -2.794)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start 10.16 -4.826)
+					(end 9.144 -5.334)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start 10.16 -12.446)
+					(end 9.144 -12.954)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start 10.16 -14.986)
+					(end 9.144 -15.494)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "USB_C_Receptacle_USB2.0_16P_0_1"
+				(rectangle
+					(start -10.16 17.78)
+					(end 10.16 -17.78)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(polyline
+					(pts (xy -8.89 -3.81) (xy -8.89 3.81))
+					(stroke
+						(width 0.508)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start -7.62 -3.81)
+					(end -6.35 3.81)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(arc
+					(start -7.62 3.81)
+					(mid -6.985 4.4423)
+					(end -6.35 3.81)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(arc
+					(start -7.62 3.81)
+					(mid -6.985 4.4423)
+					(end -6.35 3.81)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(arc
+					(start -8.89 3.81)
+					(mid -6.985 5.7067)
+					(end -5.08 3.81)
+					(stroke
+						(width 0.508)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(arc
+					(start -5.08 -3.81)
+					(mid -6.985 -5.7067)
+					(end -8.89 -3.81)
+					(stroke
+						(width 0.508)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(arc
+					(start -6.35 -3.81)
+					(mid -6.985 -4.4423)
+					(end -7.62 -3.81)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(arc
+					(start -6.35 -3.81)
+					(mid -6.985 -4.4423)
+					(end -7.62 -3.81)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(polyline
+					(pts (xy -5.08 3.81) (xy -5.08 -3.81))
+					(stroke
+						(width 0.508)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(circle
+					(center -2.54 1.143)
+					(radius 0.635)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(polyline
+					(pts (xy -1.27 4.318) (xy 0 6.858) (xy 1.27 4.318) (xy -1.27 4.318))
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(polyline
+					(pts (xy 0 -2.032) (xy 2.54 0.508) (xy 2.54 1.778))
+					(stroke
+						(width 0.508)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts (xy 0 -3.302) (xy -2.54 -0.762) (xy -2.54 0.508))
+					(stroke
+						(width 0.508)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts (xy 0 -5.842) (xy 0 4.318))
+					(stroke
+						(width 0.508)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(circle
+					(center 0 -5.842)
+					(radius 1.27)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(rectangle
+					(start 1.905 1.778)
+					(end 3.175 3.048)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+			)
+			(symbol "USB_C_Receptacle_USB2.0_16P_1_1"
+				(pin passive line
+					(at 0 -22.86 90)
+					(length 5.08)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "A1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 15.24 15.24 180)
+					(length 5.08)
+					(name "VBUS"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "A4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at 15.24 10.16 180)
+					(length 5.08)
+					(name "CC1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "A5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at 15.24 -2.54 180)
+					(length 5.08)
+					(name "D+"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "A6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at 15.24 2.54 180)
+					(length 5.08)
+					(name "D-"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "A7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at 15.24 -12.7 180)
+					(length 5.08)
+					(name "SBU1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "A8"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 15.24 15.24 180)
+					(length 5.08)
+					(hide yes)
+					(name "VBUS"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "A9"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -22.86 90)
+					(length 5.08)
+					(hide yes)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "A12"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -22.86 90)
+					(length 5.08)
+					(hide yes)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "B1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 15.24 15.24 180)
+					(length 5.08)
+					(hide yes)
+					(name "VBUS"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "B4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at 15.24 7.62 180)
+					(length 5.08)
+					(name "CC2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "B5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at 15.24 -5.08 180)
+					(length 5.08)
+					(name "D+"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "B6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at 15.24 0 180)
+					(length 5.08)
+					(name "D-"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "B7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at 15.24 -15.24 180)
+					(length 5.08)
+					(name "SBU2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "B8"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 15.24 15.24 180)
+					(length 5.08)
+					(hide yes)
+					(name "VBUS"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "B9"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -22.86 90)
+					(length 5.08)
+					(hide yes)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "B12"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -7.62 -22.86 90)
+					(length 5.08)
+					(name "SHIELD"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "SH"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "Device:C"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0.254)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "C"
+				(at 0.635 2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Value" "C"
+				(at 0.635 -2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Footprint" ""
+				(at 0.9652 -3.81 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Unpolarized capacitor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "cap capacitor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "C_*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "C_0_1"
+				(polyline
+					(pts (xy -2.032 0.762) (xy 2.032 0.762))
+					(stroke
+						(width 0.508)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts (xy -2.032 -0.762) (xy 2.032 -0.762))
+					(stroke
+						(width 0.508)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "C_1_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 2.794)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 2.794)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "Device:R"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "R"
+				(at 2.032 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "R"
+				(at 0 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at -1.778 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Resistor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "R res resistor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "R_*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "R_0_1"
+				(rectangle
+					(start -1.016 -2.54)
+					(end 1.016 2.54)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "R_1_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "Diode:SMF5V0A"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 1.016)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "D"
+				(at 0 2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "SMF5V0A"
+				(at 0 -2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" "Diode_SMD:D_SMF"
+				(at 0 -5.08 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" "https://www.vishay.com/doc?85881"
+				(at -1.27 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "200W unidirectional Transil Transient Voltage Suppressor, 5Vrwm, SMF"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "diode TVS voltage suppressor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "D*SMF*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "SMF5V0A_0_1"
+				(polyline
+					(pts (xy -0.762 1.27) (xy -1.27 1.27) (xy -1.27 -1.27))
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts (xy 1.27 1.27) (xy 1.27 -1.27) (xy -1.27 0) (xy 1.27 1.27))
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "SMF5V0A_1_1"
+				(pin passive line
+					(at -3.81 0 0)
+					(length 2.54)
+					(name "A1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 3.81 0 180)
+					(length 2.54)
+					(name "A2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "Interface_USB:TUSB320"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "U"
+				(at -11.43 11.43 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "TUSB320"
+				(at 7.62 11.43 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" "Package_DFN_QFN:Texas_X2QFN-12_1.6x1.6mm_P0.4mm"
+				(at 5.08 -13.97 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" "http://www.ti.com/lit/ds/symlink/tusb320.pdf"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "USB Type-C Configuration Channel Logic and Port Control, X2QFN-12"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "USB PD CC"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "Texas?X2QFN*1.6x1.6mm*P0.4mm*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "TUSB320_0_1"
+				(rectangle
+					(start -12.7 10.16)
+					(end 12.7 -10.16)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+			)
+			(symbol "TUSB320_1_1"
+				(pin bidirectional line
+					(at 15.24 2.54 180)
+					(length 2.54)
+					(name "CC1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at 15.24 0 180)
+					(length 2.54)
+					(name "CC2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at 15.24 -5.08 180)
+					(length 2.54)
+					(name "PORT"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at 15.24 7.62 180)
+					(length 2.54)
+					(name "VBUS_DET"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at 15.24 -7.62 180)
+					(length 2.54)
+					(name "ADDR"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin open_collector line
+					(at -15.24 2.54 0)
+					(length 2.54)
+					(name "~{INT}/OUT3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at -15.24 7.62 0)
+					(length 2.54)
+					(name "SDA/OUT1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at -15.24 5.08 0)
+					(length 2.54)
+					(name "SCL/OUT2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "8"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin open_collector line
+					(at -15.24 0 0)
+					(length 2.54)
+					(name "ID"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "9"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at 0 -12.7 90)
+					(length 2.54)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "10"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -15.24 -5.08 0)
+					(length 2.54)
+					(name "~{EN}"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "11"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at 0 12.7 270)
+					(length 2.54)
+					(name "VDD"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "12"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "keyboard:TPD4E05U06DQA"
+			(pin_names
+				(offset 1.016)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "U"
+				(at -7.62 8.89 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left bottom)
+				)
+			)
+			(property "Value" "TPD4E05U06DQA"
+				(at -7.62 -8.89 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left top)
+				)
+			)
+			(property "Footprint" "keyboard:TI_DQA0010A_USON-10_2.5x1.0mm_P0.5mm"
+				(at 0 0 0)
+				(hide yes)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" "https://www.ti.com/lit/ds/symlink/tpd4e05u06.pdf"
+				(at 0 0 0)
+				(hide yes)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "4-channel ESD protection, 0.5 pF, 5.5 V, flow-through USON-10 (DQA): IO on 1, 2, 4, 5; 6, 7, 9, 10 not connected inside, used for straight-through routing (stacked here)"
+				(at 0 0 0)
+				(hide yes)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "ESD TVS USB TI"
+				(at 0 0 0)
+				(hide yes)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "TPD4E05U06DQA_0_1"
+				(rectangle
+					(start -7.62 7.62)
+					(end 7.62 -7.62)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+			)
+			(symbol "TPD4E05U06DQA_1_1"
+				(pin passive line
+					(at -10.16 3.81 0)
+					(length 2.54)
+					(name "D1+"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -10.16 3.81 0)
+					(length 2.54)
+					(hide yes)
+					(name "D1+"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "10"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -10.16 1.27 0)
+					(length 2.54)
+					(name "D1-"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -10.16 1.27 0)
+					(length 2.54)
+					(hide yes)
+					(name "D1-"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "9"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -10.16 -1.27 0)
+					(length 2.54)
+					(name "D2+"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -10.16 -1.27 0)
+					(length 2.54)
+					(hide yes)
+					(name "D2+"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -10.16 -3.81 0)
+					(length 2.54)
+					(name "D2-"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -10.16 -3.81 0)
+					(length 2.54)
+					(hide yes)
+					(name "D2-"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at 0 -10.16 90)
+					(length 2.54)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -10.16 90)
+					(length 2.54)
+					(hide yes)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "8"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "power:+3V3"
+			(power global)
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "#PWR"
+				(at 0 -3.81 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "+3V3"
+				(at 0 3.556 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Power symbol creates a global label with name \"+3V3\""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "global power"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "+3V3_0_1"
+				(polyline
+					(pts (xy -0.762 1.27) (xy 0 2.54))
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts (xy 0 2.54) (xy 0.762 1.27))
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts (xy 0 0) (xy 0 2.54))
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "+3V3_1_1"
+				(pin power_in line
+					(at 0 0 90)
+					(length 0)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "power:GND"
+			(power global)
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "#PWR"
+				(at 0 -6.35 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "GND"
+				(at 0 -3.81 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "global power"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "GND_0_1"
+				(polyline
+					(pts (xy 0 0) (xy 0 -1.27) (xy 1.27 -1.27) (xy 0 -2.54) (xy -1.27 -1.27) (xy 0 -1.27))
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "GND_1_1"
+				(pin power_in line
+					(at 0 0 270)
+					(length 0)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "power:PWR_FLAG"
+			(power global)
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "#FLG"
+				(at 0 1.905 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "PWR_FLAG"
+				(at 0 3.81 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Special symbol for telling ERC where power comes from"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "flag power"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "PWR_FLAG_0_0"
+				(pin power_out line
+					(at 0 0 90)
+					(length 0)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(symbol "PWR_FLAG_0_1"
+				(polyline
+					(pts (xy 0 0) (xy 0 1.27) (xy -1.016 1.905) (xy 0 2.54) (xy 1.016 1.905) (xy 0 1.27))
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "power:VBUS"
+			(power global)
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "#PWR"
+				(at 0 -3.81 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "VBUS"
+				(at 0 3.556 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Power symbol creates a global label with name \"VBUS\""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "global power"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "VBUS_0_1"
+				(polyline
+					(pts (xy -0.762 1.27) (xy 0 2.54))
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts (xy 0 2.54) (xy 0.762 1.27))
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts (xy 0 0) (xy 0 2.54))
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "VBUS_1_1"
+				(pin power_in line
+					(at 0 0 90)
+					(length 0)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+	)
+	(text "J1: USB-C (USB 2.0 high-speed device, sink only) and ESD"
+		(exclude_from_sim no)
+		(at 15.24 15.24 0)
+		(effects
+			(font
+				(size 2 2)
+				(bold yes)
+			)
+			(justify left top)
+		)
+		(uuid "a51d5bb8-aca4-5557-abd9-1a8b7341fac2")
+	)
+	(text "D+/D- joined at J1, then the 90R pair through U_ESD to the MCU (PA12/PA11): hand-routed on L1 over the\nL2 ground, no vias, no stubs, no test points (SPEC §7.1). VBUS: SMF5.0A TVS; <= 10 uF before U2.\nShield: 1M || 4.7n 1 kV to GND (proposal)."
+		(exclude_from_sim no)
+		(at 15.24 19.05 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+				(italic yes)
+			)
+			(justify left top)
+		)
+		(uuid "7818b0a4-5ccd-5f63-92f1-f5f7ab7e314b")
+	)
+	(text "U_CC: TUSB320LAI USB Type-C detect, I2C1 at 0x67 (owner's decision D3; the part a candidate)"
+		(exclude_from_sim no)
+		(at 15.24 26.67 0)
+		(effects
+			(font
+				(size 2 2)
+				(bold yes)
+			)
+			(justify left top)
+		)
+		(uuid "bd841960-1103-513c-ad17-b4e943180838")
+	)
+	(text "Rd on CC1/CC2 powered or not (dead-battery Rd 4.1-6.1k). PORT = GND: sink only. EN_N = GND: always on.\nADDR 4.7k to +3V3: I2C at 0x67 (low would be 0x47, INA226 +3V3_S4's). VBUS_DET 887k 1 % from VBUS.\nINT_N: 200k to +3V3, into U_EXP2 P14 (no MCU pin). Reads Default / 1.5 A / 3.0 A: the firmware's\nVSYS budget (SPEC §3.2, §8.4). R1/R2 5.1k Rd: NOT FITTED (they would halve U_CC's termination)."
+		(exclude_from_sim no)
+		(at 15.24 30.48 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+				(italic yes)
+			)
+			(justify left top)
+		)
+		(uuid "4adeeaea-af4c-5c1b-a5bc-613b1c3b73c4")
+	)
+	(rectangle
+		(start 12.7 12.7)
+		(end 236.22 203.2)
+		(stroke
+			(width 0.1)
+			(type dash)
+		)
+		(fill
+			(type none)
+		)
+		(uuid "c932f484-c07c-5527-b0c0-008d6c5ab9d2")
+	)
+	(symbol
+		(lib_id "Connector:USB_C_Receptacle_USB2.0_16P")
+		(at 60.96 161.29 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "ff3276aa-742b-5dc7-b7e7-f7280df103ed")
+		(property "Reference" "J1"
+			(at 49.8 160.29 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "TYPE-C-31-M-12"
+			(at 49.8 162.29 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Connector_USB:USB_C_Receptacle_HRO_TYPE-C-31-M-12"
+			(at 60.96 161.29 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" "https://www.usb.org/sites/default/files/documents/usb_type-c.zip"
+			(at 60.96 161.29 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "USB 2.0-only 16P Type-C Receptacle connector"
+			(at 60.96 161.29 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "TYPE-C-31-M-12"
+			(at 60.96 161.29 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Korean Hroparts Elec"
+			(at 60.96 161.29 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C165948"
+			(at 60.96 161.29 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "A1"
+			(uuid "08cfb390-7ed7-544e-be4c-0bd62bd9ffa9")
+		)
+		(pin "A4"
+			(uuid "e5d43b55-6a6e-5f81-a4e1-d4fbe46f971c")
+		)
+		(pin "A5"
+			(uuid "48e8b01f-850a-5644-9749-0a461efc53b5")
+		)
+		(pin "A6"
+			(uuid "9b207308-d26d-5830-bdcd-e31223db36a9")
+		)
+		(pin "A7"
+			(uuid "3f83026e-40d1-57e1-afa3-2661647457b5")
+		)
+		(pin "A8"
+			(uuid "3935e26f-9534-5b53-86f7-ac0e799d7ca3")
+		)
+		(pin "A9"
+			(uuid "37c616e6-e32b-578f-9f14-1325f43b57d8")
+		)
+		(pin "A12"
+			(uuid "2f44885e-017b-5882-a8b2-9b0c6ba437d5")
+		)
+		(pin "B1"
+			(uuid "c53bdd7f-e58f-5a17-b50c-4304ccdf4293")
+		)
+		(pin "B4"
+			(uuid "28de99b6-a107-50b1-9a12-f8a04e65b6b1")
+		)
+		(pin "B5"
+			(uuid "7dbb2ac4-5116-5095-8ed1-5230c0bc3830")
+		)
+		(pin "B6"
+			(uuid "7cdfc538-fd1d-54c9-8160-438f0a78be45")
+		)
+		(pin "B7"
+			(uuid "a9055268-21ca-5b35-ae9d-5852a9684ea1")
+		)
+		(pin "B8"
+			(uuid "94c27804-1392-5822-ab1a-0cc145028659")
+		)
+		(pin "B9"
+			(uuid "8147f97f-9712-50e0-ae7b-dcb85d35bb7d")
+		)
+		(pin "B12"
+			(uuid "7ffe7628-4c04-527f-9a94-d050fe93da00")
+		)
+		(pin "SH"
+			(uuid "d8e6c99c-7bf6-59f3-9bc9-3af95f0a9631")
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866/9fe62a1d-22c6-54b9-8c92-944baa53d667"
+					(reference "J1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(no_connect
+		(at 76.2 173.99)
+		(uuid "93d3ce56-aa10-54b2-8b92-2dcd07b4039e")
+	)
+	(no_connect
+		(at 76.2 176.53)
+		(uuid "d8f1acb5-f2f1-5fc3-aeea-c148da319199")
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 60.96 184.15 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "52c83a2d-73d2-50f0-abd4-19f518cd6faa")
+		(property "Reference" "#PWR02001"
+			(at 60.96 184.15 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 60.96 187.45 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Footprint" ""
+			(at 60.96 184.15 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 60.96 184.15 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 60.96 184.15 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "ab576dd5-d5c8-522e-8891-b714569c3eed")
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866/9fe62a1d-22c6-54b9-8c92-944baa53d667"
+					(reference "#PWR02001")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Diode:SMF5V0A")
+		(at 87.63 52.07 270)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "b7e8f958-93f8-56f9-97a0-46ce080ef8bd")
+		(property "Reference" "D1"
+			(at 89.8 51.07 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "SMF5.0A"
+			(at 89.8 53.07 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Diode_SMD:D_SMF"
+			(at 87.63 52.07 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" "https://www.littelfuse.com/assetdocs/tvs-diodes-smf-datasheet"
+			(at 87.63 52.07 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "200 W unidirectional TVS, 5.0 V VRWM, SOD-123FL (cathode = pin 1 to VBUS)"
+			(at 87.63 52.07 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "SMF5.0A"
+			(at 87.63 52.07 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Littelfuse"
+			(at 87.63 52.07 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C151296"
+			(at 87.63 52.07 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "3168d53c-6569-5733-8cef-00cf0c326f04")
+		)
+		(pin "2"
+			(uuid "630fb742-8a76-535b-937f-5f4f1bf64e3e")
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866/9fe62a1d-22c6-54b9-8c92-944baa53d667"
+					(reference "D1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 87.63 55.88 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "84757bed-f177-504d-b54f-4b6c504c7431")
+		(property "Reference" "#PWR02002"
+			(at 87.63 55.88 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 87.63 59.18 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Footprint" ""
+			(at 87.63 55.88 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 87.63 55.88 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 87.63 55.88 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "caf885d4-1fe5-5c7f-be1f-b5045a0b85dd")
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866/9fe62a1d-22c6-54b9-8c92-944baa53d667"
+					(reference "#PWR02002")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:VBUS")
+		(at 101.6 48.26 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "f95c5da6-1e32-5815-a38d-bb370dc546fe")
+		(property "Reference" "#PWR02003"
+			(at 101.6 48.26 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "VBUS"
+			(at 101.6 44.96 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+			)
+		)
+		(property "Footprint" ""
+			(at 101.6 48.26 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 101.6 48.26 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 101.6 48.26 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "2e45ef53-2bce-561a-907c-5eaca86bb6bb")
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866/9fe62a1d-22c6-54b9-8c92-944baa53d667"
+					(reference "#PWR02003")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(label "USB_CC1"
+		(at 134.62 67.31 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "91dc5c9f-2505-50e7-8a29-3f05452043bf")
+	)
+	(symbol
+		(lib_id "Connector:TestPoint")
+		(at 147.32 67.31 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "a32e147c-eb34-56c3-b830-78e7cfa9bd27")
+		(property "Reference" "TP1"
+			(at 148.982 63.008 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "USB_CC1"
+			(at 148.982 65.008 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
+			(at 147.32 67.31 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 147.32 67.31 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "test point"
+			(at 147.32 67.31 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "ddd90dd2-809d-5e80-8647-e4c229d918dd")
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866/9fe62a1d-22c6-54b9-8c92-944baa53d667"
+					(reference "TP1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 149.86 71.12 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp yes)
+		(uuid "9d613b28-1812-54f6-9c94-1272311e5619")
+		(property "Reference" "R1"
+			(at 151.776 70.12 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "5.1k"
+			(at 151.776 72.12 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 149.86 71.12 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 149.86 71.12 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 149.86 71.12 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "0402WGF5101TCE"
+			(at 149.86 71.12 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 149.86 71.12 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C25905"
+			(at 149.86 71.12 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "511c3662-c91c-5e5f-9662-89a43641be62")
+		)
+		(pin "2"
+			(uuid "af313dea-a4ce-5548-a00d-cba5b21a418a")
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866/9fe62a1d-22c6-54b9-8c92-944baa53d667"
+					(reference "R1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 149.86 74.93 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "6a5dace2-eb91-5777-bcd8-cb45b04fbcad")
+		(property "Reference" "#PWR02004"
+			(at 149.86 74.93 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 149.86 78.23 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Footprint" ""
+			(at 149.86 74.93 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 149.86 74.93 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 149.86 74.93 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "d2bc4fed-d7de-5483-a76a-d9bea35a91f8")
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866/9fe62a1d-22c6-54b9-8c92-944baa53d667"
+					(reference "#PWR02004")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "keyboard:TPD4E05U06DQA")
+		(at 171.45 82.55 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "8f00b4c5-abf8-5e1f-b001-8bad8d9f02b3")
+		(property "Reference" "U_ESD"
+			(at 180.07 81.55 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "TPD4E05U06DQAR"
+			(at 180.07 83.55 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "keyboard:TI_DQA0010A_USON-10_2.5x1.0mm_P0.5mm"
+			(at 171.45 82.55 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" "https://www.ti.com/lit/ds/symlink/tpd4e05u06.pdf"
+			(at 171.45 82.55 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "4-channel ESD protection, 0.5 pF, 5.5 V, flow-through USON-10 (DQA): IO on 1, 2, 4, 5; 6, 7, 9, 10 not connected inside, used for straight-through routing (stacked here)"
+			(at 171.45 82.55 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "TPD4E05U06DQAR"
+			(at 171.45 82.55 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Texas Instruments"
+			(at 171.45 82.55 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C138714"
+			(at 171.45 82.55 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "5f9a6b15-6a70-5d60-83c6-102c4febaf06")
+		)
+		(pin "10"
+			(uuid "693e3531-20ce-53ca-9c67-7544c5ae6e2e")
+		)
+		(pin "2"
+			(uuid "26c7bef1-4655-5d82-9917-f8b7b3badae6")
+		)
+		(pin "9"
+			(uuid "4b4d520f-ffe6-5830-8202-cff608395857")
+		)
+		(pin "4"
+			(uuid "aaab6722-53e0-5527-8f69-2ff2905cb442")
+		)
+		(pin "7"
+			(uuid "f590740d-995a-5405-b602-170b26c7cd56")
+		)
+		(pin "5"
+			(uuid "a48382ae-4b11-5177-8603-408f699b99f0")
+		)
+		(pin "6"
+			(uuid "37dd33c1-60f6-5298-8749-1afb753d88cd")
+		)
+		(pin "3"
+			(uuid "44dd744e-097b-5f2b-8672-344d5e1ef152")
+		)
+		(pin "8"
+			(uuid "6c4931ec-028e-5f50-9801-d25d7923a71b")
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866/9fe62a1d-22c6-54b9-8c92-944baa53d667"
+					(reference "U_ESD")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 171.45 92.71 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "465fbe29-e3ad-560e-a0fa-4668950e96d9")
+		(property "Reference" "#PWR02005"
+			(at 171.45 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 171.45 96.01 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Footprint" ""
+			(at 171.45 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 171.45 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 171.45 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "52fa0537-8d58-5af5-9b72-5123184adca6")
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866/9fe62a1d-22c6-54b9-8c92-944baa53d667"
+					(reference "#PWR02005")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(label "USB_CC2"
+		(at 157.48 92.71 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "5e2f2a73-2f50-5587-a694-8b0d505c6747")
+	)
+	(symbol
+		(lib_id "Connector:TestPoint")
+		(at 143.51 92.71 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "0eeff82e-c2c4-55b4-81b1-14a561548a0b")
+		(property "Reference" "TP2"
+			(at 141.848 88.408 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "USB_CC2"
+			(at 141.848 90.408 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
+			(at 143.51 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 143.51 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "test point"
+			(at 143.51 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "35c3e68a-86f6-5b7d-9199-030aa237d266")
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866/9fe62a1d-22c6-54b9-8c92-944baa53d667"
+					(reference "TP2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 143.51 96.52 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp yes)
+		(uuid "64830c50-d452-58e8-acfd-bdb729e59f1a")
+		(property "Reference" "R2"
+			(at 141.594 95.52 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "5.1k"
+			(at 141.594 97.52 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 143.51 96.52 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 143.51 96.52 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 143.51 96.52 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "0402WGF5101TCE"
+			(at 143.51 96.52 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 143.51 96.52 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C25905"
+			(at 143.51 96.52 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "5e3f1a9d-6d61-50c2-8226-665a31b81af0")
+		)
+		(pin "2"
+			(uuid "1ddf9e6b-d582-54e2-9e9c-c583db5e5746")
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866/9fe62a1d-22c6-54b9-8c92-944baa53d667"
+					(reference "R2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 143.51 100.33 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "42d835aa-a5b8-5c95-92e2-fa0d9cb9b44d")
+		(property "Reference" "#PWR02006"
+			(at 143.51 100.33 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 143.51 103.63 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Footprint" ""
+			(at 143.51 100.33 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 143.51 100.33 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 143.51 100.33 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "cd7dce63-8110-5a8c-afe3-132ad46b1e56")
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866/9fe62a1d-22c6-54b9-8c92-944baa53d667"
+					(reference "#PWR02006")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Interface_USB:TUSB320")
+		(at 151.13 139.7 0)
+		(mirror y)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "745e6501-2b15-5e9b-836a-0157b3231313")
+		(property "Reference" "U_CC"
+			(at 137.13 126.54 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "TUSB320LAIRWBR"
+			(at 137.13 128.29 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Package_DFN_QFN:Texas_X2QFN-12_1.6x1.6mm_P0.4mm"
+			(at 151.13 139.7 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" "https://www.ti.com/lit/ds/symlink/tusb320lai.pdf"
+			(at 151.13 139.7 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "USB Type-C Configuration Channel Logic and Port Control, X2QFN-12"
+			(at 151.13 139.7 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "TUSB320LAIRWBR"
+			(at 151.13 139.7 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Texas Instruments"
+			(at 151.13 139.7 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C132554"
+			(at 151.13 139.7 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "6c56d356-6e7b-5899-85aa-ab5ac6b3389a")
+		)
+		(pin "2"
+			(uuid "6048d0c7-649e-5e4c-a3f8-c408535be3c3")
+		)
+		(pin "3"
+			(uuid "f6a7e53e-2d9b-51f7-80fb-5735bfd135e7")
+		)
+		(pin "4"
+			(uuid "53b72b7a-c563-58fb-9cce-41341aef8d9c")
+		)
+		(pin "5"
+			(uuid "8180d908-d974-5a1f-836f-7f3a76c610a7")
+		)
+		(pin "6"
+			(uuid "7215fcde-07d1-50bc-bbc0-c093cd85498c")
+		)
+		(pin "7"
+			(uuid "705687b9-c69e-5dd0-8c6d-28bf7969ff64")
+		)
+		(pin "8"
+			(uuid "a7940da3-5b80-5017-9782-9febee33ca91")
+		)
+		(pin "9"
+			(uuid "584164af-34ab-5315-bee4-cf954a9ec95e")
+		)
+		(pin "10"
+			(uuid "58743f00-59d4-5242-95d6-20ef5a3414b0")
+		)
+		(pin "11"
+			(uuid "86fba24c-9573-5f6c-ad1a-07220118a869")
+		)
+		(pin "12"
+			(uuid "b85ff434-2428-55f8-a498-c60f4600fdcb")
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866/9fe62a1d-22c6-54b9-8c92-944baa53d667"
+					(reference "U_CC")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 133.35 144.78 270)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "4b6f8091-ef16-5316-b1c4-7bbb5e1a6206")
+		(property "Reference" "#PWR02007"
+			(at 133.35 144.78 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 130.05 144.78 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" ""
+			(at 133.35 144.78 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 133.35 144.78 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 133.35 144.78 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "f6422d58-bad5-5234-b561-f31cde297c06")
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866/9fe62a1d-22c6-54b9-8c92-944baa53d667"
+					(reference "#PWR02007")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(no_connect
+		(at 166.37 139.7)
+		(uuid "5a2d6086-c57b-5837-a05d-0ada6a0dabdb")
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 168.91 144.78 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "cc371cd9-8a38-54fc-8e97-0768e9811300")
+		(property "Reference" "#PWR02008"
+			(at 168.91 144.78 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 168.91 148.08 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Footprint" ""
+			(at 168.91 144.78 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 168.91 144.78 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 168.91 144.78 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "93e64b37-7428-544d-a23a-c1d676e3cfee")
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866/9fe62a1d-22c6-54b9-8c92-944baa53d667"
+					(reference "#PWR02008")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 151.13 152.4 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "fca9cfa1-6cc7-5f87-bb70-026718dccc26")
+		(property "Reference" "#PWR02009"
+			(at 151.13 152.4 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 151.13 155.7 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Footprint" ""
+			(at 151.13 152.4 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 151.13 152.4 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 151.13 152.4 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "a44c1e00-8bfb-5fcd-91a4-c8f5b620873c")
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866/9fe62a1d-22c6-54b9-8c92-944baa53d667"
+					(reference "#PWR02009")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(label "CC_VBUS_DET"
+		(at 132.08 132.08 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "9f3b98e1-9a31-5b78-b9bc-7cb39841e892")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 113.03 128.27 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "ad4356f5-d729-54aa-9467-52291710337b")
+		(property "Reference" "R4"
+			(at 111.114 127.27 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "887k"
+			(at 111.114 129.27 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 113.03 128.27 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 113.03 128.27 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 113.03 128.27 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "ERJ2RKF8873X"
+			(at 113.03 128.27 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Panasonic"
+			(at 113.03 128.27 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C409935"
+			(at 113.03 128.27 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "c2b73a3e-5242-5359-869b-a42e0330ea3b")
+		)
+		(pin "2"
+			(uuid "d3b09a13-f9e4-5c74-afc7-cfaf4f4f016c")
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866/9fe62a1d-22c6-54b9-8c92-944baa53d667"
+					(reference "R4")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:VBUS")
+		(at 113.03 124.46 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "3e5d3eef-56aa-53fe-b23e-74b8d06f1e5b")
+		(property "Reference" "#PWR02010"
+			(at 113.03 124.46 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "VBUS"
+			(at 113.03 121.16 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+			)
+		)
+		(property "Footprint" ""
+			(at 113.03 124.46 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 113.03 124.46 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 113.03 124.46 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "a50ee1ed-210b-5ef8-9630-eb4607568dcd")
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866/9fe62a1d-22c6-54b9-8c92-944baa53d667"
+					(reference "#PWR02010")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(label "CC_ADDR"
+		(at 106.68 147.32 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "2d3ffb73-f215-5612-aed8-6a239d5058d3")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 92.71 143.51 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "5369f825-6e9f-5e4e-a262-59d43c2e04e0")
+		(property "Reference" "R5"
+			(at 90.794 142.51 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "4.7k"
+			(at 90.794 144.51 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 92.71 143.51 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 92.71 143.51 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 92.71 143.51 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "0402WGF4701TCE"
+			(at 92.71 143.51 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 92.71 143.51 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C25900"
+			(at 92.71 143.51 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "5543eed9-3224-5f30-a554-483305142fd3")
+		)
+		(pin "2"
+			(uuid "a669755c-5d1e-5f1a-a51b-681c09853823")
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866/9fe62a1d-22c6-54b9-8c92-944baa53d667"
+					(reference "R5")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:+3V3")
+		(at 92.71 139.7 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "e01c3d1f-4b0e-5225-a14e-59ba50014bf9")
+		(property "Reference" "#PWR02011"
+			(at 92.71 139.7 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "+3V3"
+			(at 92.71 136.4 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+			)
+		)
+		(property "Footprint" ""
+			(at 92.71 139.7 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 92.71 139.7 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 92.71 139.7 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "ffc9dd8e-dfb6-5568-9296-ee528b410fc0")
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866/9fe62a1d-22c6-54b9-8c92-944baa53d667"
+					(reference "#PWR02011")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label "I2C_PM_SDA"
+		(shape bidirectional)
+		(at 171.45 132.08 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "7dd05f39-2a53-54b3-8ac8-5a0883238921")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 171.45 132.08 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+	(global_label "I2C_PM_SCL"
+		(shape bidirectional)
+		(at 171.45 134.62 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "e6be8228-b446-54c7-be88-5569c86a1d25")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 171.45 134.62 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 189.23 133.35 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "81df050a-4763-56f0-93eb-7aaf9545577b")
+		(property "Reference" "R6"
+			(at 191.146 132.35 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "200k"
+			(at 191.146 134.35 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 189.23 133.35 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 189.23 133.35 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 189.23 133.35 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "0402WGF2003TCE"
+			(at 189.23 133.35 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 189.23 133.35 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C25764"
+			(at 189.23 133.35 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "dccd99cc-ea6b-5967-a061-8d1c46e89f0c")
+		)
+		(pin "2"
+			(uuid "989334a3-5bab-53ae-aed0-586bccfb2e9c")
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866/9fe62a1d-22c6-54b9-8c92-944baa53d667"
+					(reference "R6")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:+3V3")
+		(at 189.23 129.54 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "8872af44-0a8a-5ad5-b8a8-f414dceb6910")
+		(property "Reference" "#PWR02012"
+			(at 189.23 129.54 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "+3V3"
+			(at 189.23 126.24 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+			)
+		)
+		(property "Footprint" ""
+			(at 189.23 129.54 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 189.23 129.54 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 189.23 129.54 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "6e8d4e39-d876-5416-8f73-11beaf97ae50")
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866/9fe62a1d-22c6-54b9-8c92-944baa53d667"
+					(reference "#PWR02012")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:TestPoint")
+		(at 199.39 137.16 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "1986d8c5-6a09-54e4-91eb-4802af82579d")
+		(property "Reference" "TP3"
+			(at 201.052 132.858 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "USBC_INT_N"
+			(at 201.052 134.858 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
+			(at 199.39 137.16 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 199.39 137.16 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "test point"
+			(at 199.39 137.16 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "60a5a62f-66eb-5d3e-b3fc-795aed628dc6")
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866/9fe62a1d-22c6-54b9-8c92-944baa53d667"
+					(reference "TP3")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label "USBC_INT_N"
+		(shape passive)
+		(at 217.17 137.16 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "e348d2d3-df24-541c-a35a-51d02afc8cb0")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 217.17 137.16 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 154.94 115.57 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "f726d2c3-843d-5e60-a545-5bbb36308437")
+		(property "Reference" "C4"
+			(at 157.872 114.57 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "100n"
+			(at 157.872 116.57 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+			(at 154.94 115.57 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 154.94 115.57 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 154.94 115.57 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "CL05B104KO5NNNC"
+			(at 154.94 115.57 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Samsung Electro-Mechanics"
+			(at 154.94 115.57 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C1525"
+			(at 154.94 115.57 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "6c998726-e182-590b-8904-4427cf5bd8e3")
+		)
+		(pin "2"
+			(uuid "aa1495a0-94b4-56c0-82d1-87357e0e86e0")
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866/9fe62a1d-22c6-54b9-8c92-944baa53d667"
+					(reference "C4")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 154.94 119.38 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "29697b1e-2c6e-55e3-a5a4-977e3b346f72")
+		(property "Reference" "#PWR02013"
+			(at 154.94 119.38 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 154.94 122.68 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Footprint" ""
+			(at 154.94 119.38 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 154.94 119.38 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 154.94 119.38 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "b84c8eb1-4b8f-5e75-b250-0b5bed41a631")
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866/9fe62a1d-22c6-54b9-8c92-944baa53d667"
+					(reference "#PWR02013")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:+3V3")
+		(at 166.37 111.76 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "a415039d-760a-5e30-8214-8613ee2f21df")
+		(property "Reference" "#PWR02014"
+			(at 166.37 111.76 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "+3V3"
+			(at 166.37 108.46 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+			)
+		)
+		(property "Footprint" ""
+			(at 166.37 111.76 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 166.37 111.76 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 166.37 111.76 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "2cc77f07-a1df-5f03-901c-0722bd651d2b")
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866/9fe62a1d-22c6-54b9-8c92-944baa53d667"
+					(reference "#PWR02014")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label "USB_DM"
+		(shape bidirectional)
+		(at 86.36 158.75 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "4170e753-7938-5aaa-ba1a-84c5911e5e65")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 86.36 158.75 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+	(global_label "USB_DP"
+		(shape bidirectional)
+		(at 86.36 163.83 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "8109a501-f29d-507c-83e7-6b56611cfb18")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 86.36 163.83 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+	(label "USB_SHIELD"
+		(at 52.07 187.96 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "da78727d-da9b-56d6-98a9-ea7a775b7501")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 34.29 191.77 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "9199aea4-e4a4-5c39-9afc-58e8e8834e4c")
+		(property "Reference" "R3"
+			(at 32.374 190.77 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "1M"
+			(at 32.374 192.77 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 34.29 191.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 34.29 191.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 34.29 191.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "0402WGF1004TCE"
+			(at 34.29 191.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 34.29 191.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C26083"
+			(at 34.29 191.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "8568b6ba-ab10-5181-addc-70beeef5981a")
+		)
+		(pin "2"
+			(uuid "55da53c1-28f7-5623-95f6-aa366643a53e")
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866/9fe62a1d-22c6-54b9-8c92-944baa53d667"
+					(reference "R3")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 34.29 195.58 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "e421f04c-d549-5e75-8c92-a7275f963304")
+		(property "Reference" "#PWR02015"
+			(at 34.29 195.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 34.29 198.88 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Footprint" ""
+			(at 34.29 195.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 34.29 195.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 34.29 195.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "090ac006-62d9-5dc0-9770-c99b427974b4")
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866/9fe62a1d-22c6-54b9-8c92-944baa53d667"
+					(reference "#PWR02015")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 25.4 191.77 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "8ca308a1-3594-5418-86c9-7d03cb742e51")
+		(property "Reference" "C3"
+			(at 22.468 190.77 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "4.7n"
+			(at 22.468 192.77 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric"
+			(at 25.4 191.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 25.4 191.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 25.4 191.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "1206B472K102NT"
+			(at 25.4 191.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "FH (Guangdong Fenghua)"
+			(at 25.4 191.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C9192"
+			(at 25.4 191.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "421ff991-d308-5e7b-a9b2-08bf100159b9")
+		)
+		(pin "2"
+			(uuid "c16f8671-2f0e-5dd7-a395-25492d6788eb")
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866/9fe62a1d-22c6-54b9-8c92-944baa53d667"
+					(reference "C3")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 25.4 195.58 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "9ed753a1-aec4-5e5d-b9b3-244b712a983d")
+		(property "Reference" "#PWR02016"
+			(at 25.4 195.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 25.4 198.88 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Footprint" ""
+			(at 25.4 195.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 25.4 195.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 25.4 195.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "67a219a8-284d-516c-91d0-ff3b264c5aaf")
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866/9fe62a1d-22c6-54b9-8c92-944baa53d667"
+					(reference "#PWR02016")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts (xy 151.13 111.76) (xy 151.13 127))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "67dc6e4f-035b-5bd2-a385-4cc57f205972")
+	)
+	(wire
+		(pts (xy 151.13 111.76) (xy 154.94 111.76))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0e79cbdc-886a-51c5-9e95-821cf9ccac47")
+	)
+	(wire
+		(pts (xy 154.94 111.76) (xy 166.37 111.76))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "33f15eb6-f37d-584c-8642-b4fe01da41fb")
+	)
+	(wire
+		(pts (xy 92.71 147.32) (xy 106.68 147.32))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "33060975-a614-5ef1-bf6c-16ffffed56f6")
+	)
+	(wire
+		(pts (xy 106.68 147.32) (xy 135.89 147.32))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e4348244-3ac5-548a-84f5-1f16216a62f1")
+	)
+	(wire
+		(pts (xy 113.03 132.08) (xy 132.08 132.08))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e655b36a-9532-5994-a34c-05da48dd3c5b")
+	)
+	(wire
+		(pts (xy 132.08 132.08) (xy 135.89 132.08))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a2e4d60a-3644-5bbb-85e5-c42a601a6f17")
+	)
+	(wire
+		(pts (xy 166.37 144.78) (xy 168.91 144.78))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6f98676c-c394-5582-bf40-43e313b6fb8a")
+	)
+	(wire
+		(pts (xy 133.35 144.78) (xy 135.89 144.78))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0ab07413-e889-567e-ac4d-ba00f1eebcd6")
+	)
+	(wire
+		(pts (xy 166.37 134.62) (xy 171.45 134.62))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "26fe5020-754c-5aaf-af4f-38eb3ab36074")
+	)
+	(wire
+		(pts (xy 166.37 132.08) (xy 171.45 132.08))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1a1eccb2-4264-5430-a0c3-b8d8019808a5")
+	)
+	(wire
+		(pts (xy 166.37 137.16) (xy 189.23 137.16))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ab931957-4d4f-52a0-850a-77dd49bc75af")
+	)
+	(wire
+		(pts (xy 189.23 137.16) (xy 199.39 137.16))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1d404390-6f3b-5a28-beed-e191ed3c2dfa")
+	)
+	(wire
+		(pts (xy 199.39 137.16) (xy 217.17 137.16))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0a5351ca-ea80-58c1-9d5e-e1c18ca22b60")
+	)
+	(wire
+		(pts (xy 76.2 151.13) (xy 115.57 151.13))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ff4156bf-0f76-5cc6-8e93-1181d5c7b2d0")
+	)
+	(wire
+		(pts (xy 115.57 129.54) (xy 115.57 151.13))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1fd25712-df03-5479-a227-2d0e90bd06a0")
+	)
+	(wire
+		(pts (xy 115.57 129.54) (xy 118.11 129.54))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b0c6f9e3-e105-52a1-a997-c91ffc9b189f")
+	)
+	(wire
+		(pts (xy 118.11 83.82) (xy 118.11 129.54))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0d0dec0c-e83f-51c4-9b57-bc3a1426f1d6")
+	)
+	(wire
+		(pts (xy 118.11 83.82) (xy 146.05 83.82))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d306b96e-e458-5760-8fe7-54750b5e2fc9")
+	)
+	(wire
+		(pts (xy 118.11 129.54) (xy 133.35 129.54))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "233ce22a-1174-5e01-a323-906b784c2622")
+	)
+	(wire
+		(pts (xy 133.35 129.54) (xy 133.35 137.16))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6653629a-3f0f-5a83-89e1-f7fb08c8bd34")
+	)
+	(wire
+		(pts (xy 133.35 137.16) (xy 135.89 137.16))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3b554754-173f-5c93-8b71-e33a8f51de05")
+	)
+	(wire
+		(pts (xy 134.62 67.31) (xy 146.05 67.31))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "cbe225bc-e40b-5d4b-a247-00d8130edb11")
+	)
+	(wire
+		(pts (xy 146.05 67.31) (xy 146.05 83.82))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f1c7d0a9-0f7c-5d37-887d-490eee5e6451")
+	)
+	(wire
+		(pts (xy 146.05 67.31) (xy 147.32 67.31))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a2a76ccc-b3ed-5299-9afc-f55c55e02e55")
+	)
+	(wire
+		(pts (xy 146.05 83.82) (xy 161.29 83.82))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7f814655-851a-5511-b38e-76bf68d79a9d")
+	)
+	(wire
+		(pts (xy 147.32 67.31) (xy 149.86 67.31))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d0f86349-c59d-5b8a-9727-c3a3cf87bafc")
+	)
+	(wire
+		(pts (xy 76.2 153.67) (xy 118.11 153.67))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1732afc4-9fad-5107-8cd0-cd2ea131e6d6")
+	)
+	(wire
+		(pts (xy 105.41 92.71) (xy 105.41 139.7))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "950c9174-7242-518b-b9ef-6dc36e5d74e9")
+	)
+	(wire
+		(pts (xy 105.41 92.71) (xy 143.51 92.71))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "796ff15f-15f1-5327-8b08-429e6dc9475f")
+	)
+	(wire
+		(pts (xy 105.41 139.7) (xy 118.11 139.7))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d6de4f3d-1569-5453-8f8f-a8c92c467cab")
+	)
+	(wire
+		(pts (xy 118.11 139.7) (xy 118.11 153.67))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1e950fd1-7087-50b0-b31a-c9293acfdd12")
+	)
+	(wire
+		(pts (xy 118.11 139.7) (xy 135.89 139.7))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a683433a-61ba-52c9-a711-e0f048534728")
+	)
+	(wire
+		(pts (xy 143.51 92.71) (xy 157.48 92.71))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9da3d731-372c-519c-bffc-31ae953a9f1e")
+	)
+	(wire
+		(pts (xy 157.48 92.71) (xy 158.75 92.71))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "63d3b74a-b6d3-5ef9-a37d-d65f53c1e2d1")
+	)
+	(wire
+		(pts (xy 158.75 86.36) (xy 158.75 92.71))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "36cf81e5-2c64-546e-9a20-91ba5a108146")
+	)
+	(wire
+		(pts (xy 158.75 86.36) (xy 161.29 86.36))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b0b83427-d991-52aa-9fa0-32183ffaaba5")
+	)
+	(wire
+		(pts (xy 76.2 158.75) (xy 77.47 158.75))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1b07a120-741e-57b0-80ea-f07c32aea26d")
+	)
+	(wire
+		(pts (xy 76.2 161.29) (xy 77.47 161.29))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "50df11f3-a755-5fec-86e3-d94ed4303916")
+	)
+	(wire
+		(pts (xy 77.47 158.75) (xy 77.47 161.29))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c9fd21e0-a310-5d60-a2c5-b5a846cc7cab")
+	)
+	(wire
+		(pts (xy 77.47 158.75) (xy 85.09 158.75))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a4095ce6-fe09-58ec-8ed6-fefc860f8fa1")
+	)
+	(wire
+		(pts (xy 85.09 81.28) (xy 85.09 158.75))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4f4d0e5e-c827-554f-a5a2-e2234c5fe521")
+	)
+	(wire
+		(pts (xy 85.09 81.28) (xy 161.29 81.28))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ecbbb3d1-69e2-5d41-b216-26d4cb9214d1")
+	)
+	(wire
+		(pts (xy 85.09 158.75) (xy 86.36 158.75))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b0d31477-7513-59e8-9877-986e79429a4f")
+	)
+	(wire
+		(pts (xy 76.2 163.83) (xy 77.47 163.83))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "158b2108-737b-5e5c-a4bd-741f8c4ac01a")
+	)
+	(wire
+		(pts (xy 76.2 166.37) (xy 77.47 166.37))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "35821ba8-4b14-5d2a-979b-6269fa14af65")
+	)
+	(wire
+		(pts (xy 77.47 163.83) (xy 77.47 166.37))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "dcf283b6-da2e-586c-ac9f-1a7bcb21f710")
+	)
+	(wire
+		(pts (xy 77.47 163.83) (xy 80.01 163.83))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2f973f7b-ca40-56cd-8495-a140a2d49c88")
+	)
+	(wire
+		(pts (xy 80.01 78.74) (xy 80.01 163.83))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a4551020-299c-5402-bb4c-9e415aa9a585")
+	)
+	(wire
+		(pts (xy 80.01 78.74) (xy 147.32 78.74))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "07cacb67-e899-5c9a-8443-ad1544924cd3")
+	)
+	(wire
+		(pts (xy 80.01 163.83) (xy 86.36 163.83))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4899955c-80a3-560a-97d9-aece09d36636")
+	)
+	(wire
+		(pts (xy 147.32 78.74) (xy 147.32 80.01))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c784f4eb-eb36-519b-b4e7-d02c0d80b9aa")
+	)
+	(wire
+		(pts (xy 147.32 80.01) (xy 152.4 80.01))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e8a85fba-ca63-5a32-a495-35e99aee6e9a")
+	)
+	(wire
+		(pts (xy 152.4 78.74) (xy 152.4 80.01))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e11b83f8-6fcc-5ffa-91e1-a3f1f833b052")
+	)
+	(wire
+		(pts (xy 152.4 78.74) (xy 161.29 78.74))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a35a321c-ddb4-52d7-b449-af88c29de25b")
+	)
+	(wire
+		(pts (xy 25.4 187.96) (xy 34.29 187.96))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "fb643218-cf17-5481-b5b7-77828c5ddf21")
+	)
+	(wire
+		(pts (xy 34.29 187.96) (xy 52.07 187.96))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "415fe3f3-0675-5cfe-8626-85e6823a5b1e")
+	)
+	(wire
+		(pts (xy 52.07 187.96) (xy 53.34 187.96))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "daf35eac-0ac5-58e5-9ce4-9b7f0a500d2f")
+	)
+	(wire
+		(pts (xy 53.34 184.15) (xy 53.34 187.96))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7a7f902c-9dae-5518-b329-df412f417ddc")
+	)
+	(wire
+		(pts (xy 76.2 146.05) (xy 82.55 146.05))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8ec0350d-90f1-5406-9f62-57f04a817a80")
+	)
+	(wire
+		(pts (xy 82.55 48.26) (xy 82.55 146.05))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2b37baa4-c616-581c-9af9-ed8610d5c51d")
+	)
+	(wire
+		(pts (xy 82.55 48.26) (xy 87.63 48.26))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4e9a53e9-2cb5-584f-8c5d-3ca8495975bf")
+	)
+	(wire
+		(pts (xy 87.63 48.26) (xy 101.6 48.26))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a4fb7853-28fd-5314-b147-cba2f35bbf71")
+	)
+	(junction
+		(at 34.29 187.96)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "c4348a4a-90bc-5c3a-8093-d56ee286cdf2")
+	)
+	(junction
+		(at 77.47 158.75)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "c55f0e72-692a-502a-af6e-d93a963587be")
+	)
+	(junction
+		(at 77.47 163.83)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "e0987ef4-20bb-565e-af77-b416b67bb9cd")
+	)
+	(junction
+		(at 80.01 163.83)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "d0cd1890-8c10-534c-b0ea-a98e8eb998d7")
+	)
+	(junction
+		(at 85.09 158.75)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "cf26a86f-59a3-58ff-a4b4-98ecee444cc0")
+	)
+	(junction
+		(at 87.63 48.26)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "76325e7f-192b-5d9f-bae2-545ba4038552")
+	)
+	(junction
+		(at 118.11 129.54)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "d528f065-6e5c-5f38-af72-5b8c0f3df220")
+	)
+	(junction
+		(at 118.11 139.7)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "20976f9b-a02f-52b3-95f0-9dd49f3e4b3e")
+	)
+	(junction
+		(at 143.51 92.71)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "8cc2d880-9ecb-5c55-b032-ffead717b91b")
+	)
+	(junction
+		(at 146.05 67.31)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "9af3ece8-26b6-5c30-b0b2-8c086ef24d96")
+	)
+	(junction
+		(at 146.05 83.82)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "d4484c50-34b8-5ee7-b646-c9240abf34fe")
+	)
+	(junction
+		(at 147.32 67.31)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "9f6ad668-a115-5e0b-88ad-ddb712a7234e")
+	)
+	(junction
+		(at 154.94 111.76)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "a9056e7c-55c9-573d-a80c-75a91c2e77ec")
+	)
+	(junction
+		(at 189.23 137.16)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "a3fbb76b-a34e-54c9-b7de-80ffb42e1c03")
+	)
+	(junction
+		(at 199.39 137.16)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "7cd89668-3413-5276-8d41-eb82988d933c")
+	)
+	(text "Power flags"
+		(exclude_from_sim no)
+		(at 243.84 15.24 0)
+		(effects
+			(font
+				(size 2 2)
+				(bold yes)
+			)
+			(justify left top)
+		)
+		(uuid "ba7d5650-6cb1-5805-844e-5d7ba6d67ece")
+	)
+	(text "VBUS and GND come from the USB-C cable."
+		(exclude_from_sim no)
+		(at 243.84 19.05 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+				(italic yes)
+			)
+			(justify left top)
+		)
+		(uuid "f65b0ca4-0ed9-517a-960e-3936244acdc1")
+	)
+	(rectangle
+		(start 241.3 12.7)
+		(end 289.56 36.83)
+		(stroke
+			(width 0.1)
+			(type dash)
+		)
+		(fill
+			(type none)
+		)
+		(uuid "205c88b4-fff4-5bd5-9a84-9beb3cf113ff")
+	)
+	(symbol
+		(lib_id "power:PWR_FLAG")
+		(at 246.38 30.48 180)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board no)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "27e45e1e-7fa6-5065-bb51-7a277d3693cf")
+		(property "Reference" "#FLG01"
+			(at 248.296 30.75 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "PWR_FLAG"
+			(at 248.296 32.75 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" ""
+			(at 246.38 30.48 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 246.38 30.48 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Special symbol for telling ERC where power comes from"
+			(at 246.38 30.48 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "0b4f2430-c24b-5a0f-bd95-693054ec8af1")
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866/9fe62a1d-22c6-54b9-8c92-944baa53d667"
+					(reference "#FLG01")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:VBUS")
+		(at 246.38 30.48 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "0049aae3-0361-51cf-be26-16c5ed88a4a0")
+		(property "Reference" "#PWR02017"
+			(at 246.38 30.48 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "VBUS"
+			(at 246.38 27.18 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+			)
+		)
+		(property "Footprint" ""
+			(at 246.38 30.48 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 246.38 30.48 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 246.38 30.48 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "f4a59854-5fbd-52b0-8a07-809885db5d7d")
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866/9fe62a1d-22c6-54b9-8c92-944baa53d667"
+					(reference "#PWR02017")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:PWR_FLAG")
+		(at 264.16 27.94 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board no)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "ac8923ca-1d13-5b0b-bb94-d5e088e8b40e")
+		(property "Reference" "#FLG02"
+			(at 266.076 25.67 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "PWR_FLAG"
+			(at 266.076 27.67 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 264.16 27.94 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 264.16 27.94 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Special symbol for telling ERC where power comes from"
+			(at 264.16 27.94 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "c40ee74d-e5f2-55f2-be38-6ff4757a0c1e")
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866/9fe62a1d-22c6-54b9-8c92-944baa53d667"
+					(reference "#FLG02")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 264.16 27.94 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "4d85746b-8bcf-5320-a950-9c4a3532d67f")
+		(property "Reference" "#PWR02018"
+			(at 264.16 27.94 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 264.16 31.24 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Footprint" ""
+			(at 264.16 27.94 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 264.16 27.94 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 264.16 27.94 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "9962c451-8338-5f2f-b0bf-75b58b399bc2")
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866/9fe62a1d-22c6-54b9-8c92-944baa53d667"
+					(reference "#PWR02018")
+					(unit 1)
+				)
+			)
+		)
+	)
+)

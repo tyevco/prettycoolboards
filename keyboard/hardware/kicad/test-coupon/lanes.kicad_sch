@@ -6,7 +6,7 @@
 	(paper "A3")
 	(title_block
 		(title "Ratiometric lane references and test pads")
-		(date "2026-11-27")
+		(date "2026-11-28")
 		(rev "A")
 		(company "PrettyCool Boards")
 	)
@@ -257,6 +257,187 @@
 					(at 0 -3.81 90)
 					(length 1.27)
 					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "Diode:1N4148W"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "D"
+				(at 0 2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "1N4148W"
+				(at 0 -2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" "Diode_SMD:D_SOD-123"
+				(at 0 -4.445 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" "https://www.vishay.com/docs/85748/1n4148w.pdf"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "75V 0.15A Fast Switching Diode, SOD-123"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Sim.Device" "D"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Sim.Pins" "1=K 2=A"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "diode"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "D*SOD?123*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "1N4148W_0_1"
+				(polyline
+					(pts (xy -1.27 1.27) (xy -1.27 -1.27))
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts (xy 1.27 1.27) (xy 1.27 -1.27) (xy -1.27 0) (xy 1.27 1.27))
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts (xy 1.27 0) (xy -1.27 0))
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "1N4148W_1_1"
+				(pin passive line
+					(at -3.81 0 0)
+					(length 2.54)
+					(name "K"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 3.81 0 180)
+					(length 2.54)
+					(name "A"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1477,9 +1658,373 @@
 		(color 0 0 0 0)
 		(uuid "fff98463-ae68-5e22-93a0-e2d3214709e9")
 	)
-	(text "Test pads"
+	(text "INJ into the AN0 lane (D7, 2026-11-27): D11 1N4148W + R40 1k from INJ to the AN0 tap"
 		(exclude_from_sim no)
 		(at 173.99 15.24 0)
+		(effects
+			(font
+				(size 2 2)
+				(bold yes)
+			)
+			(justify left top)
+		)
+		(uuid "4d78f852-2920-5359-aab8-ecbfb7575c6d")
+	)
+	(text "INJ high (3.3 V) lifts AN0 by about 0.55 V (0.43-0.58 V over tolerances, estimate) and AN1-AN3 by 3/4,\n1/2, 1/4 of that; INJ low leaves the ladder alone (D11 reverse-biased, < 10 uV of leakage error).\nThe latency rig can then time the lane path, not only IRQ_N. Drive INJ only while the slot is powered."
+		(exclude_from_sim no)
+		(at 173.99 19.05 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+				(italic yes)
+			)
+			(justify left top)
+		)
+		(uuid "e59118e9-5f27-5371-8653-aea8d4dbb56c")
+	)
+	(rectangle
+		(start 171.45 12.7)
+		(end 336.55 48.26)
+		(stroke
+			(width 0.1)
+			(type dash)
+		)
+		(fill
+			(type none)
+		)
+		(uuid "5926585f-f979-55a1-845b-eff98a8cad4c")
+	)
+	(label "INJ_AN0"
+		(at 175.26 33.02 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "937a3275-e966-548e-918c-9e591e3a1b8d")
+	)
+	(symbol
+		(lib_id "Diode:1N4148W")
+		(at 191.77 33.02 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "dc6cd5ef-fb5b-58d9-99c6-484a8fe21605")
+		(property "Reference" "D11"
+			(at 191.77 30.25 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "1N4148W"
+			(at 191.77 35.79 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Diode_SMD:D_SOD-123"
+			(at 191.77 33.02 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" "https://www.lcsc.com/datasheet/lcsc_datasheet_1811061725_ST-Semtech-1N4148W_C81598.pdf"
+			(at 191.77 33.02 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Switching diode, 75 V, 150 mA, SOD-123 (INJ into the AN0 lane)"
+			(at 191.77 33.02 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "1N4148W"
+			(at 191.77 33.02 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "ST(Semtech)"
+			(at 191.77 33.02 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C81598"
+			(at 191.77 33.02 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "36ba5f96-c399-5b9f-8c92-ab08e6ffa80e")
+		)
+		(pin "2"
+			(uuid "c6a5a024-fdb1-593d-b5cd-7f410950f32a")
+		)
+		(instances
+			(project "prettycool-keyboard-test-coupon"
+				(path "/97a1f95b-9102-564f-8ac6-3ddffa62e97e/e59cd554-27b6-565e-bffc-a0758c6b6b85"
+					(reference "D11")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label "INJ"
+		(shape passive)
+		(at 198.12 33.02 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "2202eac6-0e6c-509c-bd4b-f1e47e3d7ffa")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 198.12 33.02 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 180.34 41.91 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "6ce980c8-191f-5641-9da9-85d4a1e8b7ca")
+		(property "Reference" "R40"
+			(at 180.34 39.394 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "1k"
+			(at 180.34 44.426 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 180.34 41.91 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 180.34 41.91 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 180.34 41.91 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "0402WGF1001TCE"
+			(at 180.34 41.91 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 180.34 41.91 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C11702"
+			(at 180.34 41.91 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "2d0c180c-67b9-55c5-9a13-9f01b223efe3")
+		)
+		(pin "2"
+			(uuid "a2300a75-bfa3-5662-b191-513b9f679d97")
+		)
+		(instances
+			(project "prettycool-keyboard-test-coupon"
+				(path "/97a1f95b-9102-564f-8ac6-3ddffa62e97e/e59cd554-27b6-565e-bffc-a0758c6b6b85"
+					(reference "R40")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label "AN0"
+		(shape passive)
+		(at 186.69 41.91 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "aa2bd53f-9b16-52bb-89ac-7230b6598c90")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 186.69 41.91 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+	(wire
+		(pts (xy 184.15 41.91) (xy 186.69 41.91))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a4b302d3-bb24-560b-b69c-5e30226ace6b")
+	)
+	(wire
+		(pts (xy 195.58 33.02) (xy 198.12 33.02))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ff96dd8f-8e44-5dff-9c34-77aa395292f0")
+	)
+	(wire
+		(pts (xy 175.26 33.02) (xy 176.53 33.02))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "397b9388-ba26-55c4-b966-4e1791524616")
+	)
+	(wire
+		(pts (xy 176.53 33.02) (xy 176.53 41.91))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "44495e99-d9d8-59a8-8dd2-e87ea79d8ffc")
+	)
+	(wire
+		(pts (xy 176.53 33.02) (xy 187.96 33.02))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d586b521-966d-587d-be06-d47fb0ebe4e1")
+	)
+	(junction
+		(at 176.53 33.02)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "555fb359-a78b-5205-8ef8-6bcf3a83c5b2")
+	)
+	(text "Test pads"
+		(exclude_from_sim no)
+		(at 15.24 62.23 0)
 		(effects
 			(font
 				(size 2 2)
@@ -1491,7 +2036,7 @@
 	)
 	(text "Lanes, frame tick, rig stimulus, interrupt and the SPI loopback, for a scope or logic analyser."
 		(exclude_from_sim no)
-		(at 173.99 19.05 0)
+		(at 15.24 66.04 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1499,11 +2044,11 @@
 			)
 			(justify left top)
 		)
-		(uuid "b2326ea2-d8c0-5736-8dc0-978a3a4775c7")
+		(uuid "9149c1db-c34d-53f2-a05a-c410d0fa512f")
 	)
 	(rectangle
-		(start 171.45 12.7)
-		(end 283.21 80.01)
+		(start 12.7 59.69)
+		(end 124.46 127)
 		(stroke
 			(width 0.1)
 			(type dash)
@@ -1511,11 +2056,11 @@
 		(fill
 			(type none)
 		)
-		(uuid "78bedc06-f763-5a97-96ae-08184d1d18b7")
+		(uuid "c09b5232-650a-52ad-af5d-262607ec4855")
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
-		(at 176.53 30.48 0)
+		(at 17.78 77.47 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -1525,7 +2070,7 @@
 		(dnp no)
 		(uuid "8b89f366-7231-5469-9c91-e09ace4e99be")
 		(property "Reference" "TP10"
-			(at 178.192 26.178 0)
+			(at 19.442 73.168 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1536,7 +2081,7 @@
 			)
 		)
 		(property "Value" "AN0"
-			(at 178.192 28.178 0)
+			(at 19.442 75.168 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1547,7 +2092,7 @@
 			)
 		)
 		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
-			(at 176.53 30.48 0)
+			(at 17.78 77.47 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1558,7 +2103,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 176.53 30.48 0)
+			(at 17.78 77.47 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1569,7 +2114,7 @@
 			)
 		)
 		(property "Description" "test point"
-			(at 176.53 30.48 0)
+			(at 17.78 77.47 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1593,7 +2138,7 @@
 	)
 	(global_label "AN0"
 		(shape passive)
-		(at 186.69 30.48 0)
+		(at 27.94 77.47 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -1601,9 +2146,9 @@
 			)
 			(justify left)
 		)
-		(uuid "aa2bd53f-9b16-52bb-89ac-7230b6598c90")
+		(uuid "06886d24-2d8b-5b45-9120-bd9bc5b1882d")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 186.69 30.48 0)
+			(at 27.94 77.47 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1617,7 +2162,7 @@
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
-		(at 176.53 43.18 0)
+		(at 17.78 90.17 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -1627,7 +2172,7 @@
 		(dnp no)
 		(uuid "894317d9-6e3e-55d8-8085-6a3185b3d2a5")
 		(property "Reference" "TP11"
-			(at 178.192 38.878 0)
+			(at 19.442 85.868 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1638,7 +2183,7 @@
 			)
 		)
 		(property "Value" "AN1"
-			(at 178.192 40.878 0)
+			(at 19.442 87.868 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1649,7 +2194,7 @@
 			)
 		)
 		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
-			(at 176.53 43.18 0)
+			(at 17.78 90.17 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1660,7 +2205,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 176.53 43.18 0)
+			(at 17.78 90.17 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1671,7 +2216,7 @@
 			)
 		)
 		(property "Description" "test point"
-			(at 176.53 43.18 0)
+			(at 17.78 90.17 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1695,7 +2240,7 @@
 	)
 	(global_label "AN1"
 		(shape passive)
-		(at 186.69 43.18 0)
+		(at 27.94 90.17 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -1705,7 +2250,7 @@
 		)
 		(uuid "0ee7d690-c23c-59d8-a3f1-965947bf0fe1")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 186.69 43.18 0)
+			(at 27.94 90.17 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1719,7 +2264,7 @@
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
-		(at 204.47 43.18 0)
+		(at 45.72 90.17 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -1729,7 +2274,7 @@
 		(dnp no)
 		(uuid "3080c65a-bc7f-530d-a61c-f13fe7c13c0c")
 		(property "Reference" "TP12"
-			(at 206.132 38.878 0)
+			(at 47.382 85.868 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1740,7 +2285,7 @@
 			)
 		)
 		(property "Value" "AN2"
-			(at 206.132 40.878 0)
+			(at 47.382 87.868 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1751,7 +2296,7 @@
 			)
 		)
 		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
-			(at 204.47 43.18 0)
+			(at 45.72 90.17 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1762,7 +2307,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 204.47 43.18 0)
+			(at 45.72 90.17 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1773,7 +2318,7 @@
 			)
 		)
 		(property "Description" "test point"
-			(at 204.47 43.18 0)
+			(at 45.72 90.17 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1797,7 +2342,7 @@
 	)
 	(global_label "AN2"
 		(shape passive)
-		(at 214.63 43.18 0)
+		(at 55.88 90.17 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -1807,7 +2352,7 @@
 		)
 		(uuid "bc92cbe3-75da-5703-a31a-109eb7966865")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 214.63 43.18 0)
+			(at 55.88 90.17 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1821,7 +2366,7 @@
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
-		(at 232.41 43.18 0)
+		(at 73.66 90.17 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -1831,7 +2376,7 @@
 		(dnp no)
 		(uuid "dbbdbebf-5bdf-5fae-8223-958a36a7f378")
 		(property "Reference" "TP13"
-			(at 234.072 38.878 0)
+			(at 75.322 85.868 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1842,7 +2387,7 @@
 			)
 		)
 		(property "Value" "AN3"
-			(at 234.072 40.878 0)
+			(at 75.322 87.868 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1853,7 +2398,7 @@
 			)
 		)
 		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
-			(at 232.41 43.18 0)
+			(at 73.66 90.17 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1864,7 +2409,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 232.41 43.18 0)
+			(at 73.66 90.17 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1875,7 +2420,7 @@
 			)
 		)
 		(property "Description" "test point"
-			(at 232.41 43.18 0)
+			(at 73.66 90.17 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1899,7 +2444,7 @@
 	)
 	(global_label "AN3"
 		(shape passive)
-		(at 242.57 43.18 0)
+		(at 83.82 90.17 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -1909,7 +2454,7 @@
 		)
 		(uuid "cd3bccdd-b829-55f8-b6c2-1b4a3a93ae9a")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 242.57 43.18 0)
+			(at 83.82 90.17 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1923,7 +2468,7 @@
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
-		(at 176.53 54.61 0)
+		(at 17.78 101.6 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -1933,7 +2478,7 @@
 		(dnp no)
 		(uuid "41b5effb-e0c3-5988-8842-b9f050943173")
 		(property "Reference" "TP14"
-			(at 178.192 50.308 0)
+			(at 19.442 97.298 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1944,7 +2489,7 @@
 			)
 		)
 		(property "Value" "SYNC"
-			(at 178.192 52.308 0)
+			(at 19.442 99.298 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -1955,7 +2500,7 @@
 			)
 		)
 		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
-			(at 176.53 54.61 0)
+			(at 17.78 101.6 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1966,7 +2511,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 176.53 54.61 0)
+			(at 17.78 101.6 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -1977,7 +2522,7 @@
 			)
 		)
 		(property "Description" "test point"
-			(at 176.53 54.61 0)
+			(at 17.78 101.6 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2001,7 +2546,7 @@
 	)
 	(global_label "SYNC"
 		(shape passive)
-		(at 186.69 54.61 0)
+		(at 27.94 101.6 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -2011,7 +2556,7 @@
 		)
 		(uuid "b608df26-39ca-5925-8a1f-ef1e82665c2a")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 186.69 54.61 0)
+			(at 27.94 101.6 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2025,7 +2570,7 @@
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
-		(at 205.74 54.61 0)
+		(at 46.99 101.6 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -2035,7 +2580,7 @@
 		(dnp no)
 		(uuid "11a2cf1a-e7b2-56b0-bf02-335b5bc03126")
 		(property "Reference" "TP15"
-			(at 207.402 50.308 0)
+			(at 48.652 97.298 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2046,7 +2591,7 @@
 			)
 		)
 		(property "Value" "INJ"
-			(at 207.402 52.308 0)
+			(at 48.652 99.298 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2057,7 +2602,7 @@
 			)
 		)
 		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
-			(at 205.74 54.61 0)
+			(at 46.99 101.6 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2068,7 +2613,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 205.74 54.61 0)
+			(at 46.99 101.6 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2079,7 +2624,7 @@
 			)
 		)
 		(property "Description" "test point"
-			(at 205.74 54.61 0)
+			(at 46.99 101.6 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2103,7 +2648,7 @@
 	)
 	(global_label "INJ"
 		(shape passive)
-		(at 215.9 54.61 0)
+		(at 57.15 101.6 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -2111,9 +2656,9 @@
 			)
 			(justify left)
 		)
-		(uuid "2202eac6-0e6c-509c-bd4b-f1e47e3d7ffa")
+		(uuid "0536d9c3-2356-5eab-8adb-2e5f09c68038")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 215.9 54.61 0)
+			(at 57.15 101.6 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2127,7 +2672,7 @@
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
-		(at 233.68 54.61 0)
+		(at 74.93 101.6 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -2137,7 +2682,7 @@
 		(dnp no)
 		(uuid "4d4285dd-d4a9-544e-ac25-de7a90c39413")
 		(property "Reference" "TP16"
-			(at 235.342 50.308 0)
+			(at 76.592 97.298 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2148,7 +2693,7 @@
 			)
 		)
 		(property "Value" "IRQ_N"
-			(at 235.342 52.308 0)
+			(at 76.592 99.298 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2159,7 +2704,7 @@
 			)
 		)
 		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
-			(at 233.68 54.61 0)
+			(at 74.93 101.6 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2170,7 +2715,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 233.68 54.61 0)
+			(at 74.93 101.6 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2181,7 +2726,7 @@
 			)
 		)
 		(property "Description" "test point"
-			(at 233.68 54.61 0)
+			(at 74.93 101.6 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2205,7 +2750,7 @@
 	)
 	(global_label "IRQ_N"
 		(shape passive)
-		(at 245.11 54.61 0)
+		(at 86.36 101.6 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -2215,7 +2760,7 @@
 		)
 		(uuid "b4fd42a1-4752-52b7-912d-583cc3c9369b")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 245.11 54.61 0)
+			(at 86.36 101.6 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2229,7 +2774,7 @@
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
-		(at 176.53 64.77 0)
+		(at 17.78 111.76 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -2239,7 +2784,7 @@
 		(dnp no)
 		(uuid "38348e8d-a2e1-54e3-90c8-eacc98f4e5b1")
 		(property "Reference" "TP17"
-			(at 178.192 60.468 0)
+			(at 19.442 107.458 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2250,7 +2795,7 @@
 			)
 		)
 		(property "Value" "SCK"
-			(at 178.192 62.468 0)
+			(at 19.442 109.458 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2261,7 +2806,7 @@
 			)
 		)
 		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
-			(at 176.53 64.77 0)
+			(at 17.78 111.76 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2272,7 +2817,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 176.53 64.77 0)
+			(at 17.78 111.76 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2283,7 +2828,7 @@
 			)
 		)
 		(property "Description" "test point"
-			(at 176.53 64.77 0)
+			(at 17.78 111.76 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2307,7 +2852,7 @@
 	)
 	(global_label "SCK"
 		(shape passive)
-		(at 186.69 64.77 0)
+		(at 27.94 111.76 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -2317,7 +2862,7 @@
 		)
 		(uuid "ff54ddbe-d49e-52d2-86b8-ebddda30d019")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 186.69 64.77 0)
+			(at 27.94 111.76 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2331,7 +2876,7 @@
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
-		(at 204.47 64.77 0)
+		(at 45.72 111.76 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -2341,7 +2886,7 @@
 		(dnp no)
 		(uuid "d12f3d78-a9b9-59a6-890d-9e818a94a5fb")
 		(property "Reference" "TP18"
-			(at 206.132 60.468 0)
+			(at 47.382 107.458 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2352,7 +2897,7 @@
 			)
 		)
 		(property "Value" "MISO"
-			(at 206.132 62.468 0)
+			(at 47.382 109.458 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2363,7 +2908,7 @@
 			)
 		)
 		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
-			(at 204.47 64.77 0)
+			(at 45.72 111.76 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2374,7 +2919,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 204.47 64.77 0)
+			(at 45.72 111.76 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2385,7 +2930,7 @@
 			)
 		)
 		(property "Description" "test point"
-			(at 204.47 64.77 0)
+			(at 45.72 111.76 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2409,7 +2954,7 @@
 	)
 	(global_label "MISO"
 		(shape passive)
-		(at 214.63 64.77 0)
+		(at 55.88 111.76 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -2419,7 +2964,7 @@
 		)
 		(uuid "632ad0c5-90ac-5076-b48b-6418eb47076e")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 214.63 64.77 0)
+			(at 55.88 111.76 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2433,7 +2978,7 @@
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
-		(at 233.68 64.77 0)
+		(at 74.93 111.76 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -2443,7 +2988,7 @@
 		(dnp no)
 		(uuid "f3d53a5f-4c98-5e9f-aa20-4af25fe6a9cd")
 		(property "Reference" "TP19"
-			(at 235.342 60.468 0)
+			(at 76.592 107.458 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2454,7 +2999,7 @@
 			)
 		)
 		(property "Value" "MOSI"
-			(at 235.342 62.468 0)
+			(at 76.592 109.458 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2465,7 +3010,7 @@
 			)
 		)
 		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
-			(at 233.68 64.77 0)
+			(at 74.93 111.76 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2476,7 +3021,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 233.68 64.77 0)
+			(at 74.93 111.76 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2487,7 +3032,7 @@
 			)
 		)
 		(property "Description" "test point"
-			(at 233.68 64.77 0)
+			(at 74.93 111.76 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2511,7 +3056,7 @@
 	)
 	(global_label "MOSI"
 		(shape passive)
-		(at 243.84 64.77 0)
+		(at 85.09 111.76 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -2521,7 +3066,7 @@
 		)
 		(uuid "2d1938b4-aad3-590e-9cbf-f8f37c876ba5")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 243.84 64.77 0)
+			(at 85.09 111.76 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2535,7 +3080,7 @@
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
-		(at 176.53 76.2 0)
+		(at 17.78 123.19 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -2545,7 +3090,7 @@
 		(dnp no)
 		(uuid "346c359c-9aba-5161-bbf7-e8e88ec7aec3")
 		(property "Reference" "TP20"
-			(at 178.192 71.898 0)
+			(at 19.442 118.888 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2556,7 +3101,7 @@
 			)
 		)
 		(property "Value" "CS0_N"
-			(at 178.192 73.898 0)
+			(at 19.442 120.888 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2567,7 +3112,7 @@
 			)
 		)
 		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
-			(at 176.53 76.2 0)
+			(at 17.78 123.19 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2578,7 +3123,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 176.53 76.2 0)
+			(at 17.78 123.19 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2589,7 +3134,7 @@
 			)
 		)
 		(property "Description" "test point"
-			(at 176.53 76.2 0)
+			(at 17.78 123.19 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2613,7 +3158,7 @@
 	)
 	(global_label "CS0_N"
 		(shape passive)
-		(at 187.96 76.2 0)
+		(at 29.21 123.19 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -2623,7 +3168,7 @@
 		)
 		(uuid "8b2ab18c-cfd1-57f3-a848-6eb99e55b138")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 187.96 76.2 0)
+			(at 29.21 123.19 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2637,7 +3182,7 @@
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
-		(at 208.28 76.2 0)
+		(at 49.53 123.19 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -2647,7 +3192,7 @@
 		(dnp no)
 		(uuid "a5029eec-61bb-5844-ba8b-f5abceed133e")
 		(property "Reference" "TP21"
-			(at 209.942 71.898 0)
+			(at 51.192 118.888 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2658,7 +3203,7 @@
 			)
 		)
 		(property "Value" "CS1_N"
-			(at 209.942 73.898 0)
+			(at 51.192 120.888 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2669,7 +3214,7 @@
 			)
 		)
 		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
-			(at 208.28 76.2 0)
+			(at 49.53 123.19 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2680,7 +3225,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 208.28 76.2 0)
+			(at 49.53 123.19 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2691,7 +3236,7 @@
 			)
 		)
 		(property "Description" "test point"
-			(at 208.28 76.2 0)
+			(at 49.53 123.19 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2715,7 +3260,7 @@
 	)
 	(global_label "CS1_N"
 		(shape passive)
-		(at 219.71 76.2 0)
+		(at 60.96 123.19 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -2725,7 +3270,7 @@
 		)
 		(uuid "48700471-95cf-5daf-8904-85ebc6cc0546")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 219.71 76.2 0)
+			(at 60.96 123.19 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2738,15 +3283,15 @@
 		)
 	)
 	(wire
-		(pts (xy 176.53 30.48) (xy 186.69 30.48))
+		(pts (xy 17.78 77.47) (xy 27.94 77.47))
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "a4b302d3-bb24-560b-b69c-5e30226ace6b")
+		(uuid "ff42a43f-b32e-5c56-b278-345ec8ed530c")
 	)
 	(wire
-		(pts (xy 176.53 43.18) (xy 186.69 43.18))
+		(pts (xy 17.78 90.17) (xy 27.94 90.17))
 		(stroke
 			(width 0)
 			(type default)
@@ -2754,7 +3299,7 @@
 		(uuid "bc5b1d68-c378-502b-a045-9fb2e7a18641")
 	)
 	(wire
-		(pts (xy 204.47 43.18) (xy 214.63 43.18))
+		(pts (xy 45.72 90.17) (xy 55.88 90.17))
 		(stroke
 			(width 0)
 			(type default)
@@ -2762,7 +3307,7 @@
 		(uuid "b7cc2c65-6f0d-5f73-946b-c73479c6563d")
 	)
 	(wire
-		(pts (xy 232.41 43.18) (xy 242.57 43.18))
+		(pts (xy 73.66 90.17) (xy 83.82 90.17))
 		(stroke
 			(width 0)
 			(type default)
@@ -2770,7 +3315,7 @@
 		(uuid "42c3aac0-10b3-5fbe-a34d-9ed847185ffe")
 	)
 	(wire
-		(pts (xy 176.53 76.2) (xy 187.96 76.2))
+		(pts (xy 17.78 123.19) (xy 29.21 123.19))
 		(stroke
 			(width 0)
 			(type default)
@@ -2778,7 +3323,7 @@
 		(uuid "06e2d012-817d-50fc-ae66-f09de1630a5b")
 	)
 	(wire
-		(pts (xy 208.28 76.2) (xy 219.71 76.2))
+		(pts (xy 49.53 123.19) (xy 60.96 123.19))
 		(stroke
 			(width 0)
 			(type default)
@@ -2786,15 +3331,15 @@
 		(uuid "30e08b20-f3e1-54b0-bc45-7690070e68fd")
 	)
 	(wire
-		(pts (xy 205.74 54.61) (xy 215.9 54.61))
+		(pts (xy 46.99 101.6) (xy 57.15 101.6))
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "ff96dd8f-8e44-5dff-9c34-77aa395292f0")
+		(uuid "83beeeae-1dba-55a1-8760-2864e2200f87")
 	)
 	(wire
-		(pts (xy 233.68 54.61) (xy 245.11 54.61))
+		(pts (xy 74.93 101.6) (xy 86.36 101.6))
 		(stroke
 			(width 0)
 			(type default)
@@ -2802,7 +3347,7 @@
 		(uuid "2467eed3-0050-572c-af7e-998784942872")
 	)
 	(wire
-		(pts (xy 204.47 64.77) (xy 214.63 64.77))
+		(pts (xy 45.72 111.76) (xy 55.88 111.76))
 		(stroke
 			(width 0)
 			(type default)
@@ -2810,7 +3355,7 @@
 		(uuid "79617688-5b50-5b02-b1ba-4fc8e0d36573")
 	)
 	(wire
-		(pts (xy 233.68 64.77) (xy 243.84 64.77))
+		(pts (xy 74.93 111.76) (xy 85.09 111.76))
 		(stroke
 			(width 0)
 			(type default)
@@ -2818,7 +3363,7 @@
 		(uuid "c469c6b4-cd50-5b31-b5ba-d80331267a5e")
 	)
 	(wire
-		(pts (xy 176.53 64.77) (xy 186.69 64.77))
+		(pts (xy 17.78 111.76) (xy 27.94 111.76))
 		(stroke
 			(width 0)
 			(type default)
@@ -2826,7 +3371,7 @@
 		(uuid "31e2a698-787d-5f55-8fbb-1ac3da57cb18")
 	)
 	(wire
-		(pts (xy 176.53 54.61) (xy 186.69 54.61))
+		(pts (xy 17.78 101.6) (xy 27.94 101.6))
 		(stroke
 			(width 0)
 			(type default)

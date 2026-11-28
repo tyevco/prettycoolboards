@@ -1,0 +1,18 @@
+ERC report (2026-11-28T04:04:37, Encoding UTF8)
+Report includes: Errors, Warnings, Exclusions
+
+***** Sheet /
+
+***** Sheet /Slot header, descriptor EEPROM, mounting/
+
+***** Sheet /Hall sensors: four keys, two references/
+
+***** Sheet /Mux, enable latch, lane buffers, thermistors/
+
+ ** ERC messages: 0  Errors 0  Warnings 0
+
+ ** Ignored checks:
+    - Global label only appears once in the schematic
+    - Four connection points are joined together
+    - SPICE model issue
+    - Assigned footprint doesn't match footprint filters

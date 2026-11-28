@@ -87,6 +87,10 @@ NEEDS = {"pwm_g0_g3": 0, "tim1": 1, "high_current_5v": 2, "lanes_14bit": 3, "fas
 # every coupon straps to GND, after the two rails). tests/test_descriptor.py checks it against nets.py.
 USES = ["+3V3", "+5V", "AN0", "AN1", "AN2", "AN3", "INJ", "SYNC", "SCK", "MISO", "MOSI", "CS0_N", "CS1_N", "SCL",
         "SDA", "IRQ_N", "G0", "G1", "G2", "G3", "G4", "G5"]
+# Bits 22-31 of `uses` name no slot pin. Pin 39 has none either: it is the slot key (the owner's decision D2 of
+# 2026-11-27, nets.SLOT_KEY_PIN; it was RSV), absent from every coupon, so no descriptor may claim it. A same-minor
+# image with any of those bits set is refused (decode(strict=True)); tests check USES against nets.SLOT_PINS.
+USES_MASK = (1 << len(USES)) - 1
 LANE_FLAGS = {"ratiometric": 0, "multiplexed": 1, "buffered": 2, "bipolar": 3, "adc4_ok": 4}
 GLINE_FLAGS = {"active_low": 0, "fast": 1, "pwm": 2, "exceeds_rule": 3, "not_on_s5": 4}
 CS_FLAGS = {"active_high": 0}
@@ -694,6 +698,8 @@ def decode(img, strict=True):
             bad.append("ext[16:] (site_map uses 16 bytes)")
         if f["ext_format"] == 0 and any(f["ext"]):
             bad.append("ext (format none)")
+        if f["uses"] & ~USES_MASK:
+            bad.append(f"uses bits 0x{f['uses'] & ~USES_MASK:08X} (no slot pin; pin 39, the slot key, has no bit)")
         if bad:
             raise DescriptorError("reserved", f"non-zero reserved bytes in a format {major}.{minor} image: {bad}")
     return to_json(f, newer_minor=minor > FORMAT_MINOR)

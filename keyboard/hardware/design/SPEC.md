@@ -1,24 +1,32 @@
 # PrettyCool Keyboard rev A testbed: SPEC (draft architecture of record)
 
-> **Status (2026-11-27): Draft architecture of record, rev A testbed. Designed on paper, not captured: no schematic,
-> layout, build or measurement yet.** The owner decided three of this draft's proposals on 2026-11-26: no charger on
-> rev A, the 2 × 20 slot connector, and a USB Type-C detect chip (§1). Every part below is still a **candidate**,
+> **Status (2026-11-27): Draft architecture of record, rev A testbed. The motherboard schematic is captured from this
+> SPEC and nets.py (2026-11-27: sheets/mb_*.py, gated by the wiring rule, ERC and check_contract.py); not built, not
+> measured.** The owner decided three of this draft's proposals on 2026-11-26: no charger on
+> rev A, the 2 × 20 slot connector, and a USB Type-C detect chip (§1). On the evening of 2026-11-27 the owner
+> answered the [risk register](../../docs/risks.md) with seven more decisions (§1: rev A in two stages, the slot key,
+> series resistors at the sockets, power fixes, layout rules, SPEC fixes and MCU alternates, coupon fixes). They are
+> written into this SPEC and nets.py; **none of them is captured, laid out or built yet**. Every part below is still a **candidate**,
 > picked on paper, with its JLC stock checked on 2026-11-26 (the Type-C detect candidates on 2026-11-27); stock
 > changes daily. Figures marked *estimate* are arithmetic or a model, not a measurement. Claims marked **unverified**
 > were not checked against a primary source. The MCU pin map is a draft: its pin numbers and alternate functions
 > agree with the datasheet (§5.1). The reference-manual items of §5.2, §5.3, §6 and §8 were read on 2026-11-27 in a
 > third-party transcription of RM0456 Rev 7, because st.com was unreachable, and ST's errata sheet ES0553 is not read
-> yet (§11 #24, #25). The only firmware is the 8 kHz HID proof for the Nucleo, compiled and never run (§10 step 2).
+> yet (§11 #24, #25). st.com still failed on 2026-11-27 at 22:03 and 23:03 UTC (HTTP/2 stream errors; a retry over
+> HTTP/1.1 got an empty reply), so ST's own PDFs remain unread. The firmware written so far (the 8 kHz HID proof for the Nucleo,
+> the board support and the bring-up application) compiles and has never run on hardware (§10 step 2).
 
 This is the contract that the testbed's schematics, layout, coupons, latency rig and firmware will implement, in the
 role [the caliper's SPEC](../../../caliper/hardware/design/SPEC.md) plays for the caliper. The net names, the coupon
 slot pinout and the MCU pin map live in [nets.py](nets.py) (`python nets.py` checks that they agree with each
-other). Change this file and `nets.py` together. When the schematic is generated (sheet modules under
-`keyboard/hardware/design/sheets/`, drawn under the [wiring rule](../../../tools/README.md#wiring-rule)), a
-`check_contract.py` will compare the netlist's MCU pins with `nets.MCU_PINS`, as the caliper's does.
+other). Change this file and `nets.py` together. The schematic is generated from sheet modules under
+`keyboard/hardware/design/sheets/` (`mb_*.py`), drawn under the [wiring rule](../../../tools/README.md#wiring-rule),
+and [check_contract.py](check_contract.py) compares the netlist's MCU pins with `nets.MCU_PINS`, as the caliper's
+does, and the expanders, the mux, U_CC, the INA226 straps, the slot sockets and the headers with their tables here.
 
 It rests on the owner's decisions recorded in [concept.md](../../docs/concept.md) (the features, the testbed-first
-staging, Zephyr) and the [rev A MCU decision record](../../docs/mcu.md) (2026-11-26).
+staging, Zephyr), the [rev A MCU decision record](../../docs/mcu.md) (2026-11-26), and the owner's answers of
+2026-11-27 to the [rev A risk register](../../docs/risks.md) (§1).
 
 ## 1. Purpose and what rev A must prove
 
@@ -34,26 +42,48 @@ Rev A is a **motherboard plus plug-in coupons**, one coupon per sensing method, 
 | The battery gate picks a rev B chip from measured numbers | Per-rail current logs at 1 kHz and 8 kHz scan rates, exported with the scan mode and the coupon's identity (§8.5) |
 | The compiler has generated and gated every coupon | One slot interface, one descriptor EEPROM per coupon, coupon design rules the compiler can check (§4.6, §4.9) |
 
+**Two stages** (owner's decision D1 of 2026-11-27, answering [risks.md PG-2](../../docs/risks.md#pg-2)). Rev A is
+released, ordered and brought up in two stages, so that the boards that prove the platform do not wait for the rest:
+
+| Stage | Boards | When |
+|---|---|---|
+| **A1** | the motherboard, the test coupon, the Hall-effect coupon | released first; ordered and brought up first (§10) |
+| **A2** | the haptics, coil, shear and TMR coupons, and the latency rig | designed after A1, ordered later. **A2 must not hold A1 back** |
+
+The optional KVM coupon is in neither stage of this release. The done list above is still rev A's: A1 answers its
+first row for the Hall coupon, the 8 kHz HID and the scan engine below; A2 answers the rest. Neither stage has a
+written done card yet (risks.md recommendation 20, not decided).
+
 Two things this board must also show, because rev A is where the platform risks get retired
 ([mcu.md](../../docs/mcu.md#bring-up-risks)): **8 kHz HID** (bInterval 1 at high speed) through Zephyr's STM32 USB
 device driver, and a **scan engine** that fills a 125 µs frame (§6).
 
-**Conditions before the schematic is committed** (owner, 2026-11-26; both open):
+**Conditions before the schematic is committed** (owner, 2026-11-26; both open). On 2026-11-27 the owner asked for
+the KiCad projects, Gerbers, BoMs and enclosures of rev A now, so both conditions now gate **ordering boards**, not
+capture:
 
-1. **The MCUs are reserved**: JLC's stock bought into a JLC private parts library, or 4–6 parts consigned. JLC had
-   13 STM32U5A5VJT6 (C22455480) at $19.07 on 2026-11-26, DigiKey none before February–March 2027
-   ([mcu.md](../../docs/mcu.md#what-the-verifier-corrected)). The same JLC API answer gives `canPresaleNumber` −4
-   for this part, where other parts show about their stock (SN74CBTLV3125PWR 1101 in stock, 1100; RT1021 300, 300):
-   the 13 may already be committed to other orders. The field is undocumented, so this is an inference,
-   **unverified**. Next step: check on JLC's parts-order page whether any can be bought into a private library today;
-   if not, plan consignment from another distributor (none had stock on 2026-11-26) or the RT1021.
+1. **The MCUs are in hand.** The purchase route is **ST's own store** (owner's decision D6 of 2026-11-27): the ST
+   eStore listed the STM32U5A5VJT6 "In stock" at $19.25 (1–9) on 2026-11-27, and the pin-compatible STM32U599VJT6
+   at $17.99 (risks.md [SF-1](../../docs/risks.md#sf-1); the eStore pages were read by the risk register's supply
+   reviewer, not again here). **The owner buys them; no agent buys anything.** The STM32U599VJT6 and STM32U595VJT6 are
+   pin-compatible alternates (§2.1); the -Q parts are not. JLC's own stock stays thin: 13 STM32U5A5VJT6 (C22455480)
+   on 2026-11-27 with `canPresaleNumber` −4, where other parts show about their stock (SN74CBTLV3125PWR 1101 in
+   stock, 1100), so the 13 may already be committed to other orders (the field is undocumented: an inference,
+   **unverified**); neither alternate is in JLC's stock. DigiKey had none before February–March 2027
+   ([mcu.md](../../docs/mcu.md#what-the-verifier-corrected)). How ST's parts reach the board (consigned to JLC, or
+   U1 left unfitted and soldered by hand) is the owner's choice when ordering. The NXP i.MX RT1021 stays the last
+   resort.
 2. **8 kHz HID is proven on the NUCLEO-U5A5ZJ-Q** with Zephyr's `usbd`: `in-polling-period-us = <125>`, bInterval 1,
    report rate and jitter measured for at least 10 minutes on Windows and Linux with CDC logging active
    ([mcu.md](../../docs/mcu.md#conditions-before-the-schematic-is-committed)). Nobody has published this for
    `udc_stm32`. If either fails, the NXP i.MX RT1021 (C5119758) is the fallback and this SPEC is redrawn for it. The
    proof firmware and its host measurement tool are written: [keyboard/firmware/hid8k](../../firmware/hid8k/README.md)
    builds for `nucleo_u5a5zj_q` and its high-speed endpoint descriptor carries bInterval 1, but it has not run on a
-   Nucleo, so nothing about this condition is measured yet (§10 step 2).
+   Nucleo, so nothing about this condition is measured yet (§10 step 2). The rule for a mixed or host-side result
+   (risks.md recommendation 20) is not decided.
+
+Both conditions still gate **ordering** after the decisions of 2026-11-27, and every `ORDER-NOTES.md` says so at the
+top.
 
 **Owner decisions of 2026-11-26** (answers to this draft's proposals; the parts named for them remain candidates):
 
@@ -63,20 +93,48 @@ device driver, and a **scan engine** that fills a 125 µs frame (§6).
 | D2 | **The coupon slot connector is 2 × 20 at 2.54 mm**: a female through-hole socket on the motherboard, a male header on the coupon. The board sizes follow from it (motherboard about 190 × 150 mm, standard coupon about 58 × 60 mm, wide coupon about 80 × 60 mm); layout sets the exact outlines | §2, §4.1, §9, §11 #20 |
 | D3 | **USB-C input power:** keep the input breaker at about 3.3 A, and add a USB Type-C detect chip on I2C that reads the source's advertised current (Default, 1.5 A or 3.0 A), so that the firmware sets the VSYS budget itself. It uses no MCU pin (the pin budget is 82 of 82) | §3.1, §3.2, §3.5, §3.8 (the chip: U_CC, candidate TUSB320LAI), §8.4, §11 #12 |
 
-**Out of rev A:** no battery and no charger, by the owner's decision D1 (concept §7 had listed "power and charging";
+**Owner decisions of 2026-11-27 (evening)**, answering the risk register's
+[changes recommended before ordering](../../docs/risks.md#changes-recommended-before-ordering) (its recommendations
+1–21). Their numbers restart at D1; where this page cites one it writes the date, "D3 of 2026-11-27":
+
+| | Decision (2026-11-27) | Risk register | Where it lands |
+|---|---|---|---|
+| D1 | **Rev A in two stages.** A1 = the motherboard, the test coupon and the Hall coupon, released, ordered and brought up first; A2 = the haptics, coil, shear and TMR coupons and the latency rig, designed after A1 and ordered later. A1 is released first; A2 must not hold A1 back | PG-2 | this section; §2, §10, §11 |
+| D2 | **Key the slot at pin 39.** RSV becomes KEY. Pin 39 is absent from every coupon's header (a footprint with no pad 39; the header's pin 39 pulled before soldering, or a part sold that way if one is stocked), and the socket's hole 39 is plugged (a key plug part if one is stocked, else an assembly note) and unconnected. A coupon rule checks that pin 39 is absent and unconnected. Never key pins 2 and 39 together | rec. 2 (EL-2) | §4.2, §4.9; `nets.SLOT_PINS`, `nets.SLOT_KEY_PIN` |
+| D3 | **Slot guard: 100 Ω in series at each socket** on CS0_N, CS1_N, IRQ_N and G0–G3, and on S5's G4/G5. Plain resistors, no TVS arrays; checked against TIM1's PWM edges and EXTI timing. The lanes keep their 47 Ω + 1 nF | rec. 4 (EL-3) | §4.3; `nets.SLOT_SERIES` |
+| D4 | **Power fixes.** U2's PGTH divider 100 k / 44.2 k, so that VSYS_PG falls at 3.51–3.64 V; the USB-C load line (4.75 − 0.25 × I at J1); §11 #15 from SLVSF16B (VM 4.5 V minimum, UVLO falling 4.1–4.3 V); a damping leg on +3V3A (10 µF + 0.47 Ω, or a resistor in place of FB1), chosen only after a model with the LDO confirms it: **it did, and the leg was chosen** (§3.7); Kelvin sense nets for every INA226 shunt, pre-routed, with a post-layout check | recs. 5, 6, 7 (EL-1, EL-5, EL-6) | §3.1, §3.4, §3.6, §3.7, §7.5, §11 #15; `nets.INPUT_PGTH_DIVIDER`, `nets.VDDA_DAMPING`, `nets.INA226_SHUNT_NETS` |
+| D5 | **Layout rules.** Shrouded box headers for J_RIG and J_KVM; the placement rules of §9; the PCB stack named, with the 90 Ω geometry for it; the motherboard single-sided with the lane RCs on top; the coupons' via rule (0.60 / 0.30 mm) on the motherboard; `release.py` warns on drills under 0.3 mm | recs. 3, 8, 9, 10 (EL-2, EL-7, SF-5, SF-3, EL-11) | §2, §7.1, §7.3, §7.4, §9; `nets.MB_STACK`, `nets.USB_PAIR` |
+| D6 | **SPEC fixes and MCU alternates.** STM32U599VJT6 and STM32U595VJT6 as pin-compatible alternates (the -Q parts are not); ST's store as the purchase route; the corrections of rec. 14; §8.1's Stop 1 sentence against DS13543 Table 10 note 12; ST's documents read first-hand where st.com answers (it did not, §11 #24); the note that the TPS259470L is out of stock | recs. 1, 13, 14 and rec. 12's TPS259470L note (SF-1, PG-7, SF-6) | §1, §2.1, §3.3, §3.4, §3.5, §5.3, §8.1, §8.4, §8.5, §11; `nets.MCU_ALTERNATES` |
+| D7 | **Coupon fixes.** The test coupon gets an INJ-to-lane path and is re-released; the haptics coupon one or two Hall sites at rev B distances and a filter on the DRV2605L's supply; the coil coupon tanks above 1 MHz with two capacitor footprints per coil, and its U15 mux becomes the documented scheme; before the TMR and shear coupons are captured, the TMR part is picked by sensing axis and range and its magnet sized, the TMAG5170 variant picked from the stop field with tolerances, and the two shear sites put at least 40 mm apart | recs. 15–18 (ME-2, SE-5, SE-6, SE-8, SE-9, SE-1, SE-3) | §4.5, §4.8 |
+
+**Not decided** (open owner items, §11 #26–#30): rec. 11 (a coupon BOM and CPL without J1, for Economic PCBA),
+rec. 12's second source for the bus switch, rec. 19 (the rule that bounds a lane's voltage), rec. 20 (written rules:
+the 1 kHz mode, the rig's VBUS source, the decision rule for condition 2, a done card per coupon) and rec. 21 (LICENSE
+files and pid.codes PIDs). The optional KVM coupon stays out of this release.
+
+**Out of rev A:** no battery and no charger, by the owner's decision D1 of 2026-11-26 (concept §7 had listed "power and charging";
 the battery gate needs per-rail currents, not a cell; the charger goes to rev B, where the caliper's charger sheets
 are a starting point); no radio (the rev A MCU has none; the rev B side track measures BLE on an nRF54LM20 dev kit); no
 LSE crystal (a proposal, §5.2, §11 #11).
 
 ## 2. Boards
 
-| Board | Size (follows from D2; outline set at layout) | Stack (proposal) | Carries |
-|---|---|---|---|
-| Motherboard | **about 190 × 150 mm** | 4-layer, 1.6 mm, ENIG, JLC's controlled-impedance stack (L1 signals and the HS pair, L2 solid GND, L3 power, L4 signals) | STM32U5A5VJT6, USB-C with the hand-routed 90 Ω pair and the Type-C detect chip (U_CC), the power tree and 13 current monitors, five coupon slots (S1–S5), the I2C mux, three I/O expanders, five bus switches, the latency-rig header, the optional KVM header, SWD |
-| Standard coupon | about 58 × 60 mm | 4-layer, 1.6 mm (analog coupons want a solid ground layer) | Hall-effect (S1), TMR (S2), shear (S3) |
-| Wide coupon | about 80 × 60 mm | 4-layer, 1.6 mm; the coil coupon keeps copper-free layers under each coil ([concept §8](../../docs/concept.md#_8-conflicts-the-testbed-has-to-settle)) | Coil (S4), haptics (S5) |
-| KVM coupon (optional) | ≤ 50 × 40 mm | its own choice | A second USB device path for host B (§7.4) |
-| Latency rig | 100 × 80 mm | 4-layer, 1.6 mm (it carries a high-speed host link) | A high-speed USB host with microframe timestamps, the stimulus drivers, a ribbon to J_RIG (§7.3) |
+| Board | Stage (D1 of 2026-11-27) | Size (follows from D2 of 2026-11-26; outline set at layout) | Stack | Carries |
+|---|---|---|---|---|
+| Motherboard | A1 | **about 190 × 150 mm** | 4-layer, 1.6 mm, ENIG, **JLC04161H-7628** (D5 of 2026-11-27, below): L1 signals and the HS pair, L2 solid GND, L3 power, L4 signals; parts on L1 only | STM32U5A5VJT6, USB-C with the hand-routed 90 Ω pair and the Type-C detect chip (U_CC), the power tree and 13 current monitors, five coupon slots (S1–S5), the I2C mux, three I/O expanders, five bus switches, the latency-rig header, the optional KVM header, SWD |
+| Standard coupon | A1: test, Hall-effect (S1); A2: TMR (S2), shear (S3) | about 58 × 60 mm | 4-layer, 1.6 mm, JLC04161H-7628 (analog coupons want a solid ground layer) | the test coupon (§10 step 7), Hall-effect (S1), TMR (S2), shear (S3) |
+| Wide coupon | A2 | about 80 × 60 mm | 4-layer, 1.6 mm, JLC04161H-7628; the coil coupon keeps copper-free layers under each coil ([concept §8](../../docs/concept.md#_8-conflicts-the-testbed-has-to-settle)) | Coil (S4), haptics (S5) |
+| KVM coupon (optional) | not in this release | ≤ 50 × 40 mm | its own choice | A second USB device path for host B (§7.4) |
+| Latency rig | A2 | 100 × 80 mm | 4-layer, 1.6 mm (it carries a high-speed host link) | A high-speed USB host with microframe timestamps, the stimulus drivers, a ribbon to J_RIG (§7.3) |
+
+**The stack** (owner's decision D5 of 2026-11-27; `nets.MB_STACK`) is JLC's **JLC04161H-7628**, whose layers JLC's
+impedance page (fetched 2026-11-27) lists exactly as it lists its "No requirement" stack, so that the motherboard
+keeps what is, by that reading, JLC's default stack. Its layers, from JLC's page: L1 copper 0.035 mm; 7628 prepreg 0.2104 mm,
+dielectric constant 4.4; L2 copper 0.0152 mm; core 1.065 mm, 4.6; L3 copper 0.0152 mm; 7628 prepreg 0.2104 mm, 4.4;
+L4 copper 0.035 mm; about 1.59 mm in all. Solder mask: dielectric constant 3.8, 1.2 mil over the laminate and
+between traces, 0.6 mil over copper. The coupons already use this stack (`boards/coupon_common.py`, whose figures,
+held there "as remembered", agree with JLC's page). The USB pair's geometry for it is in §7.1. **The motherboard is
+single-sided** (D5): every part, the lane RCs and the through-hole sockets and headers included, sits on L1 (§9).
 
 The slot connector is the owner's decision D2 (2026-11-26): 2 × 20 at 2.54 mm (§4.1). The sizes follow from it and
 stay proposals until layout sets the exact outlines: the 50.8 mm socket needs a coupon edge of about 55 mm, which
@@ -145,13 +203,16 @@ reaches the MCU through an expander; I2C4 to the slot mux), and the slot fabric.
 ### 2.1 Candidate parts (JLC parts API, 2026-11-26)
 
 Queried through the endpoint that [`tools/lcsc_check.py`](../../../tools/lcsc_check.py) uses, on 2026-11-26 (the
-Type-C detect row on 2026-11-27). Stock is JLC's, price is qty 1. All are JLC **extended** parts except the crystal
-(basic), so each unique part adds JLC's extended-part fee.
+Type-C detect row on 2026-11-27, and the rows the owner's decisions of 2026-11-27 add, that evening). Stock is JLC's,
+price is qty 1. All are JLC **extended** parts except the crystal and the rows marked basic, so each unique part adds
+JLC's extended-part fee.
 
 | Function | Part | LCSC | JLC stock | $ (qty 1) | Notes |
 |---|---|---|---|---|---|
-| MCU | STM32U5A5VJT6 (LQFP100) | C22455480 | 13 | 19.07 | Owner's pick; reserve before the schematic is committed (§1). JLC's API also reports `canPresaleNumber` −4 (§1) |
-| Input breaker U2, S5 5 V breaker U5 | TPS259474LRPWR (VQFN-10 2 × 2) | C2864845 | 5803 | 1.35 | 2.7–23 V, 5.5 A, 28.3 mΩ typ, true reverse-current blocking, adjustable OVLO, power-good. A **circuit breaker**, latch-off: above I_LIM for longer than the C_ITIMER blanking interval, or at once above 2 × I_LIM, it turns off and stays off; it limits current actively only at start-up (TI ZHCSL91B, Device Comparison Table, §8.3.5.2). The TPS259470L of the same family limits current actively instead, with FLT in place of PG |
+| MCU | STM32U5A5VJT6 (LQFP100) | C22455480 | 13 (13 again on 2026-11-27) | 19.07 | Owner's pick; the owner buys it from ST's store (§1, condition 1; D6 of 2026-11-27). JLC's API also reports `canPresaleNumber` −4 (§1) |
+| MCU alternate | STM32U599VJT6 (LQFP100) | C18213037 | 0 (2026-11-27) | 18.88 | Pin-compatible (D6 of 2026-11-27, `nets.MCU_ALTERNATES`): ST's open pin data gives 0 renamed pins and 0 missing signals against the U5A5VJTx; it differs in the AES, OTFDEC, PKA and SAES blocks, which this board does not use (risks.md SF-1, compared by script there). ST's eStore listed it "In stock", $17.99 (1–9), on 2026-11-27. Firmware changes only the SoC |
+| MCU alternate | STM32U595VJT6 (LQFP100) | C7938448 | 0 (2026-11-27) | 24.64 | As the U599. **Not alternates:** the -Q parts (STM32U599VJT6Q C26430725, STM32U595VJT6Q C24591629), the SMPS variants: 33 pins differ (SF-1) |
+| Input breaker U2, S5 5 V breaker U5 | TPS259474LRPWR (VQFN-10 2 × 2) | C2864845 | 5803 | 1.35 | 2.7–23 V, 5.5 A, 28.3 mΩ typ, true reverse-current blocking, adjustable OVLO, power-good. A **circuit breaker**, latch-off: above I_LIM for longer than the C_ITIMER blanking interval, or at once above 2 × I_LIM, it turns off and stays off; it limits current actively only at start-up (TI ZHCSL91B, Device Comparison Table, §8.3.5.2). The TPS259470L of the same family limits current actively instead, with FLT in place of PG; **JLC had none on 2026-11-27** (TPS259470LRPWR, C3662793: 0 in stock, `canPresaleNumber` −91; D6 of 2026-11-27), so it is not an alternative for an assembled order today. On 2026-11-27 the TPS259474L itself showed 5643 |
 | Slot 3.3 V and S1–S4 5 V switches, KVM 5 V | TPS2553DBVR (SOT-23-6) | C55266 | 40431 | 0.54 | 2.5–6.5 V, 85 mΩ typ (135 mΩ max over temperature), adjustable current limit 75–1300 mA typ, 1.5 A maximum continuous load, constant-current limiting, FAULT output, active-high EN (TI SLVS841E). The latch-off TPS2553DBVR-1 (C111738, 6244) is the alternative. 10 per board |
 | Current monitor | INA226AIDGSR (VSSOP-10) | C49851 | 37740 | 0.67 | 16-bit, 2.5 µV shunt LSB, 0–36 V common mode, 330 µA, 16 addresses (TI SBOS547). 13 per board |
 | I2C mux | TCA9548APWR (TSSOP-24) | C130026 | 14661 | 0.86 | 8 channels, reset input |
@@ -161,16 +222,21 @@ Type-C detect row on 2026-11-27). Stock is JLC's, price is qty 1. All are JLC **
 | 3.3 V slot LDO | LDL1117S33R (SOT-223) | C435835 | 43247 | 0.49 | 1.2 A, 60 µVrms (JLC listing). Lower-noise option if the slot budget stays under about 150 mA: TPS7A2033PDBVR, C2862740 (90355, $0.20; 300 mA, 10 µVrms) |
 | HSE crystal | X322516MLB4SI, 16 MHz, 3225 | C13738 | 399712 | 0.09 | **Basic** part; 9 pF load, ±10 ppm (JLC listing) |
 | USB-C receptacle | HRO TYPE-C-31-M-12 | C165948 | 404629 | 0.19 | 16-pin USB 2.0, the caliper's part |
-| USB Type-C detect U_CC | TUSB320LAIRWBR (X2QFN-12 1.6 × 1.6 mm, 0.4 mm pitch) | C132554 | 4353 (2026-11-27) | 1.31 | Sink-only CC logic: Rd on CC1/CC2 powered or unpowered, reads Default / 1.5 A / 3.0 A over I2C at 0x67 (TI SLLSEQ8D). The owner decided on a detect chip (D3); this part is a candidate (§3.8, alternatives compared there) |
+| USB Type-C detect U_CC | TUSB320LAIRWBR (X2QFN-12 1.6 × 1.6 mm, 0.4 mm pitch) | C132554 | 4353 (2026-11-27) | 1.31 | Sink-only CC logic: Rd on CC1/CC2 powered or unpowered, reads Default / 1.5 A / 3.0 A over I2C at 0x67 (TI SLLSEQ8D). The owner decided on a detect chip (D3 of 2026-11-26); this part is a candidate (§3.8, alternatives compared there) |
 | USB ESD | TPD4E05U06DQAR (USON-10) | C138714 | 29197 | 0.08 | 4 channels, 0.5 pF (JLC listing): D+, D−, CC1, CC2. Alternative: USBLC6-2SC6 C7519 (33014, $0.15; 3.5 pF per the listing), the caliper's |
 | VBUS TVS | SMF5.0A (SOD-123FL) | C151296 | 55132 | 0.12 | As the caliper |
 | VDDA ferrite | BLM18PG221SN1D (0603) | C80165 | 164706 | 0.01 | 220 Ω at 100 MHz |
-| Slot socket (motherboard) | BOOMELE 2.54-2*20P female, 8.5 mm, THT | C5124634 | 6382 | 0.33 | The connector type is the owner's decision (D2); this part is a candidate. 2.5 A per contact. Alternative HanElectricity 2541FV-2x20P-B C25503128 (1622, 3 A) |
-| Slot header (coupon) | HanElectricity 2541WV-2x20P male, THT | C25503140 | 1520 | 0.14 | As the socket: type decided (D2), part a candidate. 3 A per contact |
+| Slot socket (motherboard) | BOOMELE 2.54-2*20P female, 8.5 mm, THT | C5124634 | 6382 | 0.33 | The connector type is the owner's decision (D2 of 2026-11-26); this part is a candidate. 2.5 A per contact. Alternative HanElectricity 2541FV-2x20P-B C25503128 (1622, 3 A) |
+| Slot header (coupon) | HanElectricity 2541WV-2x20P male, THT | C25503140 | 1520 (506 on 2026-11-27) | 0.14 | As the socket: type decided (D2 of 2026-11-26), part a candidate. 3 A per contact |
 | Coupon descriptor | M24C02-WMN6TP (SOIC-8) | C7562 | 217250 | 0.12 | On every coupon, not on the motherboard |
 | SWD | Samtec FTSH-107-01-L-DV-K (STDC14) | C5307809 | 2371 | 3.70 | 14-pin 1.27 mm, ST's STDC14 layout (§7.2) |
-| Rig header | CJT A2541WV-2x5P | C225520 | 8249 | 0.18 | §7.3 |
-| KVM header | CJT A2541WV-2x6P | C225521 | 4303 | 0.24 | §7.4 |
+| Rig header | CJT A2541WV-2x5P | C225520 | 8249 | 0.18 | §7.3. **To be replaced** by a shrouded 2 × 5 box header (D5 of 2026-11-27), picked at capture |
+| KVM header | CJT A2541WV-2x6P | C225521 | 4303 | 0.24 | §7.4. **To be replaced** by a shrouded 2 × 6 box header (D5 of 2026-11-27), picked at capture |
+| Slot series resistors, 37 (D3 of 2026-11-27) | UNI-ROYAL 0402WGF1000TCE, 100 Ω 1 % 0402 | C25076 | 9011776 (2026-11-27) | 0.0011 | **Basic** part. §4.3 |
+| U2 PGTH bottom resistor (D4 of 2026-11-27) | UNI-ROYAL 0402WGF4422TCE, 44.2 kΩ 1 % 0402 | C25895 | 21741 (2026-11-27) | 0.0017 | The top stays 100 k. §3.1 |
+| +3V3A damping leg, R (D4 of 2026-11-27) | UNI-ROYAL 0603WAF470LT5E, 0.47 Ω 1 % 0603 | C23411 | 99709 (2026-11-27) | 0.0051 | ±800 ppm/°C, which a damping resistor tolerates. §3.7 |
+| +3V3A damping leg, C (D4 of 2026-11-27) | Samsung CL21A106KAYNNNE, 10 µF 25 V X5R 0805 | C15850 | 9304315 (2026-11-27) | 0.031 | **Basic** part, already the board's 5 V bulk capacitor. Its capacitance at 3.3 V of DC bias was not read; the model still damps at 47 % of it (§3.7) |
+| Slot key plug (D2 of 2026-11-27) | none found | – | – | – | JLC keyword searches on 2026-11-27 ("polarizing key", "key plug 2.54", "coding key header", "2.54mm polarizing") found no key plug for a 2.54 mm socket, so socket hole 39 is plugged by hand (§4.2) |
 | Meter jumpers | hanxia HX PZ2.54-1x2P ZZ | C32713268 | 121940 | 0.02 | One per 3.3 V slot rail (§3.4) |
 
 ## 3. Power tree
@@ -181,12 +247,12 @@ Type-C detect row on 2026-11-27). Stock is JLC's, price is qty 1. All are JLC **
 USB-C J1 CC1, CC2 ─ TPD4E05U06 (ESD) ─ TUSB320LAI U_CC (Rd on both, powered or not; reads the source's current
                                          advertisement → I2C1 0x67, INT_N → U_EXP2 P14; VBUS_DET ← 887 kΩ ← VBUS)
 USB-C J1 VBUS ─ SMF5.0A ─ (≤ 10 µF) ─ TPS259474L breaker U2 (I_LIM 2.96 / 3.33 / 3.62 A, dV/dt soft start,
-   │                                     OVLO ≈ 5.8 V, latch-off, PG → VSYS_PG)
-   └─ 20 mΩ shunt (INA226 0x40, the whole board) → VSYS (5 V)
+   │                                     OVLO ≈ 5.8 V, latch-off, PG → VSYS_PG, PGTH 100 k / 44.2 k: falls 3.51–3.64 V)
+   └─ 20 mΩ shunt (INA226 0x40, the whole board; Kelvin-sensed, §3.4) → VSYS (5 V)
 VSYS ─ AP2112K-3.3 U3 → +3V3 (always on: INA226 x 13, TCA9535 x 3, TCA9548A, U_CC, bus switches, LEDs, pull-ups)
          +3V3 ─ 0.5 Ω (INA226 0x41) → +3V3_MCU (the five VDD pins, VBAT)
          +3V3 ─ 1 Ω   (INA226 0x42) → +3V3_USB (VDDUSB: the HS PHY's 3.3 V part)
-VSYS ─ LDL1117S33R U4 → +3V3_SLOT ─┬─ BLM18PG221 + 1 µF + 100 nF → +3V3A (VDDA, VREF+)
+VSYS ─ LDL1117S33R U4 → +3V3_SLOT ─┬─ BLM18PG221 → +3V3A (VDDA, VREF+: 2 × (1 µF + 100 nF); damping leg 0.47 Ω + 10 µF)
                                    └─ TPS2553 x 5 (EN_3V3_Sn, 256 / 292 / 335 mA) ─ 0.24 Ω (INA226 0x44–0x48)
                                          ─ JP_3V3_Sn → +3V3_Sn
 VSYS ─ TPS2553 x 4 (EN_5V_Sn, 519 / 577 / 644 mA) ─ 0.1 Ω (INA226 0x49–0x4C) → +5V_S1 … +5V_S4
@@ -214,10 +280,30 @@ minimum, keeps the board inside both. All resistor values are proposals, to re-c
 All the TPS2553 FAULT outputs are wired together into SLOT_FAULT_N (open drain, read by U_EXP2); the INA226 that has
 crossed its alert limit says which rail it was.
 
+**U2's power-good threshold** (owner's decision D4 of 2026-11-27; risks.md [EL-1](../../docs/risks.md#el-1);
+`nets.INPUT_PGTH_DIVIDER`). U2's PGTH pin watches VSYS_IN through **100 k / 44.2 k** (E96, 1 %; captured on
+2026-11-27 as 100 k / 39 k, R35/R36). The TPS25947's PGTH thresholds are 1.183 / 1.20 / 1.223 V rising and
+1.076 / 1.09 / 1.116 V falling (min / typ / max, TI SLVSFC9C §6.5; the same as EN/UVLO), and the divider multiplies
+them by (100 + 44.2) / 44.2 = 3.262. So VSYS_PG **falls at 3.51 / 3.56 / 3.64 V and rises at 3.86 / 3.91 / 3.99 V**
+with exact resistors, and at 3.46–3.69 V and 3.81–4.05 V with both resistors 1 % off in the worst direction
+(`nets.vsys_pg_thresholds()`; arithmetic). PGTH's leakage, −0.1 to 0.3 µA (§6.5), through the divider's 30.6 kΩ
+moves the pin by −3 to +9 mV, −10 to +30 mV at VSYS_IN (*estimate*). At OVLO's 5.8 V the pin sees 1.78 V, inside
+its 5 V recommended range. The captured 39 k put the falling edge at 3.83–3.98 V, which a legal source and cable
+reach at the 2.8 A ceiling (§3.6), and the firmware takes VSYS_PG low as "every rail off"
+(`keyboard/firmware/lib/src/trip.c`). Now VSYS_PG means "about to brown out": while U2 is on, VSYS_IN sits at most
+I × R_ON below VBUS (0.13 V at 2.8 A and 45 mΩ), and U2's own UVLO (100 k / 39 k on VBUS, not changed: falling at
+3.83–3.98 V, 3.78–4.04 V with 1 % resistors) turns U2 off before VBUS can take VSYS_IN much below 3.7 V, so VSYS_PG
+falls only with a brown-out (*estimate*). Only at the far corners do the two overlap: UVLO's lowest 3.78 V less
+0.13 V is 3.65 V at 2.8 A, against VSYS_PG's highest 3.69 V, so VSYS_PG can fall up to about 40 mV of VSYS_IN
+before U2 turns off (arithmetic, added by the review of 2026-11-27). With this divider in a copy of the netlist,
+keyboard/sim's `test_ceiling_compliant_cable_keeps_vsys_pg`
+passes. U5's own PGTH divider (S5_PG) is not part of the decision.
+
 **Why VDDA hangs off the slot LDO.** The lanes carry ratiometric sensor outputs (a Hall sensor's zero-field output
 and sensitivity scale with its supply). VDDA and VREF+ come from the same regulator as the slot rails, so slow supply
 movement is common to the sensor and the ADC reference and cancels to first order. The ferrite and capacitors keep
-the slot switching out of VDDA at high frequency. Between the regulator and the coupon, the shunt, switch and jumper
+the slot switching out of VDDA at high frequency, and the damping leg of §3.7 (D4 of 2026-11-27) keeps their
+resonance from amplifying the scan's own disturbances. Between the regulator and the coupon, the shunt, switch and jumper
 drop I × (R_shunt + R_DS(on) + R_jumper): with 0.24 Ω and the TPS2553's 85 mΩ typ (135 mΩ max over temperature,
 SLVS841E), about 3.3 mV (0.1 %) at 10 mA and 81–94 mV (2.5–2.8 %) at the 250 mA rule, plus the jumper's contact
 resistance (*estimate*). The INA226's bus-voltage reading cannot correct that: its offset is ±7.5 mV max and its gain
@@ -268,8 +354,9 @@ advertises 1.5 A or 3.0 A on CC. U_CC reads that advertisement (§3.8). So the f
 
 * Each slot rail has its own switch, shunt and INA226, downstream of everything else. A slot's reading is the coupon
   plus two small motherboard contributions: the slot's I2C pull-ups (4.7 k to +3V3_S*n*, §4.2), which draw 0.70 mA per
-  line while it is low, so about 0.7 mA while the bus is busy (*estimate*); and the INA226's own input currents, its
-  IN− bias of 10 µA typ and its VBUS input's 830 kΩ, about 4 µA at 3.3 V (SBOS547). The firmware logs each frame's I2C
+  line while it is low, so about 0.7 mA while the bus is busy (*estimate*); and the INA226's own input currents: its
+  IN+ and IN− bias of 0.1 nA typ (SBOS547C, revised August 2026, "Input bias current (IIN+, IIN– pins)"; this page
+  said 10 µA until the correction of 2026-11-27, D6) and its VBUS input's 830 kΩ, about 4 µA at 3.3 V. The firmware logs each frame's I2C
   activity on the slot's channel so that the battery gate can subtract the pull-ups (§8.5).
 * The MCU's VDD pins and VBAT sit on their own shunt (+3V3_MCU), VDDUSB on another (+3V3_USB). The INA226s, expanders,
   mux, U_CC and LEDs sit on +3V3 outside both.
@@ -323,15 +410,42 @@ The INA226's conversion time is 140 µs to 8.244 ms per sample, and averaging (1
 about 8.4 s (SBOS547). Run continuously on the shunt alone at 140 µs without averaging, one monitor gives a reading
 about every 140 µs, enough to see the motor's detent peaks; averaged settings give the battery gate's mean currents.
 **The bus sets how many rails can be followed that fast.** I2C1 runs at 400 kHz, the TCA9535's limit (SCPS201D). A
-2-byte read with the register pointer already set is about 29 bit times, 73 µs, so the bus carries about 13,700 reads
-per second in all (*estimate*). That holds only for raw reads (`i2c_read_dt`) of a monitor whose pointer was set once
-and that nothing else re-points (each INA226 keeps its own pointer). Zephyr's INA226 driver reads every register
+2-byte read with the register pointer already set is about 29 bit times, 72.5 µs, so the bus carries about 13,700
+reads per second in all (*estimate*). That holds only for raw reads (`i2c_read_dt`) of a monitor whose pointer was set
+once and that nothing else re-points (each INA226 keeps its own pointer). Zephyr's INA226 driver reads every register
 with a pointer write, a repeated start and the data (`i2c_burst_read_dt`), about 48 bit times or 120 µs, so through
 the sensor API the bus carries about 8,300 reads per second, and `sample_fetch(SENSOR_CHAN_ALL)` costs four of them
 (`ina2xx_common.c`, `ina2xx_fetch.c`, v4.5.0; *estimate*). Following one rail at 140 µs takes about 7,100 reads per
-second: half the bus with raw reads, nearly all of it through the sensor API. So one rail, two at most with raw
-reads, runs at 140 µs (for example S5 during a motor test), fetching one channel, and the rest are averaged at 1 ms
-or slower, leaving room for U_EXP2's alerts and faults. The three TCA9535 expanders and the Type-C detect chip U_CC
+second: half the bus with raw reads, nearly all of it through the sensor API.
+
+**The logging plan** (re-planned on 2026-11-27, D6, from risks.md [FW-4](../../docs/risks.md#fw-4)'s arithmetic; all
+*estimates* at 400 kHz, to measure on the bench by scoping SCL). This page used to say "one rail at 140 µs and the
+rest averaged at 1 ms", which needs 131–139 % of the bus (one rail at 7,143 reads/s plus twelve at 1 kHz, raw);
+thirteen rails at 1 kHz take 94 % with raw current-only reads, and 312 % with the bus voltage read every time
+through the sensor API. So:
+
+| Mode | What is read | Bus share |
+|---|---|---|
+| Survey | All 13 monitors, **current only**, raw reads with the pointer held on the Current register, at **≤ 700 Hz each** | 13 × 700 × 72.5 µs ≈ 66 % |
+| Fast | **One** rail at 140 µs (7,143 reads/s; for example S5 during a motor test), the other twelve at **≤ 300 Hz** or paused | 52 % + 26 % ≈ 78 % |
+| Bus voltages | Every rail at **≤ 10 Hz**: a pointer write to Bus Voltage, the read (120 µs), and a pointer write back to Current (about 50 µs) | 13 × 10 × 170 µs ≈ 2 % |
+
+That leaves about a fifth of the bus or more for U_EXP2's interrupts and faults and for U_CC. Each monitor's
+conversion time and averaging are set so that a new result is ready within the read period. A monitor whose bus
+voltage is read runs shunt-and-bus conversions, and its cycle is (shunt + bus conversion time) × averages
+(SBOS547C §6.4.1: 588 µs for both, averaged 4 times, updates "approximately every 4.7ms"), and SBOS547C gives
+maxima 10 % above typical for its conversion times of 1.1 ms and longer (none for the shorter ones; taken as 10 %
+here). So at 700 Hz (a 1.43 ms period) a 332 µs shunt and 140 µs bus conversion averaged twice fits: 0.94 ms
+typical, about 1.04 ms if 10 % long. The 332 µs × 4 = 1.33 ms first written here did not: it left out the bus
+conversion, and 10 % long it is about 1.46 ms (corrected by the review of 2026-11-27; *estimates*). The fast rail
+runs shunt-only at 140 µs, so its bus voltage is not converted while it runs fast. Duplicates are marked by time,
+**never by CVRF**: the Conversion Ready flag clears only when Mask/Enable is read or the configuration written
+("Reading the Mask/Enable Register (06h)",
+SBOS547C), and with the alert latch enabled, "the AFF and Alert pin remain asserted until either the Configuration
+Register (00h) is written to or the Mask/Enable Register is read": polling Mask/Enable for CVRF would clear the
+latched alert the board uses to find which monitor fired. So the board service reads Mask/Enable only after
+PM_ALERT_N falls, and reads every monitor's Mask/Enable once before it writes a configuration (which also clears a
+latched alert). The INA226 records of §8.5 follow this plan. The three TCA9535 expanders and the Type-C detect chip U_CC
 share this bus, which no coupon ever sees; U_CC is read at boot and when its interrupt fires (§8.4), so it costs the
 bus nothing that matters. Every INA226 ALERT is wired into PM_ALERT_N (open drain, read by U_EXP2 P07): a firmware
 over-current threshold set below the switch's hardware limit, for example at the current the coupon's descriptor
@@ -371,8 +485,9 @@ there, so they must not be made stronger than about 1.8 kΩ (*estimate*).
   threshold 1.20 V, 1.183–1.223 V): target about 5.8 V, above USB-C's 5.5 V maximum and at or below the AP2112K's
   6.0 V recommended maximum (the TPS7A2033 alternative is rated 6 V, the TPS2553 6.5 V); with 1 % resistors it trips
   at about 5.65–5.95 V (*estimate*). True reverse-current blocking, so a coupon's motor cannot push current back into
-  the host. Power-good to VSYS_PG. If a latching board-level trip proves too disruptive on the bench, the TPS259470L
-  limits current actively instead.
+  the host. Power-good to VSYS_PG, falling at 3.51–3.64 V (§3.1, D4 of 2026-11-27). If a latching board-level trip
+  proves too disruptive on the bench, the TPS259470L limits current actively instead, but JLC had none on 2026-11-27
+  (C3662793: 0 in stock, `canPresaleNumber` −91; §2.1).
 * **Slot switches** (TPS2553): soft start and a constant-current limit per rail; a shorted coupon trips its own rail
   only. The coupon's bulk capacitance is charged at the switch's limit (coupon rules, §4.9). S5's U5 is a second
   TPS259474L breaker: above its I_LIM for longer than the blanking interval it latches off until EN_5V_S5 is driven
@@ -412,9 +527,33 @@ there, so they must not be made stronger than about 1.8 kΩ (*estimate*).
   ALERT tells the firmware to turn S5 off if the motor draws more than the budget allows.
 * **Supply margin:** under a 2 A load the motherboard itself drops about 0.2 V between J1 and the S5 pins
   (*estimate*: U2 at 28.3 mΩ typ ≈ 59 mV at 2.1 A, the 20 mΩ VSYS shunt ≈ 42 mV, U5 ≈ 57 mV, the 20 mΩ S5 shunt
-  ≈ 40 mV, three contacts in parallel ≈ 15 mV), and the cable adds its own drop. From a source at USB's 4.75 V
-  minimum the coupon may see 4.3–4.5 V. The DRV8316's minimum supply is near 4.5 V (**unverified**). The haptics
-  coupon must check its margin, or bring its own supply input if it wants more than 5 V or 2 A.
+  ≈ 40 mV, three contacts in parallel ≈ 15 mV), and the cable adds its own drop.
+* **The USB-C load line** (owner's decision D4 of 2026-11-27; risks.md [EL-1](../../docs/risks.md#el-1)). A source
+  may sit at 4.75 V (USB 2.0 §7.2.2), and a Type-C cable may drop "250 mV" on ground and "500 mV" on VBUS "through
+  the cable to the cable's maximum rated VBUS current capacity" (Type-C R2.0 §4.4.1), 0.25 Ω round trip for a 3 A
+  cable, so the board must expect, at J1,
+
+  **V(J1) = 4.75 V − 0.25 Ω × I(J1)**
+
+  and design its thresholds against it. The DRV8316's own figures (TI SLVSF16B, read 2026-11-27): VM **4.5 V
+  minimum** (recommended operating conditions), and VM **UVLO falling at 4.1 / 4.2 / 4.3 V**, rising at 4.3 / 4.4 /
+  4.5 V (min / typ / max), with a 3–7 µs deglitch. Along the load line (DC arithmetic, *estimate*: U2 and U5 at their
+  45 mΩ maximum R_ON, the two 20 mΩ shunts, three 20 mΩ contacts each way, 0.1 A for the rest of the board unless
+  stated):
+
+  | S5 current (J1 current) | J1 | VSYS_IN | S5 pins | Against |
+  |---|---|---|---|---|
+  | 1.0 A (1.1 A) | 4.47 V | 4.43 V | 4.33 V | below the DRV8316's 4.5 V minimum, above its UVLO |
+  | 1.5 A (1.6 A) | 4.35 V | 4.28 V | 4.13 V | in the UVLO band (4.1–4.3 V) |
+  | 2.0 A (2.1 A) | 4.22 V | 4.13 V | 3.93 V | below UVLO: the motor stops |
+  | 2.0 A, board at the 2.8 A ceiling | 4.05 V | 3.92 V | 3.71 V | below UVLO; VSYS_PG holds (falls at 3.46–3.69 V, §3.1); U2's UVLO margin 14 mV (keyboard/sim bench 3) |
+
+  keyboard/sim's bench 2 agrees in the transient (4.34 V at the coupon for 1 A detents through 0.25 Ω from 4.75 V;
+  3.71 V at 2 A with the board at its ceiling). So **S5 runs its motor in range only from a better source or cable
+  than the load line**: a 5.1 V source on a good 1 m cable (0.12 Ω) gives about 4.56 V at 2 A (risks.md EL-1's
+  table). The haptics coupon checks its margin, or brings its own supply input if it wants more than 5 V or 2 A.
+  Two more proposals of risks.md EL-1 are **not decided**: a bench rule that S5 runs above 1 A only on a short cable
+  known to be compliant, and the firmware shedding S5 when VSYS sags.
 * Braking energy cannot flow back into VSYS (U5 blocks reverse current), so the coupon must absorb it in its own bulk
   capacitance or clamp it.
 
@@ -424,6 +563,42 @@ From DS13543 Rev 2 Figure 23 (the LDO supply scheme of the non-SMPS parts): n ×
 2 × 2.2 µF ±20 %), ESR under 20 mΩ at 3 MHz, rated ≥ 10 V on VCAP**; 100 nF + 1 µF on VDDA and on VREF+. VDDUSB takes
 3.0–3.6 V (DS13543 §3.9.1); 100 nF + 1 µF (proposal). VBAT is tied to VDD with 100 nF (no backup cell).
 VREF+ is tied to VDDA (+3V3A): VREFBUF stays off, because the lanes swing to the full 3.3 V.
+
+**The +3V3A damping leg** (owner's decision D4 of 2026-11-27; risks.md [EL-5](../../docs/risks.md#el-5);
+`nets.VDDA_DAMPING`): **0.47 Ω in series with 10 µF, from +3V3A to GND** (middle net VDDA_DAMP), at FB1's +3V3A
+end; FB1 and the 2 × (100 nF + 1 µF) at VDDA and VREF+ stay. The owner asked for a leg or a resistor in place of FB1,
+chosen only once a model that includes the LDO confirms it; the leg was picked from this model under that rule, and the
+owner has not reviewed the pick separately. The model is bench 4 of [keyboard/sim](../../sim/README.md)
+(`bench_vdda.py`): the LDL1117 with its output impedance fitted to its Figure 27, the captured 5.2 µF on +3V3_SLOT,
+FB1 (0.10 Ω DC resistance, max; its inductance, which Murata does not publish, bracketed at 0.1–2 µH), the captured
+2.2 µF on +3V3A, and the ADCs' current from DS13543 (Table 97: ADC12 980 + 160 µA typ at 2.5 Msps and 14 bits, each;
+Table 100: ADC4 360 + 18 µA). Results, simulations of datasheet-based models (*estimates*; LSB are 14-bit codes of a
+ratiometric input at mid-scale, 2^13 × ΔV / 3.3 V):
+
+| | As captured | **With the leg** | 1 Ω in place of FB1, +10 µF | 2.2 Ω in place of FB1, +10 µF |
+|---|---|---|---|---|
+| Peaking, +3V3_SLOT to +3V3A, FB1 at 0.1 / 0.5 / 2 µH | +6.4 dB at 316 kHz / +13.2 dB at 151 kHz / +19.1 dB at 76 kHz | +0.6 / +0.4 / +2.7 dB | none (a low-pass near 13 kHz) | none (near 6 kHz) |
+| Worst peaking over the bracket (also the LDO's inductance × 0.5–2 and the +3V3A capacitors at 1.3–2.2 µF) | +21.2 dB | +2.7 dB; +5.9 dB with the leg's capacitor at 47 % | – | – |
+| Peak impedance at +3V3A, what the ADCs' own current sees | up to 8.0 Ω | 0.62 Ω | 1.0 Ω, at DC | 2.2 Ω, at DC |
+| VREF+ swing inside an 80 µs scan window from the ADCs' 2.66 mA, FB1 at 0.1 / 0.5 / 2 µH | 0.7 / 3.2 / 9.7 LSB | 0.4 / 1.1 / 2.4 LSB | 5.6 LSB | 12.7 LSB |
+| VREF+ swing across one slot's eight conversion steps (7.3 µs each, §6.3) | 0.9 / 2.0 / 5.2 LSB | 0.5 / 1.1 / 1.7 LSB | 1.3 LSB | 2.3 LSB |
+| VREF+ excursion when another slot's four sensors switch on (10.4 mA on +3V3_SLOT) | 3.1–3.8 LSB | 1.5–2.2 LSB | 0.6 LSB | 0.3 LSB |
+
+**Why the leg.** As captured the branch resonates where the scan's own disturbances sit (the 8 kHz frame's harmonics,
+and step rates of 19–300 kHz for §6.3's 3.3–52 µs steps; EL-5's 64 kHz assumed steps spread evenly over the frame).
+The leg removes the peaking at every inductance in the bracket and keeps +3V3A's DC impedance at FB1's 0.1 Ω, so
+VREF+ stays ratiometric with the slot rails at DC (§3.1). A resistor in place of FB1 filters the slot rails harder,
+but its 1–2.2 Ω at DC turns the ADCs' own current, which starts and stops with every scan window, into a 5.6–12.7 LSB
+swing of the reference. The bars the choice is held to (proposals): peaking ≤ 3 dB over the whole bracket (≤ 6 dB
+with the capacitor at 47 %), |Z| ≤ 1 Ω, and a scan-window swing ≤ 3 LSB; `keyboard/sim/tests/test_vdda.py` checks
+them and fails if the leg is removed from the contract or, once the motherboard is recaptured, from the netlist.
+With the leg the LDL1117 sees 17.4 µF nominal at most (5.2 + 2.2 + 10, the leg counted in full, though it sits
+behind FB1 and 0.47 Ω), inside the 22 µF edge of its stability plan (DocID030319 Figures 20–21). Parts: §2.1 (the
+10 µF is the board's basic C15850, whose loss at 3.3 V of DC bias was not read). What the model cannot see: the
+bead's real inductance and loss, the LDO's real control loop, layout inductance, the ADCs' real current waveform.
+Bring-up measures the branch (§10 step 5; EL-5's test). The leg does nothing for a slot rail switched on during a run
+(keyboard/sim's item 6: up to 45 mV on VDDA without soft start), so the firmware still switches rails only between
+runs.
 
 ### 3.8 USB Type-C detect (U_CC)
 
@@ -565,10 +740,26 @@ Odd pins are one row, even pins the other. Directions are seen from the motherbo
 | 36 | G3 | io | S*n*_G3 | S4: TIM8_CH4; S5: TIM1_CH1N |
 | 37 | G4 | io | S*n*_G4 | S1–S4: slow, on expander U_EXP3; S5: TIM1_CH2N |
 | 38 | G5 | io | S*n*_G5 | S1–S4: slow, on expander U_EXP3; S5: TIM1_CH3N |
-| 39 | RSV | nc | – | reserved, not connected on the rev A motherboard |
+| 39 | KEY | – | – | **the slot key** (D2 of 2026-11-27): no pin 39 on any coupon, socket hole 39 plugged; unconnected on both sides |
 | 40 | GND | gnd | GND | |
 
 Thirteen grounds, one opposite each lane and between the power and signal groups.
+
+**The key** (owner's decision D2 of 2026-11-27; risks.md [EL-2](../../docs/risks.md#el-2); `nets.SLOT_KEY_PIN`). The
+socket and header are plain 2 × 20 parts. Turned 180°, socket pin *p* meets coupon pin 41 − *p*: PRESENT_N (32) meets
+a coupon GND (9), +3V3 (7, 8) meets G1 and G0, CS0_N (27) a GND (14), so an unkeyed slot reads a turned coupon as
+present and drives it. Keyed, the turned coupon's pin 2 lands on the plugged hole 39 and the coupon does not go in.
+
+* **On every coupon pin 39 is absent:** its footprint has no pad 39, and the 2 × 20 header's pin 39 is pulled out
+  before the header is soldered (an assembly step: JLC keyword searches on 2026-11-27, such as "2*20P 39P header"
+  and "2.54mm 2x20 keyed male header", found no 2 × 20 header sold without pin 39). A stock header then has no hole
+  to go into at pin 39, so JLC cannot fit it as it comes (§11 #31).
+* **On the motherboard** socket pin 39 keeps its pad and **no net**, and its hole is **plugged**. JLC listed no key
+  plug for a 2.54 mm socket on 2026-11-27 (§2.1), so the plug is an assembly note: for example a header pin cut flush
+  and pressed into contact 39. It must not stand above the socket's top, where the coupon's header body rests.
+* **A coupon rule** (`keyboard/tools/coupon/rules.py`, §4.9) checks that a coupon's pin 39 is absent and unconnected.
+* **Never key pins 2 and 39 together:** they swap under rotation, so a coupon keyed at both would fit either way
+  round (`nets.SLOT_KEY_NEVER_WITH`). J_RIG and J_KVM get shrouded box headers instead of a key (§7.3, §7.4).
 
 ### 4.3 What sits between a slot pin and the MCU (`nets.SLOT_PATH`)
 
@@ -577,10 +768,49 @@ Thirteen grounds, one opposite each lane and between the power and signal groups
 | AN0–AN3 | 47 Ω in series and 1 nF C0G to GND at the MCU pin (proposal). The MCU-side net is `Sn_ANk_ADC`. τ = (R_src + 47 Ω) × 1 nF, where R_src is the coupon's source impedance: from a stiff, buffered source (R_src of a few ohms) τ ≈ 47 ns and the lane settles to 14 bits in ≈ 0.5 µs; from a 1 kΩ source τ ≈ 1.05 µs and it takes ≈ 11 µs (*estimate*, §6.3). The 1 nF is the charge reservoir for the ADC's 5 pF sampling capacitor (DS13543 Table 97), whose kickback recovers through the same R_src + 47 Ω (§6.3). **The 1 nF alone uses the TMAG5253's whole CLoad recommendation** (1 nF max, SBASAI5E §6.3), and the other sensors sharing the lane (about 20 pF each by TI's example) and the trace add to it; whether capacitance behind the 47 Ω counts toward CLoad is not stated (**unverified**). The alternative is **680 pF C0G**: about 870 pF in all with eight sensors and the trace, a worst-case kickback of 3.3 V × 5 pF / 685 pF ≈ 24 mV recovering through 47 Ω with τ ≈ 32 ns (*estimate*). Keep 1 nF until a breakout shows the sensor stable into it (§10 step 3, §11 #21) |
 | SCK, MOSI, MISO, SYNC | One SN74CBTLV3125 per slot (U_BS*n*), all four OE_N tied to BUSEN_N_S*n* from U_EXP1, powered from the always-on +3V3: shared SPI2 and the frame tick reach only powered slots, and an unpowered coupon is isolated (the switch has Ioff, 0.25 ns propagation). **100 kΩ to GND on SLOT_SCK and SLOT_MOSI** at the MCU side (proposal): ST's ROM bootloader probes SPI2 on these pins, and AN2606 §4.3 asks for "a pull-down resistor ... connected to the SCK line" and a known level on unused RX pins such as SPI_MOSI, which otherwise float on the open switches' A sides (§5.2). About 33 µA each while driven high (*estimate*) |
 | SCL, SDA | TCA9548A (U_MUX) channel *n* − 1; pull-ups to +3V3_S*n*; the channel is deselected before the slot's rails go off (§3.5) |
-| CS0_N, CS1_N, IRQ_N, G0–G3 | Straight to the MCU. S5's G4/G5 too |
+| CS0_N, CS1_N, IRQ_N, G0–G3 | **100 Ω in series at the socket** (D3 of 2026-11-27, below; `nets.SLOT_SERIES`), then straight to the MCU. S5's G4/G5 too. The socket pin carries the resistor's socket-side net, `S<n>_<signal>_J` (`nets.socket_net()`); the MCU side keeps `S<n>_<signal>` |
 | G4, G5 on S1–S4 | U_EXP3 outputs with 100 k pull-downs: slow, static selects (address straps, enables) |
 | PRESENT_N | U_EXP2 input, 100 k pull-up to +3V3; U_EXP2's INT reaches the MCU as EXP_INT_N (PC13) |
 | INJ | Solder jumper JP_INJ*n* from RIG_INJ (J_RIG pin 9), open by default, plus a test pad |
+
+**The slot guard and its timing** (owner's decision D3 of 2026-11-27; risks.md [EL-3](../../docs/risks.md#el-3) and
+EL-2). A plain 100 Ω resistor, no TVS array, sits in series on each of the **37 slot lines that run straight to MCU
+pins**: CS0_N, CS1_N, IRQ_N and G0–G3 on all five slots, and S5's G4/G5. It sits **at the socket**, next to its pin
+(§9), so that the line from it to the MCU is the motherboard's own. The lanes keep their 47 Ω + 1 nF; the
+bus-switched lines (SCK, MISO, MOSI, SYNC), I2C, PRESENT_N, INJ and S1–S4's expander-driven G4/G5 get none. The
+resistor limits the current that a charged coupon, a finger or a misplaced pin drives into the MCU pin's clamps. It is
+not an ESD protection device, so the bench rule of EL-3 (mat, wrist strap, the board's GND to the mat through 1 MΩ)
+stays. A driven line shorted to a rail through it carries about 3.3 V / (100 Ω + the pin's own driver), 22–33 mA
+(DS13543 Table 88 implies roughly 50 Ω of driver at 0.4 V and 8 mA; *estimate*), still above the 20 mA absolute
+maximum per pin (Table 31): the key (D2) keeps a turned coupon out, and reading the descriptor before driving a slot
+line is a firmware item of EL-2.
+
+Timing, against the edges it slows (arithmetic with datasheet capacitances; *estimates*):
+
+* **Outputs** (CS0_N, CS1_N, G0–G3, S5's G4/G5). The MCU drives the resistor; behind it sit the socket and header
+  (about 2 pF: neither datasheet gives a figure), up to about 60 mm of coupon track over its ground plane (about
+  0.1 pF/mm on JLC04161H-7628, 6 pF) and the coupon's inputs: 30 pF typ for each DRV8316 logic input (C_ID, TI
+  SLVSF16B), 2 pF max for a TMUX1208 select (C_IN, TI SCDS389C), 10 pF max for an SN74HC259 input (C_i, TI
+  SCLS134F). At the worst, about 40 pF behind 100 Ω: τ = 4 ns, a 10–90 % edge of 2.2 τ ≈ 9 ns and a 50 % delay of
+  0.69 τ ≈ 2.8 ns, on top of the pin's own edge (at most 3.3 ns into 30 pF at speed setting 10, DS13543 Table 90).
+* **TIM1 PWM on S5** (G0–G5 to the DRV8316's INHx and INLx). The DRV8316 takes PWM up to 200 kHz, a 5 µs period, and
+  TIM1 at 160 MHz counts in 6.25 ns. The RC delays both edges of a pulse by the same time constant, but a rising
+  edge crosses the input's rising threshold and a falling edge its falling threshold, and SLVSF16B places those only
+  within V_IL 0.6 V max and V_IH 1.5 V min, with 180–420 mV of hysteresis. For a step through τ = 4 ns the two
+  crossings differ by 1.3–5.7 ns across that range (about 1.3 ns with both thresholds near 1.5 V, 5.7 ns with both
+  near 0.6 V; arithmetic, corrected by the review of 2026-11-27, which first read "a nanosecond or two"): a high pulse
+  at the input lengthens, and a low pulse shortens, by less than one TIM1 count. That is small against the DRV8316's
+  own 650–4550 ns propagation delay, 500–3400 ns dead time and 600 ns minimum output pulse (SLVSF16B). In 6x PWM the
+  same skew shortens the dead time TIM1 puts between INLx falling and INHx rising (and the reverse) by up to about
+  6 ns, small against any dead time TIM1 would be set to and against the DRV8316's own.
+* **IRQ_N** (an EXTI line, and TIM1_BKIN on S5). The coupon drives it, open drain with its own pull-up, through
+  100 Ω into the motherboard track to the MCU (up to about 150 mm, 15 pF) and the pin's 5 pF (C_IO, DS13543 Table
+  87): τ ≈ 2 ns, against EXTI's 20 ns minimum pulse (PLEC, Table 95) and the coupon pull-up's own rise (10 kΩ into
+  the same 20 pF: 200 ns). The resistor adds I × 100 Ω to the low level: 33 mV with a 10 kΩ pull-up, 65 mV with the
+  haptics coupon's 5.1 kΩ on nFAULT, against V_IL of 0.3 × VDD ≈ 1 V (Table 87).
+* **Chip selects into SPI parts**: a few ns against setup times of tens of ns (not read here for the TMAG5170).
+
+So 100 Ω limits no slot function at rev A's speeds.
 
 ### 4.4 Per-slot MCU map (`nets.SLOT_MCU`)
 
@@ -619,10 +849,15 @@ current-sense outputs.
 * The mux is visible on every channel, so **coupons must not use 0x70** (`nets.check()` also requires any other device
   upstream of the mux to be reserved for coupons). The power-monitor bus (I2C1) is separate: its addresses (0x20–0x22,
   0x40–0x4D, 0x67; §3.4) are free for coupons to use.
-* **Several of one part on one coupon** still needs an address scheme on the coupon. For the coil coupon's five
-  LDC1614s, which have only two addresses (0x2A with ADDR low, 0x2B with ADDR high, per TI's datasheet,
-  **unverified** here): drive each one's ADDR from its own G-line (G0–G4), hold the selected one low and the others
-  high, and talk only to 0x2A. A coupon can instead carry its own TCA9548A at 0x71–0x77.
+* **Several of one part on one coupon** still needs an address scheme on the coupon. **The documented scheme is a
+  TCA9548A of the coupon's own at 0x71–0x77** behind the slot's channel, one downstream channel per part (owner's
+  decision D7 of 2026-11-27; risks.md [SE-9](../../docs/risks.md#se-9)). The coil coupon's five LDC1614s have only
+  two addresses (0x2A with ADDR low, 0x2B with ADDR high; TI SNOSCY9A, read for the coil coupon's capture), and the
+  datasheet allows an ADDR change only in Shutdown, which "will return all registers to their default state"
+  (§7.4.4). So the coupon's **U15, a TCA9548A at 0x71**, gives each converter a channel of its own (0–4 = U10–U14),
+  and the firmware selects one channel at a time; the descriptor EEPROM stays on the slot channel ahead of U15 (0x50).
+  The earlier scheme, each ADDR driven from its own G-line (G0–G4) with only the selected one low, stays on the
+  coupon as a bring-up experiment, not as the way to address the converters.
 
 ### 4.6 Slot identity
 
@@ -643,18 +878,22 @@ current-sense outputs.
   conversion on it (a TMAG5170 trigger, say) or ignore it. The same net goes to J_RIG.
 * **INJ** (pin 19) brings the latency rig's stimulus to a coupon: a resistor into a lane at a test pad, a small coil
   next to a sensor, whatever the coupon provides. JP_INJ*n* is open by default, so the rig reaches one slot at a time
-  and nothing reaches a coupon by accident.
+  and nothing reaches a coupon by accident. On the **test coupon** INJ reaches a lane (owner's decision D7 of
+  2026-11-27; risks.md [ME-2](../../docs/risks.md#me-2)): a diode and 1 kΩ from INJ into the AN0 ladder's tap, so INJ
+  high lifts AN0 (by about 0.58 V, the measurement reviewer's *estimate*) and INJ low leaves the ladder alone, and the
+  rig can time the lane path (lane RC, select step, ADC, decision, report), not only IRQ_N's.
 
 ### 4.8 Which coupon uses what
 
 | Coupon (default slot) | Rails | Lanes | G-lines | SPI | I2C (own channel) | IRQ_N |
 |---|---|---|---|---|---|---|
-| Hall-effect (S1): TMAG5253 per key (output high-impedance when disabled), aftertouch sites, two reference sensors, two thermistors. **At 8 kHz the sensors stay on** behind an analog mux on the coupon: a TMAG5253 re-enabled every frame does not settle within it (tON 20 µs typ, 45 µs max, to 5 % only; §6.3). Enable-gating, the lower-current mode, suits 1 kHz runs (proposal; the coupon's design decides) | 3.3 V; 32 always-on sensors draw about 83 mA typ, 160 mA at the 5 mA max (SBASAI5E), inside the 250 mA rule | AN0–AN3, up to eight sensors per lane, through the mux (its on-resistance and capacitance count in R_src and the lane's load, §4.9) or sharing it when gated | G0–G2 = SEL[2:0] into the mux selects or a 3-to-8 enable decoder, G3 = SEL_EN (all off when low): 8 select steps × 4 lanes = 32 sites | – | descriptor | – |
-| TMR (S2): the same keys on a TMR sensor | 3.3 V (5 V if the chosen sensor wants it) | as Hall | as Hall | – | descriptor | – |
-| Shear (S3): TMAG5170 under a stock stem and under a centring-stem prototype | 3.3 V | spare, or analog reference sensors | G0–G1 as extra chip selects for more sites | TMAG5170s on CS0_N, CS1_N (their SPI clock limit from the datasheet) | descriptor | ALERT outputs, wired-OR open drain |
-| Coil (S4): about 20 generated coils under stock and slug-stem switches, five LDC1614-class converters, a local 40 MHz reference | 3.3 V | AN0 for a thermistor, if fitted | G0–G4: ADDR of converters 1–5 (§4.5; G4 is a slow expander line on S1–S4, fine for a static select) | – | 5 × LDC1614 + descriptor | INTB outputs, wired-OR |
-| Haptics (S5): DRV8316 (3x PWM first) + MT6701CT + gimbal motor; DRV2605L + LRA; capacitive strip on an I2C touch controller | 5 V (motor, LRA), 3.3 V (logic, encoder) | AN0: MT6701's analog output (optional); AN1–AN3: the DRV8316's current-sense outputs (**unverified** that its package brings them out) | G0–G2: INHA–INHC on TIM1_CH1–CH3; G3–G5: INLA–INLC, held high as enables in 3x PWM mode, TIM1_CH1N–CH3N in 6x | DRV8316 (SPI variant) on CS0_N, MT6701 SSI on CS1_N (output modes **unverified**) | DRV2605L 0x5A, the touch controller (polled), an I/O expander for nSLEEP and the enables, descriptor | DRV8316 nFAULT on TIM1_BKIN: a fault stops the PWM in hardware |
-| KVM (J_KVM, optional) | +5V_KVM | – | – | – | mux ch5 | – (UART, §7.4) |
+| Test coupon (any slot; A1): resistive loads on each rail, fixed dividers on the lanes, an SPI loopback, the descriptor, PRESENT_N (§10 step 7; `sheets/test_coupon.py`). **INJ-to-lane path** (D7 of 2026-11-27): a diode and 1 kΩ from INJ into the AN0 ladder's tap (§4.7); re-released with it | 3.3 V and 5 V, switched loads | one ratiometric ladder on AN0–AN3 | G0–G3 switch the loads | an SN74LV165A loopback | descriptor | low while G5 or INJ is high |
+| Hall-effect (S1; A1): TMAG5253 per key (output high-impedance when disabled), aftertouch sites, two reference sensors, two thermistors. **At 8 kHz the sensors stay on** behind an analog mux on the coupon: a TMAG5253 re-enabled every frame does not settle within it (tON 20 µs typ, 45 µs max, to 5 % only; §6.3). Enable-gating, the lower-current mode, suits 1 kHz runs (proposal; the coupon's design decides) | 3.3 V; 32 always-on sensors draw about 83 mA typ, 160 mA at the 5 mA max (SBASAI5E), inside the 250 mA rule | AN0–AN3, up to eight sensors per lane, through the mux (its on-resistance and capacitance count in R_src and the lane's load, §4.9) or sharing it when gated | G0–G2 = SEL[2:0] into the mux selects or a 3-to-8 enable decoder, G3 = SEL_EN (all off when low): 8 select steps × 4 lanes = 32 sites | – | descriptor | – |
+| TMR (S2; A2): keys on a TMR sensor, **not the Hall coupon's keys** (risks.md [SE-1](../../docs/risks.md#se-1): linear TMR parts sense the in-plane field and are linear to a few mT, while the Hall coupon's magnet gives 44.9 mT in-plane at 1 mm off axis). **Before capture** (D7 of 2026-11-27): pick the TMR part by its sensing axis and range, then size its magnet and position with the field model so that the sensed component stays linear and monotonic over the travel | 3.3 V (5 V if the chosen sensor wants it) | as Hall | as Hall | – | descriptor | – |
+| Shear (S3; A2): TMAG5170 under a stock stem and under a centring-stem prototype. **Before capture** (D7 of 2026-11-27; risks.md [SE-3](../../docs/risks.md#se-3)): pick the variant from the stop field with tolerances (the TMAG5170A1's largest Z range is ±100 mT, the A2's ±300 mT, TI SBASAF4; the Hall coupon's magnet gives 83–102 mT at the stop across its tolerances, so the A1 only if the shear magnet's stop field stays under about 90 mT), and put the two sites **at least 40 mm apart** | 3.3 V | spare, or analog reference sensors | G0–G1 as extra chip selects for more sites | TMAG5170s on CS0_N, CS1_N (their SPI clock limit from the datasheet) | descriptor | ALERT outputs, wired-OR open drain |
+| Coil (S4; A2): about 20 generated coils under stock and slug-stem switches, five LDC1614-class converters, a local 40 MHz reference. **D7 of 2026-11-27** (risks.md [SE-8](../../docs/risks.md#se-8)): every tank resonates **above 1 MHz** (TI SNOA957B: steel targets want "either ƒSENSOR < 20 kHz or ƒSENSOR > 1 MHz"), with **two capacitor footprints per coil**, so that sensor frequency becomes an axis of the experiment (the register proposed one near 1–2 MHz and one near 5–10 MHz) | 3.3 V | AN0 for a thermistor, if fitted | G0–G4: the converters' ADDR, a bring-up experiment only (§4.5); G5: their shutdown | – | **U15 TCA9548A at 0x71**, one channel per LDC1614 (the documented scheme, §4.5), + descriptor | INTB outputs, through diodes |
+| Haptics (S5; A2): DRV8316 (3x PWM first) + MT6701CT + gimbal motor; DRV2605L + LRA; capacitive strip on an I2C touch controller. **D7 of 2026-11-27**: one or two Hall sites at rev B's distances from the encoder axis and the LRA (risks.md [SE-6](../../docs/risks.md#se-6): the encoder magnet swings 1.8–3.5 mT pp at 20 mm, against 25–49 µT pp at rev A's 83 mm), and a filter on the DRV2605L's supply branch (risks.md SE-5) | 5 V (motor, LRA), 3.3 V (logic, encoder) | AN0: MT6701's analog output (optional); AN1–AN3: the DRV8316's current-sense outputs (**unverified** that its package brings them out) | G0–G2: INHA–INHC on TIM1_CH1–CH3; G3–G5: INLA–INLC, held high as enables in 3x PWM mode, TIM1_CH1N–CH3N in 6x | DRV8316 (SPI variant) on CS0_N, MT6701 SSI on CS1_N (output modes **unverified**) | DRV2605L 0x5A, the touch controller (polled), an I/O expander for nSLEEP and the enables, descriptor | DRV8316 nFAULT on TIM1_BKIN: a fault stops the PWM in hardware |
+| KVM (J_KVM, optional; not in this release) | +5V_KVM | – | – | – | mux ch5 | – (UART, §7.4) |
 
 The capacitive strip needs an external touch controller because Zephyr has no TSC node for the STM32U5
 ([mcu.md](../../docs/mcu.md#bring-up-risks)).
@@ -666,6 +905,9 @@ The capacitive strip needs an external touch controller because Zephyr has no TS
 * Bulk capacitance: at most 47 µF on +3V3 and 100 µF on +5V (S5: 470 µF), charged at the switch's current limit
   (proposals, to check against the switches' soft-start at capture).
 * Tie PRESENT_N to GND; fit the descriptor EEPROM at 0x50 with A0–A2 to GND; avoid 0x70.
+* **Pin 39 is absent and unconnected** (the key, D2 of 2026-11-27, §4.2): no pad 39 on the header footprint, no net.
+  `keyboard/tools/coupon/rules.py` checks it.
+* Vias 0.60 / 0.30 mm (JLC's standard via; the coupons' rule, `boards/coupon_common.py`).
 * No pull-up from a coupon to anything but its own +3V3_S*n*. IRQ_N is open drain with its pull-up on the coupon.
   MISO goes high-impedance when the coupon's chip selects are high.
 * A lane's source impedance R_src (the sensor's output plus anything in series on the coupon, such as an analog mux)
@@ -926,8 +1168,15 @@ Zephyr's `gpio_stm32` would switch it to input mode and disconnect TIM1_BKIN (`d
 EXTI does see a pad in alternate-function mode: "To use external interrupt lines, the port can be configured in
 input, output, or alternate function mode (the port must not be configured in analog mode)" (RM0456 Rev 7 §13.3.8),
 and in that mode "The Schmitt trigger input is activated" (§13.3.11; both read in a transcription, §11 #24). The
-break input is on from reset: TIMx_AF1 resets to 0x0000 0001, so BKINE = 1 and TIM1_BKIN feeds the break, and
-BKINP = 0 with BKP = 0 makes it active low (RM0456 §54), which suits the DRV8316's open-drain nFAULT.
+break **input** is routed from reset: TIMx_AF1 resets to 0x0000 0001, so BKINE = 1 and TIM1_BKIN feeds the break, and
+BKINP = 0 with BKP = 0 makes it active low (RM0456 §54), which suits the DRV8316's open-drain nFAULT. The break
+**function** is not on from reset (corrected on 2026-11-27, D6; risks.md [FW-6](../../docs/risks.md#fw-6)): it needs
+TIMx_BDTR.BKE ("Break function enabled", `LL_TIM_BREAK_ENABLE` = `TIM_BDTR_BKE`, bit 12, in ST's LL header at
+hal_stm32 c9550199), which resets to 0 (RM0456's TIM1 register map as the firmware reviewer read it; not read again
+here), and Zephyr v4.5.0's PWM driver writes only the dead time and MOE (`pwm_stm32.c` lines 810–813). So the haptics
+driver writes BKE, BKP and the filter in its own first BDTR write. Once BKE is on, a BKIN held low (S5 empty, or the
+coupon's pull-up unpowered) holds the break, so the break interrupt is enabled only while +3V3_S5 is up and PE15 reads
+high (FW-6's proposal).
 
 ### 5.4 Pin budget
 
@@ -1089,8 +1338,23 @@ What it means:
   1 MΩ ∥ 4.7 nF (proposal).
 * ESD: TPD4E05U06DQAR (C138714) on D+, D−, CC1 and CC2, at the connector (on CC, between J1 and U_CC); SMF5.0A on
   VBUS.
-* **The pair:** 90 Ω differential (USB 2.0 nominal) on L1 over the unbroken L2 ground of JLC's controlled-impedance
-  stack, width and gap from JLC's impedance calculator for the chosen stack. **Routed by hand before Freerouting**
+* **The pair:** 90 Ω differential (USB 2.0 nominal, ±15 %) on L1 over the unbroken L2 ground of **JLC04161H-7628**
+  (§2; owner's decision D5 of 2026-11-27): **0.25 mm tracks with a 0.15 mm gap** (`nets.USB_PAIR`). That geometry
+  is an *estimate*, not JLC's calculator. Two quasi-static 2-D solves of two rectangular 0.035 mm tracks on
+  0.2104 mm of Dk 4.4 over the plane, with JLC's solder mask (Dk 3.8; 1.2 mil over the laminate, 0.6 mil over
+  copper), agree on **about 88 Ω** (*estimate*). The risk register's supply reviewer's uniform-cell finite-difference
+  script (run again for the decision; mask over the tracks' tops and the laminate) gives 99.3 / 94.7 / 91.7 /
+  90.1 Ω at 10 / 5 / 2.5 / 1.25 µm cells, still falling, toward about 88 Ω. The review of 2026-11-27 solved it again
+  with a finite-volume solver of its own on a graded mesh, with the mask conformal over the tracks' sides as well:
+  87.6 / 87.8 / 87.9 / 87.9 Ω at 4 / 2 / 1 / 0.5 µm at the copper. That solver, run with thin copper and no mask,
+  gives 105.3 Ω against 105.5 Ω from the Hammerstad–Jensen and Kirschning–Jansen closed forms; with the copper and no
+  mask it gives 94.5 Ω, and IPC-2141's closed form about 92 Ω (this page said 95 Ω before the review). The pair moves
+  about ±6 Ω for ±0.02 mm of etch on the width (the gap moving the other way), about ∓1.5 Ω for ±5 % of Dk, and
+  −2.5 / +2.1 Ω for ±10 % of the prepreg's thickness (both solvers agree). If JLC's calculator also puts
+  0.25 / 0.15 mm low, 0.24 / 0.16 mm keeps the same 0.40 mm pitch and gives 90.7 Ω in the review's solve.
+  JLC's impedance calculator, run on this stack before ordering, replaces the figure; whether to order JLC's
+  impedance control (and its test) is decided then. The risk register's first figures (about 90 Ω for 0.25 / 0.15 mm,
+  109 Ω for the caliper's 0.16 / 0.16 mm) were coarser solves of the same model. **Routed by hand before Freerouting**
   (which is not impedance-aware), length-matched, as short as the placement allows (target ≤ 30 mm: the MCU is
   rotated so pins 70/71 face J1), no vias, no stubs, no test points on the pair. Plan an enumeration and eye check at
   480 Mb/s at bring-up.
@@ -1128,8 +1392,10 @@ The rig injects a stimulus at a sensor node and, as the USB host, timestamps the
 ([concept §4.2](../../docs/concept.md#_4-2-latency-and-battery-gates)). To time 8 kHz it must be a **high-speed host
 with microframe (125 µs) timestamps** ([mcu.md](../../docs/mcu.md#bring-up-risks)).
 
-J_RIG, 2 × 5, 2.54 mm (CJT A2541WV-2x5P, C225520), a ribbon of up to about 150 mm; 33 Ω in series on the
-motherboard's outputs:
+J_RIG, 2 × 5, 2.54 mm, a **shrouded box header** keyed for the ribbon's IDC socket (owner's decision D5 of
+2026-11-27; risks.md EL-2: a plain header plugs either way round). The part is picked at capture and replaces the
+unshrouded CJT A2541WV-2x5P (C225520) of §2.1; the pinout below stays, with pin 1 at the key's marked end. A ribbon of
+up to about 150 mm; 33 Ω in series on the motherboard's outputs:
 
 | Pin | Net | Direction | Use |
 |---|---|---|---|
@@ -1146,12 +1412,16 @@ motherboard's outputs:
 silicon, DS13543 §3.55; Zephyr's host-side support for it is not checked). Whichever it is, the rig can be
 calibrated against a reference 8 kHz device, for example an AT32F405 running libhmk (an option the owner left open;
 libhmk's 8 kHz is its own claim, not measured here; [mcu.md](../../docs/mcu.md#the-at32f405-verdict)), and
-cross-checked with a high-speed USB sniffer (Cynthion or ataradov's usb-sniffer, concept §4.2).
+cross-checked with a high-speed USB sniffer (Cynthion or ataradov's usb-sniffer, concept §4.2). The rig board is
+in stage A2 (D1 of 2026-11-27): A1's bring-up does not wait for it, and where the rig's VBUS comes from is still to
+write down (risks.md EL-8, recommendation 20, not decided).
 
 ### 7.4 Optional KVM slot (J_KVM)
 
-2 × 6, 2.54 mm (CJT A2541WV-2x6P, C225521). The KVM coupon is its own USB device to host B (its own MCU and an
-isolator); the motherboard sends it host B's reports over UART4.
+2 × 6, 2.54 mm, a **shrouded box header** (owner's decision D5 of 2026-11-27), picked at capture in place of the
+unshrouded CJT A2541WV-2x6P (C225521) of §2.1; the pinout below stays, pin 1 at the key's marked end. The KVM coupon
+is its own USB device to host B (its own MCU and an isolator); the motherboard sends it host B's reports over UART4.
+The KVM coupon itself is out of this release; J_KVM stays on the motherboard.
 
 | Pin | Net | Pin | Net |
 |---|---|---|---|
@@ -1167,6 +1437,14 @@ Powering the keyboard from host B alone is the open KVM power question of
 [concept §8](../../docs/concept.md#_8-conflicts-the-testbed-has-to-settle), for the KVM coupon or rev B.
 
 ### 7.5 Test points
+
+**Kelvin sense** (owner's decision D4 of 2026-11-27; risks.md [EL-6](../../docs/risks.md#el-6);
+`nets.INA226_SHUNT_NETS`, `nets.ina226_sense_nets()`). Each INA226 reads its shunt through a sense pair of its own:
+IN+ on PM*aa*_SENSE_P and IN− on PM*aa*_SENSE_N (*aa* the monitor's address in hex, PM40 … PM4D), each joined to the
+shunt's power net only at that shunt's pad, through a NetTie_2 at the pad or the sense pads of a 4-terminal shunt.
+The pairs are pre-routed from the pads' inner edges, and a post-layout check (`layout.py`) fails if a sense track or
+its tie meets the power net's copper anywhere else. On the 20 mΩ shunts 5 mm of 0.5 mm track is about 5 mΩ, +24 %,
+and the 2.8 A ceiling sits only 160 mA under U2's minimum trip (EL-6), which is why this is not left to the router.
 
 Kelvin pad pairs across every shunt; a pad on every lane (connector side), on SLOT_SYNC, RIG_MARK, USB_SOF, both I2C
 buses, SPI2 and the mux's channels 6 and 7; on CC1, CC2 and USBC_INT_N at U_CC (§10 step 5 scopes them); and on the
@@ -1202,9 +1480,12 @@ written and compiled on 2026-11-27, never run on hardware.
   "VDD11USB enabled".
 * **Low power:** the MCU stays out of low-power states that gate the OTG clocks until that path is tested
   ([mcu.md](../../docs/mcu.md#bring-up-risks)). RM0456 Rev 7 §10.7.12 backs the rule: Stop 2 and Stop 3 cannot keep
-  the OTG_HS, and in Stop 0 and Stop 1 it may stay configured (USBPWREN left set, so the OTG_HS can wake the MCU;
-  shutting it off is only recommended), but USBBOOSTEN is cleared by hardware in every Stop mode and must be set
-  again, and USBBOOSTRDY awaited, before the OTG_HS clock runs.
+  the OTG_HS, and in Stop 0 and Stop 1 it may stay configured (USBPWREN left set; shutting it off is only
+  recommended), but USBBOOSTEN is cleared by hardware in every Stop mode and must be set again, and USBBOOSTRDY
+  awaited, before the OTG_HS clock runs. **Corrected on 2026-11-27** (D6; risks.md [PG-7](../../docs/risks.md#pg-7)):
+  this page said the OTG_HS "can wake the MCU" from Stop 0 and Stop 1, but DS13543 Rev 2 Table 10, note 12, says
+  "OTG_HS cannot wake up from Stop mode 1." So at most Stop 0 could keep a USB wake-up, and the rule above (no Stop
+  modes) does not depend on either.
 * **`clk_lse` stays disabled**, as in the SoC default
   (`dts/arm/st/u5/stm32u5.dtsi`). Do not copy the Nucleo's `&clk_lse { status = "okay"; }` or its LSE-clocked `&rtc`
   (`nucleo_u5a5zj_q-common.dtsi`): PC14 is S1_IRQ_N and PC15 is LED_N (§5.2), and with no crystal Zephyr's clock
@@ -1362,8 +1643,10 @@ during the bootloader's scan (§5.2).
     Attached.SNK sets the budget from the new advertisement. Whenever a budget falls below what the enabled rails
     declare, rails go off, S5 first and then the rest in the reverse order of enabling, until the others fit.
   * **A source that changes its advertisement while attached** may go unreported (§3.8). If U_CC does report it, the
-    new budget applies at once (the Type-C specification gives a sink a set time to follow a lowered advertisement;
-    its value is not read here, **unverified**). If it does not, nothing on the board catches it: INA226 0x40's ALERT
+    new budget applies at once: the Type-C specification gives a sink **tSinkAdj = 60 ms** at most to follow a
+    changed advertisement ("Response time for a Sink to adjust its current consumption to be in the specified range
+    due to a change in USB Type-C Current advertisement", USB Type-C R2.0 Table 4-29, read 2026-11-27; recorded
+    here by the correction of D6). If it does not, nothing on the board catches it: INA226 0x40's ALERT
     stays at the old budget and the input breaker trips only above 2.96 A (§3.8).
   * **Operator override:** it can lower the budget (to protect a weak source or cable, or for a Type-A-to-C cable
     whose Rp advertises more than its port gives, §3.8), never raise it. The advertisement is the source's own
@@ -1374,13 +1657,16 @@ during the bootloader's scan (§5.2).
     ATTACHED_STATE (Table 10). Any of them can make the source remove VBUS, the board's only supply.
 * **Motor:** the DRV8316 in **3x PWM mode first** (its own dead-time): TIM1 CH1–CH3 as PWM, G3–G5 as GPIO enables,
   and its nFAULT on TIM1's break input, taken as the TIM1_BRK interrupt (§5.3).
-  Zephyr's `st,stm32-pwm` binding has `STM32_PWM_COMPLEMENTARY` but no dead-time property in v4.5.0, so 6x PWM waits
-  until TIM1's dead-time setup is proven (LL code or a driver change).
+  Zephyr v4.5.0 does have a dead-time property (corrected on 2026-11-27, D6; risks.md FW-6): `st,deadtime` on the
+  `st,stm32-timers` binding (`dts/bindings/timer/st,stm32-timers.yaml`, default 0), which `pwm_stm32.c` writes with
+  `LL_TIM_OC_SetDeadTime`, next to `STM32_PWM_COMPLEMENTARY` on the PWM channels. 6x PWM still waits until TIM1's
+  dead time and its break (§5.3) are proven on the bench.
 
 ### 8.5 What the gates read
 
-* **Battery gate:** per-rail records from the INA226s (time, rail, current, bus voltage, conversion and averaging
-  settings) tagged with the scan rate (1 or 8 kHz), the select duty, the coupon's descriptor (type, revision, serial)
+* **Battery gate:** per-rail records from the INA226s (time, rail, current at the logging rate of §3.4's plan, bus
+  voltage at 10 Hz or less, conversion and averaging settings; corrected on 2026-11-27, D6, because current and bus
+  voltage on every record do not fit I2C1) tagged with the scan rate (1 or 8 kHz), the select duty, the coupon's descriptor (type, revision, serial)
   and the firmware version, exported over USB as CSV, with each frame's I2C activity on the slot's channel so that
   the pull-ups' share can be subtracted (§3.3). External-meter runs through JP_3V3_Sn are logged beside them.
   Figures stay *designed* until such a log replaces them ([concept §4.2](../../docs/concept.md#_4-2-latency-and-battery-gates)).
@@ -1389,7 +1675,7 @@ during the bootloader's scan (§5.2).
 
 ## 9. Mechanical envelope (proposal)
 
-* **Motherboard:** about 190 × 150 mm, a size that follows from the owner's 2 × 20 slot connector (D2; layout sets
+* **Motherboard:** about 190 × 150 mm, a size that follows from the owner's 2 × 20 slot connector (D2 of 2026-11-26; layout sets
   the outline), four M3 holes 4 mm in from the corners, on 10 mm standoffs. Two rows of slots:
   S1–S3 (standard) along the back, S4 and S5 (wide) and J_KVM along the front, and an uncovered strip between them
   for the MCU, USB-C (on the left edge), power, monitors, J_SWD, J_RIG and the test points.
@@ -1400,9 +1686,36 @@ during the bootloader's scan (§5.2).
 * **Latency rig:** 100 × 80 mm on its own standoffs, beside the motherboard, on the J_RIG ribbon and a USB cable to
   J1.
 
+**Layout rules** (owner's decision D5 of 2026-11-27, from risks.md EL-7, EL-11, SF-3 and the decisions D3 and D4 of
+the same day). They bind the motherboard's layout (`boards/motherboard.py`) and are not laid out yet:
+
+* **Single-sided:** every motherboard part on the top side, the lane RCs (47 Ω + 1 nF) and the 37 series resistors
+  included (§11 #20: the strip between the slot rows has room to find for them; under a coupon the 6 mm height rule
+  applies).
+* **The 2 A loop** (risks.md [EL-7](../../docs/risks.md#el-7)): S5's socket and its feed (U5, its shunt) nearest J1;
+  the 2 A path from J1 through U2, the VSYS shunt and U5 to S5 kept away from the MCU's analog pins and from the
+  S1–S4 lanes; VDDA's branch and the slot branches split at the LDO's (U4's) output pad; VSSA returned at the MCU.
+* **At the parts they serve:** each D3 series resistor next to its socket pin, within about 10 mm of the pad
+  (*proposal*); the +3V3A damping leg at FB1's +3V3A end (§3.7); the lane capacitors at the MCU's ADC pins (§4.3).
+* **Kelvin sense pairs** pre-routed from the shunts' pads, with the post-layout check of §7.5.
+* **The USB pair** routed by hand to `nets.USB_PAIR` (§7.1).
+* **Vias:** the coupons' rule, 0.60 / 0.30 mm (JLC's standard via, no surcharge), on the motherboard too; and
+  `release.py` warns on any drill under 0.3 mm (risks.md SF-3: a smaller drill adds a charge and can hold an order).
+* **Shrouded box headers** for J_RIG and J_KVM (§7.3, §7.4).
+* **Through-hole parts** (the five sockets, the box headers, the meter jumpers) on the top side as well. How JLC would
+  solder the sockets (wave soldering, and the socket body is rated 220 °C for 10 s) or whether they are hand-soldered
+  with a coupon as the jig is asked at ordering (risks.md EL-11; the coupon side, recommendation 11, is not
+  decided).
+
 ## 10. Bring-up order
 
-1. **Reserve the MCUs** (condition 1, §1).
+Rev A is brought up in two stages (owner's decision D1 of 2026-11-27, §1): **A1** (the motherboard, the test coupon
+and the Hall coupon) through steps 1–3 and 5–8, and **A2** (the haptics, coil, shear and TMR coupons and the latency
+rig) after A1, in step 4 and the rest of step 8. Step 9 runs per stage: A1's battery logs need only A1, while the
+latency gate's p50 and p99 need the rig, which is in A2 (risks.md PG-2 proposes first latency numbers from a function
+generator and a sniffer; not decided). A2 never holds an A1 step back.
+
+1. **Buy the MCUs** from ST's store (condition 1, §1; the owner buys).
 2. **Nucleo, 8 kHz HID** (condition 2): Zephyr pinned, the USB samples first, then HID at 125 µs; enumerate at high
    speed, read bInterval 1 from the descriptors, measure the report rate and jitter for at least 10 minutes on
    Windows and Linux with CDC logging on, and the cost of `hid_device_submit_report`. Pass: no missed microframes in
@@ -1419,8 +1732,8 @@ during the bootloader's scan (§5.2).
    datasheet gives only 5 %, §6.3) and its stability into the lane's 1 nF and into 680 pF (§4.3). Try the 1 kΩ-source
    alternatives of §6.3: the 391-cycle sampling time, a lower ADC clock, SMPTRIG or BULB in dual mode. An INA226 and
    a TPS2553 on a breakout prove the measurement path.
-4. **Latency rig v0** against a reference 8 kHz device (for example the AT32F405/libhmk option) and a high-speed
-   sniffer.
+4. **Latency rig v0** (stage A2) against a reference 8 kHz device (for example the AT32F405/libhmk option) and a
+   high-speed sniffer. A1 does not wait for it.
 5. **Motherboard power:** first power from a current-limited 5 V supply; input breaker, VSYS, both LDOs, VCAP, then
    the slot switches one by one into dummy loads (each trip point at 3.3 V and 5 V against §3.1), the INA226 readings
    against a meter, the reset states of the expanders after a power-on, and that the firmware restores them after an
@@ -1432,9 +1745,12 @@ during the bootloader's scan (§5.2).
 6. **Motherboard MCU:** SWD, HSE and PLL, USB enumeration at high speed and an eye check, then the 8 kHz test again
    on this board.
 7. **A test coupon first** (proposal: the compiler's first coupon): resistive loads on each rail, fixed dividers on
-   the lanes, a descriptor EEPROM, an SPI loopback, PRESENT_N. It checks every slot and the monitors' accuracy before
-   any sensor does, and calibrates each slot's series resistance (§3.1).
-8. **Coupons:** Hall-effect, TMR, shear, coil, haptics (3x PWM, then 6x), and the KVM coupon if built.
+   the lanes, a descriptor EEPROM, an SPI loopback, PRESENT_N, and INJ into the AN0 lane (D7 of 2026-11-27). It
+   checks every slot and the monitors' accuracy before any sensor does, and calibrates each slot's series resistance
+   (§3.1). Also here: the key (a turned test coupon must not go in, §4.2), and the +3V3A branch against the model
+   (§3.7; risks.md EL-5's test).
+8. **Coupons:** the Hall-effect coupon (A1); then, in A2, TMR, shear, coil and haptics (3x PWM, then 6x). The KVM
+   coupon is not in this release.
 9. **The gates:** battery logs at 1 and 8 kHz for every coupon; latency p50 and p99 per mode.
 
 ## 11. Open items and risks
@@ -1444,35 +1760,43 @@ Firmware, Rig (the latency rig) and Compiler (compiler v0). The owner's decision
 #13 and settled the connector behind #20, and turned #12 from an open question into a design to check. The reading
 of 2026-11-27 (RM0456 Rev 7 in a transcription, AN2606 Rev 68, UM2448 Rev 5, the TMAG5253 and TPS2553 datasheets,
 the KiCad symbol and Zephyr's drivers) closed #5 and #23, settled the STDC14, TCA9535-driver, TPS2553-voltage and
-KiCad-symbol parts of #16, and answered #17's SOF question; #24 and #25 are what it could not reach.
+KiCad-symbol parts of #16, and answered #17's SOF question; #24 and #25 are what it could not reach. The owner's
+decisions of the evening of 2026-11-27 (D1–D7 of that day, §1) changed #1, #3, #4, #7, #15, #16, #19 and #20, and
+added #26–#31: the risk register's recommendations the owner left open, and one consequence of the key.
 
 | # | Item | Why it matters | Next step | Owner |
 |---|---|---|---|---|
-| 1 | Reserve the STM32U5A5VJT6 | 13 at JLC, none at DigiKey before Feb–Mar 2027; the JLC API reports `canPresaleNumber` −4 (13 in stock, apparently all committed; the field is undocumented, so **unverified**) | Check on JLC's parts-order page whether any can be bought into the private library today; private library or consignment of 4–6 before the schematic is committed; else the RT1021 | Owner |
+| 1 | Buy the STM32U5A5VJT6 | 13 at JLC (presale −4, apparently committed; the field is undocumented, so **unverified**), none at DigiKey before Feb–Mar 2027; ST's eStore listed it "In stock" on 2026-11-27 (risks.md SF-1). **Decided 2026-11-27 (D6):** the route is ST's store, and the STM32U599VJT6 and STM32U595VJT6 are pin-compatible alternates (§2.1) | The owner buys 4–6 from ST's store (no agent buys anything) and chooses at ordering between consignment and a hand-fitted U1; the RT1021 stays the last resort | Owner |
 | 2 | 8 kHz HID on `udc_stm32` | Unpublished; the platform's first gate. The proof firmware is written and compiles (hid8k, §8.2) and has not run. Bring-up checks besides the rate: Zephyr skips RM0456's TUNER2 step and turns the PHY clock on after EN (§8.2); a community report of OTG_HS IN-FIFO stalls at full speed with eight packets queued (**unverified**, not an erratum; at high speed it would need more FIFO RAM than exists, §8.2) | Run hid8k on the Nucleo per its README (§10 step 2), with and without `CONFIG_HID8K_PHY_TUNER2`; the owner picks strict or PASS as the bar | Firmware, Owner |
-| 3 | Sensor enable-to-valid settling | Sets keys per lane (§6.3). TMAG5253 read: tON 20 µs typ, 45 µs max (bipolar), to 5 % only (SBASAI5E), so a gated TMAG5253 does not fit an 8 kHz frame at 14 bits (*estimate*: ≈ 79 µs more from 5 % to half an LSB) and the Hall coupon runs its sensors always on at 8 kHz (§4.8). No TMR part is chosen, so there is no datasheet to read | Measure the TMAG5253's settling to 14 bits on a breakout (§10 step 3); pick a TMR part, then read its datasheet | Hardware, Owner (the TMR pick) |
-| 4 | The 90 Ω pair on JLC's stack | Freerouting is not impedance-aware | Hand-route, compute width and gap for the stack, eye check at bring-up | Hardware |
+| 3 | Sensor enable-to-valid settling | Sets keys per lane (§6.3). TMAG5253 read: tON 20 µs typ, 45 µs max (bipolar), to 5 % only (SBASAI5E), so a gated TMAG5253 does not fit an 8 kHz frame at 14 bits (*estimate*: ≈ 79 µs more from 5 % to half an LSB) and the Hall coupon runs its sensors always on at 8 kHz (§4.8). No TMR part is chosen, so there is no datasheet to read; **D7 of 2026-11-27**: the TMR part is picked by sensing axis and range, and its magnet sized, before the TMR coupon is captured (§4.8) | Measure the TMAG5253's settling to 14 bits on a breakout (§10 step 3); pick the TMR part (A2), then read its datasheet | Hardware, Owner (the TMR pick) |
+| 4 | The 90 Ω pair on JLC's stack | Freerouting is not impedance-aware. **D5 of 2026-11-27:** the stack is JLC04161H-7628, and 0.25 / 0.15 mm gives about 88 Ω by two independent 2-D solves (*estimate*, §7.1) | Run JLC's impedance calculator on the stack before ordering; hand-route; eye check at bring-up | Hardware |
 | 5 | HSE frequencies the PHY accepts | **Closed** (2026-11-27): 16 MHz is in RM0456 Rev 7's CLKSEL list (§15.3.12, read in a transcription), in ST's HAL and Zephyr's driver, and in the ROM bootloader's DFU crystal list (AN2606 Table 202); a crystal, not bypass (§5.2) | Keep the 16 MHz crystal; confirm against ST's PDF under #24 | Hardware (closed) |
 | 6 | The PHY's 1.1 V current on the VDD shunt | LQFP100 has no VDD11USB pin. RM0456 Rev 7 (§10.4, §10.4.1, in a transcription) and DS13543 call the pin optional and mention an internal transceiver supply, but neither names the regulator or the pins its current flows through, so it is still an inference (§3.3); either shunt has room for it | At bring-up log +3V3_MCU and +3V3_USB with USB suspended and at HS idle; optionally read ST AN5373 | Hardware, Firmware |
-| 7 | 6x PWM and dead-time | No dead-time property in Zephyr's STM32 PWM binding | 3x PWM first; prove TIM1 dead-time in LL code | Firmware |
+| 7 | 6x PWM and dead-time | Zephyr v4.5.0 has a dead-time property, `st,deadtime` on `st,stm32-timers` (corrected 2026-11-27, D6, §8.4); the break function needs BKE, which nothing sets (§5.3) | 3x PWM first; prove TIM1's dead time and break on the bench | Firmware |
 | 8 | Capacitive strip | No Zephyr TSC node for the U5 | External I2C touch controller on the haptics coupon; pick its part and address | Hardware (coupon) |
 | 9 | The rig's high-speed host | Microframe timestamps needed; no candidate checked | Pick and prove a host; calibrate on a reference device (AT32F405/libhmk is one option) | Rig |
 | 10 | Pin budget is full | 82 of 82 I/O used (the Type-C detect chip took an expander input, not an MCU pin); 6 expander pins left | New MCU signals must displace something (§5.4) | Hardware |
 | 11 | No LSE | PC14/PC15 reused | Confirm, or move S1_IRQ_N and LED_N | Owner |
-| 12 | Type-C detect U_CC (owner's decision D3; TUSB320LAI a candidate) | It sets the VSYS budget (§3.2, §8.4). Not yet checked: that Rd stays unbroken while its VDD rises through POR (**unverified**); I2C1's capacitance against its 100 pF per line at 400 kHz (*estimate* 60–75 pF of pins before traces, §3.4); whether it reports a source that lowers its advertisement while attached (if it does not, nothing on the board catches that, §3.8); a non-compliant Type-A-to-C cable whose 10 kΩ Rp reads as 3.0 A (*estimate*, §3.8); the +3V3 ramp within 25 ms; no Zephyr driver (§3.8) | Compute I2C1's capacitance at layout (fallback: mux channel 6); pick C_dVdT at capture; scope CC and VBUS through power-up on Default, 1.5 A and 3.0 A sources and a Type-A-to-C cable (§10 step 5); write the register reader | Hardware, Firmware |
+| 12 | Type-C detect U_CC (owner's decision D3 of 2026-11-26; TUSB320LAI a candidate) | It sets the VSYS budget (§3.2, §8.4). Not yet checked: that Rd stays unbroken while its VDD rises through POR (**unverified**); I2C1's capacitance against its 100 pF per line at 400 kHz (*estimate* 60–75 pF of pins before traces, §3.4); whether it reports a source that lowers its advertisement while attached (if it does not, nothing on the board catches that, §3.8); a non-compliant Type-A-to-C cable whose 10 kΩ Rp reads as 3.0 A (*estimate*, §3.8); the +3V3 ramp within 25 ms; no Zephyr driver (§3.8) | Compute I2C1's capacitance at layout (fallback: mux channel 6); pick C_dVdT at capture; scope CC and VBUS through power-up on Default, 1.5 A and 3.0 A sources and a Type-A-to-C cable (§10 step 5); write the register reader | Hardware, Firmware |
 | 13 | No battery and no charger on rev A | **Decided** by the owner on 2026-11-26 (D1); concept §7 had listed "power and charging" | None for rev A; the charger goes to rev B | Owner (closed) |
 | 14 | Slot LDO budget | 300 mA total by dissipation (*estimate*); five 250 mA rules (switches tripping at up to 335 mA) could ask for more | Firmware budget check (§3.2); thermal check at capture | Hardware, Firmware |
-| 15 | VBUS sag against the DRV8316's supply minimum | Near 4.5 V (**unverified**); the board drops about 0.2 V at 2 A plus the cable, so 4.3–4.5 V at the coupon from a 4.75 V source (*estimate*, §3.6) | Check on the haptics coupon; its own supply input if needed | Hardware (coupon) |
-| 16 | Part details to confirm at capture | Settled on 2026-11-27: the TPS2553 equation holds over VIN 2.5–6.5 V (SLVS841E; its trips now include a 1 % R_ILIM, §3.1); the STDC14 pinout (UM2448 Rev 5 Table 6, §7.2); the TCA9535 under `nxp,pca95xx` (§8.4); the KiCad symbol, `MCU_ST_STM32U5:STM32U5A5VJTx` at tag 10.0.8, with five names aliased (§5). Still open: TPS25947 R_ILM spread between the table rows and C_ITIMER for the motor's peak width; whether a latching input breaker suits the bench (or the TPS259470L); the OVLO divider; LDC1614 addresses; DRV8316 current-sense outputs; MT6701 output modes; the J_SWD part's "-A" suffix (§7.2); for U_CC (§3.8), the 887 kΩ VBUS_DET value against the datasheet's 855–920 kΩ, the ADDR and INT_N pull-ups, and whether the TPD4E05U06's clamp protects U_CC's CC pins (6 V absolute maximum); the TUSB320LI as a second source | Read each datasheet when its sheet is written | Hardware |
+| 15 | VBUS sag against the DRV8316's supply minimum | **Read (D4 of 2026-11-27):** TI SLVSF16B gives VM 4.5 V minimum and UVLO falling at 4.1 / 4.2 / 4.3 V. Along the USB-C load line, 4.75 V − 0.25 Ω × I at J1 (§3.6), the S5 pins sit at 4.33 V at 1 A, 3.93 V at 2 A and 3.71 V at 2 A with the board at its 2.8 A ceiling (*estimate*): below the minimum at 1 A and below UVLO at 2 A | The haptics coupon (A2) checks its margin or brings its own supply input; S5 above 1 A only from a better source and cable than the load line | Hardware (coupon) |
+| 16 | Part details to confirm at capture | Settled on 2026-11-27: the TPS2553 equation holds over VIN 2.5–6.5 V (SLVS841E; its trips now include a 1 % R_ILIM, §3.1); the STDC14 pinout (UM2448 Rev 5 Table 6, §7.2); the TCA9535 under `nxp,pca95xx` (§8.4); the KiCad symbol, `MCU_ST_STM32U5:STM32U5A5VJTx` at tag 10.0.8, with five names aliased (§5). Still open: TPS25947 R_ILM spread between the table rows and C_ITIMER for the motor's peak width; whether a latching input breaker suits the bench (or the TPS259470L, which JLC had none of on 2026-11-27, §2.1); the OVLO divider; LDC1614 addresses; DRV8316 current-sense outputs; MT6701 output modes; the J_SWD part's "-A" suffix (§7.2); for U_CC (§3.8), the 887 kΩ VBUS_DET value against the datasheet's 855–920 kΩ, the ADDR and INT_N pull-ups, and whether the TPD4E05U06's clamp protects U_CC's CC pins (6 V absolute maximum); the TUSB320LI as a second source | Read each datasheet when its sheet is written | Hardware |
 | 17 | Scan engine in Zephyr | Dual simultaneous ADC and timer-triggered steps need LL code. The SOF reaches TIM2 only, on tim_itr11 (RM0456 Rev 7 Table 563, ST's HAL agrees; §6.1); the step timer can be TIM15, whose TRGO triggers both ADC12 and ADC4; read ADC12's calibration factors only after ADRDY (§6.1) | Prototype on the Nucleo (§10 step 3) | Firmware |
 | 18 | Descriptor format | The coupon driver model rests on it | Define in compiler v0; the test coupon carries the first one | Compiler |
-| 19 | Bus-switch stock | SN74CBTLV3125PWR: 1101 at JLC | Buy with the MCUs, or name a second source | Owner |
-| 20 | Sizes | The slot connector is decided (2 × 20, 2.54 mm, D2); the sizes follow from it (motherboard about 190 × 150 mm, coupons about 58 × 60 and 80 × 60 mm) and stay proposals until layout. The redrawn concept sketch shows two tensions (*estimates* from the sketch): two 80 mm coupons on a 190 mm board leave about 20 mm beside them in the front row, so a KVM coupon of up to 50 × 40 mm (§2) does not fit there; and the strip between the rows is about 26 mm deep, where the LQFP100 fits but the 40 lane RC parts and the pull-ups (§4.3) are not drawn | Set the exact outlines with the first placement: a narrower KVM coupon, J_KVM elsewhere, or a wider board; place the lane RCs (bottom side or under the coupons) | Hardware, Owner |
+| 19 | Bus-switch stock | SN74CBTLV3125PWR: 1101 at JLC (1101 again on 2026-11-27). The Nexperia 74CBTLV3125PW,118 (C456149, 19957) is the register's candidate second source, once its R_on and timing are read against §4.3; **not decided** (rec. 12's second source, #27) | Buy with the MCUs, or decide the second source | Owner |
+| 20 | Sizes | The slot connector is decided (2 × 20, 2.54 mm, D2 of 2026-11-26); the sizes follow from it (motherboard about 190 × 150 mm, coupons about 58 × 60 and 80 × 60 mm) and stay proposals until layout. The redrawn concept sketch shows two tensions (*estimates* from the sketch): two 80 mm coupons on a 190 mm board leave about 20 mm beside them in the front row, so a KVM coupon of up to 50 × 40 mm (§2) does not fit there; and the strip between the rows is about 26 mm deep, where the LQFP100 fits but the 40 lane RC parts and the pull-ups (§4.3) are not drawn | Set the exact outlines with the first placement: a narrower KVM coupon, J_KVM elsewhere, or a wider board. **D5 of 2026-11-27:** the motherboard is single-sided, so the lane RCs and the series resistors go on the top side (§9), in the strip or under the coupons within the 6 mm rule | Hardware, Owner |
 | 21 | Lane source drive | The §6.3 timing assumes stiff lane sources; a 1 kΩ source cuts a slot of 1 µs sensors from 32 keys to 20, or to 8 once the ADC's kickback and its 391-cycle sampling step are counted (§6.3). The TMAG5253 is stiff (1.27 Ω, ±1 mA), but its recommended load is 1 nF at most, which the lane's 1 nF alone uses (SBASAI5E; §4.3) | Measure the TMAG5253 into 1 nF and 680 pF on a breakout (§10 step 3), and pick the lane capacitor; read the TMR part's drive once it is chosen (#3); revisit 47 Ω and t_s | Hardware |
 | 22 | USB current rules | 100 mA before configuration (and again after a bus reset or deconfiguration), 500 mA after, 2.5 mA in suspend; a Type-C source's 1.5 A or 3.0 A, read by U_CC, raises the budget after configuration only (§3.2); the testbed's base load (≈ 45 mA, *estimate*) exceeds the suspend limit | Firmware sequencing of §3.2 and §8.4; measure the base load and the budget's response to each source type at bring-up | Firmware |
 | 23 | ROM bootloader with BOOT0 high | **Closed for AN2606** (Rev 68, read 2026-11-27): DFU on OTG_HS through J1, 16 MHz crystal supported, and the pins it probes mapped onto the board (§5.2). The expanders' reset states hold only after a power-on, so the bootloader is entered from power-off with the coupons unplugged; SLOT_SCK and SLOT_MOSI get 100 kΩ pull-downs (proposal) | Board items only: fit the pull-downs at capture; record the DFU's speed and cable detection on the Nucleo (§10 step 2) | Hardware (AN2606 closed) |
-| 24 | ST documents read second-hand or of unknown currency | RM0456 Rev 7 (March 2026), the newest revision found, was read in a third-party HTML transcription (docs.dirba.io: "Unofficial documentation site ... may contain errors"), because st.com returned HTTP 503; every RM0456 fact in this SPEC rests on it, some cross-checked against ST's HAL. Whether DS13543 Rev 2 (July 2023) is still the latest is **uncertain**: both copies obtained are Rev 2 and nothing newer was found, but st.com could not be read | On st.com: confirm RM0456 Rev 7 is current and re-read the cited sections in ST's PDF; confirm DS13543's latest revision and, if newer, diff Tables 27–29 against §5.1 | Hardware |
-| 25 | Errata not read | ST's errata sheet ES0553 (STM32U59x/5Ax) was **not read**: st.com was unreachable, and ST's "errata sheets: expected preliminary updates" article has no STM32U5 entry, which says nothing about its contents. No erratum is known or ruled out for this design | Read ES0553 (latest revision) for OTG_HS, ADC12/ADC4, TIM1/TIM8 break, EXTI and RCC/HSE before capture | Hardware |
+| 24 | ST documents read second-hand or of unknown currency | RM0456 Rev 7 (March 2026), the newest revision found, was read in a third-party HTML transcription (docs.dirba.io: "Unofficial documentation site ... may contain errors"), because st.com returned HTTP 503; every RM0456 fact in this SPEC rests on it, some cross-checked against ST's HAL. Whether DS13543 Rev 2 (July 2023) is still the latest is **uncertain**: both copies obtained are Rev 2 and nothing newer was found, but st.com could not be read. **D6 of 2026-11-27** asks for ST's documents first-hand where st.com answers: it did not, on 2026-11-27 at 22:03 UTC or again at 23:03 UTC (HTTP/2 stream errors on the datasheet, RM0456 and ES0553 URLs; an HTTP/1.1 retry got an empty reply). The risk register's report of ES0553 Rev 6 and DS13543 Rev 3 is unconfirmed | On st.com: confirm RM0456 Rev 7 is current and re-read the cited sections in ST's PDF; confirm DS13543's latest revision and, if newer, diff Tables 27–29 against §5.1 | Hardware |
+| 25 | Errata not read | ST's errata sheet ES0553 (STM32U59x/5Ax) was **not read**: st.com was unreachable (again on 2026-11-27, #24), and ST's "errata sheets: expected preliminary updates" article has no STM32U5 entry, which says nothing about its contents. No erratum is known or ruled out for this design | Read ES0553 (latest revision) for OTG_HS, ADC12/ADC4, TIM1/TIM8 break, EXTI, RCC/HSE and GPDMA before ordering, in an ordinary browser if st.com still fails here | Hardware, Owner |
+| 26 | Coupon BOM and CPL without J1 | Risk register rec. 11 (SF-2): the 2 × 20 header is through-hole on the coupon's bottom, which makes each coupon a two-sided Standard PCBA order; **not decided** by the owner on 2026-11-27 | The owner decides; until then each coupon's ORDER-NOTES offers ordering J1 as do-not-place | Owner |
+| 27 | A second source for the bus switch | Rec. 12's second half (SF-6): the Nexperia 74CBTLV3125PW,118 (#19); **not decided** | Read its R_on and timing against §4.3; the owner decides | Owner, Hardware |
+| 28 | A rule that bounds a lane's voltage | Rec. 19 (EL-4): a lane at most min(+3V3_S*n*, VDDA) + 0.3 V in every power state, a V_max field in the descriptor, the TT pins noted (PA4, PA5 take no injected current); **not decided** | The owner decides; then §4.9, compiler v0 and the descriptor | Owner, Compiler |
+| 29 | Rules written before the data | Rec. 20 (ME-4, EL-8, US-1, PG-4): the 1 kHz mode (full speed with bInterval 1, or high speed with bInterval 4 locked to the polled microframe), the rig's VBUS source, the decision rule for a mixed or host-side result of condition 2, a done card per coupon; **not decided** | The owner decides before the runs they govern | Owner |
+| 30 | LICENSE and USB PIDs | Rec. 21 (PG-9): no LICENSE file in the repository, and the test PID 1209:0001 must not leave the bench; **not decided** | The owner picks the licences; pid.codes PIDs before boards leave the bench | Owner |
+| 31 | The key and coupon assembly | A consequence of D2 of 2026-11-27: a coupon footprint without pad 39 takes no stock 2 × 20 header, so JLC cannot fit J1 as it comes; the header's pin 39 is pulled and J1 soldered by hand (or a header without pin 39 found). It meets #26, which is open | Each coupon's ORDER-NOTES says J1 is hand-fitted after pin 39 is pulled; the owner settles it with #26 | Owner, Hardware |
 
 ## Sources
 
@@ -1560,7 +1884,40 @@ its recommended operating conditions, Electrical Characteristics and Eq. 1 re-re
 **Stock:** the JLC parts API, <https://jlcpcb.com/api/overseas-pcb-order/v1/shoppingCart/smtGood/selectSmtComponentList>,
 for every C-number on this page (its `stockCount` and the undocumented `canPresaleNumber`).
 
+**Read on 2026-11-27 for the owner's decisions of that evening** (D1–D7, §1):
+
+* TI DRV8316, SLVSF16B (January 2021, revised April 2022), from ti.com: the recommended VM (4.5 V minimum), VM UVLO
+  (rising 4.3 / 4.4 / 4.5 V, falling 4.1 / 4.2 / 4.3 V, 3–7 µs deglitch), the logic inputs (C_ID 30 pF typ, V_IL
+  0.6 V max, V_IH 1.5 V min), f_PWM up to 200 kHz, t_PD, t_DEAD and t_MIN_PULSE (§3.6, §4.3, §11 #15).
+* TI TPS25947xx, SLVSFC9C (October 2020, revised May 2026): §6.5, PGTH rising 1.183 / 1.20 / 1.223 V, falling
+  1.076 / 1.09 / 1.116 V, leakage −0.1 to 0.3 µA; the recommended PGTH range (§3.1). This page cites the same
+  device's Chinese edition, ZHCSL91B, elsewhere.
+* TI INA226, SBOS547C (June 2011, revised August 2026): input bias current 0.1 nA; the CVRF and alert-latch clearing
+  conditions (§3.3, §3.4).
+* TI SN74HC259 (SCLS134F, C_i) and TMUX1208 (SCDS389C, C_IN), the copies the Hall coupon's capture used (§4.3).
+* ST DS13543 Rev 2: Table 10 note 12 (§8.1), Tables 31, 87, 88 and 90 (pin currents, V_IL, C_IO, output edges),
+  Table 95 (EXTI's 20 ns minimum pulse), Tables 97 and 100 (the ADCs' VDDA and VREF+ currents) (§3.7, §4.3).
+* ST LDL1117, DocID030319 Rev 3: Figures 20–21 (the stability plan) and 27 (§3.7). Murata BLM18PG221SN1D, reference
+  specification JENF243A-0003AD-01: 220 Ω ±25 % at 100 MHz, 0.10 Ω DC resistance max, no low-frequency inductance.
+* USB Type-C Cable and Connector Specification R2.0 (August 2019): §4.4.1 (the cable's IR drop, §3.6) and Table 4-29
+  (tSinkAdj 60 ms, §8.4).
+* JLC's impedance page, <https://jlcpcb.com/impedance> (fetched 2026-11-27): the 4-layer stacks JLC04161H-7628 and
+  -3313 and the "No requirement" stack, the prepregs' and core's dielectric constants, the solder mask's thickness
+  and dielectric constant (§2, §7.1). JLC's impedance calculator itself was not run. The pair's figures (§7.1) come
+  from two scratch 2-D solvers, not in the repository: the risk register's `zdiff2d.py` (uniform cells) and the
+  review's graded-mesh finite-volume solver, which was checked against the Hammerstad–Jensen and Kirschning–Jansen
+  closed forms for coupled microstrip.
+* The JLC parts API (as above) for every row of §2.1 dated 2026-11-27, and keyword searches for a socket key plug.
+* hal_stm32 c9550199, `stm32u5xx_ll_tim.h` (`LL_TIM_BREAK_ENABLE` = `TIM_BDTR_BKE`), and Zephyr v4.5.0's
+  `dts/bindings/timer/st,stm32-timers.yaml` (`st,deadtime`) and `drivers/pwm/pwm_stm32.c` (§5.3, §8.4).
+* The ST eStore pages for the STM32U5A5VJT6 and STM32U599VJT6 and ST's open pin data for the alternates, as read by
+  the risk register's supply reviewer ([risks.md SF-1](../../docs/risks.md#sf-1)); not fetched again here.
+* **Not reachable:** st.com, on 2026-11-27 at 22:03 UTC and again at 23:03 UTC, for DS13543, RM0456 and ES0553
+  (§11 #24).
+
 **This repository:** [concept.md](../../docs/concept.md), [mcu.md](../../docs/mcu.md) (the MCU research and its
-verifier), the 8 kHz HID proof [keyboard/firmware/hid8k](../../firmware/hid8k/README.md),
+verifier), [risks.md](../../docs/risks.md) (the rev A risk register the owner answered on 2026-11-27),
+[keyboard/sim](../../sim/README.md) (bench 4, the +3V3A branch, §3.7), the 8 kHz HID proof
+[keyboard/firmware/hid8k](../../firmware/hid8k/README.md),
 [the caliper's SPEC](../../../caliper/hardware/design/SPEC.md) and [nets.py](../../../caliper/hardware/design/nets.py)
 (the model for this file's form).

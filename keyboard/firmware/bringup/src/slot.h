@@ -1,6 +1,7 @@
 /*
  * Powering a slot and discovering its coupon (SPEC §3.5, §4.6, §8.4): +3V3 first at the coupon rule, the
- * descriptor, its declared currents against the rules and budgets, +5V if it asks, then the bus switch.
+ * descriptor, its declared currents against the rules and budgets, only then the slot's direct lines (CS high,
+ * G low; risks.md EL-2), +5V if it asks, then the bus switch.
  * Callers hold tb_lock (the sequence sleeps for the settling time, but never prints).
  *
  * SPDX-License-Identifier: Apache-2.0

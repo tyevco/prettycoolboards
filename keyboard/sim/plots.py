@@ -208,7 +208,7 @@ def s5_droop(r):
     ax.set_xlabel("Time from the motor profile's start (ms)")
     ax.set_ylabel("Haptics coupon supply (V)")
     _title(ax, "S5: supply at the coupon under motor current (motor not chosen; profiles assumed)")
-    ax.legend(loc="lower right", fontsize=9.5)
+    ax.legend(loc="lower right", bbox_to_anchor=(1.0, 0.24), fontsize=9.5)
     ax.set_ylim(3.4, 5.1)
     return _save(fig, "s5_droop.png")
 
@@ -251,7 +251,7 @@ def input_startup(r):
     ax.set_ylabel("+3V3 (V)")
     ax.set_xlim(0, 30)
     _title(ax, "Start-up through U2's dV/dt soft start (C_dVdt 2.2 nF)")
-    ax.legend(loc="lower right", fontsize=9.5)
+    ax.legend(loc="lower right", bbox_to_anchor=(0.82, 0.0), fontsize=9.5)   # clear of the 25 ms line
     return _save(fig, "input_startup.png")
 
 
@@ -268,7 +268,7 @@ def input_ceiling(r, th):
     _hline(axes[0], th["uvlo_fall"][2], f"U2 UVLO falling, max with 1 % divider ({th['uvlo_fall'][2]:.2f} V)", va="top")
     _hline(axes[0], th["ucc_vbus_thr"][2], f"U_CC VBUS_THR max ({th['ucc_vbus_thr'][2]:.1f} V)", xpos=0.6,
            va="top")
-    _hline(axes[1], th["pg_fall"][2], f"VSYS_PG falling, max with 1 % divider ({th['pg_fall'][2]:.2f} V)")
+    _hline(axes[1], th["pg_fall"][2], f"VSYS_PG falling, max with 1 % divider ({th['pg_fall'][2]:.2f} V)", xpos=0.6, va="top")
     axes[0].set_ylabel("VBUS at J1 (V)")
     axes[1].set_ylabel("VSYS (V)")
     axes[1].set_xlabel("Time after the load steps to 2.8 A (ms)")
@@ -278,3 +278,47 @@ def input_ceiling(r, th):
     fig.tight_layout()
     _suptitle(fig, "The 2.8 A ceiling from a 4.75 V source (R_ON max, highest thresholds)")
     return _save(fig, "input_ceiling.png")
+
+
+def vdda_damping(r):
+    """The +3V3A branch (bench_vdda.py): the transfer from +3V3_SLOT and the reference's swing in a scan window, for
+    the branch as captured, with the contract's damping leg, and with 1 ohm in place of FB1."""
+    import bench_vdda as bv
+    fig, axes = plt.subplots(1, 2, figsize=(10.5, 5.0))
+    ax = axes[0]
+    series = [("captured", 2e-6, "as captured (FB1 at 2 µH)"), ("leg", 2e-6, "with the 0.47 Ω + 10 µF leg (FB1 at 2 µH)"),
+              ("r1", None, "1 Ω in place of FB1, +10 µF")]
+    for (opt, l, label), col in zip(series, C):
+        if opt not in r["compare"]:
+            continue
+        a = r["compare"][opt][l]
+        ax.semilogx(a["f"] / 1e3, 20 * np.log10(np.abs(a["H"])), color=col, label=label)
+    for fs in (64, 128, 192):
+        ax.axvline(fs, color=REF, lw=1.0, ls=":", zorder=1)
+    _hline(ax, bv.PEAK_DB_MAX, "3 dB bar", xpos=0.99)
+    ax.set_xlabel("Frequency (kHz); dotted: 64, 128, 192 kHz")
+    ax.set_ylabel("|V(+3V3A) / V(+3V3_SLOT)| (dB)")
+    ax.set_xlim(1, 1e4)
+    ax.set_ylim(-40, 25)
+    ax.set_title("From +3V3_SLOT to VDDA and VREF+", loc="left", fontsize=10.5)
+    ax.legend(loc="upper left", bbox_to_anchor=(0.0, -0.16), fontsize=9)
+    ax = axes[1]
+    for (opt, label), col in zip((("captured_2uH", "as captured, FB1 2 µH"), ("leg_2uH", "with the leg, FB1 2 µH"),
+                                  ("r1", "1 Ω in place of FB1")), C):
+        key = f"burst_{opt}"
+        if key not in r:
+            continue
+        d = r[key]
+        w = d["waves"]
+        t = (w.scale - d["t0"]) * 1e6
+        m = (t > -10) & (t < bv.T_SCAN * 1e6 + 40)
+        ax.plot(t[m], (w["v(a)"][m] - d["v0"]) / bv.LSB_MID, color=col, label=label)
+    ax.axvspan(0, bv.T_SCAN * 1e6, color="#f2f2f2", zorder=0)
+    ax.set_xlabel("Time from the start of a scan window (µs); grey: the 80 µs window")
+    ax.set_ylabel("VREF+ change (LSB at mid-scale)")
+    ax.set_title("The ADCs' own 2.66 mA (DS13543 Tables 97, 100) on +3V3A", loc="left", fontsize=10.5)
+    ax.legend(loc="upper left", bbox_to_anchor=(0.0, -0.16), fontsize=9)
+    fig.tight_layout()
+    _suptitle(fig, "The +3V3A branch with the LDO's output impedance (LDL1117 fit): FB1's inductance is not "
+                   "published (bracket 0.1-2 µH)")
+    return _save(fig, "vdda_damping.png")

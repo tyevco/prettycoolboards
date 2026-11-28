@@ -55,12 +55,29 @@ def test_ceiling_compliant_cable_uvlo_margin_50mv(inp):
     assert inp[COMPLIANT]["margin_uvlo"] > 0.05
 
 
-@pytest.mark.xfail(strict=True, reason="U2's PG divider (100 k / 39 k on VSYS_IN, the same as the UVLO divider) "
-                   "falls at up to 3.98 V (4.035 V with 1 % resistors); at 2.8 A through a compliant cable from 4.75 V, "
-                   "VSYS_IN is about 3.92 V, so VSYS_PG (a status input on U_EXP2 P12) can deassert while the board "
-                   "runs")
+@pytest.mark.xfail(design.board()["pgth_bot"] < 44e3 and design.predates_decisions_2026_11_27(), strict=True,
+                   reason="U2's PG divider as captured on 2026-11-27 (100 k / 39 k on VSYS_IN, the same as the UVLO "
+                   "divider) falls at up to 3.98 V (4.035 V with 1 % resistors); at 2.8 A through a compliant cable "
+                   "from 4.75 V, VSYS_IN is about 3.92 V, so VSYS_PG (a status input on U_EXP2 P12) can deassert while "
+                   "the board runs. The owner's decision D4 of 2026-11-27 (nets.INPUT_PGTH_DIVIDER, 100 k / 44.2 k: "
+                   "falling at 3.46-3.69 V with 1 %) closes it once captured; this marker then no longer applies, "
+                   "and a recaptured netlist (one with D3's nets) is never excused by it")
 def test_ceiling_compliant_cable_keeps_vsys_pg(inp):
     assert inp[COMPLIANT]["margin_pg"] > 0
+
+
+@pytest.mark.nospice
+def test_pgth_divider_follows_the_contract(board):
+    """D4: the capture's PG divider must be the contract's (nets.INPUT_PGTH_DIVIDER). Only a netlist from before the
+    owner's decisions of 2026-11-27 (none of D3's socket-side nets: design.predates_decisions_2026_11_27) is an
+    expected failure at 100 k / 39 k; a recaptured netlist that still or again has 39 k fails (D4 reverted)."""
+    nets = design.load_nets()
+    want = getattr(nets, "INPUT_PGTH_DIVIDER", None)
+    assert want is not None, "nets.INPUT_PGTH_DIVIDER is gone (owner's decision D4)"
+    got = (board["pgth_top"], board["pgth_bot"])
+    if got == (100e3, 39e3) and design.predates_decisions_2026_11_27():
+        pytest.xfail("the motherboard netlist predates D4: U2's PGTH divider is still 100 k / 39 k")
+    assert got == pytest.approx(want), f"U2's PGTH divider is {got}, the contract (D4) {want}"
 
 
 @pytest.mark.xfail(strict=True, reason="a 0.3 Ohm cable is beyond Type-C's limit for a 3 A cable; at 2.8 A from "

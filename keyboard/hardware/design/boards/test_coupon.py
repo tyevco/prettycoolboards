@@ -2,8 +2,12 @@
 
 Floor plan (board mm, top view, the slot edge at y = 0):
 
-* J1 on the bottom along the slot edge (coupon_common); the lane ladder R30-R34 right above the lane pins (AN0-AN3,
-  x 17.6-25.2), one 499 Ohm 0.1 % resistor between each pair of taps.
+* J1 on the bottom along the slot edge (coupon_common), keyed at pin 39 (no pad; X and KEY on the silk, D2 of
+  2026-11-27); the lane ladder R30-R34 right above the lane pins (AN0-AN3, x 17.6-25.2), one 499 Ohm 0.1 % resistor
+  between each pair of taps. The INJ-to-AN0 path of D7 (2026-11-27): D11 right of the ladder, anode down toward
+  J1 pin 19 (INJ, x 27.7), and R40 (1 k) standing on the AN0 tap; INJ_AN0 between them is pre-routed and locked
+  (`preroute`): up from each part to a via and across on In2 at y 14.2, under the AN1-AN3 lanes with the In1 GND
+  plane between. So the crossing is fixed by construction: no router puts INJ or INJ_AN0 between the lane pads.
 * The loads on the left, next to the rail pins (+5V x 4.9-7.4, +3V3 x 12.5): the +5V loads first (G3's three
   parallel 2512s stacked, G2's series row), the +3V3 loads above them (G1's stack, G0's row), each MOSFET at the end
   of its string with its drain toward it. The 11 x 2512 spread up to 1.4 W (G3 limited at the TPS2553's typical trip)
@@ -53,10 +57,15 @@ STITCH_PITCH = 3.0
 ROUTE = True
 CENTRE = (29.0, 30.0)
 HIDE_REFS = ("H", "FID", "TP")              # the pads carry net labels on the silk instead
-PROTECTED_NETS = ("+5V", "LOAD3_D")         # the pre-routes are locked: never pruned as debris
-PREROUTED_NETS = ("+5V", "LOAD3_D")         # joined in full by preroute(): out of Freerouting's job (layout.py)
+PROTECTED_NETS = ("+5V", "LOAD3_D", "INJ_AN0")    # the pre-routes are locked: never pruned as debris
+PREROUTED_NETS = ("+5V", "LOAD3_D", "INJ_AN0")    # joined in full by preroute(): out of Freerouting's job (layout.py)
 
 FAB_NOTES = [
+    "**Stage A1** (the owner's decision D1 of 2026-11-27, SPEC §1): released, ordered and brought up with the "
+    "motherboard and the Hall coupon.",
+    "**INJ into the AN0 lane** (the owner's decision D7 of 2026-11-27, SPEC §4.7): D11 (1N4148W, C81598) and R40 "
+    "(1 k) from INJ into the AN0 ladder tap. D11 is polarised: its cathode band (pad 1, INJ_AN0) points away from "
+    "the slot edge, its anode toward J1 pin 19 (INJ); R40 stands on the AN0 tap, joined to D11 on In2.",
     "**Test coupon (SPEC §10 step 7):** the loads on G0-G3 deliberately exceed the coupon rules (250 mA on +3V3, "
     "500 mA on +5V) to exercise the slot switches; **G3 (3.33 Ohm on +5V) is for S1-S4 only**: on S5 the 2 A "
     "breaker would let it draw 1.5 A, 2.5 W per 1 W resistor (sheets/test_coupon.py; the silk next to the load "
@@ -87,6 +96,15 @@ _FIXED = {
     # lane ladder: pin 1 (the higher tap) toward +x, between the lane pins
     "R30": (16.3, 10.5, 180.0), "R31": (19.3, 10.5, 180.0), "R32": (22.3, 10.5, 180.0), "R33": (25.3, 10.5, 180.0),
     "R34": (28.3, 10.5, 180.0),
+    # INJ into the AN0 tap (D7). R40 at rot 270 stands on the tap: pad 2 (AN0) down at (18.6, 11.84), over R31's
+    # AN0 pad, pad 1 (INJ_AN0) up at (18.6, 12.86). D11 at rot 270 sits right of R34, near J1 pin 19 (INJ): pad 2
+    # (anode, INJ) down at (31.2, 9.35), pad 1 (cathode, INJ_AN0) up at (31.2, 12.65). preroute() joins the two
+    # pad 1s on In2 (INJ_AN0_Y). Review of 2026-11-28: the first placement (D11 at (24.0, 13.2) rot 0, R40 at
+    # (18.7, 13.2)) let the AN1 lane run up between them, and Freerouting routed INJ_AN0 99 mm round it (two tracks
+    # beside AN1 up to TP11 and back, under R16's and R21's load strings) where 3 mm would do; a column of both parts
+    # over the tap then let Freerouting bring INJ itself on F.Cu between J1's rows and between R31's AN0 and AN1
+    # pads. Here the only crossing is the locked In2 link.
+    "R40": (18.6, 12.35, 270.0), "D11": (31.2, 11.0, 270.0),
     # logic
     "U1": (41.0, 13.5, 0.0), "U11": (35.5, 19.0, 0.0), "U10": (45.0, 25.0, 0.0),
     "Q14": (49.0, 34.0, 180.0), "Q15": (43.0, 34.0, 180.0),
@@ -110,6 +128,9 @@ PIN_ANCHORS = {
 TRUNK_X, TRUNK_W = 4.87, 1.5
 RISER_X, RISER_Y, RISER_W = 2.4, 49.0, 2.0
 LOAD3_X, LOAD3_W = 10.96, 1.0
+# D7's INJ_AN0 link, R40.1 -> via -> In2 -> via -> D11.1: track width, the In2 run's y, the via (mm), and the
+# placer keep-out round each via (no auto-placed part lands on the locked copper)
+INJ_AN0_W, INJ_AN0_Y, INJ_AN0_VIA, INJ_AN0_KEEP = 0.25, 14.2, (0.6, 0.3), 1.0
 G3_WARNING = ("G3: S1-S4 ONLY", 19.5, 21.6)        # silk next to G3's load (text, x, y)
 
 
@@ -135,7 +156,11 @@ def keepouts():
         return (LOAD3_X - 0.9 <= x <= LOAD3_X + 0.9 and 12.0 <= y <= 22.0) or \
                (LOAD3_X <= x <= 14.2 and 16.2 <= y <= 17.8)
 
-    return cc.keepouts(SIZE) + [("F", trunk), ("F", load3)]
+    def inj_an0(x, y):                       # the two vias of the INJ_AN0 link and its F.Cu stubs
+        return abs(y - INJ_AN0_Y) <= INJ_AN0_KEEP and any(abs(x - vx) <= INJ_AN0_KEEP
+                                                          for vx in (_FIXED["R40"][0], _FIXED["D11"][0]))
+
+    return cc.keepouts(SIZE) + [("F", trunk), ("F", load3), ("*", inj_an0)]
 
 
 def build(bb, comps):
@@ -168,6 +193,16 @@ def _pad(fp, num):
     return bxy(p), p.GetNetname()
 
 
+def _via(board, xy, net, size, drill):
+    v = pcbnew.PCB_VIA(board)
+    v.SetPosition(V(*xy))
+    v.SetWidth(pcbnew.FromMM(size))
+    v.SetDrill(pcbnew.FromMM(drill))
+    v.SetNet(net)
+    v.SetLocked(True)
+    board.Add(v)
+
+
 def _path(board, pts, layer, net, width):
     for a, c in zip(pts, pts[1:]):
         t = pcbnew.PCB_TRACK(board)
@@ -181,8 +216,8 @@ def _path(board, pts, layer, net, width):
 
 
 def preroute(bb):
-    """Locked +5V on the outer layers and LOAD3_D on F.Cu (see the module docstring). Every +5V pad is joined here,
-    so no router adds +5V copper (it would be free to use 0.5 oz In2)."""
+    """Locked +5V on the outer layers, LOAD3_D on F.Cu and INJ_AN0 across In2 (see the module docstring). Every +5V
+    pad is joined here, so no router adds +5V copper (it would be free to use 0.5 oz In2)."""
     fps, b = bb.footprints, bb.board
     j1 = fps["J1"]
     (j1_1, n5), (j1_2, _), (j1_3, _) = _pad(j1, "1"), _pad(j1, "2"), _pad(j1, "3")
@@ -214,6 +249,18 @@ def preroute(bb):
     (r22, _), (r23, _), (r24, _), (q, _) = pads
     _path(b, [r22, r23, r24], pcbnew.F_Cu, netd, LOAD3_W)
     _path(b, [(LOAD3_X, q[1]), q], pcbnew.F_Cu, netd, LOAD3_W)
+    # INJ_AN0 (D7), the whole net: R40 pad 1 up to a via, across on In2 under the AN1-AN3 lanes (the In1 GND plane
+    # between them and the F.Cu lanes), and up to D11's cathode through a second via (see _FIXED)
+    (r40, n1), (d11, n2) = _pad(fps["R40"], "1"), _pad(fps["D11"], "1")
+    assert n1 == n2 and n1.endswith("/INJ_AN0"), f"R40.1 is on {n1}, D11.1 on {n2}: not INJ_AN0"
+    assert min(INJ_AN0_Y - r40[1], INJ_AN0_Y - d11[1]) > 0.9, "the INJ_AN0 vias would touch R40.1 or D11.1"
+    net_ia = bb.net(n1)
+    va, vb = (r40[0], INJ_AN0_Y), (d11[0], INJ_AN0_Y)
+    _path(b, [r40, va], pcbnew.F_Cu, net_ia, INJ_AN0_W)
+    _path(b, [va, vb], pcbnew.In2_Cu, net_ia, INJ_AN0_W)
+    _path(b, [vb, d11], pcbnew.F_Cu, net_ia, INJ_AN0_W)
+    for xy in (va, vb):
+        _via(b, xy, net_ia, *INJ_AN0_VIA)
 
 
 def pours(bb):

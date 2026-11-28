@@ -1,9 +1,11 @@
 """Synthetic coupons for the rules tests: a small, correct coupon, and helpers that break one thing at a time.
 
-* good_spec() -> a netlist spec {comps, nets}: J1 (the 2 x 20 header), U1 (M24C02 at 0x50, WC held low by R1, JP1
-  to +3V3), the bulk and decoupling capacitors, a Hall sensor U10 on AN0, an I2C haptic driver U11 at 0x5A whose
+* good_spec() -> a netlist spec {comps, nets}: J1 (the 2 x 20 header, keyed: no pin 39, as D2 of 2026-11-27 and
+  sheets/coupon_common.py draw it), U1 (M24C02 at 0x50, WC held low by R1, JP1 to +3V3), the bulk and decoupling capacitors, a Hall sensor U10 on AN0, an I2C haptic driver U11 at 0x5A whose
   interrupt pulls IRQ_N (pull-up R2 to +3V3) and whose supply is +5V.
 * good_desc() -> the matching descriptor JSON.
+* unkeyed(spec), drop_header_pin(spec, pin): the stock 40-pin header (pin 39 present, unconnected), or a header
+  pin removed (pin 2: keyed at both 2 and 39).
 * write_net(path, spec): the spec as a KiCad 10 s-expression netlist (the format `kicad-cli sch export netlist`
   writes, version "E"), read back by coupon_model.read_netlist like a real one.
 * write_board(path, spec, ...): a .kicad_pcb built with pcbnew from the same spec, with the outline, the header on
@@ -30,7 +32,9 @@ needs_pcbnew = pytest.mark.skipif(not HAVE_PCBNEW, reason="pcbnew (KiCad 10 Pyth
 
 FP_DIR = os.environ.get("KICAD10_FOOTPRINT_DIR", "/usr/share/kicad/footprints")
 
-HEADER_PINS = [(str(n), f"Pin_{n}", "passive") for n in range(1, 41)]
+KEY_PIN = 39                   # nets.SLOT_KEY_PIN (the owner's decision D2 of 2026-11-27)
+STOCK_HEADER_PINS = [(str(n), f"Pin_{n}", "passive") for n in range(1, 41)]
+HEADER_PINS = [x for x in STOCK_HEADER_PINS if x[0] != str(KEY_PIN)]      # the keyed symbol: no pin 39
 EEPROM_PINS = [("1", "E0", "input"), ("2", "E1", "input"), ("3", "E2", "input"), ("4", "VSS", "power_in"),
                ("5", "SDA", "bidirectional"), ("6", "SCL", "input"), ("7", "~{WC}", "input"), ("8", "VCC", "power_in")]
 R_PINS = [("1", "~", "passive"), ("2", "~", "passive")]
@@ -38,8 +42,10 @@ SENSOR_PINS = [("1", "VCC", "power_in"), ("2", "OUT", "output"), ("3", "GND", "p
 DRIVER_PINS = [("1", "VDD", "power_in"), ("2", "GND", "power_in"), ("3", "SDA", "bidirectional"),
                ("4", "SCL", "input"), ("5", "INT", "open_collector")]
 
+STOCK_HEADER_FP = "Connector_PinHeader_2.54mm:PinHeader_2x20_P2.54mm_Vertical"
+KEYED_HEADER_FP = "keyboard:PinHeader_2x20_P2.54mm_Vertical"     # boards/coupon_common.HEADER_FP: no pad 39
 FOOTPRINTS = {
-    "J1": "Connector_PinHeader_2.54mm:PinHeader_2x20_P2.54mm_Vertical",
+    "J1": KEYED_HEADER_FP,
     "U1": "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm",
     "R": "Resistor_SMD:R_0603_1608Metric", "C": "Capacitor_SMD:C_0603_1608Metric",
     "JP": "Jumper:SolderJumper-2_P1.3mm_Open_RoundedPad1.0x1.5mm",
@@ -58,7 +64,7 @@ def _comp(ref, lib, part, value, fp, pins, fields=None):
 
 def good_spec():
     comps = {
-        "J1": _comp("J1", "Connector_Generic", "Conn_02x20_Odd_Even", "SLOT", FOOTPRINTS["J1"], HEADER_PINS),
+        "J1": _comp("J1", "keyboard", "Conn_02x20_Odd_Even_NoPin39", "SLOT", FOOTPRINTS["J1"], HEADER_PINS),
         "U1": _comp("U1", "Memory_EEPROM", "M24C02-WMN", "M24C02-WMN6TP", FOOTPRINTS["U1"], EEPROM_PINS),
         "R1": _comp("R1", "Device", "R", "100k", FOOTPRINTS["R"], R_PINS),
         "JP1": _comp("JP1", "Jumper", "SolderJumper_2_Open", "WP", FOOTPRINTS["JP"], R_PINS),
@@ -85,10 +91,28 @@ def good_spec():
         "/Slot/EE_WC": [("U1", "7"), ("R1", "1"), ("JP1", "1")],
     }
     used = {p for mem in nets.values() for r, p in mem if r == "J1"}
-    for n in range(1, 41):
-        if str(n) not in used:
-            nets[f"unconnected-(J1-Pin_{n}-Pad{n})"] = [("J1", str(n))]
+    for num, _nm, _t in HEADER_PINS:
+        if num not in used:
+            nets[f"unconnected-(J1-Pin_{num}-Pad{num})"] = [("J1", num)]
     return {"comps": comps, "nets": nets}
+
+
+def unkeyed(spec):
+    """J1 as the stock header before D2: KiCad's 40-pin symbol and footprint, pin 39 present and unconnected."""
+    spec["comps"]["J1"].update(lib="Connector_Generic", part="Conn_02x20_Odd_Even", footprint=STOCK_HEADER_FP,
+                               pins=list(STOCK_HEADER_PINS))
+    spec["nets"][f"unconnected-(J1-Pin_{KEY_PIN}-Pad{KEY_PIN})"] = [("J1", str(KEY_PIN))]
+    return spec
+
+
+def drop_header_pin(spec, pin):
+    """Remove a pin from J1's symbol (and so its pad from the board write_board makes)."""
+    spec["comps"]["J1"]["pins"] = [x for x in spec["comps"]["J1"]["pins"] if x[0] != str(pin)]
+    for name in list(spec["nets"]):
+        spec["nets"][name] = [m for m in spec["nets"][name] if m != ("J1", str(pin))]
+        if not spec["nets"][name]:
+            del spec["nets"][name]
+    return spec
 
 
 def good_desc():
@@ -105,6 +129,32 @@ def good_desc():
                     {"part": "tmag5253", "bus": "analog", "addr": ["AN0"], "count": 1}],
         "ext": {"format": "none"},
     }
+
+
+# The owner's decision D1 of 2026-11-27 (SPEC §1, risks.md PG-2): stage A1, ordered and brought up first, is the
+# motherboard, the test coupon and the Hall coupon. Their generated boards are never an expected failure in these
+# tests: an A1 coupon that fails a rule fails the suite. Only A2 boards (haptics, coil, shear, TMR), designed after
+# A1, may be excused while they are rebuilt.
+A1_COUPONS = ("test-coupon", "coupon-hall")
+
+
+def excused(board):
+    """False for an A1 coupon (A1_COUPONS): nothing excuses its failures. True for an A2 board."""
+    return board not in A1_COUPONS
+
+
+def predates_the_key(board):
+    """True when an A2 coupon's generated netlist still gives J1 a pin 39: built before the owner's decision D2 of
+    2026-11-27 and not rebuilt since (build.py and layout.py regenerate it with the keyed header). Always False for
+    an A1 coupon (A1_COUPONS): one with a pin 39 is a regression, and its tests fail."""
+    import coupon_model as M
+    if not excused(board):
+        return False
+    net, _pcb = M.board_files(board)
+    if not os.path.exists(net):
+        return False
+    n = M.read_netlist(net)
+    return "J1" in n.comps and (str(KEY_PIN) in n.comps["J1"].pins or ("J1", str(KEY_PIN)) in n.pin_net)
 
 
 # ----------------------------------------------------------------------------------------------- spec edits
@@ -226,8 +276,15 @@ def write_board(path, spec, size=(58.0, 60.0), header_shift=(0.0, 0.0), header_r
 
     def place(ref, fpid, x, y, rot=0.0, side="F"):
         lib, name = fpid.split(":", 1)
-        fp = pcbnew.FootprintLoad(os.path.join(FP_DIR, lib + ".pretty"), name)
+        if fpid == cc.HEADER_FP:                      # the keyed header is made, not loaded (coupon_common)
+            fp = pcbnew.FOOTPRINT(cc.keyed_header())
+        else:
+            fp = pcbnew.FootprintLoad(os.path.join(FP_DIR, lib + ".pretty"), name)
         fp.SetFPID(pcbnew.LIB_ID(lib, name))         # FootprintLoad leaves the library nickname empty
+        if ref == "J1":                               # a pad the symbol does not have is not on the board either
+            want = {num for num, _nm, _t in spec["comps"]["J1"]["pins"]}
+            for pad in [pd for pd in fp.Pads() if pd.GetNumber() not in want]:
+                fp.Remove(pad)
         fp.SetReference(ref)
         b.Add(fp)
         if side == "B":

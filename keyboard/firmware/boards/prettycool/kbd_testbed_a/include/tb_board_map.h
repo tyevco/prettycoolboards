@@ -12,7 +12,7 @@
 #ifndef TB_BOARD_MAP_H_
 #define TB_BOARD_MAP_H_
 
-#define TB_MAP_HASH "64b0636f240a9e34"
+#define TB_MAP_HASH "10b5eaea9fcebc38"
 #define TB_MAP_NETS_REV "A-testbed"
 #define TB_MAP_NETS_DATE "2026-11-27"
 #define TB_MAP_MCU "STM32U5A5VJT6"

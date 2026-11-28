@@ -25,6 +25,14 @@ def test_parse_value():
 
 
 @pytest.mark.nospice
+def test_motherboard_netlist_is_there():
+    """The motherboard is captured (2026-11-27) and its netlist is committed with it, so the benches read it. Without
+    it they fall back to defaults, and the capture tests below skip or report expected failures: a missing file (or a
+    KBDSIM_NETLIST that names no file) is a failure here, not a quiet skip."""
+    assert os.path.exists(design.MB_NETLIST), f"no motherboard netlist at {design.MB_NETLIST}"
+
+
+@pytest.mark.nospice
 def test_design_values_come_from_the_capture(board):
     """The lane RC and the breakers' parts are read from the generated netlist when it exists."""
     if not os.path.exists(design.MB_NETLIST):
@@ -168,3 +176,42 @@ def test_power_values_against_datasheets():
     assert design.TUSB320["VBUS_THR"] == (2.95, 3.3, 3.8)
     assert design.LDL1117["V_DROP_MAX"] == 0.600 and design.LDL1117["I_SC_MIN"] == 1.5
     assert design.AP2112K["V_DROP"][0.600] == (0.250, 0.400)
+
+
+@pytest.mark.nospice
+def test_no_bench_line_hides_a_series_resistor():
+    """The owner's decision D3 of 2026-11-27 puts 100 ohm at each socket on the slot's direct lines (CS0_N, CS1_N,
+    IRQ_N, G0-G3, S5's G4/G5; nets.SLOT_SERIES) and leaves the lanes alone. No bench models a G-line or a chip select
+    (the benches are the lanes, the slot rails and the 5 V path), so the D3 resistors enter no simulation; and the
+    lane bench's 47 ohm must be the whole series path from the socket pin to the ADC pin. Both are read from the
+    netlist: every socket's lane pin sits on its 47 ohm's input with nothing else in series (test points aside), and
+    every D3 line's socket pin sits on its own net with one fitted resistor of the contract's value to the MCU side,
+    nothing else on that socket-side net (D3: plain resistors, no TVS or capacitor; test points aside), and the MCU
+    side on the MCU pin nets.SLOT_MCU names. The key pin (D2) carries no net. A resistor added in series with a lane,
+    or a D3 resistor missing, of another value, marked DNP (not on the assembled board) or joined by a part on the
+    socket side, fails here."""
+    nl = design.netlist()
+    if nl is None:
+        pytest.skip("no motherboard netlist")
+    nets = design.load_nets()
+    if not hasattr(nets, "SLOT_SERIES"):
+        pytest.skip("a nets.py from before the owner's decisions of 2026-11-27")
+    pin_of = {sig: p for p, sig, _d, _n in nets.SLOT_PINS}
+    number_of = {name: num for num, name in nets.LQFP100.items()}
+    for n in nets.SLOTS:
+        sock = nl.pins[f"J_S{n}"]
+        for k in range(4):
+            lane = f"S{n}_AN{k}"
+            assert sock[str(pin_of[f"AN{k}"])] == lane, (n, k)
+            series = nl.two_pin("R", lane, f"{lane}_ADC")
+            assert len(series) == 1 and nl.value(series[0]) == pytest.approx(47.0), (lane, series)
+            others = {r for r, _p in nl.nets[lane] if r != f"J_S{n}" and not r.startswith("TP")}
+            assert others == set(series), (lane, others)
+        for sig, (sock_net, ohms) in nets.SLOT_SERIES[n].items():
+            assert sock[str(pin_of[sig])] == sock_net, (n, sig)
+            refs = nl.two_pin("R", sock_net, nets.slot_net(n, sig))
+            assert len(refs) == 1 and nl.value(refs[0]) == pytest.approx(ohms), (n, sig, refs)
+            extra = {r for r, _p in nl.nets[sock_net] if r not in (f"J_S{n}", refs[0]) and not r.startswith("TP")}
+            assert not extra, (n, sig, sock_net, extra)
+            assert ("U1", str(number_of[nets.SLOT_MCU[n][sig]])) in nl.nets[nets.slot_net(n, sig)], (n, sig)
+        assert sock[str(nets.SLOT_KEY_PIN)].startswith("unconnected-"), n

@@ -1,0 +1,8974 @@
+(kicad_sch
+	(version 20260306)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(uuid "ca079efd-5383-5d91-88f2-b4f4e2ad851c")
+	(paper "A3")
+	(title_block
+		(title "Mux, enable latch, lane buffers, thermistors")
+		(date "2026-11-28")
+		(rev "A")
+		(company "PrettyCool Boards")
+	)
+	(lib_symbols
+		(symbol "74xx:74LS259"
+			(pin_names
+				(offset 1.016)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "U"
+				(at -7.62 13.97 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "74LS259"
+				(at -7.62 -13.97 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" "http://www.ti.com/lit/gpn/sn74LS259"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "8-bit addressable latch"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_locked" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "TTL REG DFF"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "DIP?16*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "74LS259_1_0"
+				(pin input line
+					(at -12.7 5.08 0)
+					(length 5.08)
+					(name "A0"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -12.7 2.54 0)
+					(length 5.08)
+					(name "A1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -12.7 0 0)
+					(length 5.08)
+					(name "A2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 12.7 10.16 180)
+					(length 5.08)
+					(name "Q0"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 12.7 7.62 180)
+					(length 5.08)
+					(name "Q1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 12.7 5.08 180)
+					(length 5.08)
+					(name "Q2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 12.7 2.54 180)
+					(length 5.08)
+					(name "Q3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at 0 -17.78 90)
+					(length 5.08)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "8"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 12.7 0 180)
+					(length 5.08)
+					(name "Q4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "9"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 12.7 -2.54 180)
+					(length 5.08)
+					(name "Q5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "10"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 12.7 -5.08 180)
+					(length 5.08)
+					(name "Q6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "11"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 12.7 -7.62 180)
+					(length 5.08)
+					(name "Q7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "12"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -12.7 10.16 0)
+					(length 5.08)
+					(name "D"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "13"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input inverted
+					(at -12.7 -5.08 0)
+					(length 5.08)
+					(name "E"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "14"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input inverted
+					(at -12.7 -10.16 0)
+					(length 5.08)
+					(name "Clr"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "15"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at 0 17.78 270)
+					(length 5.08)
+					(name "VCC"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "16"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(symbol "74LS259_1_1"
+				(rectangle
+					(start -7.62 12.7)
+					(end 7.62 -12.7)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "Amplifier_Operational:Opamp_Dual"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "U"
+				(at 0 5.08 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Value" "Opamp_Dual"
+				(at 0 -5.08 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Dual operational amplifier"
+				(at 0 -8.89 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Sim.Library" "${KICAD10_SYMBOL_DIR}/Simulation_SPICE.sp"
+				(at -12.7 -13.97 0)
+				(show_name yes)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Sim.Name" "kicad_builtin_opamp_dual"
+				(at -12.7 -21.59 0)
+				(show_name yes)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Sim.Device" "SUBCKT"
+				(at -12.7 -19.05 0)
+				(show_name yes)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Sim.Pins" "1=out1 2=in1- 3=in1+ 4=vee 5=in2+ 6=in2- 7=out2 8=vcc"
+				(at -12.7 -16.51 0)
+				(show_name yes)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property private "KLC_S3.1" "Units A+B are centered, UnitC has a offset so it fits nicely on A or B."
+				(at -12.7 -25.4 0)
+				(show_name yes)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property private "KLC_S4.1" "Pin1 and Pin7 are the output, adding a name would look ugly and does not add a benefit."
+				(at -12.7 -27.94 0)
+				(show_name yes)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property private "KLC_S6.2" "This is a generic symbol and thus has no datasheet."
+				(at -12.7 -30.48 0)
+				(show_name yes)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "ki_locked" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "dual opamp"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "SOIC*3.9x4.9mm*P1.27mm* DIP*W7.62mm* MSOP*3x3mm*P0.65mm* SSOP*2.95x2.8mm*P0.65mm* TSSOP*3x3mm*P0.65mm* VSSOP*P0.5mm* TO?99*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "Opamp_Dual_1_1"
+				(polyline
+					(pts (xy -5.08 5.08) (xy 5.08 0) (xy -5.08 -5.08) (xy -5.08 5.08))
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(pin output line
+					(at 7.62 0 180)
+					(length 2.54)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -7.62 -2.54 0)
+					(length 2.54)
+					(name "-"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -7.62 2.54 0)
+					(length 2.54)
+					(name "+"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(symbol "Opamp_Dual_2_1"
+				(polyline
+					(pts (xy -5.08 5.08) (xy 5.08 0) (xy -5.08 -5.08) (xy -5.08 5.08))
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(pin input line
+					(at -7.62 2.54 0)
+					(length 2.54)
+					(name "+"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -7.62 -2.54 0)
+					(length 2.54)
+					(name "-"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 7.62 0 180)
+					(length 2.54)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(symbol "Opamp_Dual_3_1"
+				(pin power_in line
+					(at -2.54 -7.62 90)
+					(length 3.81)
+					(name "V-"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at -2.54 7.62 270)
+					(length 3.81)
+					(name "V+"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "8"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "Connector:TestPoint"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0.762)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "TP"
+				(at 0 6.858 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "TestPoint"
+				(at 0 5.08 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 5.08 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 5.08 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "test point"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "test point tp"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "Pin* Test*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "TestPoint_0_1"
+				(circle
+					(center 0 3.302)
+					(radius 0.762)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "TestPoint_1_1"
+				(pin passive line
+					(at 0 0 90)
+					(length 2.54)
+					(name "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "Device:C"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0.254)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "C"
+				(at 0.635 2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Value" "C"
+				(at 0.635 -2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Footprint" ""
+				(at 0.9652 -3.81 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Unpolarized capacitor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "cap capacitor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "C_*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "C_0_1"
+				(polyline
+					(pts (xy -2.032 0.762) (xy 2.032 0.762))
+					(stroke
+						(width 0.508)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts (xy -2.032 -0.762) (xy 2.032 -0.762))
+					(stroke
+						(width 0.508)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "C_1_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 2.794)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 2.794)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "Device:R"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "R"
+				(at 2.032 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "R"
+				(at 0 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at -1.778 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Resistor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "R res resistor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "R_*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "R_0_1"
+				(rectangle
+					(start -1.016 -2.54)
+					(end 1.016 2.54)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "R_1_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "Device:Thermistor_NTC"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "TH"
+				(at -4.445 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "Thermistor_NTC"
+				(at 3.175 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 1.27 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 1.27 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Temperature dependent resistor, negative temperature coefficient"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "thermistor NTC resistor sensor RTD"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "R_* RV_*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "Thermistor_NTC_0_1"
+				(arc
+					(start -3.175 2.413)
+					(mid -3.0506 2.3165)
+					(end -3.048 2.159)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(arc
+					(start -3.048 2.794)
+					(mid -2.9736 2.9736)
+					(end -2.794 3.048)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(arc
+					(start -2.794 3.048)
+					(mid -2.6144 2.9736)
+					(end -2.54 2.794)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(arc
+					(start -2.794 2.54)
+					(mid -2.9736 2.6144)
+					(end -3.048 2.794)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(arc
+					(start -2.794 1.905)
+					(mid -2.9736 1.9794)
+					(end -3.048 2.159)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(arc
+					(start -2.54 2.159)
+					(mid -2.6144 1.9794)
+					(end -2.794 1.905)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(arc
+					(start -2.159 2.794)
+					(mid -2.434 2.5608)
+					(end -2.794 2.54)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts (xy -2.54 2.159) (xy -2.54 2.794))
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts (xy -2.54 -3.683) (xy -2.54 -1.397) (xy -2.794 -2.159) (xy -2.286 -2.159) (xy -2.54 -1.397) (xy -2.54 -1.651))
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(polyline
+					(pts (xy -1.778 2.54) (xy -1.778 1.524) (xy 1.778 -1.524) (xy 1.778 -2.54))
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts (xy -1.778 -1.397) (xy -1.778 -3.683) (xy -2.032 -2.921) (xy -1.524 -2.921) (xy -1.778 -3.683) (xy -1.778 -3.429))
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(rectangle
+					(start -1.016 2.54)
+					(end 1.016 -2.54)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "Thermistor_NTC_1_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "Mechanical:MountingHole"
+			(pin_names
+				(offset 1.016)
+			)
+			(exclude_from_sim no)
+			(in_bom no)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "H"
+				(at 0 5.08 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "MountingHole"
+				(at 0 3.175 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Mounting Hole without connection"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "mounting hole"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "MountingHole*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "MountingHole_0_1"
+				(circle
+					(center 0 0)
+					(radius 1.27)
+					(stroke
+						(width 1.27)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "keyboard:TMUX1208PW"
+			(pin_names
+				(offset 1.016)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "U"
+				(at -7.62 13.97 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left bottom)
+				)
+			)
+			(property "Value" "TMUX1208PW"
+				(at -7.62 -13.97 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left top)
+				)
+			)
+			(property "Footprint" "Package_SO:TSSOP-16_4.4x5mm_P0.65mm"
+				(at 0 0 0)
+				(hide yes)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" "https://www.ti.com/lit/ds/symlink/tmux1208.pdf"
+				(at 0 0 0)
+				(hide yes)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "8:1 analog multiplexer, 1.08-5.5 V, 5 Ohm at 5 V (9 Ohm typ, 15 max at 3.3 V), fail-safe logic, active-high EN, TSSOP-16"
+				(at 0 0 0)
+				(hide yes)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "analog multiplexer mux 8:1 TI"
+				(at 0 0 0)
+				(hide yes)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "TMUX1208PW_0_1"
+				(rectangle
+					(start -7.62 12.7)
+					(end 7.62 -12.7)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+			)
+			(symbol "TMUX1208PW_1_1"
+				(pin bidirectional line
+					(at -10.16 8.89 0)
+					(length 2.54)
+					(name "S1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at -10.16 6.35 0)
+					(length 2.54)
+					(name "S2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at -10.16 3.81 0)
+					(length 2.54)
+					(name "S3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at -10.16 1.27 0)
+					(length 2.54)
+					(name "S4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at -10.16 -1.27 0)
+					(length 2.54)
+					(name "S5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "12"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at -10.16 -3.81 0)
+					(length 2.54)
+					(name "S6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "11"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at -10.16 -6.35 0)
+					(length 2.54)
+					(name "S7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "10"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at -10.16 -8.89 0)
+					(length 2.54)
+					(name "S8"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "9"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at 10.16 5.08 180)
+					(length 2.54)
+					(name "D"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "8"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at 10.16 2.54 180)
+					(length 2.54)
+					(name "A0"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at 10.16 0 180)
+					(length 2.54)
+					(name "A1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "16"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at 10.16 -2.54 180)
+					(length 2.54)
+					(name "A2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "15"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at 10.16 -5.08 180)
+					(length 2.54)
+					(name "EN"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at 0 15.24 270)
+					(length 2.54)
+					(name "VDD"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "13"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at -1.27 -15.24 90)
+					(length 2.54)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "14"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 1.27 -15.24 90)
+					(length 2.54)
+					(name "NC"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "power:+3V3"
+			(power global)
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "#PWR"
+				(at 0 -3.81 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "+3V3"
+				(at 0 3.556 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Power symbol creates a global label with name \"+3V3\""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "global power"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "+3V3_0_1"
+				(polyline
+					(pts (xy -0.762 1.27) (xy 0 2.54))
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts (xy 0 2.54) (xy 0.762 1.27))
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts (xy 0 0) (xy 0 2.54))
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "+3V3_1_1"
+				(pin power_in line
+					(at 0 0 90)
+					(length 0)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "power:GND"
+			(power global)
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "#PWR"
+				(at 0 -6.35 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "GND"
+				(at 0 -3.81 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "global power"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "GND_0_1"
+				(polyline
+					(pts (xy 0 0) (xy 0 -1.27) (xy 1.27 -1.27) (xy 0 -2.54) (xy -1.27 -1.27) (xy 0 -1.27))
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "GND_1_1"
+				(pin power_in line
+					(at 0 0 270)
+					(length 0)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+	)
+	(text "U10 TMUX1208: 8:1 mux onto lane AN0 (SEL = G0-G2, EN = G3)"
+		(exclude_from_sim no)
+		(at 15.24 15.24 0)
+		(effects
+			(font
+				(size 2 2)
+				(bold yes)
+			)
+			(justify left top)
+		)
+		(uuid "323c7218-6844-55b4-b0d0-ba6d4b43f0cf")
+	)
+	(text "S1-S6 = K1, K2, K3, K4, REF1, REF2 (SEL 0-5); S7, S8 = the thermistor taps TEMP1, TEMP2 (SEL 6, 7).\nEN low: every switch off (AN0 undefined). RON 9 Ohm typ at 3.3 V; the buffer's input takes no current."
+		(exclude_from_sim no)
+		(at 15.24 19.05 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+				(italic yes)
+			)
+			(justify left top)
+		)
+		(uuid "648582e9-6ff6-5e33-991e-5397fbb4e58a")
+	)
+	(text "U12 OPA2365: lane buffers (AN0 = mux, AN1 = K1 direct)"
+		(exclude_from_sim no)
+		(at 15.24 24.13 0)
+		(effects
+			(font
+				(size 2 2)
+				(bold yes)
+			)
+			(justify left top)
+		)
+		(uuid "0e291101-9774-5d9b-a174-3b15f91126fa")
+	)
+	(text "Unity-gain followers, 22 Ohm in series to the slot pin (SBOS365G §8.3.3); the lane's 47 Ohm + 1 nF\nfollow on the motherboard. R26 (0 Ohm, NOT FITTED) puts the mux output straight onto AN2: the unbuffered\nlane-drive experiment of SPEC §11 #21 (fitted, the selected sensor drives the lane's 1 nF)."
+		(exclude_from_sim no)
+		(at 15.24 29.21 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+				(italic yes)
+			)
+			(justify left top)
+		)
+		(uuid "4e6ee8b7-218a-5f89-864d-92a72b6176bb")
+	)
+	(text "Probe pads"
+		(exclude_from_sim no)
+		(at 15.24 36.83 0)
+		(effects
+			(font
+				(size 2 2)
+				(bold yes)
+			)
+			(justify left top)
+		)
+		(uuid "d9d0b0b3-8578-5269-a2f0-d29f4568acf7")
+	)
+	(text "Lanes, the mux output, K1's output and SEL_EN, for a scope at bring-up."
+		(exclude_from_sim no)
+		(at 15.24 40.64 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+				(italic yes)
+			)
+			(justify left top)
+		)
+		(uuid "f30e5826-e130-5668-8c20-a3d6d9d63114")
+	)
+	(rectangle
+		(start 12.7 12.7)
+		(end 242.57 139.7)
+		(stroke
+			(width 0.1)
+			(type dash)
+		)
+		(fill
+			(type none)
+		)
+		(uuid "e9ffae51-caf7-5cf3-a400-44c188dc7d91")
+	)
+	(symbol
+		(lib_id "keyboard:TMUX1208PW")
+		(at 130.81 82.55 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "ad0deb08-5b02-54ec-90b7-9b8ec8389754")
+		(property "Reference" "U10"
+			(at 133.35 66.85 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "TMUX1208PWR"
+			(at 133.35 68.6 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Package_SO:TSSOP-16_4.4x5mm_P0.65mm"
+			(at 130.81 82.55 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" "https://www.ti.com/lit/ds/symlink/tmux1208.pdf"
+			(at 130.81 82.55 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "8:1 analog multiplexer, 1.08-5.5 V, 5 Ohm at 5 V (9 Ohm typ, 15 max at 3.3 V), fail-safe logic, active-high EN, TSSOP-16"
+			(at 130.81 82.55 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "TMUX1208PWR"
+			(at 130.81 82.55 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Texas Instruments"
+			(at 130.81 82.55 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C494728"
+			(at 130.81 82.55 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "4"
+			(uuid "4bd5bd9a-5beb-5c52-9b96-ff835c170cf9")
+		)
+		(pin "5"
+			(uuid "63644485-befd-5e50-a0aa-2c266f742d63")
+		)
+		(pin "6"
+			(uuid "8d99acdd-3471-581c-ad92-c6cbc937ab91")
+		)
+		(pin "7"
+			(uuid "b0b7a334-5811-543b-b6a4-a6545f2d0b35")
+		)
+		(pin "12"
+			(uuid "1bd53a37-e09d-56ff-9830-f59608bea145")
+		)
+		(pin "11"
+			(uuid "8761c20d-ee84-5021-b1cf-06d4c09a2450")
+		)
+		(pin "10"
+			(uuid "e3d25408-d3ef-5107-b089-461b02c632da")
+		)
+		(pin "9"
+			(uuid "c588e6aa-e916-538b-9633-c56ac931d63f")
+		)
+		(pin "8"
+			(uuid "615565ad-31ba-53df-9739-9f33d2e153b5")
+		)
+		(pin "1"
+			(uuid "48536a7e-b765-511e-ab5e-3192bfd85151")
+		)
+		(pin "16"
+			(uuid "c0af03b7-fc24-51ca-a043-02020c90c99e")
+		)
+		(pin "15"
+			(uuid "e73b3bb8-ddb4-53ed-b941-7ca59e050d9a")
+		)
+		(pin "2"
+			(uuid "9a3a1946-962c-5e39-b220-373d38575dbe")
+		)
+		(pin "13"
+			(uuid "284b8121-c46f-545d-8673-80b4da8f659b")
+		)
+		(pin "14"
+			(uuid "959613d9-25bc-535e-b960-5438ab1150d2")
+		)
+		(pin "3"
+			(uuid "9df277b4-103f-5048-a5b9-38b0daf99887")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "U10")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 129.54 97.79 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "3c23d92f-f5e4-5d62-86cc-2aaa2f5b4979")
+		(property "Reference" "#PWR04001"
+			(at 129.54 97.79 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 129.54 101.09 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Footprint" ""
+			(at 129.54 97.79 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 129.54 97.79 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 129.54 97.79 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "7a0d7067-53c4-548d-a142-84f660e6b301")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "#PWR04001")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(no_connect
+		(at 132.08 97.79)
+		(uuid "7ee9acdc-e109-59be-be34-9f14d36a61dc")
+	)
+	(symbol
+		(lib_id "Connector:TestPoint")
+		(at 88.9 62.23 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "1e1996c7-bd37-5868-b303-70fc9cd2cb07")
+		(property "Reference" "TP13"
+			(at 87.238 57.928 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "HALL_K1"
+			(at 87.238 59.928 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
+			(at 88.9 62.23 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 88.9 62.23 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "test point"
+			(at 88.9 62.23 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "0bff2edb-a2e4-52db-af7b-9c5bbcd994c9")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "TP13")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label "HALL_K1"
+		(shape bidirectional)
+		(at 74.93 59.69 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "3341c56e-c186-5264-9e94-a5917aecefb9")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 74.93 59.69 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Amplifier_Operational:Opamp_Dual")
+		(at 63.5 68.58 0)
+		(mirror y)
+		(unit 2)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "7c3d4992-9806-56e5-b5e6-911d8a5de4df")
+		(property "Reference" "U12"
+			(at 57.12 60.5 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "OPA2365AIDR"
+			(at 57.12 62.25 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm"
+			(at 63.5 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" "https://www.ti.com/lit/ds/symlink/opa365.pdf"
+			(at 63.5 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Dual operational amplifier"
+			(at 63.5 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "OPA2365AIDR"
+			(at 63.5 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Texas Instruments"
+			(at 63.5 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C130011"
+			(at 63.5 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "5"
+			(uuid "318fef76-249d-5e4f-85bd-fe38440863fe")
+		)
+		(pin "6"
+			(uuid "f65357ec-5bf8-509c-a90b-c7f3508b9131")
+		)
+		(pin "7"
+			(uuid "c8564fc1-bda1-53d8-af14-030f31a6398f")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "U12")
+					(unit 2)
+				)
+			)
+		)
+	)
+	(label "BUF1"
+		(at 52.07 68.58 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "5a3b9da8-eefd-55d8-91c6-f2105a573aac")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 39.37 68.58 270)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "3f8ae457-d115-53f5-9d83-731d651b52ca")
+		(property "Reference" "R19"
+			(at 39.37 66.064 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "22"
+			(at 39.37 71.096 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 39.37 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 39.37 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 39.37 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "0402WGF220JTCE"
+			(at 39.37 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 39.37 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C25092"
+			(at 39.37 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "cb68d3fc-767f-5e7a-9fde-065512ae516d")
+		)
+		(pin "2"
+			(uuid "9d68b1d9-f9b2-55f7-8852-3516fb53996e")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "R19")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:TestPoint")
+		(at 33.02 68.58 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "40c04946-61de-575c-ad7c-f88b239c22be")
+		(property "Reference" "TP11"
+			(at 31.358 64.278 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "AN1"
+			(at 31.358 66.278 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
+			(at 33.02 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 33.02 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "test point"
+			(at 33.02 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "47e92754-c5c0-5865-a7b1-a6a7a28620ba")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "TP11")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label "AN1"
+		(shape passive)
+		(at 22.86 68.58 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "a1192a62-4cb6-595e-9e29-0c46740ebd0c")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 22.86 68.58 180)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "HALL_K2"
+		(shape bidirectional)
+		(at 107.95 76.2 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "71a88e7e-b669-5be3-a5da-e3cfbcd88345")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 107.95 76.2 180)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "HALL_K3"
+		(shape bidirectional)
+		(at 107.95 78.74 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "1669f528-ecdb-5f7b-a1e8-b4e86885f938")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 107.95 78.74 180)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "HALL_K4"
+		(shape bidirectional)
+		(at 107.95 81.28 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "2be5c28a-f599-5297-ad7b-3312c73ca7d3")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 107.95 81.28 180)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "HALL_REF1"
+		(shape bidirectional)
+		(at 107.95 83.82 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "d5261427-5ff7-5a4c-b6db-fc378d8b9476")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 107.95 83.82 180)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "HALL_REF2"
+		(shape bidirectional)
+		(at 107.95 86.36 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "7cba7bd2-3f65-570a-8221-88b3bb3306cf")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 107.95 86.36 180)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(label "TEMP1"
+		(at 109.22 100.33 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "264e1e84-0303-5992-99f2-5adf5cfb880d")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 97.79 96.52 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "1634b331-9496-520e-afa5-fcc5bf899ddc")
+		(property "Reference" "R16"
+			(at 95.874 95.52 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "10k"
+			(at 95.874 97.52 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 97.79 96.52 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 97.79 96.52 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Thin-film resistor, 10 kOhm, 0.1 %, 25 ppm/K, 0603 (thermistor divider)"
+			(at 97.79 96.52 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "RT0603BRD0710KL"
+			(at 97.79 96.52 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "YAGEO"
+			(at 97.79 96.52 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C95204"
+			(at 97.79 96.52 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "1ee2e6df-2287-591d-8522-ea9ad026968a")
+		)
+		(pin "2"
+			(uuid "655de1c1-b6fd-5e8a-aab4-6726529d6e4c")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "R16")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:+3V3")
+		(at 97.79 92.71 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "05a68416-f381-5c40-9990-bd7ff5f53a5b")
+		(property "Reference" "#PWR04002"
+			(at 97.79 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "+3V3"
+			(at 97.79 89.41 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+			)
+		)
+		(property "Footprint" ""
+			(at 97.79 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 97.79 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 97.79 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "419e1cbb-a715-5c5e-8d3b-6f4ebc599a19")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "#PWR04002")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:Thermistor_NTC")
+		(at 95.25 104.14 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "977cdca3-bb98-5025-9f46-071858a4258d")
+		(property "Reference" "TH10"
+			(at 91.175 103.4575 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "10k B3380"
+			(at 91.175 105.4575 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 95.25 104.14 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" "https://www.lcsc.com/datasheet/lcsc_datasheet_2304140030_Murata-Electronics-NCP15XH103F03RC_C77131.pdf"
+			(at 95.25 104.14 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "NTC thermistor 10 kOhm 1 %, B25/50 3380 K, 0402, beside K1's sensor"
+			(at 95.25 104.14 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "NCP15XH103F03RC"
+			(at 95.25 104.14 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Murata Electronics"
+			(at 95.25 104.14 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C77131"
+			(at 95.25 104.14 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "64ed526c-26f9-5af3-a298-e78b8ab644b0")
+		)
+		(pin "2"
+			(uuid "d7235a6c-5ffe-5d77-8582-38f731086117")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "TH10")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 95.25 107.95 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "31d0d30e-2e04-5e0e-b45f-7e3a3e40a656")
+		(property "Reference" "#PWR04003"
+			(at 95.25 107.95 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 95.25 111.25 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Footprint" ""
+			(at 95.25 107.95 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 95.25 107.95 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 95.25 107.95 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "1ec7fdbf-a490-55a8-b8ee-5bffb6bb1a9b")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "#PWR04003")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 74.93 104.14 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "e8bf3370-fd71-5339-9482-746eb3f6cf2e")
+		(property "Reference" "C16"
+			(at 71.998 103.14 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "1u"
+			(at 71.998 105.14 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+			(at 74.93 104.14 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 74.93 104.14 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 74.93 104.14 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "CL05A105KA5NQNC"
+			(at 74.93 104.14 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Samsung Electro-Mechanics"
+			(at 74.93 104.14 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C52923"
+			(at 74.93 104.14 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "4b3e9977-1ecf-5005-b0e3-6ceab7815de0")
+		)
+		(pin "2"
+			(uuid "300c52b4-0aa0-56e2-b49a-90a9a6436f8c")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "C16")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 74.93 107.95 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "def5e113-aeab-5c7f-b76c-6bd24b310fdb")
+		(property "Reference" "#PWR04004"
+			(at 74.93 107.95 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 74.93 111.25 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Footprint" ""
+			(at 74.93 107.95 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 74.93 107.95 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 74.93 107.95 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "4dfcca72-c1c8-5dc7-a605-d4e9429a2f7e")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "#PWR04004")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(label "TEMP2"
+		(at 109.22 125.73 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "253e26e8-d723-53f5-86d0-e710d91cf345")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 97.79 121.92 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "c0b4cfd6-577c-5696-b9fd-fd797f4361f7")
+		(property "Reference" "R17"
+			(at 95.874 120.92 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "10k"
+			(at 95.874 122.92 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 97.79 121.92 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 97.79 121.92 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Thin-film resistor, 10 kOhm, 0.1 %, 25 ppm/K, 0603 (thermistor divider)"
+			(at 97.79 121.92 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "RT0603BRD0710KL"
+			(at 97.79 121.92 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "YAGEO"
+			(at 97.79 121.92 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C95204"
+			(at 97.79 121.92 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "c938c0c6-443f-50e5-9250-36f21cc43145")
+		)
+		(pin "2"
+			(uuid "c0a8509e-6c20-5a9e-8d59-c2ccfff54224")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "R17")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:+3V3")
+		(at 97.79 118.11 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "f0882da9-0a24-5a87-9654-fc1e01c48a41")
+		(property "Reference" "#PWR04005"
+			(at 97.79 118.11 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "+3V3"
+			(at 97.79 114.81 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+			)
+		)
+		(property "Footprint" ""
+			(at 97.79 118.11 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 97.79 118.11 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 97.79 118.11 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "40272fbb-e668-590b-8edc-8110e2b0152f")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "#PWR04005")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:Thermistor_NTC")
+		(at 95.25 129.54 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "a22558c7-408f-5d25-8c37-17e06f3d0941")
+		(property "Reference" "TH11"
+			(at 91.175 128.8575 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "10k B3380"
+			(at 91.175 130.8575 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 95.25 129.54 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" "https://www.lcsc.com/datasheet/lcsc_datasheet_2304140030_Murata-Electronics-NCP15XH103F03RC_C77131.pdf"
+			(at 95.25 129.54 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "NTC thermistor 10 kOhm 1 %, B25/50 3380 K, 0402, beside REF1's sensor"
+			(at 95.25 129.54 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "NCP15XH103F03RC"
+			(at 95.25 129.54 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Murata Electronics"
+			(at 95.25 129.54 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C77131"
+			(at 95.25 129.54 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "fe6fad38-8d88-5cdb-bf67-44c0174654e3")
+		)
+		(pin "2"
+			(uuid "b0d0eff6-f51f-518b-8554-34cfa73f5648")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "TH11")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 95.25 133.35 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "ca5f0c74-42a9-5ed0-9dc7-4228e75df634")
+		(property "Reference" "#PWR04006"
+			(at 95.25 133.35 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 95.25 136.65 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Footprint" ""
+			(at 95.25 133.35 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 95.25 133.35 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 95.25 133.35 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "fe25c2eb-ea15-5abd-b017-144d3094403f")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "#PWR04006")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 74.93 129.54 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "423e3122-9c0f-588e-8662-063cc883f066")
+		(property "Reference" "C17"
+			(at 71.998 128.54 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "1u"
+			(at 71.998 130.54 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+			(at 74.93 129.54 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 74.93 129.54 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 74.93 129.54 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "CL05A105KA5NQNC"
+			(at 74.93 129.54 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Samsung Electro-Mechanics"
+			(at 74.93 129.54 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C52923"
+			(at 74.93 129.54 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "d312dbf0-83f4-54c2-9c18-b1c8f239e424")
+		)
+		(pin "2"
+			(uuid "a7e6d7df-127e-56ae-bd47-18bd1ff17fce")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "C17")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 74.93 133.35 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "7d6d0b46-d33b-5e76-88b8-5abd02f7a14d")
+		(property "Reference" "#PWR04007"
+			(at 74.93 133.35 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 74.93 136.65 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Footprint" ""
+			(at 74.93 133.35 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 74.93 133.35 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 74.93 133.35 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "2b9b737a-d701-58e3-9c0d-23c0f665e7ee")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "#PWR04007")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(label "MUX_D"
+		(at 201.93 77.47 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "125f2d18-92e1-59fd-bdc6-c414864e0523")
+	)
+	(symbol
+		(lib_id "Connector:TestPoint")
+		(at 212.09 77.47 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "20705b50-e37d-506f-aa00-6b1c3d97137a")
+		(property "Reference" "TP12"
+			(at 213.752 73.168 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "MUX_D"
+			(at 213.752 75.168 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
+			(at 212.09 77.47 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 212.09 77.47 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "test point"
+			(at 212.09 77.47 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "ba8d8b96-d727-5980-a810-b076ed9103a3")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "TP12")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 227.33 77.47 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp yes)
+		(uuid "ed03dd1e-1802-588f-8e57-a9d4f154b3cb")
+		(property "Reference" "R26"
+			(at 227.33 74.954 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "0R"
+			(at 227.33 79.986 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 227.33 77.47 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 227.33 77.47 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 227.33 77.47 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "0402WGF0000TCE"
+			(at 227.33 77.47 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 227.33 77.47 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C17168"
+			(at 227.33 77.47 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "fbcff056-fe23-52c2-a964-122d91a10258")
+		)
+		(pin "2"
+			(uuid "923fa00c-681f-5250-a335-4b4c9248b639")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "R26")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label "AN2"
+		(shape passive)
+		(at 233.68 77.47 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "a7119238-4ec9-52bc-9e68-6e48ec66b089")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 233.68 77.47 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Amplifier_Operational:Opamp_Dual")
+		(at 210.82 92.71 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "57bdddea-7633-5b41-834e-df37d30a5d39")
+		(property "Reference" "U12"
+			(at 205.74 84.63 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "OPA2365AIDR"
+			(at 205.74 86.38 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm"
+			(at 210.82 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" "https://www.ti.com/lit/ds/symlink/opa365.pdf"
+			(at 210.82 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Dual operational amplifier"
+			(at 210.82 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "OPA2365AIDR"
+			(at 210.82 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Texas Instruments"
+			(at 210.82 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C130011"
+			(at 210.82 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "d14110e8-20c2-53d9-a4a2-be28a0c6ed80")
+		)
+		(pin "2"
+			(uuid "0604f931-55aa-5796-987e-c55754a7e52e")
+		)
+		(pin "3"
+			(uuid "60ee7e43-5024-5e13-9efb-00162015daf1")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "U12")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(label "BUF0"
+		(at 199.39 99.06 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "3b33d4fc-81ef-53a2-b14b-260b360ff71b")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 186.69 99.06 270)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "2337b2c3-b101-52e6-bcc0-0ecdf3f8036c")
+		(property "Reference" "R18"
+			(at 186.69 96.544 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "22"
+			(at 186.69 101.576 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 186.69 99.06 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 186.69 99.06 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 186.69 99.06 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "0402WGF220JTCE"
+			(at 186.69 99.06 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 186.69 99.06 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C25092"
+			(at 186.69 99.06 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "b8272b82-3cdb-532c-830a-b9a3bca1d856")
+		)
+		(pin "2"
+			(uuid "01cfcc01-1fb2-59b2-9ab7-baa3287589b7")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "R18")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:TestPoint")
+		(at 180.34 99.06 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "49e71857-cfca-5f81-9dd8-a843c621c034")
+		(property "Reference" "TP10"
+			(at 178.678 94.758 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "AN0"
+			(at 178.678 96.758 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
+			(at 180.34 99.06 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 180.34 99.06 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "test point"
+			(at 180.34 99.06 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "01ba0603-ed89-53ac-82ab-8306d52b8b9c")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "TP10")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label "AN0"
+		(shape passive)
+		(at 170.18 99.06 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "d5af9663-764c-5908-9f26-f4b540c4859a")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 170.18 99.06 180)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "G0"
+		(shape input)
+		(at 146.05 80.01 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "4109bce8-9cff-509b-b87e-fb643db80441")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 146.05 80.01 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+	(global_label "G1"
+		(shape input)
+		(at 146.05 82.55 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "decec807-3065-59ec-adc0-d25c6bbf8f76")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 146.05 82.55 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+	(global_label "G2"
+		(shape input)
+		(at 146.05 85.09 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "fc9cec11-ca0c-54b1-9205-b45197dd9fb8")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 146.05 85.09 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:TestPoint")
+		(at 146.05 87.63 180)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "ee8cdf48-af0a-54e6-99a1-d29466d0d360")
+		(property "Reference" "TP14"
+			(at 147.712 89.932 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "G3"
+			(at 147.712 91.932 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
+			(at 146.05 87.63 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 146.05 87.63 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "test point"
+			(at 146.05 87.63 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "9db4439e-2fcb-5a57-bd7d-7794a0e2f361")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "TP14")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label "G3"
+		(shape input)
+		(at 156.21 87.63 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "bbd3694e-3c47-5770-b58b-ade9175c4ca2")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 156.21 87.63 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 134.62 55.88 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "b696cb57-05fc-57e3-8e12-46e2edf9d3b2")
+		(property "Reference" "C10"
+			(at 137.552 54.88 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "100n"
+			(at 137.552 56.88 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+			(at 134.62 55.88 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 134.62 55.88 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 134.62 55.88 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "CL05B104KO5NNNC"
+			(at 134.62 55.88 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Samsung Electro-Mechanics"
+			(at 134.62 55.88 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C1525"
+			(at 134.62 55.88 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "59e98f83-db99-56a1-8f11-1240cc85cedc")
+		)
+		(pin "2"
+			(uuid "cf5e7703-1821-5c3f-9788-abc757a4bd93")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "C10")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 134.62 59.69 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "c5e81f8b-fe4c-544c-8144-1275731aca62")
+		(property "Reference" "#PWR04008"
+			(at 134.62 59.69 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 134.62 62.99 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Footprint" ""
+			(at 134.62 59.69 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 134.62 59.69 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 134.62 59.69 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "e80cf713-de55-5c10-8683-913faa1f9503")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "#PWR04008")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:+3V3")
+		(at 146.05 52.07 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "89f286d6-8ed9-5850-b5d8-632c67f918b8")
+		(property "Reference" "#PWR04009"
+			(at 146.05 52.07 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "+3V3"
+			(at 146.05 48.77 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+			)
+		)
+		(property "Footprint" ""
+			(at 146.05 52.07 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 146.05 52.07 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 146.05 52.07 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "e449fce5-fea1-50c5-babb-d34d4370d82e")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "#PWR04009")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts (xy 130.81 52.07) (xy 130.81 67.31))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "265c597d-9316-538c-aaf1-8e3dcd23decb")
+	)
+	(wire
+		(pts (xy 130.81 52.07) (xy 134.62 52.07))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7fad0ebc-1601-5a4d-96c9-d674721eee3f")
+	)
+	(wire
+		(pts (xy 134.62 52.07) (xy 146.05 52.07))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b67facea-29d7-5e96-869a-32275870fc50")
+	)
+	(wire
+		(pts (xy 170.18 99.06) (xy 180.34 99.06))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c15ff2f1-d94b-594b-bdf0-e02a01cdf7fa")
+	)
+	(wire
+		(pts (xy 180.34 99.06) (xy 182.88 99.06))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b1c2cd9d-32c9-54e6-acf5-2112a50cd338")
+	)
+	(wire
+		(pts (xy 22.86 68.58) (xy 33.02 68.58))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1db09c7e-d558-5d87-a52d-2ee231f5daa1")
+	)
+	(wire
+		(pts (xy 33.02 68.58) (xy 35.56 68.58))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d8820145-603e-54c3-8194-a4eb9c0eb528")
+	)
+	(wire
+		(pts (xy 231.14 77.47) (xy 233.68 77.47))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ffe5085e-99f7-5fd9-a2a0-95c52e2a6926")
+	)
+	(wire
+		(pts (xy 190.5 99.06) (xy 199.39 99.06))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "69013615-a5af-5cdb-a7e5-c01d2243611e")
+	)
+	(wire
+		(pts (xy 199.39 99.06) (xy 201.93 99.06))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "dfd8f804-0518-56d9-b9fb-bd6929250637")
+	)
+	(wire
+		(pts (xy 201.93 95.25) (xy 201.93 99.06))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "508237f1-8473-5ab9-a36a-f884f5bb6258")
+	)
+	(wire
+		(pts (xy 201.93 95.25) (xy 203.2 95.25))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3561bf16-de63-5b39-b135-639879c9d819")
+	)
+	(wire
+		(pts (xy 201.93 99.06) (xy 201.93 100.33))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ccad17e0-4697-5fd9-85bd-f1276197e436")
+	)
+	(wire
+		(pts (xy 201.93 100.33) (xy 218.44 100.33))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d3483cb1-ca74-5726-b463-675af689b63a")
+	)
+	(wire
+		(pts (xy 218.44 92.71) (xy 218.44 100.33))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "64b53228-5137-51d3-8ac4-2572c7db30b4")
+	)
+	(wire
+		(pts (xy 43.18 68.58) (xy 52.07 68.58))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "66b4468a-aada-5a25-9400-1729a105510e")
+	)
+	(wire
+		(pts (xy 52.07 68.58) (xy 54.61 68.58))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f532b297-23ba-55ee-9b42-9e7ed119ef24")
+	)
+	(wire
+		(pts (xy 54.61 68.58) (xy 54.61 76.2))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1c5c011c-7e72-5c81-ab5d-2c8a33c118b7")
+	)
+	(wire
+		(pts (xy 54.61 68.58) (xy 55.88 68.58))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "541cf54a-e9ba-5036-891f-3ddb5608dfbc")
+	)
+	(wire
+		(pts (xy 54.61 76.2) (xy 71.12 76.2))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8fab4c6f-0a43-5ae8-bca0-b7ad1b6ad809")
+	)
+	(wire
+		(pts (xy 71.12 71.12) (xy 71.12 76.2))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "84c5a769-59d6-5e34-80cf-dcd6510a4c64")
+	)
+	(wire
+		(pts (xy 140.97 80.01) (xy 146.05 80.01))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2fb6dc9c-dce5-5f19-b79f-d2aa45abc194")
+	)
+	(wire
+		(pts (xy 140.97 82.55) (xy 146.05 82.55))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "964bcba3-2861-5101-84ca-d0194b995183")
+	)
+	(wire
+		(pts (xy 140.97 85.09) (xy 146.05 85.09))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "784a335a-07ca-5b02-a4b3-4fde0de137f5")
+	)
+	(wire
+		(pts (xy 140.97 87.63) (xy 146.05 87.63))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ca29e156-e35a-5f81-9961-b754bd412b58")
+	)
+	(wire
+		(pts (xy 146.05 87.63) (xy 156.21 87.63))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2692171d-390b-5eb0-8b0d-b3889b6a8220")
+	)
+	(wire
+		(pts (xy 71.12 66.04) (xy 74.93 66.04))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "925a6cb2-f756-5f86-9f3d-f969ff20a80b")
+	)
+	(wire
+		(pts (xy 74.93 59.69) (xy 74.93 63.5))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7cf553bc-9e34-55a4-be5f-d8d5632a42cc")
+	)
+	(wire
+		(pts (xy 74.93 63.5) (xy 74.93 66.04))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f3516db9-9508-5080-bb6b-aad2d06c6885")
+	)
+	(wire
+		(pts (xy 74.93 63.5) (xy 88.9 63.5))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "911600be-04c7-520d-b1c0-8b5053b259db")
+	)
+	(wire
+		(pts (xy 88.9 62.23) (xy 88.9 63.5))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "afb38629-d99b-5277-a01e-043b52c00130")
+	)
+	(wire
+		(pts (xy 88.9 63.5) (xy 88.9 73.66))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7e222e23-748c-56e9-b7ac-b8e09fe526ba")
+	)
+	(wire
+		(pts (xy 88.9 73.66) (xy 120.65 73.66))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "169e3b18-2b8f-5f58-973d-42fb96c99ae5")
+	)
+	(wire
+		(pts (xy 107.95 76.2) (xy 120.65 76.2))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b237fec7-c666-545f-8d35-143bd80c0764")
+	)
+	(wire
+		(pts (xy 107.95 78.74) (xy 120.65 78.74))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "390d8cd2-99c2-5dae-a3f5-228f41d1f792")
+	)
+	(wire
+		(pts (xy 107.95 81.28) (xy 120.65 81.28))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ce2d7b05-669d-51a2-bea5-22b265325d4d")
+	)
+	(wire
+		(pts (xy 107.95 83.82) (xy 120.65 83.82))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "69cfcad5-50ac-5b64-8da1-18bda3a727b3")
+	)
+	(wire
+		(pts (xy 107.95 86.36) (xy 120.65 86.36))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d04e378a-5116-5abf-9520-4d4f8a4c409e")
+	)
+	(wire
+		(pts (xy 140.97 77.47) (xy 201.93 77.47))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "162e1ef2-0ea2-5ff8-91f4-519b71eae8f9")
+	)
+	(wire
+		(pts (xy 201.93 77.47) (xy 203.2 77.47))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "923a9760-411d-51aa-9359-62d9acbb2c84")
+	)
+	(wire
+		(pts (xy 203.2 77.47) (xy 203.2 90.17))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e88c1539-6554-56e0-8e89-7bda5affc171")
+	)
+	(wire
+		(pts (xy 203.2 77.47) (xy 212.09 77.47))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "abc13a64-c973-54b4-8176-346844f2c5b9")
+	)
+	(wire
+		(pts (xy 212.09 77.47) (xy 223.52 77.47))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9047db5a-34fa-5e9c-82f0-9eeeb74fef99")
+	)
+	(wire
+		(pts (xy 74.93 100.33) (xy 95.25 100.33))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6b67078f-78ba-570f-8fed-593d86d9cfd6")
+	)
+	(wire
+		(pts (xy 95.25 100.33) (xy 97.79 100.33))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "02ecd0ea-a0a3-51b4-9dfc-284c082f5293")
+	)
+	(wire
+		(pts (xy 97.79 100.33) (xy 109.22 100.33))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7644a812-dab2-5998-84fc-d48f2f1720a1")
+	)
+	(wire
+		(pts (xy 109.22 100.33) (xy 110.49 100.33))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8244aba6-3a94-5889-9a49-457fb4af2786")
+	)
+	(wire
+		(pts (xy 110.49 88.9) (xy 110.49 100.33))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1e5684e2-29aa-538b-93f7-4dc16e7e419e")
+	)
+	(wire
+		(pts (xy 110.49 88.9) (xy 120.65 88.9))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e0e8cae6-ddb5-5568-bf2d-f8c0af0e73f6")
+	)
+	(wire
+		(pts (xy 74.93 125.73) (xy 95.25 125.73))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ba0d2bfe-1b7e-5c33-b43e-457ea3cb86c3")
+	)
+	(wire
+		(pts (xy 95.25 125.73) (xy 97.79 125.73))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "92f5f375-a743-51c2-9601-373f6acef4f9")
+	)
+	(wire
+		(pts (xy 97.79 125.73) (xy 109.22 125.73))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d172d4b6-302d-57f3-8c43-28f4770290a2")
+	)
+	(wire
+		(pts (xy 109.22 125.73) (xy 113.03 125.73))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "597c12a5-91c5-552e-af25-ddac83adf196")
+	)
+	(wire
+		(pts (xy 113.03 91.44) (xy 113.03 125.73))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0586b481-4ef6-5c87-88ae-3ea2c33e5c83")
+	)
+	(wire
+		(pts (xy 113.03 91.44) (xy 120.65 91.44))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "820b737e-a1c4-593a-bc71-6f4f68803ec0")
+	)
+	(junction
+		(at 33.02 68.58)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "2c20f79f-18af-5274-a3d0-ea30ba1eb289")
+	)
+	(junction
+		(at 54.61 68.58)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "b24f78f2-8ea0-5870-9f1b-83b1de4317af")
+	)
+	(junction
+		(at 74.93 63.5)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "899fa2f0-c1cc-519d-8135-d317899cbc6f")
+	)
+	(junction
+		(at 88.9 63.5)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "996462b6-e835-5932-a570-9d9a63797138")
+	)
+	(junction
+		(at 95.25 100.33)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "21b53da2-8449-54b5-8f02-6da492b43d37")
+	)
+	(junction
+		(at 95.25 125.73)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "4a54d381-71cb-59bb-bac8-96ba27b18dd3")
+	)
+	(junction
+		(at 97.79 100.33)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "dff590c8-c791-58f0-8204-f97f7b85ae0f")
+	)
+	(junction
+		(at 97.79 125.73)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "cab09d74-dfc5-58eb-a4bb-a14ca6a188cf")
+	)
+	(junction
+		(at 134.62 52.07)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "0d246ba0-f2fa-50c0-a921-9b1da27178ff")
+	)
+	(junction
+		(at 146.05 87.63)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "eb54cb38-5d92-5f04-ac27-9c3300c561a9")
+	)
+	(junction
+		(at 180.34 99.06)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "2c4bdde1-84ee-5123-bc8f-9c6509c5135c")
+	)
+	(junction
+		(at 201.93 99.06)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "94ba960a-49d6-5a25-b48d-fe0c6be689f7")
+	)
+	(junction
+		(at 203.2 77.47)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "06456ee4-f331-5a23-8c0a-7d6947fa5923")
+	)
+	(junction
+		(at 212.09 77.47)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "6fbad9cc-4a1e-5a94-af3e-8217b67c7415")
+	)
+	(text "U12C: buffer supply"
+		(exclude_from_sim no)
+		(at 15.24 147.32 0)
+		(effects
+			(font
+				(size 2 2)
+				(bold yes)
+			)
+			(justify left top)
+		)
+		(uuid "8616e55c-422f-5b23-ba15-0072de624ddb")
+	)
+	(text "100n at V+ (pin 8). 4.6 mA per channel typ (SBOS365G)."
+		(exclude_from_sim no)
+		(at 15.24 151.13 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+				(italic yes)
+			)
+			(justify left top)
+		)
+		(uuid "6c783993-02be-5543-ac81-8f601d884169")
+	)
+	(rectangle
+		(start 12.7 144.78)
+		(end 78.74 199.39)
+		(stroke
+			(width 0.1)
+			(type dash)
+		)
+		(fill
+			(type none)
+		)
+		(uuid "59360cf6-3740-57df-94c0-c269ebaa7765")
+	)
+	(symbol
+		(lib_id "Amplifier_Operational:Opamp_Dual")
+		(at 20.32 185.42 0)
+		(unit 3)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "70aa302f-1e65-5f4b-ad61-a7b8db7f9a7b")
+		(property "Reference" "U12"
+			(at 18.98 184.42 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "OPA2365AIDR"
+			(at 18.98 186.42 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm"
+			(at 20.32 185.42 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" "https://www.ti.com/lit/ds/symlink/opa365.pdf"
+			(at 20.32 185.42 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Dual operational amplifier"
+			(at 20.32 185.42 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "OPA2365AIDR"
+			(at 20.32 185.42 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Texas Instruments"
+			(at 20.32 185.42 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C130011"
+			(at 20.32 185.42 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "4"
+			(uuid "81ed60c2-59f3-587d-902d-712e857b1789")
+		)
+		(pin "8"
+			(uuid "358bf8c6-02c4-5f69-a1af-40022c15b6e5")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "U12")
+					(unit 3)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 17.78 193.04 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "514ff8de-32b6-594e-ad25-271e376c9f8b")
+		(property "Reference" "#PWR04010"
+			(at 17.78 193.04 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 17.78 196.34 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Footprint" ""
+			(at 17.78 193.04 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 17.78 193.04 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 17.78 193.04 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "c90bb08c-5e2a-573a-8207-ac2eb3deaca7")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "#PWR04010")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 21.59 166.37 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "a24b1799-e42a-503d-bbdc-e61e3ea88f98")
+		(property "Reference" "C12"
+			(at 24.522 165.37 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "100n"
+			(at 24.522 167.37 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+			(at 21.59 166.37 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 21.59 166.37 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 21.59 166.37 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "CL05B104KO5NNNC"
+			(at 21.59 166.37 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Samsung Electro-Mechanics"
+			(at 21.59 166.37 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C1525"
+			(at 21.59 166.37 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "a7cd6a26-bfd1-5950-af87-c86edc262df6")
+		)
+		(pin "2"
+			(uuid "e381015f-d031-5cae-be42-750d8819f210")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "C12")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 21.59 170.18 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "f26768e6-8aef-592b-9866-f24b4d141b25")
+		(property "Reference" "#PWR04011"
+			(at 21.59 170.18 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 21.59 173.48 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Footprint" ""
+			(at 21.59 170.18 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 21.59 170.18 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 21.59 170.18 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "56f89673-0f46-5e56-873d-dd68cf6f0323")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "#PWR04011")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:+3V3")
+		(at 33.02 162.56 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "5e7da79c-6053-51e2-babf-2353687c82fb")
+		(property "Reference" "#PWR04012"
+			(at 33.02 162.56 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "+3V3"
+			(at 33.02 159.26 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+			)
+		)
+		(property "Footprint" ""
+			(at 33.02 162.56 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 33.02 162.56 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 33.02 162.56 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "81e6c4c8-1f6b-59ed-95f2-31cc20a58bd5")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "#PWR04012")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts (xy 17.78 162.56) (xy 17.78 177.8))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a182edbb-c859-5c63-bca0-d1ebcb11d91e")
+	)
+	(wire
+		(pts (xy 17.78 162.56) (xy 21.59 162.56))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "720fb838-95a1-5bb2-815e-fa6fba8d9383")
+	)
+	(wire
+		(pts (xy 21.59 162.56) (xy 33.02 162.56))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "79751af5-a5d6-5986-8212-2b9e2b83780d")
+	)
+	(junction
+		(at 21.59 162.56)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "66ef1c0e-86a3-5896-9005-f5b75f4476f9")
+	)
+	(text "U11 SN74HC259: sensor enables (Q0-Q5 = K1, K2, K3, K4, REF1, REF2)"
+		(exclude_from_sim no)
+		(at 250.19 15.24 0)
+		(effects
+			(font
+				(size 2 2)
+				(bold yes)
+			)
+			(justify left top)
+		)
+		(uuid "0782798e-8321-52a9-80e1-e3914e585083")
+	)
+	(text "S0-S2 = G0-G2 (SEL), D = G3 (SEL_EN), G = G4, CLR = G5. CLR low + G low: demultiplexer, only the\naddressed sensor on while G3 is high (gated, 1 kHz). CLR high: write each address with G3 high, then\nG high holds them all on (8 kHz). CLR low + G high: all off. 100k pull-downs: every G-line low = all off.\nA subset: set SEL and G3 with G high, then pulse G low (SCLS134F 7.3: G high while the address changes)."
+		(exclude_from_sim no)
+		(at 250.19 19.05 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+				(italic yes)
+			)
+			(justify left top)
+		)
+		(uuid "d973c780-570a-5d5d-b1b2-999647c56c16")
+	)
+	(rectangle
+		(start 247.65 12.7)
+		(end 378.46 118.11)
+		(stroke
+			(width 0.1)
+			(type dash)
+		)
+		(fill
+			(type none)
+		)
+		(uuid "55b7ab88-6a8e-538f-9ab1-cc9c8792ef60")
+	)
+	(symbol
+		(lib_id "74xx:74LS259")
+		(at 298.45 74.93 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "72500762-9ed5-5d78-89b9-88a6fcae7f23")
+		(property "Reference" "U11"
+			(at 300.99 59.23 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "SN74HC259PWR"
+			(at 300.99 60.98 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Package_SO:TSSOP-16_4.4x5mm_P0.65mm"
+			(at 298.45 74.93 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" "https://www.ti.com/lit/ds/symlink/sn74hc259.pdf"
+			(at 298.45 74.93 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "8-bit addressable latch, 2-6 V, TSSOP-16"
+			(at 298.45 74.93 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "SN74HC259PWR"
+			(at 298.45 74.93 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Texas Instruments"
+			(at 298.45 74.93 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C2652971"
+			(at 298.45 74.93 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "5da9aa5f-473d-5cc0-bdd7-79e4192d583a")
+		)
+		(pin "2"
+			(uuid "88f481b2-37fb-5e45-9c97-100e89b875bd")
+		)
+		(pin "3"
+			(uuid "b9a77482-d273-55bc-a149-1e7ef74e3c35")
+		)
+		(pin "4"
+			(uuid "e465e785-cb2e-50d5-92fe-e45d1d0a0fe7")
+		)
+		(pin "5"
+			(uuid "282bc362-529e-586c-a470-559597955d5a")
+		)
+		(pin "6"
+			(uuid "d6ff2ccb-0975-5c99-b754-3b39ffc6f56b")
+		)
+		(pin "7"
+			(uuid "8c06a1f9-d26f-5052-8df7-ea37c278a1ed")
+		)
+		(pin "8"
+			(uuid "12dddf43-0c30-5efe-b7cd-f532cdfbcc7f")
+		)
+		(pin "9"
+			(uuid "30c4124b-0939-5867-bc67-35f6d1ee84e4")
+		)
+		(pin "10"
+			(uuid "46b28a0f-8e84-56e2-84c8-c6dd29983bc4")
+		)
+		(pin "11"
+			(uuid "e15be005-53e1-5b3a-8a9b-79c3e6f90dcc")
+		)
+		(pin "12"
+			(uuid "ec438d62-114a-51f8-8c79-154abd1ac542")
+		)
+		(pin "13"
+			(uuid "2f15604a-d91a-52b5-b680-ad07deab561a")
+		)
+		(pin "14"
+			(uuid "a39f5582-80d9-5ce7-ba6c-ca871db7c718")
+		)
+		(pin "15"
+			(uuid "515824fb-8dbe-5d17-b64d-ceeeb3948401")
+		)
+		(pin "16"
+			(uuid "864e5070-9ba7-58cb-b167-e388834c815b")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "U11")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(no_connect
+		(at 311.15 80.01)
+		(uuid "3d1a69c6-2456-56f8-a5a0-10024fbc0524")
+	)
+	(no_connect
+		(at 311.15 82.55)
+		(uuid "a7682d84-5e70-53ae-b086-4785c88c18ab")
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 298.45 92.71 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "1b54702c-ab13-5bc4-99ae-a3f08e0a708b")
+		(property "Reference" "#PWR04013"
+			(at 298.45 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 298.45 96.01 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Footprint" ""
+			(at 298.45 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 298.45 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 298.45 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "fa3b608e-4d1d-53f5-a869-232ee92ee713")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "#PWR04013")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 266.7 36.83 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "6bb403ef-784d-5db7-9f96-bd2c9c354a5e")
+		(property "Reference" "R13"
+			(at 264.784 35.83 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "100k"
+			(at 264.784 37.83 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 266.7 36.83 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 266.7 36.83 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 266.7 36.83 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "0402WGF1003TCE"
+			(at 266.7 36.83 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 266.7 36.83 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C25741"
+			(at 266.7 36.83 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "85a7a656-9f02-508e-b1ed-7b561bf88979")
+		)
+		(pin "2"
+			(uuid "c5dccbcf-88e4-57fa-984b-8b4baf9285fb")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "R13")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 266.7 40.64 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "4d476a65-0087-51f6-b1a2-f4b155d1aabb")
+		(property "Reference" "#PWR04014"
+			(at 266.7 40.64 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 266.7 43.94 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Footprint" ""
+			(at 266.7 40.64 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 266.7 40.64 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 266.7 40.64 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "108ab663-3d4e-5641-b5d1-fd481a1d0a86")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "#PWR04014")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label "G3"
+		(shape input)
+		(at 256.54 33.02 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "2dd10150-a063-513c-8801-b2d52071be11")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 256.54 33.02 180)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 266.7 50.8 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "5f6c8e34-6150-5021-92ac-08e63f5725e5")
+		(property "Reference" "R10"
+			(at 264.784 49.8 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "100k"
+			(at 264.784 51.8 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 266.7 50.8 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 266.7 50.8 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 266.7 50.8 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "0402WGF1003TCE"
+			(at 266.7 50.8 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 266.7 50.8 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C25741"
+			(at 266.7 50.8 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "a43813c2-9690-5dce-a663-e8dbae1ecbc7")
+		)
+		(pin "2"
+			(uuid "9ec34c13-e68b-5334-98f3-595a3a88fbd6")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "R10")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 266.7 54.61 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "dc9f8e8e-c566-50a6-b9d9-593afe1de0f3")
+		(property "Reference" "#PWR04015"
+			(at 266.7 54.61 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 266.7 57.91 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Footprint" ""
+			(at 266.7 54.61 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 266.7 54.61 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 266.7 54.61 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "448327f5-e719-5ea9-8f2d-f644ec7f919d")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "#PWR04015")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label "G0"
+		(shape input)
+		(at 256.54 46.99 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "c90b48f6-8597-5df9-b742-b33d7e73f203")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 256.54 46.99 180)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 266.7 64.77 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "0ddf79d3-3454-5755-b832-d41029207ded")
+		(property "Reference" "R11"
+			(at 264.784 63.77 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "100k"
+			(at 264.784 65.77 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 266.7 64.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 266.7 64.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 266.7 64.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "0402WGF1003TCE"
+			(at 266.7 64.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 266.7 64.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C25741"
+			(at 266.7 64.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "6cc21da2-f6c1-55c6-820d-439c5434d835")
+		)
+		(pin "2"
+			(uuid "d5b6ac1b-7957-5512-acf5-7cdb320c0147")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "R11")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 266.7 68.58 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "a5bc64c4-6c2c-5154-bd08-721ff2a99a22")
+		(property "Reference" "#PWR04016"
+			(at 266.7 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 266.7 71.88 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Footprint" ""
+			(at 266.7 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 266.7 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 266.7 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "c22a08c7-5f16-57d7-9be7-ad0f7fcaeda8")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "#PWR04016")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label "G1"
+		(shape input)
+		(at 256.54 60.96 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "267744ce-f876-5600-92b2-32ae81c8a839")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 256.54 60.96 180)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 266.7 78.74 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "4f18a192-351c-5f7b-9057-195eb7d43949")
+		(property "Reference" "R12"
+			(at 264.784 77.74 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "100k"
+			(at 264.784 79.74 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 266.7 78.74 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 266.7 78.74 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 266.7 78.74 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "0402WGF1003TCE"
+			(at 266.7 78.74 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 266.7 78.74 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C25741"
+			(at 266.7 78.74 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "548fd5db-d6f9-5240-bf08-04305a8dd8e6")
+		)
+		(pin "2"
+			(uuid "a4a93c02-ac7d-5181-9247-b86eeb37347e")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "R12")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 266.7 82.55 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "769e315d-8108-5153-95f6-dfe557422484")
+		(property "Reference" "#PWR04017"
+			(at 266.7 82.55 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 266.7 85.85 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Footprint" ""
+			(at 266.7 82.55 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 266.7 82.55 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 266.7 82.55 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "b293e26e-f931-598e-bc90-ac867ba45587")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "#PWR04017")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label "G2"
+		(shape input)
+		(at 256.54 74.93 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "70f324fe-d2e5-5030-8145-724cb44e4f4e")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 256.54 74.93 180)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 266.7 92.71 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "ab389548-17ce-5317-9890-6e2ccd6eede5")
+		(property "Reference" "R14"
+			(at 264.784 91.71 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "100k"
+			(at 264.784 93.71 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 266.7 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 266.7 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 266.7 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "0402WGF1003TCE"
+			(at 266.7 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 266.7 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C25741"
+			(at 266.7 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "d4afb4bf-6d60-57de-b1e1-eaf8f2b9928a")
+		)
+		(pin "2"
+			(uuid "db0e13ce-242d-55aa-8390-ec13f410c8d6")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "R14")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 266.7 96.52 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "f4b1da98-1f9d-555e-8555-cc68557746ff")
+		(property "Reference" "#PWR04018"
+			(at 266.7 96.52 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 266.7 99.82 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Footprint" ""
+			(at 266.7 96.52 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 266.7 96.52 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 266.7 96.52 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "4031ee12-0129-5a45-bc30-4900a857256c")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "#PWR04018")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label "G4"
+		(shape input)
+		(at 256.54 88.9 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "a7b55604-9bb8-54b8-8ada-a81baa2f25fc")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 256.54 88.9 180)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 266.7 106.68 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "b3cfea5a-255a-5c3f-8592-78ed1caf1893")
+		(property "Reference" "R15"
+			(at 264.784 105.68 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "100k"
+			(at 264.784 107.68 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 266.7 106.68 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 266.7 106.68 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 266.7 106.68 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "0402WGF1003TCE"
+			(at 266.7 106.68 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL"
+			(at 266.7 106.68 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C25741"
+			(at 266.7 106.68 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "eeabeead-da54-59ef-ba14-4ef028cac0e1")
+		)
+		(pin "2"
+			(uuid "4c8c4733-b89f-531c-8204-7c2fdaa9d0dd")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "R15")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 266.7 110.49 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "2f30eaaa-283f-556c-8483-8b313f6c1356")
+		(property "Reference" "#PWR04019"
+			(at 266.7 110.49 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 266.7 113.79 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Footprint" ""
+			(at 266.7 110.49 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 266.7 110.49 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 266.7 110.49 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "6d1cc050-057c-5b49-9278-9e2174a09bf2")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "#PWR04019")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(global_label "G5"
+		(shape input)
+		(at 256.54 102.87 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "0dd230f5-76ab-598e-8b81-2219196b45d6")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 256.54 102.87 180)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "EN_K1"
+		(shape output)
+		(at 316.23 64.77 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "1a5ccd57-5b4d-58f3-ad18-723367087e99")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 316.23 64.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+	(global_label "EN_K2"
+		(shape output)
+		(at 316.23 67.31 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "8df14c17-c876-506f-bc80-ca69174ad44c")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 316.23 67.31 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+	(global_label "EN_K3"
+		(shape output)
+		(at 316.23 69.85 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "060b0e68-fa02-58ef-ada8-ab221ead553f")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 316.23 69.85 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+	(global_label "EN_K4"
+		(shape output)
+		(at 316.23 72.39 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "be0a30af-d65e-54fd-9089-009771452d86")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 316.23 72.39 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+	(global_label "EN_REF1"
+		(shape output)
+		(at 316.23 74.93 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "e8705e3e-9e1e-5702-bb6c-42a10f4cfe37")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 316.23 74.93 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+	(global_label "EN_REF2"
+		(shape output)
+		(at 316.23 77.47 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "d1bb5b33-db87-5076-8bb6-9f1f56466cc2")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 316.23 77.47 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 302.26 45.72 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "63e0ac59-e029-5346-8e5d-12e271875917")
+		(property "Reference" "C11"
+			(at 305.192 44.72 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "100n"
+			(at 305.192 46.72 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+			(at 302.26 45.72 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 302.26 45.72 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 302.26 45.72 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "CL05B104KO5NNNC"
+			(at 302.26 45.72 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Samsung Electro-Mechanics"
+			(at 302.26 45.72 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C1525"
+			(at 302.26 45.72 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "466ef2cf-c0c4-55e0-8435-3c4f425a40eb")
+		)
+		(pin "2"
+			(uuid "6492948f-21f8-572a-bc0f-9c95c73c4510")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "C11")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 302.26 49.53 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "13b9a285-600c-5adb-8580-24b35946e37d")
+		(property "Reference" "#PWR04020"
+			(at 302.26 49.53 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 302.26 52.83 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify top)
+			)
+		)
+		(property "Footprint" ""
+			(at 302.26 49.53 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 302.26 49.53 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 302.26 49.53 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "df265e9f-f401-5b7b-9eae-dc166560810b")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "#PWR04020")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:+3V3")
+		(at 313.69 41.91 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "36b36efb-78e7-583e-a9c9-9051d791c88a")
+		(property "Reference" "#PWR04021"
+			(at 313.69 41.91 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "+3V3"
+			(at 313.69 38.61 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+			)
+		)
+		(property "Footprint" ""
+			(at 313.69 41.91 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 313.69 41.91 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 313.69 41.91 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "5b514572-63db-5541-9547-9ac277959343")
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "#PWR04021")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts (xy 298.45 41.91) (xy 298.45 57.15))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "85b3e1e2-3e97-589a-baaa-1f92d291fc59")
+	)
+	(wire
+		(pts (xy 298.45 41.91) (xy 302.26 41.91))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b5481423-c82b-5fc3-a107-24c37079cd8d")
+	)
+	(wire
+		(pts (xy 302.26 41.91) (xy 313.69 41.91))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "83be9704-bd5a-5c09-9b20-445edd459422")
+	)
+	(wire
+		(pts (xy 311.15 64.77) (xy 316.23 64.77))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "fb15d729-2789-554e-9755-b8985c168de4")
+	)
+	(wire
+		(pts (xy 311.15 67.31) (xy 316.23 67.31))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8f0b3ec7-4626-5a5d-a697-c7f418353d2c")
+	)
+	(wire
+		(pts (xy 311.15 69.85) (xy 316.23 69.85))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5e2f9c93-fa97-5b02-94b7-3d5ef3480488")
+	)
+	(wire
+		(pts (xy 311.15 72.39) (xy 316.23 72.39))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7a1e96f4-d2d3-5435-a56a-89ec93335afc")
+	)
+	(wire
+		(pts (xy 311.15 74.93) (xy 316.23 74.93))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "906cd42f-2107-5316-a589-df0bcfc06104")
+	)
+	(wire
+		(pts (xy 311.15 77.47) (xy 316.23 77.47))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d81b56ea-dbb5-5210-b621-202d6624da55")
+	)
+	(wire
+		(pts (xy 256.54 46.99) (xy 266.7 46.99))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6a5613fa-fbdc-5505-8103-a7cb308a1ab1")
+	)
+	(wire
+		(pts (xy 266.7 46.99) (xy 273.05 46.99))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "553cf5d8-c65f-5488-b499-d7f82879d3fb")
+	)
+	(wire
+		(pts (xy 273.05 46.99) (xy 273.05 69.85))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6d38fcdc-9b8e-51b4-9b15-2a12e8426dc6")
+	)
+	(wire
+		(pts (xy 273.05 69.85) (xy 285.75 69.85))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0a898e03-ef18-5807-aa62-d989ae3f208b")
+	)
+	(wire
+		(pts (xy 256.54 60.96) (xy 266.7 60.96))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "72df3d0f-9626-592c-a8d4-8b3bb1ecf20b")
+	)
+	(wire
+		(pts (xy 266.7 60.96) (xy 270.51 60.96))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ca4a8659-5f86-5f26-b715-d5af5d46afa8")
+	)
+	(wire
+		(pts (xy 270.51 60.96) (xy 270.51 72.39))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "48be4247-0af1-5d65-bd81-95be5db49277")
+	)
+	(wire
+		(pts (xy 270.51 72.39) (xy 285.75 72.39))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a34b8e7b-02b5-5795-b0f6-2a84220f92d8")
+	)
+	(wire
+		(pts (xy 256.54 74.93) (xy 266.7 74.93))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "183135bb-77ac-5e28-8575-75f8d76ece67")
+	)
+	(wire
+		(pts (xy 266.7 74.93) (xy 285.75 74.93))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d22614e8-5717-5b4a-81c9-e6e29b5865c7")
+	)
+	(wire
+		(pts (xy 256.54 33.02) (xy 266.7 33.02))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a2a3db2d-5c28-51bf-a053-8597692e99cb")
+	)
+	(wire
+		(pts (xy 266.7 33.02) (xy 275.59 33.02))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "48d7a859-c360-51da-ad6b-25226965d894")
+	)
+	(wire
+		(pts (xy 275.59 33.02) (xy 275.59 64.77))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "769df000-0229-5dab-a1ae-a4aab420c57e")
+	)
+	(wire
+		(pts (xy 275.59 64.77) (xy 285.75 64.77))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "35eb37df-03e5-51d1-b802-ace50d73d4f9")
+	)
+	(wire
+		(pts (xy 256.54 88.9) (xy 266.7 88.9))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9f7b7c24-7db0-522b-a9bd-7ec383303b0c")
+	)
+	(wire
+		(pts (xy 266.7 88.9) (xy 270.51 88.9))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8723c443-3750-50d2-b4f9-e84ca56f3298")
+	)
+	(wire
+		(pts (xy 270.51 80.01) (xy 270.51 88.9))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3c597f9a-3ac9-53f5-959b-0223fd18445c")
+	)
+	(wire
+		(pts (xy 270.51 80.01) (xy 285.75 80.01))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7872dd67-304c-57f9-98a7-d59ac65ccc2f")
+	)
+	(wire
+		(pts (xy 256.54 102.87) (xy 266.7 102.87))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3c8db578-03f9-59fd-9d7a-46c3d295af01")
+	)
+	(wire
+		(pts (xy 266.7 102.87) (xy 273.05 102.87))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "36becc9f-aad2-54ee-a62e-ca9b6df58d19")
+	)
+	(wire
+		(pts (xy 273.05 85.09) (xy 273.05 102.87))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "07561ca3-ba90-58aa-9567-95fa6b6032bd")
+	)
+	(wire
+		(pts (xy 273.05 85.09) (xy 285.75 85.09))
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0c380f79-d5ae-50db-8ddf-a0a450dca2eb")
+	)
+	(junction
+		(at 266.7 33.02)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "fb25e6a7-be01-5341-9e9c-06e5c3a5ca58")
+	)
+	(junction
+		(at 266.7 46.99)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "3e2196cd-60a8-561b-8b15-13a027b49c10")
+	)
+	(junction
+		(at 266.7 60.96)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "72016cc6-bb33-536a-9b7e-649083e2e541")
+	)
+	(junction
+		(at 266.7 74.93)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "373e8a62-3452-5354-8ceb-1091f6a3f30e")
+	)
+	(junction
+		(at 266.7 88.9)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "f144cb68-683c-57ab-a6a4-d49abf42ffaa")
+	)
+	(junction
+		(at 266.7 102.87)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "44c4cb77-edcb-5aaf-87f0-aea8bdc06375")
+	)
+	(junction
+		(at 302.26 41.91)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "66c5264a-7742-5844-be41-04e4fd6a5c48")
+	)
+	(text "Key fixture holes"
+		(exclude_from_sim no)
+		(at 86.36 147.32 0)
+		(effects
+			(font
+				(size 2 2)
+				(bold yes)
+			)
+			(justify left top)
+		)
+		(uuid "ae53703b-da47-5cd4-9c2e-ccaa6d345f2b")
+	)
+	(text "M2, unplated: the printed key fixture (keyboard/hardware/mechanical) is screwed here. Positions in boards/coupon_hall.py."
+		(exclude_from_sim no)
+		(at 86.36 151.13 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+				(italic yes)
+			)
+			(justify left top)
+		)
+		(uuid "dafdfa7b-f2ef-5754-bca7-8c3b12e9c7d3")
+	)
+	(rectangle
+		(start 83.82 144.78)
+		(end 224.79 163.83)
+		(stroke
+			(width 0.1)
+			(type dash)
+		)
+		(fill
+			(type none)
+		)
+		(uuid "5fb52146-f129-5629-b25e-8c64936d53dd")
+	)
+	(symbol
+		(lib_id "Mechanical:MountingHole")
+		(at 87.63 158.75 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "aafe3de6-adeb-5fb9-8e08-848d493df9d2")
+		(property "Reference" "H10"
+			(at 89.8 157.75 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "M2"
+			(at 89.8 159.75 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "MountingHole:MountingHole_2.2mm_M2"
+			(at 87.63 158.75 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 87.63 158.75 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Mounting Hole without connection"
+			(at 87.63 158.75 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "H10")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Mechanical:MountingHole")
+		(at 99.06 158.75 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "6aa278b9-883a-510c-b320-269a4ecbc0d5")
+		(property "Reference" "H11"
+			(at 101.23 157.75 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "M2"
+			(at 101.23 159.75 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "MountingHole:MountingHole_2.2mm_M2"
+			(at 99.06 158.75 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 99.06 158.75 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Mounting Hole without connection"
+			(at 99.06 158.75 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "H11")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Mechanical:MountingHole")
+		(at 110.49 158.75 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "4b4ac5ac-99a5-5415-b1c2-d6f041e561ae")
+		(property "Reference" "H12"
+			(at 112.66 157.75 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "M2"
+			(at 112.66 159.75 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "MountingHole:MountingHole_2.2mm_M2"
+			(at 110.49 158.75 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 110.49 158.75 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Mounting Hole without connection"
+			(at 110.49 158.75 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "H12")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Mechanical:MountingHole")
+		(at 121.92 158.75 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "d7b7c44b-74d6-50dc-959a-171b66179787")
+		(property "Reference" "H13"
+			(at 124.09 157.75 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "M2"
+			(at 124.09 159.75 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "MountingHole:MountingHole_2.2mm_M2"
+			(at 121.92 158.75 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 121.92 158.75 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Mounting Hole without connection"
+			(at 121.92 158.75 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "H13")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Mechanical:MountingHole")
+		(at 133.35 158.75 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "c5d1b8ce-9ed4-5654-b61f-c57110d48dd0")
+		(property "Reference" "H14"
+			(at 135.52 157.75 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "M2"
+			(at 135.52 159.75 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "MountingHole:MountingHole_2.2mm_M2"
+			(at 133.35 158.75 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 133.35 158.75 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Mounting Hole without connection"
+			(at 133.35 158.75 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(instances
+			(project "prettycool-keyboard-coupon-hall"
+				(path "/e0936b42-8ce5-5076-b186-ecea1ea9795e/ca079efd-5383-5d91-88f2-b4f4e2ad851c"
+					(reference "H14")
+					(unit 1)
+				)
+			)
+		)
+	)
+)

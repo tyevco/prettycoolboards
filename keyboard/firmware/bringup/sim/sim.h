@@ -23,6 +23,13 @@ enum sim_coupon_kind {
 	SIM_TEST,       /* the test coupon, its descriptor written */
 	SIM_TEST_BLANK, /* the test coupon, its EEPROM erased */
 	SIM_HALL,       /* a coupon with a minimal Hall descriptor and a 30 mA 3.3 V draw */
+	/* The test coupon plugged in turned 180 degrees. The slot key (D2 of 2026-11-27: coupon pin 39 absent,
+	 * socket hole 39 plugged) stops this, so it models a socket whose plug was not fitted. Slot pin p meets
+	 * coupon pin 41 - p (nets.SLOT_PINS): PRESENT_N (32) meets its GND (9), so the slot reads present; SCL (29)
+	 * meets its GND (12), so nothing answers on the slot's channel (modelled as a NAK: the real bus is held low,
+	 * which jams I2C4 while the channel is selected, risks.md EL-2, not modelled); IRQ_N (31) meets a GND (10);
+	 * CS0_N (27) a GND (14); G0/G1 (33, 34) its +3V3 (8, 7). */
+	SIM_TURNED,
 };
 
 struct sim_exp {
@@ -71,6 +78,9 @@ extern struct sim_world sim;
  *  - slot n's bus switch closed, or its mux channel selected, while +3V3_Sn is off;
  *  - a line that goes straight to slot n (CS0_N, CS1_N, IRQ_N, G0-G5, U_EXP3's G4/G5 included) driven high
  *    while +3V3_Sn is off (SPEC §3.5: low or high-impedance only);
+ *  - an MCU line that goes straight to slot n (CS0_N, CS1_N, G0-G5) driven at either level, or its bus switch
+ *    closed, while a turned coupon (SIM_TURNED) is in it: the firmware drives a slot's lines only after a valid
+ *    descriptor (SPEC §4.6, risks.md EL-2), which a turned coupon cannot give;
  *  - a rail switched on while the host has not configured the device, or is suspending it (bench mode, the
  *    operator's declaration, excepted), and a rail still on SIM_USB_GRACE_MS after the host left that state.
  * A violation is counted and the first one kept; "sim state" prints both and every test asserts none.

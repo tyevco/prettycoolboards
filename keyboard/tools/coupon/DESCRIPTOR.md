@@ -82,7 +82,10 @@ The generated tables below give every byte. What the less obvious fields mean:
   `slot_mask` must be a subset of the compatible slots; the firmware refuses the coupon in any other slot.
 * **`uses`.** One bit per slot pin group, in `descriptor.USES` order: the two rails, then every slot signal but
   PRESENT_N (always strapped). `rules.py` requires it to equal the header pins the netlist connects. The firmware
-  powers +5V_S*n* only if bit 1 is set and drives only the lines listed.
+  powers +5V_S*n* only if bit 1 is set and drives only the lines listed. **Pin 39 has no bit:** it is the slot key
+  (the owner's decision D2 of 2026-11-27, SPEC §4.2; it was RSV), absent from every coupon. Bits 22–31 are zero;
+  `descriptor.py`'s strict decode refuses a same-minor image with any of them set as a reserved-bits error. The C
+  header's `coupon_desc_validate()` checks only the size, blank, magic, version, length and CRC, not this.
 * **Rails** (`rails[0]` +3V3, `rails[1]` +5V): `max_ma` is the budget, within SPEC §4.9's rule and below the switch's
   minimum trip in every allowed slot; `bulk_uf_x10` is the capacitance at the header, within 47 µF (+3V3), 100 µF
   (+5V) or 470 µF (+5V on S5); `startup_ms` is how long after the rail is up the coupon's parts become usable (the

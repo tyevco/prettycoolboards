@@ -80,7 +80,11 @@ int tb_slot_on(int slot, const struct tb_slot_on_opts *o, struct tb_slot_on_resu
 		}
 	}
 	res->on3 = true;
-	(void)tb_slot_lines(slot, true);
+	/* The slot's direct lines (CS0_N, CS1_N, G0-G5, IRQ_N) stay high-impedance until the descriptor is read and
+	 * checked (SPEC §4.6: "reads the descriptor, and only then configures anything else"; risks.md EL-2). The
+	 * read needs only +3V3_Sn and the slot's mux channel. The key (D2 of 2026-11-27) keeps a turned coupon out of
+	 * the socket, but only while hole 39 is plugged and the coupon's pin 39 pulled, two hand steps: a coupon
+	 * that went in turned reads present (PRESENT_N on its GND), and is now refused without being driven. */
 
 	if (o->use_desc) {
 		res->desc = tb_descio_load(slot, raw, sizeof(raw), &len);
@@ -116,6 +120,8 @@ int tb_slot_on(int slot, const struct tb_slot_on_opts *o, struct tb_slot_on_resu
 	if (tb_mon_for_rail(h->rail3) != NULL) {
 		(void)tb_mon_set_alert(tb_mon_for_rail(h->rail3), tb_rail_alert_ua(h->rail3, res->ma3));
 	}
+	/* Identified (or declared by the operator with nodesc): now the lines, CS high and G low (SPEC §3.5). */
+	(void)tb_slot_lines(slot, true);
 
 	if (tb.budget.on & TB_RAIL_BIT(h->rail5)) {
 		const struct tb_mon *m5 = tb_mon_for_rail(h->rail5);

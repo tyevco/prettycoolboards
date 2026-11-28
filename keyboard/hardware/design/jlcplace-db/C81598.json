@@ -1,0 +1,70 @@
+{
+ "entries": [
+  {
+   "correction": {
+    "dx": 0.0,
+    "dy": 0.0,
+    "mirror": false,
+    "rot": 0.0
+   },
+   "ee": {
+    "key": "ee-sha1:6fc0434f8e5ddb10",
+    "title": "SOD-123F_L2.7-W1.6-LS3.8-RD"
+   },
+   "fit": {
+    "alternatives": [
+     {
+      "conflicts": 0,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": true,
+      "matched": 2,
+      "mirror": true,
+      "names": 2,
+      "rot": 180.0
+     },
+     {
+      "conflicts": 2,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": true,
+      "names": -2,
+      "rot": 0.0
+     },
+     {
+      "conflicts": 2,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": false,
+      "names": -2,
+      "rot": 180.0
+     }
+    ],
+    "matched": 2,
+    "method": "number",
+    "polar": true,
+    "rms": 0.0849,
+    "score": 75
+   },
+   "fitted": "2026-11-28",
+   "kicad": {
+    "fpid": "Diode_SMD:D_SOD-123",
+    "pad_hash": "sha1:883c7ddc7f58ee09"
+   },
+   "reasons": [
+    "fits by pad numbers and pin names: 2/2 matched, rms 0.085 mm",
+    "rot 180 also lands every pad, on other nets; ruled out by pad numbers, pin names and the drawn polarity: the EasyEDA footprint draws its + beside pad 2, and KiCad's positive pad is 2 (by KiCad's library convention (pad 1 = cathode))",
+    "2 pin names agree"
+   ],
+   "status": "auto",
+   "tool": "jlcplace 0.2.1",
+   "verdict": "green",
+   "verifications": []
+  }
+ ],
+ "lcsc": "C81598"
+}

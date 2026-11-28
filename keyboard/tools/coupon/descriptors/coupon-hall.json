@@ -1,7 +1,7 @@
 {
-  "_comment": "Descriptor of the rev A Hall-effect coupon (default slot S1, standard), written from its captured design (keyboard/hardware/design/sheets/coupon_hall.py, DESCRIPTOR_FACTS and the parts notes, 2026-11-27) and its netlist. Not built: the currents are the design's estimates and the scaling is the datasheet's typical sensitivity (placeholder_fields). tests/test_rules.py compares it with DESCRIPTOR_FACTS.",
+  "_comment": "Descriptor of the rev A Hall-effect coupon (default slot S1, standard), written from its captured design (keyboard/hardware/design/sheets/coupon_hall.py, DESCRIPTOR_FACTS and the parts notes; captured 2026-11-27, re-captured 2026-11-28 for the owner's decisions of 2026-11-27) and its netlist. Not built: the currents are the design's estimates and the scaling is the datasheet's typical sensitivity (placeholder_fields). tests/test_rules.py compares it with DESCRIPTOR_FACTS.",
   "board": "coupon-hall",
-  "source": "sheets/coupon_hall.py (captured 2026-11-27)",
+  "source": "sheets/coupon_hall.py (captured 2026-11-27, re-captured 2026-11-28)",
   "placeholder_fields": ["rails.+3V3.typ_ma", "rails.+3V3.max_ma", "rails.+3V3.startup_ms", "select.settle_ns",
                          "lanes.*.offset", "lanes.*.gain"],
   "notes": [
@@ -13,7 +13,10 @@
     "Bulk on +3V3 at the header: C1 10 uF + ten 100 nF = 11 uF (the netlist)",
     "G-lines: G0-G2 = SEL[2:0] (mux A0-A2 and latch S0-S2), G3 = SEL_EN (mux EN and latch D), G4 = latch G (active low), G5 = latch CLR (active low); every G-line has a 100 k pull-down on the coupon. Modes in sheets/coupon_hall.py DESCRIPTOR_FACTS['modes']. G4/G5 are slow expander lines on S1-S4: fine, they only set the mode",
     "needs lanes_14bit: AN1 is a 14-bit key lane; on S5 it would land on the 12-bit ADC4 (SPEC §4.4)",
-    "devices[3] is the SN74HC259 enable latch (U11): format 1.0 has no part ID for it, so 'other' on bus gpio"
+    "devices[3] is the SN74HC259 enable latch (U11): format 1.0 has no part ID for it, so 'other' on bus gpio",
+    "Pin 39 is the slot key (owner's decision D2 of 2026-11-27): no pin, no pad, no net on this coupon; it is in no `uses` group. Stage A1 (D1)",
+    "Crosstalk (risks.md SE-2, the register's field model, an estimate): a press to the 4 mm stop moves REF1 by -205 uT for K1 or K3 and -8 uT for K2 or K4 (REF2 the mirror image), a key's row or column neighbour by -137 uT and its diagonal by -28 uT, against a sensor's 25.8 uT rms. A reference is common mode only while every key reads at rest; otherwise subtract the 4 x 6 matrix measured at bring-up (DESCRIPTOR_FACTS['crosstalk_uT'])",
+    "Electronic floor (risks.md SE-4): AN0 steps 6 and 7 (TEMP1, TEMP2, the thermistor taps behind 1 uF) pass the same mux, U12A, R18 and lane as the sensors, every frame, near mid-scale; their own noise is about 9 uV rms (estimate) against the ADC's 233-464 uV rms, so their sigma is the lane's floor. AN1 has no floor source of its own (with K1 off, R20 holds it at 0 V): use AN0's"
   ],
   "type": "hall",
   "rev": "A",
@@ -21,7 +24,7 @@
   "default_slot": 1,
   "needs": ["lanes_14bit"],
   "serial": 0,
-  "date": "2026-11-27",
+  "date": "2026-11-28",
   "git": "auto",
   "uses": ["+3V3", "AN0", "AN1", "SCL", "SDA", "G0", "G1", "G2", "G3", "G4", "G5"],
   "spi": {"max_khz": 0},

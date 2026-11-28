@@ -174,3 +174,59 @@ def test_hall_lane_behind_a_dnp_part(tmp_path, geometry):
         d["lanes"]["AN2"] = dict(d["lanes"]["AN0"])
     desc = _desc("coupon-hall", tmp_path, f)
     assert _check("coupon-hall", desc=desc, geometry=geometry).result("uses") == "FAIL"
+
+
+# ---- the owner's decisions of 2026-11-27 on the real boards: D2 (the key), D3 (100 ohm on the direct lines), D7
+@needs_pcbnew
+def test_key_pad_put_back_on_the_board(tmp_path, geometry):
+    """A pad 39 added to the real test coupon's J1 (where the stock header has it) fails key.pcb."""
+    import pcbnew
+    _n, p0, _d = _files("test-coupon")
+    b = pcbnew.LoadBoard(p0)
+    j1 = b.FindFootprintByReference("J1")
+    pads = {p.GetNumber(): p for p in j1.Pads()}
+    assert "39" not in pads
+    pad = pcbnew.PAD(pads["37"])
+    pad.SetNumber("39")
+    pad.SetPosition(pads["37"].GetPosition() + (pads["3"].GetPosition() - pads["1"].GetPosition()))
+    pad.SetNet(b.FindNet("") or pads["37"].GetNet())
+    j1.Add(pad)
+    pcb = str(tmp_path / "f.kicad_pcb")
+    pcbnew.SaveBoard(pcb, b)
+    rep = _check("test-coupon", pcb=pcb, geometry=geometry)
+    assert rep.result("key.pcb") == "FAIL" and "has a pad 39" in " ".join(d for _r, _x, d in rep.rows)
+
+
+@needs_pcbnew
+def test_key_pin_on_a_net(tmp_path, geometry):
+    """J1 pin 39 put on GND in a copy of the real Hall coupon's netlist fails the key rule."""
+    import sexpr
+
+    def f(root):
+        for nt in sexpr.find_all(sexpr.find(root, "nets"), "net"):
+            if str(sexpr.find(nt, "name")[1]) == "GND":
+                nt.append(["node", ["ref", sexpr.Q("J1")], ["pin", sexpr.Q("39")], ["pintype", sexpr.Q("passive")]])
+                return
+    n0, _p, _d = _files("coupon-hall")
+    net = _edit_net(n0, tmp_path / "f.net", f)
+    rep = _check("coupon-hall", net=net, geometry=geometry)
+    assert rep.result("key") == "FAIL" and "pin 39 (KEY) is on GND" in " ".join(d for _r, _x, d in rep.rows)
+
+
+@needs_pcbnew
+def test_strong_load_on_a_g_line(tmp_path, geometry):
+    """220 ohm from G0 to GND on the real test coupon: through the socket's 100 ohm (D3) and the MCU's driver the pin
+    sources about 8.9 mA, beyond DS13543 Table 88's 8 mA: slotlines.dc fails."""
+    n0, _p, _d = _files("test-coupon")
+    net = _edit_net(n0, tmp_path / "f.net", lambda r: _add_cap(r, "R99", "220", "G0", "GND", like="R10"))
+    rep = _check("test-coupon", net=net, geometry=geometry)
+    assert rep.result("slotlines.dc") == "FAIL" and "G0: R10, R99" in " ".join(d for _r, _x, d in rep.rows)
+
+
+@needs_pcbnew
+def test_inj_diode_is_open_while_the_lane_idles(geometry):
+    """D11 from INJ into the AN0 tap (D7) is reverse-biased while INJ idles, so the idle lane's ratio and R_src are
+    checked (test_ladder_resistor_changed relies on it)."""
+    rep = _check("test-coupon", geometry=geometry)
+    txt = " ".join(d for ru, _x, d in rep.rows if ru == "lanes.AN0.rsrc")
+    assert rep.result("lanes.AN0.ratio") == "PASS" and "D11 from INJ taken as open" in txt and "399" in txt

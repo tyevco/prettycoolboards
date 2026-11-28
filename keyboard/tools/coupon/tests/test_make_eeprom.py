@@ -3,13 +3,19 @@
 import json
 import os
 
+import pytest
+
+import coupon_fixtures as F
 import descriptor as D
 import make_eeprom as ME
+import rules as R
 from coupon_fixtures import good_desc
 
 
 def test_every_descriptor_makes_an_image(tmp_path):
-    assert ME.main(["--out", str(tmp_path), "--serial", "1-2", "--git", "0123456789abcdef"]) == 0
+    """Every shipped descriptor encodes into a valid image (the descriptor rules only; the generated boards are
+    checked against their descriptors below)."""
+    assert ME.main(["--out", str(tmp_path), "--serial", "1-2", "--git", "0123456789abcdef", "--no-board-check"]) == 0
     bins = sorted(p for p in os.listdir(tmp_path) if p.endswith(".bin"))
     boards = sorted(f[:-5] for f in os.listdir(ME.DESC_DIR) if f.endswith(".json"))
     assert bins == sorted(f"{b}-s{s:04d}.bin" for b in boards for s in (1, 2))
@@ -20,6 +26,19 @@ def test_every_descriptor_makes_an_image(tmp_path):
         assert json.loads((tmp_path / b.replace(".bin", ".json")).read_text()) == k
         assert ME.read_intel_hex((tmp_path / b.replace(".bin", ".hex")).read_text()) == img
     assert ME.main(["--check", *[str(tmp_path / b) for b in bins]]) == 0
+
+
+@pytest.mark.parametrize("board", R.generated_coupons())
+def test_generated_board_agrees_with_its_descriptor(tmp_path, board):
+    """make_eeprom.py with the board rules: a coupon's image is written only if its generated board agrees with its
+    descriptor. A board generated before the key (D2 of 2026-11-27) or with a placeholder descriptor is an expected
+    failure, named; it runs as an ordinary test once the board is rebuilt and the descriptor written."""
+    if F.predates_the_key(board):
+        pytest.xfail(f"{board} was generated before D2 of 2026-11-27 (J1 still has pin 39): rebuild it with "
+                     "build.py and layout.py")
+    if F.excused(board) and D.load_json(os.path.join(ME.DESC_DIR, f"{board}.json")).get("placeholder"):
+        pytest.xfail(f"descriptors/{board}.json is still a placeholder: write it from the captured design")
+    assert ME.main([board, "--out", str(tmp_path), "--git", "none"]) == 0
 
 
 def test_placeholder_flag_and_refusal(tmp_path):

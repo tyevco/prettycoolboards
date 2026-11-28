@@ -1,0 +1,88 @@
+{
+ "entries": [
+  {
+   "correction": {
+    "dx": 0.0,
+    "dy": 0.0,
+    "mirror": false,
+    "rot": 0.0
+   },
+   "ee": {
+    "key": "ee-sha1:e45b3f8fd119b91b",
+    "title": "R0402"
+   },
+   "fit": {
+    "alternatives": [
+     {
+      "conflicts": 0,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": true,
+      "matched": 2,
+      "mirror": true,
+      "names": 0,
+      "rot": 180.0
+     },
+     {
+      "conflicts": 2,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": true,
+      "names": 0,
+      "rot": 0.0
+     },
+     {
+      "conflicts": 2,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": false,
+      "names": 0,
+      "rot": 180.0
+     }
+    ],
+    "doubt": "polarity",
+    "matched": 2,
+    "method": "number",
+    "polar": true,
+    "rms": 0.0772,
+    "score": 70
+   },
+   "fitted": "2026-11-28",
+   "kicad": {
+    "fpid": "Resistor_SMD:R_0402_1005Metric",
+    "pad_hash": "sha1:24211eb4e460e19a"
+   },
+   "reasons": [
+    "polarity decided by pad numbers only (rot 180 also lands both pads, and no pin names or drawn + confirm it): check the polarity mark in JLC's preview"
+   ],
+   "status": "manual",
+   "tool": "jlcplace 0.2.1",
+   "verdict": "yellow",
+   "verifications": [
+    {
+     "board": "prettycool-keyboard-coupon-hall.kicad_pcb",
+     "by": "hardware (coupon-hall capture)",
+     "correction": {
+      "dx": 0.0,
+      "dy": 0.0,
+      "mirror": false,
+      "rot": 0.0
+     },
+     "date": "2026-11-27",
+     "layer": "top",
+     "note": "NTC thermistor (Murata NCP15XH103F03RC, 0402): a resistor, not polarised, so rot 0 and rot 180 are both correct; the auto fit's polarity warning does not apply.",
+     "ok": true,
+     "presses": null,
+     "ref": "TH10",
+     "rotation": 0.0,
+     "source": "manual"
+    }
+   ]
+  }
+ ],
+ "lcsc": "C77131"
+}

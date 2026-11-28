@@ -129,8 +129,8 @@ Error tokens:
 | `tb rail <rail> on <declared mA>` | one rail on (presence, budget, order checked), then read after the settling time. The slot's bus switch is opened first if it was closed (SPEC §3.5) and left open: `tb slot <n> on` closes it again | `ina`, `rail` |
 | `tb rail <rail> off` | that rail off (a 3.3 V rail takes its slot's 5 V with it); the slot's bus switch opens first and stays open | `rail` |
 | `tb slot` / `tb slot <n>` | slot status | `slot` per slot |
-| `tb slot <n> on [probe=<mA>] [keep]` | SPEC §8.4's discovery: +3V3 declared at the 250 mA rule (or `probe=`, lower) until the descriptor is read, check, descriptor, its rules, its currents, +5V if it asks, then the bus switch. `keep` leaves +3V3 on when the descriptor is blank (to write one). On a slot already on it reports its state | `slot_on`, `slot` |
-| `tb slot <n> on nodesc ma3=<mA> [ma5=<mA>]` | the same without a descriptor (a breakout on jumper leads), with the operator's declared currents | `slot_on`, `slot` |
+| `tb slot <n> on [probe=<mA>] [keep]` | SPEC §8.4's discovery: +3V3 declared at the 250 mA rule (or `probe=`, lower) until the descriptor is read, check, descriptor, its rules, its currents, then the slot's direct lines (CS high, G low; until then high-impedance: SPEC §4.6, risks.md EL-2), +5V if it asks, then the bus switch. `keep` leaves +3V3 on when the descriptor is blank (to write one), with the lines still high-impedance. On a slot already on it reports its state | `slot_on`, `slot` |
+| `tb slot <n> on nodesc ma3=<mA> [ma5=<mA>]` | the same without a descriptor (a breakout on jumper leads), with the operator's declared currents; the lines are driven once the rail checks pass | `slot_on`, `slot` |
 | `tb slot <n> off` | the slot off | `slot` |
 | `tb desc <n>` | read and parse the descriptor (+3V3 must be on) | `desc_hex` per 16 bytes, `desc` (or `desc status=<err>`), `desc_lane`, `desc_gline`, `desc_load` |
 | `tb desc <n> write test [serial=<n>] [force]` | write the test coupon's descriptor (format 1.0, a proposal) and verify it | `desc`, ... |

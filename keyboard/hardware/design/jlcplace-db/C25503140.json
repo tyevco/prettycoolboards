@@ -62,6 +62,37 @@
    "tool": "jlcplace 0.2.1",
    "verdict": "green",
    "verifications": []
+  },
+  {
+   "correction": {
+    "dx": 1.27,
+    "dy": 24.13,
+    "mirror": false,
+    "rot": 270.0
+   },
+   "ee": {
+    "key": "ee-sha1:3e7073cae5729470",
+    "title": "HDR-TH_40P-P2.54-V-M-R2-C20-S2.54"
+   },
+   "fit": {
+    "alternatives": [],
+    "matched": 39,
+    "method": "number",
+    "rms": 0.0,
+    "score": 39
+   },
+   "fitted": "2026-11-27",
+   "kicad": {
+    "fpid": "keyboard:PinHeader_2x20_P2.54mm_Vertical",
+    "pad_hash": "sha1:6867219864ddb28d"
+   },
+   "reasons": [
+    "no placement puts every EasyEDA pad on KiCad copper; under the best one 1 of 40 are off copper: 39"
+   ],
+   "status": "auto",
+   "tool": "jlcplace 0.2.1",
+   "verdict": "red",
+   "verifications": []
   }
  ],
  "lcsc": "C25503140"

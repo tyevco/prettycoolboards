@@ -1,0 +1,68 @@
+{
+ "entries": [
+  {
+   "correction": {
+    "dx": 0.0,
+    "dy": 0.0,
+    "mirror": false,
+    "rot": 270.0
+   },
+   "ee": {
+    "key": "ee-sha1:85d4dd89a596db93",
+    "title": "TSSOP-16_L5.0-W4.4-P0.65-LS6.4-BL"
+   },
+   "fit": {
+    "alternatives": [
+     {
+      "conflicts": 16,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": false,
+      "names": 0,
+      "rot": 90.0
+     },
+     {
+      "conflicts": 16,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": true,
+      "names": 0,
+      "rot": 90.0
+     },
+     {
+      "conflicts": 16,
+      "dx": 0.0,
+      "dy": 0.0,
+      "equivalent": false,
+      "matched": 0,
+      "mirror": true,
+      "names": 0,
+      "rot": 270.0
+     }
+    ],
+    "matched": 16,
+    "method": "number",
+    "rms": 0.0033,
+    "score": 85
+   },
+   "fitted": "2026-11-28",
+   "kicad": {
+    "fpid": "Package_SO:TSSOP-16_4.4x5mm_P0.65mm",
+    "pad_hash": "sha1:61d52cfe2c22a24a"
+   },
+   "reasons": [
+    "fits by pad numbers: 16/16 matched, rms 0.003 mm",
+    "rot 90 also lands every pad, on other nets; ruled out by pad numbers"
+   ],
+   "status": "auto",
+   "tool": "jlcplace 0.2.1",
+   "verdict": "green",
+   "verifications": []
+  }
+ ],
+ "lcsc": "C494728"
+}

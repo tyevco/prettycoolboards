@@ -19,6 +19,16 @@ in a REVIEW-ONLY.txt next to it):
    the package. A second check without the database cross-checks the stored corrections against the EasyEDA records.
    --refit-jlc (network) runs `jlcplace fetch` and `jlcplace fit --db` first, for new or changed parts.
 
+Warning, not a gate: any drill under 0.3 mm (vias and pad holes) is printed and listed in ORDER-NOTES.md (SPEC §9,
+the owner's decision D5 of 2026-11-27; risks.md SF-3: small holes cost extra and can hold an order).
+
+A part that is DNP in the schematic and carries a "Fit" field (the coupons' keyed slot header J1, D2 of 2026-11-27)
+is bought and fitted by hand: it stays out of the JLC BOM and CPL, and release.py adds it to the vendor-neutral BOM
+(from mpn/<board>.csv like every other line) and lists it in ORDER-NOTES.md. A board without one is unaffected.
+
+Every text output is written with LF line endings, the JLC BOM and CPL included (tools/fab.py and jlcplace write
+them CRLF; release.py rewrites them, and changes nothing else in them).
+
 Board-specific order notes come from the board module (boards/<board>.py FAB_NOTES, and for a coupon the shared
 notes of boards/coupon_common.py). Adapted from caliper/hardware/design/release.py.
 """
@@ -27,6 +37,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import datetime
 import os
 import shutil
 import subprocess
@@ -47,17 +58,21 @@ from sheets import PROJECTS  # noqa: E402
 
 JLC_DB = os.path.join(HERE, "jlcplace-db")       # jlcplace correction database (derived numbers only), committed
 MPN_DIR = os.path.join(HERE, "mpn")
-RELEASE_DATE = "2026-11-27"
+# The date the gates ran, for the status line of ORDER-NOTES.md: today (UTC), or $KBD_RELEASE_DATE (YYYY-MM-DD) to
+# reproduce an earlier package byte for byte. It was a constant 2026-11-27 until a release ran past midnight.
+RELEASE_DATE = os.environ.get("KBD_RELEASE_DATE") or datetime.datetime.now(datetime.timezone.utc).date().isoformat()
 
 # The owner's ordering condition (2026-11-27): the KiCad projects, Gerbers, BoMs and enclosures are made now, but the
-# two conditions of SPEC §1 gate ORDERING boards. Written at the top of every ORDER-NOTES.md.
+# two conditions of SPEC §1 gate ORDERING boards. Written at the top of every ORDER-NOTES.md. Condition 1 follows the
+# owner's decision D6 of 2026-11-27 (SPEC §1, §2.1, §11 #1): ST's store is the purchase route and the owner buys.
 ORDER_CONDITION = (
     "> **Do not order yet.** On 2026-11-27 the owner asked for everything needed to build rev A now, and moved the "
-    "two conditions of SPEC §1 from capture to ordering: boards are ordered only once (1) **the STM32U5A5VJT6 MCUs "
-    "are reserved** (JLC's stock bought into a JLC private parts library, or 4-6 parts consigned) and (2) **8 kHz HID "
-    "is proven on the NUCLEO-U5A5ZJ-Q** with Zephyr's `usbd` (bInterval 1, rate and jitter measured for at least 10 "
-    "minutes on Windows and Linux with CDC logging active). Both are open. If either fails, the NXP i.MX RT1021 is "
-    "the fallback and the testbed is redrawn for it (keyboard/hardware/design/SPEC.md §1).")
+    "two conditions of SPEC §1 from capture to ordering: boards are ordered only once (1) **the MCUs are in hand**: "
+    "STM32U5A5VJT6, or the pin-compatible STM32U599VJT6 or STM32U595VJT6 (not the -Q parts), bought by the owner from "
+    "ST's own store (the owner's decision D6 of 2026-11-27; no agent buys anything), and (2) **8 kHz HID is proven on "
+    "the NUCLEO-U5A5ZJ-Q** with Zephyr's `usbd` (bInterval 1, rate and jitter measured for at least 10 minutes on "
+    "Windows and Linux with CDC logging active). Both are open. If either fails, the NXP i.MX RT1021 is the fallback "
+    "and the testbed is redrawn for it (keyboard/hardware/design/SPEC.md §1).")
 
 
 def kicad_cli():
@@ -146,6 +161,44 @@ def sync_fields(pcb, net):
     return changed
 
 
+def to_lf(path):
+    """Rewrite a text file with LF line endings (the repository's, .gitattributes). tools/fab.jlc_bom writes the JLC
+    BOM with the csv module's CRLF and `jlcplace cpl` writes the CPL with CRLF; the caliper's committed copies are
+    LF only because git normalises them. Returns True if anything changed."""
+    if not os.path.exists(path):
+        return False
+    with open(path, "rb") as f:
+        data = f.read()
+    lf = data.replace(b"\r\n", b"\n")
+    if lf != data:
+        with open(path, "wb") as f:
+            f.write(lf)
+    return lf != data
+
+
+MIN_DRILL_MM = 0.30          # SPEC §9 (owner's decision D5 of 2026-11-27; risks.md SF-3): warn on any smaller drill
+
+
+def small_drills(pcb, limit=MIN_DRILL_MM):
+    """Every drilled hole under `limit` mm (vias, and pad holes on either axis of a slot): [(what, drill mm)], and the
+    smallest drill on the board as (what, drill mm). JLC charges extra for small holes and they can hold an order
+    (risks.md SF-3), so release.py warns; it does not refuse."""
+    import pcbnew
+    b = pcbnew.LoadBoard(pcb)
+    holes = []
+    for t in b.GetTracks():
+        if t.Type() == pcbnew.PCB_VIA_T:
+            holes.append((f"via {t.GetNetname() or '(no net)'}", pcbnew.ToMM(t.GetDrillValue())))
+    for fp in b.GetFootprints():
+        for p in fp.Pads():
+            d = p.GetDrillSize()
+            if d.x > 0 and d.y > 0:
+                holes.append((f"{fp.GetReference()}.{p.GetNumber() or '?'}", pcbnew.ToMM(min(d.x, d.y))))
+    small = sorted((h for h in holes if h[1] < limit - 1e-6), key=lambda h: (h[1], h[0]))
+    smallest = min(holes, key=lambda h: h[1]) if holes else None
+    return small, smallest
+
+
 def gate(pcb, out):
     """DRC + schematic parity, errors only. Returns (ok, report path, summary line)."""
     rpt = os.path.join(out, "drc-parity.rpt")
@@ -155,9 +208,21 @@ def gate(pcb, out):
     return r.returncode == 0, rpt, "; ".join(summary)
 
 
-def generic_bom(board, out, proj):
+def hand_fitted(pcb, net):
+    """Parts the assembler does not place but that are bought and fitted by hand: DNP in the schematic with a "Fit"
+    field (sheets/coupon_common.py: the keyed slot header J1, D2 of 2026-11-27). [(ref, comp, side)] in ref order."""
+    import pcbnew
+    import pcbgen
+    comps, _ = pcbgen.load_netlist(net)
+    sides = {fp.GetReference(): ("bottom" if fp.IsFlipped() else "top") for fp in pcbnew.LoadBoard(pcb).GetFootprints()}
+    return [(r, c, sides.get(r, "?")) for r, c in sorted(comps.items(), key=lambda kv: fab._refkey(kv[0]))
+            if c["footprint"] and ("dnp" in c["props"] or c["fields"].get("DNP")) and c["fields"].get("Fit")]
+
+
+def generic_bom(board, out, proj, hand=()):
     """Vendor-neutral BOM: the JLC BOM joined with mpn/<board>.csv (LCSC code -> manufacturer part, distributor
-    numbers, note). Refuses if a BOM line has no row."""
+    numbers, note), then the hand-fitted parts (`hand`, from hand_fitted(): not in JLC's BOM, still to be bought).
+    Refuses if a line has no row."""
     path_map = os.path.join(MPN_DIR, f"{board}.csv")
     if not os.path.exists(path_map):
         raise SystemExit(f"generic BOM: {path_map} is missing (one row per LCSC code of the board)")
@@ -180,6 +245,17 @@ def generic_bom(board, out, proj):
                          "Footprint": r["Footprint"], "Side": "/".join(sorted({side.get(x, "?") for x in refs})),
                          "Manufacturer": m["Manufacturer"], "MPN": m["MPN"], "DigiKey": m["DigiKey"],
                          "Mouser": m["Mouser"], "LCSC": r["LCSC Part #"], "Note": m["Note"]})
+    for ref, c, sd in hand:
+        code = c["fields"].get("LCSC", "")
+        m = mp.get(code)
+        if m is None:
+            missing.append(f"{ref} ({code or 'no LCSC code'}, hand-fitted)")
+            continue
+        rows.append({"Designator": ref, "Qty": 1, "Value": c["value"], "Footprint": c["footprint"].split(":")[-1],
+                     "Side": sd, "Manufacturer": m["Manufacturer"], "MPN": m["MPN"], "DigiKey": m["DigiKey"],
+                     "Mouser": m["Mouser"], "LCSC": code,
+                     "Note": f"NOT IN THE JLC BOM/CPL (DNP for the assembler), fitted by hand after assembly: "
+                             f"{c['fields']['Fit']}; " + m["Note"]})
     if missing:
         raise SystemExit(f"generic BOM: no {os.path.basename(path_map)} row for {', '.join(missing)}")
     path = os.path.join(out, f"{proj}-BOM-generic.csv")
@@ -209,6 +285,7 @@ def jlc_gate(board, pcb, out, tmp, proj, force, refit):
     if red_cpl and not force:
         raise SystemExit(f"[{board}] jlcplace cpl: red rows, no CPL written (use --force for a review-only "
                          f"package):\n{text.strip()}")
+    to_lf(cpl)                                   # jlcplace writes CRLF; the repository is LF (checked as written)
     res = jlcp.check(pcb, cpl, os.path.join(tmp, "jlcplace.json"), bom=bom, gerbers=gerbers, db=JLC_DB,
                      report=report, checklist=checklist)
     # the same CPL from the EasyEDA records alone: a stored auto correction may not turn a red row green
@@ -223,7 +300,7 @@ def jlc_gate(board, pcb, out, tmp, proj, force, refit):
     return not res["red"], jlcp.order_lines(res, ver)
 
 
-def order_notes(board, mod, pcb, net, path, review_only, jlc_lines, gate_line):
+def order_notes(board, mod, pcb, net, path, review_only, jlc_lines, gate_line, small=(), hand=()):
     import pcbnew
     import pcbgen
     comps, _ = pcbgen.load_netlist(net)
@@ -235,8 +312,8 @@ def order_notes(board, mod, pcb, net, path, review_only, jlc_lines, gate_line):
                      if fp.IsFlipped() and not fp.GetAttributes() & pcbnew.FP_EXCLUDE_FROM_POS_FILES
                      and not fp.IsDNP()), key=fab._refkey)
     tht = sorted((fp.GetReference() for fp in b.GetFootprints()
-                  if fp.GetAttributes() & pcbnew.FP_THROUGH_HOLE and not fp.GetAttributes() & pcbnew.FP_EXCLUDE_FROM_BOM),
-                 key=fab._refkey)
+                  if fp.GetAttributes() & pcbnew.FP_THROUGH_HOLE and not fp.GetAttributes() & pcbnew.FP_EXCLUDE_FROM_BOM
+                  and not fp.IsDNP()), key=fab._refkey)
     with open(path, "w", encoding="utf-8", newline="\n") as f:
         f.write(f"# Order notes: {os.path.basename(pcb)}\n\n")
         f.write(ORDER_CONDITION + "\n\n")
@@ -251,6 +328,17 @@ def order_notes(board, mod, pcb, net, path, review_only, jlc_lines, gate_line):
         f.write(f"* Not assembled, not in BOM/CPL: {', '.join(excluded) or 'none'}\n")
         f.write(f"* Bottom-side placements ({len(bottom)}): {', '.join(bottom) or 'none'}\n")
         f.write(f"* Through-hole parts in the BOM ({len(tht)}): {', '.join(tht) or 'none'}\n")
+        if hand:                                    # only when there is one: other boards keep their notes as before
+            f.write(f"* **Fitted by hand after assembly** (DNP for the assembler, not in the JLC BOM or CPL; bought "
+                    f"separately, listed in the vendor-neutral BOM): "
+                    + "; ".join(f"{r} ({c['fields'].get('LCSC', '')}, {c['value']}, {sd}): {c['fields']['Fit']}"
+                                for r, c, sd in hand) + "\n")
+        if small:                                   # only when there is one: a board without keeps its notes as before
+            sizes = sorted({round(d, 3) for _w, d in small})
+            f.write(f"* **Drills under {MIN_DRILL_MM:.2f} mm ({len(small)}: "
+                    f"{', '.join(f'{d:g} mm' for d in sizes)}; {', '.join(w for w, _d in small[:8])}"
+                    f"{' ...' if len(small) > 8 else ''}):** JLC charges extra for small holes and they can hold an "
+                    "order (SPEC §9, risks.md SF-3); use 0.60 / 0.30 mm vias unless the board needs smaller.\n")
         for ln in jlc_lines:
             f.write(ln + "\n")
         for note in cfg(mod, "FAB_NOTES", []):
@@ -286,8 +374,16 @@ def release(board, force=False, refit=False):
     if not ok and not force:
         raise SystemExit(f"DRC/parity violations in {pcb} - see {rpt}; refusing to write fab outputs "
                          "(use --force for a review-only package)")
+    small, smallest = small_drills(pcb)
+    if small:
+        print(f"WARN: [{board}] {len(small)} drill(s) under {MIN_DRILL_MM:.2f} mm (SPEC §9, D5 of 2026-11-27): "
+              + ", ".join(f"{w} {d:g} mm" for w, d in small[:12]) + (" ..." if len(small) > 12 else ""))
+    else:
+        print(f"[{board}] drills: none under {MIN_DRILL_MM:.2f} mm"
+              + (f" (smallest {smallest[1]:g} mm, {smallest[0]})" if smallest else ""))
     fab.gerbers(pcb, out, mod.LAYERS)
     fab.jlc_bom(net, os.path.join(out, f"{proj}-BOM-JLCPCB.csv"))
+    to_lf(os.path.join(out, f"{proj}-BOM-JLCPCB.csv"))   # tools/fab.py writes CRLF (csv default); keep tools/ as is
     try:
         try:
             jlc_ok, jlc_lines = jlc_gate(board, pcb, out, tmp, proj, force, refit)
@@ -301,13 +397,15 @@ def release(board, force=False, refit=False):
                     "Fix the red rows (see jlcplace-report.html) and release again.\n")
         raise
     review_only = review_only or not jlc_ok
-    gpath, n = generic_bom(board, out, proj)
+    hand = hand_fitted(pcb, net)
+    gpath, n = generic_bom(board, out, proj, hand)
     fab.pos_csv(pcb, os.path.join(out, f"{proj}-pos-generic.csv"))
     jlc_lines = list(jlc_lines) + [
         f"* **Other assemblers:** `{os.path.basename(gpath)}` ({n} lines: manufacturer parts from "
         f"`keyboard/hardware/design/mpn/{board}.csv`) and `{proj}-pos-generic.csv` (KiCad's placement file: "
         "library-zero rotations, not JLC's)."]
-    order_notes(board, mod, pcb, net, os.path.join(out, "ORDER-NOTES.md"), review_only, jlc_lines, gate_line)
+    order_notes(board, mod, pcb, net, os.path.join(out, "ORDER-NOTES.md"), review_only, jlc_lines, gate_line, small,
+                hand)
     if review_only:
         with open(os.path.join(out, "REVIEW-ONLY.txt"), "w") as f:
             f.write("REVIEW-ONLY package written with --force: do not order. See ORDER-NOTES.md.\n")

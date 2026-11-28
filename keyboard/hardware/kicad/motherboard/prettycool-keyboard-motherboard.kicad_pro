@@ -1,0 +1,77 @@
+{
+  "board": {
+    "design_settings": {
+      "defaults": {},
+      "diff_pair_dimensions": [],
+      "drc_exclusions": [],
+      "rules": {},
+      "track_widths": [],
+      "via_dimensions": []
+    }
+  },
+  "boards": [],
+  "libraries": {
+    "pinned_footprint_libs": [],
+    "pinned_symbol_libs": []
+  },
+  "meta": {
+    "filename": "prettycool-keyboard-motherboard.kicad_pro",
+    "version": 1
+  },
+  "net_settings": {
+    "classes": [],
+    "meta": {
+      "version": 0
+    }
+  },
+  "pcbnew": {
+    "page_layout_descr_file": ""
+  },
+  "sheets": [
+    [
+      "8f90aa17-293d-57ef-9e9c-d487e7a89866",
+      "Root"
+    ],
+    [
+      "9fe62a1d-22c6-54b9-8c92-944baa53d667",
+      "USB-C input, ESD, Type-C detect"
+    ],
+    [
+      "3a0af7db-b83a-5147-95eb-53b14e1ee035",
+      "Power: input breaker, VSYS, +3V3, +3V3_SLOT, +3V3A, monitors"
+    ],
+    [
+      "7e6b3e5a-9a29-582a-837c-783777a8bfb6",
+      "MCU: STM32U5A5VJT6, supplies, HSE, BOOT0, NRST"
+    ],
+    [
+      "a841488c-1e75-5922-b55e-3ba95baeff5e",
+      "I/O expanders, slot I2C mux, bus pull-ups"
+    ],
+    [
+      "ccefaff1-c05a-545f-984f-b6920b461a3d",
+      "Slot S1: socket, rails, monitors, bus switch, lanes"
+    ],
+    [
+      "f2a30a92-e24e-5bf9-a3b4-e352b0ee13d9",
+      "Slot S2: socket, rails, monitors, bus switch, lanes"
+    ],
+    [
+      "f6e00492-7a90-5a27-8163-dc4c879e494a",
+      "Slot S3: socket, rails, monitors, bus switch, lanes"
+    ],
+    [
+      "b43630bf-d4bd-53f9-b80d-cfbe0434603b",
+      "Slot S4: socket, rails, monitors, bus switch, lanes"
+    ],
+    [
+      "fdde5c59-8c65-5942-bb2f-0376868da015",
+      "Slot S5: socket, rails, monitors, bus switch, lanes"
+    ],
+    [
+      "8b7eb3ae-e068-5679-af0e-da89db501f1e",
+      "Headers: SWD, latency rig, KVM; mounting"
+    ]
+  ],
+  "text_variables": {}
+}

@@ -16,15 +16,26 @@ size or larger) and the motherboard places one socket and one spacer per slot wi
 | Fiducials | (2.0, 9.5), (W - 2.0, 9.5), (W - 2.0, 57.5) | top side, 1 mm copper / 2 mm mask, no copper within r 1.35 |
 | Wire pads TP1-TP4 | (11.0, 56.5) ... (23.0, 56.5), 4 mm apart | +3V3, +5V, GND, GND |
 
-**The header and the socket.** The coupon's header (KiCad `PinHeader_2x20_P2.54mm_Vertical`) sits on the coupon's
-**bottom**, body down. The motherboard's socket (KiCad `PinSocket_2x20_P2.54mm_Vertical`; candidate BOOMELE
-2.54-2*20P, LCSC C5124634, 8.5 mm, 2.5 A per contact, Ø1.1 mm holes in its drawing PY2.54-2*NA-8.5MM-Y, KiCad's
-Ø1.0 drill taking its 0.64 x 0.40 mm tail) sits on the motherboard's **top**, under the coupon, with every pin n
-at the same top-view position as the coupon's pin n. `header_placement()` and `socket_placement()` solve the
-footprint position and rotation for that; `check_mating()` compares all 40 pads of both and fails on any difference
-(run by layout.py on every coupon). Heights: socket 8.5 mm + the header's 2.54 mm plastic = 11.04 mm from the
+**The header and the socket.** The coupon's header (`HEADER_FP`: KiCad's `PinHeader_2x20_P2.54mm_Vertical` less
+pad 39, `keyed_header()`) sits on the coupon's **bottom**, body down. The motherboard's socket (KiCad
+`PinSocket_2x20_P2.54mm_Vertical`; candidate BOOMELE 2.54-2*20P, LCSC C5124634, 8.5 mm, 2.5 A per contact, Ø1.1 mm
+holes in its drawing PY2.54-2*NA-8.5MM-Y, KiCad's Ø1.0 drill taking its 0.64 x 0.40 mm tail) sits on the
+motherboard's **top**, under the coupon, with every pin n at the same top-view position as the coupon's pin n.
+`header_placement()` and `socket_placement()` solve the footprint position and rotation for that; `check_mating()`
+compares the header's 39 pads with the socket's 40, pad by pad, and fails on any difference (run by every coupon's
+post_fixed()). Heights: socket 8.5 mm + the header's 2.54 mm plastic = 11.04 mm from the
 motherboard's top to the coupon's underside (SPEC §9 says 11: 8.5 + 2.5). The header's mating pins are 6.00 mm, so
 they do not bottom out in the 8.5 mm socket.
+
+**The key** (the owner's decision D2 of 2026-11-27, SPEC §4.2, `nets.SLOT_KEY_PIN`). Pin 39 is absent from every
+coupon: `HEADER_FP` (`keyboard:PinHeader_2x20_P2.54mm_Vertical`, written into each coupon's own library by
+sheets/coupon_common.footprints()) is the stock land with pad 39 removed, an X on its silk where the pin was (on the
+coupon's bottom, under the header body: the assembler's mark) and a note on its fab layer; `build()` puts an X and
+"KEY" on the top silk at the same place. The header's pin 39 is pulled before soldering. The motherboard socket keeps
+all 40 contacts, pin 39 with no net, its hole plugged. Turned 180 degrees about the header's centre, coupon pin p
+lands on socket position 41 - p, so the coupon's pin 2 meets the plugged contact 39 and the coupon does not go in;
+`check_mating()` checks that as well. The footprint keeps the stock name, in the "keyboard" library, so that
+keyboard/tools/coupon/rules.py (which matches the header by name) finds it; `HEADER_FP_STOCK` is the stock one.
 
 **Stack** (`STACKUP`): JLC's 4-layer 1.6 mm JLC04161H-7628 (7628 prepreg 0.2104 mm, er 4.4; core 1.065 mm; 1 oz
 outer, 0.5 oz inner: JLC's published figures as remembered here, **unverified**; nothing on a coupon depends on them,
@@ -46,6 +57,7 @@ import os
 
 import pcbnew
 
+import nets
 from boards.geom import TO, B, circle, rect, rounded_rect
 from boards.geom import poly_page as page
 
@@ -60,12 +72,17 @@ HEADER_XC = 29.0                              # header centre, from the coupon's
 HEADER_X0 = round(HEADER_XC - 9.5 * PITCH, 4)  # 4.87: the pin 1 / pin 2 column
 ROW_INNER, ROW_EDGE = 5.27, 2.73              # odd pins (signals) inside, even pins (mostly GND) at the edge
 HEADER_BODY = (HEADER_XC - 25.4, 1.5, HEADER_XC + 25.4, 6.5)
-HEADER_FP = "Connector_PinHeader_2.54mm:PinHeader_2x20_P2.54mm_Vertical"
+KEY_PIN = nets.SLOT_KEY_PIN                   # 39: absent on every coupon (D2 of 2026-11-27)
+KEY_NEVER_WITH = nets.SLOT_KEY_NEVER_WITH     # 2: must stay a real pin, or the key works both ways round
+HEADER_FP_STOCK = "Connector_PinHeader_2.54mm:PinHeader_2x20_P2.54mm_Vertical"
+HEADER_FP = "keyboard:PinHeader_2x20_P2.54mm_Vertical"       # HEADER_FP_STOCK less pad 39 (keyed_header())
 SOCKET_FP = "Connector_PinSocket_2.54mm:PinSocket_2x20_P2.54mm_Vertical"
 SOCKET_PART = {"MPN": "2.54-2*20P", "Manufacturer": "BOOMELE(Boom Precision Elec)", "LCSC": "C5124634",
-               "note": "female 2 x 20, 2.54 mm, 8.5 mm, THT; 6382 in stock at JLC, $0.33 (2026-11-27)"}
+               "note": "female 2 x 20, 2.54 mm, 8.5 mm, THT; 6344 in stock at JLC, $0.33 (2026-11-28)"}
 HEADER_PART = {"MPN": "2541WV-2x20P", "Manufacturer": "HanElectricity", "LCSC": "C25503140",
-               "note": "male 2 x 20, 2.54 mm, 6.0 mm mating, THT; 1516 in stock at JLC, $0.14 (2026-11-27)"}
+               "note": "male 2 x 20, 2.54 mm, 6.0 mm mating, THT; 506 in stock at JLC, $0.14 (2026-11-28); "
+                       "pin 39 pulled before soldering (the slot key)"}
+KEY_MARK = 0.6                                # half-length of the key mark's X arms, mm (silk, 0.15 mm lines)
 
 POST = (4.0, 56.0)
 POST_DRILL = 3.2
@@ -114,16 +131,29 @@ FAB_NOTES = [
     "wider, pre-routed paths); vias "
     "0.60 / 0.30 mm (JLC's standard via, no surcharge); copper >= 0.30 mm from the edge. JLC's 4-layer minimums are "
     "0.09 / 0.09 mm and a 0.15 mm hole: nothing here is near them.",
-    "**J1, the slot header, is through-hole and mounted on the BOTTOM side** (body against the bottom, pins down; "
-    "soldered on the top side). Either JLC fits it (JLC stocks the part, LCSC C25503140; check on the order form "
-    "that JLC accepts a through-hole part with its body on the bottom), or order J1 as do-not-place and hand-solder "
-    "it: 40 joints from the top, the body flat against the bottom, square with the edge. The two halves only mate "
-    "if the header is on the bottom (boards/coupon_common.py check_mating()). The 2541WV drawing limits soldering "
-    "to 220 C for 10 s (PBT body), below a lead-free wave's temperature, and a wave or selective nozzle from the "
-    "bottom would meet the body: the joints are soldered on the top side.",
-    "**The 2 x 20 header has no key.** Plug a coupon with its SLOT EDGE / pin 1 silk over the motherboard socket's "
-    "pin 1 and its post hole over the slot's spacer; turned 180 degrees, +5V meets GND pins (the slot switch "
-    "limits the current). Never hot-plug: the slot's LED must be off (SPEC §3.5).",
+    "**J1, the slot header, is keyed at pin 39 (the owner's decision D2 of 2026-11-27, SPEC §4.2) and fitted by "
+    "hand: it is DNP for the assembler and in neither the JLC BOM nor the CPL.** The footprint has no pad and no hole "
+    "at 39 (marked X on both silk layers), so a 2541WV-2x20P with all 40 pins does not go in, and jlcplace finds "
+    "EasyEDA's pad 39 off copper (red). JLC listed no 2 x 20 header sold without pin 39 on 2026-11-27 (SPEC §4.2), "
+    "so JLC cannot fit J1 as it comes (SPEC §11 #31). Buy it separately (LCSC C25503140, in the vendor-neutral BOM), "
+    "pull pin 39 out of the header with pliers from the mating side, and solder it as below. Pin 39 is a corner "
+    "pin: the inner row (away from the slot edge), at the end opposite pin 1, under the X. The header itself is "
+    "symmetric, so pull any one corner pin and fit the header with the gap over the X; it goes in no other way "
+    "round. This is the key's "
+    "consequence; whether coupons then go as Economic PCBA is still the owner's open item (SPEC §11 #26, risk "
+    "register recommendation 11, not decided). If a header sold without pin 39 is found, or JLC agrees to pull the "
+    "pin, sheets/coupon_common.slot_sheet(header_dnp=False) puts J1 back in the JLC BOM and CPL.",
+    "**J1 is through-hole and mounted on the BOTTOM side** (body against the bottom, pins down; soldered on the top "
+    "side): 39 joints from the top, the body flat against the bottom, square with the edge. The two halves only "
+    "mate if the header is on the bottom (boards/coupon_common.py check_mating()). The 2541WV drawing limits "
+    "soldering to 220 C for 10 s (PBT body), below a lead-free wave's temperature, and a wave or selective nozzle "
+    "from the bottom would meet the body: the joints are soldered on the top side. A 2 x 20 socket (the "
+    "motherboard's, hole 39 plugged, with the slot's M3 spacer fitted, or a loose C5124634) holds the header square "
+    "while its joints are soldered (risks.md SF-2).",
+    "**Plugging a coupon in:** the SLOT EDGE / pin 1 silk over the motherboard socket's pin 1 and the post hole over "
+    "the slot's spacer. Turned 180 degrees, the coupon's pin 2 meets the socket's plugged contact 39 and the coupon "
+    "does not go in (the motherboard plugs hole 39; SPEC §4.2). Never hot-plug: the slot's LED must be off "
+    "(SPEC §3.5).",
     "**Not on the PCBA:** the M3 x 11 mm nylon spacer and screw on H1 (SPEC §9), bought separately.",
     "**Assembly size:** 58 x 60 mm (standard coupon) or 80 x 60 mm (wide) is under the 70 x 70 mm minimum this "
     "repository's caliper notes give for JLC's Standard PCBA (not re-checked for this board): if the order form "
@@ -151,11 +181,56 @@ def _fp_dir(lib):
     return os.path.join(os.environ.get("KICAD10_FOOTPRINT_DIR", "/usr/share/kicad/footprints"), lib + ".pretty")
 
 
+def keyed_header():
+    """The coupon's slot header land (HEADER_FP), a new FOOTPRINT: KiCad 10.0.8's PinHeader_2x20_P2.54mm_Vertical
+    with pad 39 removed (the key, D2 of 2026-11-27), an X on its F.SilkS where pad 39 was (the coupon's bottom silk,
+    since J1 is flipped), "KEY 39" on its F.Fab, and the stock 3D model (which still draws 40 pins). Every other pad,
+    the courtyard, silk and fab are the stock footprint's, so the mating geometry is unchanged."""
+    lib, name = HEADER_FP_STOCK.split(":", 1)
+    stock = pcbnew.FootprintLoad(_fp_dir(lib), name)
+    if stock is None:
+        raise RuntimeError(f"{HEADER_FP_STOCK} not found under {_fp_dir(lib)}")
+    fp = pcbnew.FOOTPRINT(stock)
+    key = next((p for p in fp.Pads() if p.GetNumber() == str(KEY_PIN)), None)
+    if key is None:
+        raise RuntimeError(f"{HEADER_FP_STOCK} has no pad {KEY_PIN} to remove")
+    kx, ky = key.GetFPRelativePosition().x, key.GetFPRelativePosition().y
+    fp.Remove(key)
+    fp.SetFPIDAsString(HEADER_FP.split(":", 1)[1])
+    fp.SetLibDescription(f"{stock.GetLibDescription()}; pad {KEY_PIN} removed: the rev A slot key (owner's decision "
+                         f"D2 of 2026-11-27, keyboard SPEC §4.2); pull the header's pin {KEY_PIN} before soldering. "
+                         f"Derived from KiCad 10.0.8 {HEADER_FP_STOCK} by boards/coupon_common.keyed_header()")
+    fp.SetKeywords(f"{stock.GetKeywords()} keyed key pin{KEY_PIN}")
+    d = pcbnew.FromMM(KEY_MARK)
+    for (ax, ay), (bx, by) in (((-d, -d), (d, d)), ((-d, d), (d, -d))):
+        seg = pcbnew.PCB_SHAPE(fp)
+        seg.SetShape(pcbnew.SHAPE_T_SEGMENT)
+        seg.SetStart(pcbnew.VECTOR2I(kx + ax, ky + ay))
+        seg.SetEnd(pcbnew.VECTOR2I(kx + bx, ky + by))
+        seg.SetLayer(pcbnew.F_SilkS)
+        seg.SetWidth(pcbnew.FromMM(0.15))
+        fp.Add(seg)
+    txt = pcbnew.PCB_TEXT(fp)
+    txt.SetText(f"KEY {KEY_PIN}")
+    txt.SetLayer(pcbnew.F_Fab)
+    txt.SetPosition(pcbnew.VECTOR2I(kx - pcbnew.FromMM(2.6), ky))
+    txt.SetTextSize(pcbnew.VECTOR2I(pcbnew.FromMM(0.8), pcbnew.FromMM(0.8)))
+    txt.SetTextThickness(pcbnew.FromMM(0.12))
+    fp.Add(txt)
+    return fp
+
+
+def _base(fpid):
+    if fpid == HEADER_FP:
+        return keyed_header()
+    lib, name = fpid.split(":", 1)
+    return pcbnew.FootprintLoad(_fp_dir(lib), name)
+
+
 def _solve(fpid, side):
     """(x, y, rot) of the footprint origin (board mm) for which every pad n lands on pin_xy(n), placed the way
     pcbgen.place_from_netlist places it (flipped first if side == 'B', then positioned, then rotated)."""
-    lib, name = fpid.split(":", 1)
-    base = pcbnew.FootprintLoad(_fp_dir(lib), name)
+    base = _base(fpid)
     board = pcbnew.BOARD()                       # Flip() needs the footprint on a board
     for rot in (0.0, 90.0, 180.0, 270.0):
         fp = pcbnew.FOOTPRINT(base)
@@ -184,9 +259,46 @@ def socket_placement():
     return (*_solve(SOCKET_FP, "F"), "F")
 
 
+def _placed_pads(fpid, placement):
+    """{pad number: top-view (x, y) board mm} of a footprint placed as pcbgen places it."""
+    x, y, rot, side = placement
+    board = pcbnew.BOARD()
+    fp = pcbnew.FOOTPRINT(_base(fpid))
+    board.Add(fp)
+    if side == "B":
+        fp.Flip(fp.GetPosition(), pcbnew.FLIP_DIRECTION_TOP_BOTTOM)
+    fp.SetPosition(pcbnew.VECTOR2I(pcbnew.FromMM(x), pcbnew.FromMM(-y)))
+    fp.SetOrientationDegrees(rot)
+    return {p.GetNumber(): (round(TO(p.GetPosition().x), 4), round(-TO(p.GetPosition().y), 4)) for p in fp.Pads()}
+
+
 def check_mating():
-    """Both halves solved: every one of the 40 pins at the same top-view position. Returns the two placements."""
+    """Both halves solved and checked pad by pad (top view, board mm), and the key (D2 of 2026-11-27):
+
+    * the socket has all 40 contacts, each on pin_xy(n);
+    * the coupon's header has every pad but 39, each on the socket contact of the same number;
+    * turned 180 degrees about the header's centre, the header's pad p lands on socket contact 41 - p, and its pad 2
+      (KEY_NEVER_WITH, a real pin) on the plugged contact 39: a turned coupon cannot go in.
+
+    Raises AssertionError on any difference. Returns the two placements (header, socket)."""
     h, s = header_placement(), socket_placement()
+    hp, sp = _placed_pads(HEADER_FP, h), _placed_pads(SOCKET_FP, s)
+    want = {str(n) for n in range(1, 41)}
+    assert set(sp) == want, f"socket pads {sorted(set(sp) ^ want, key=int)} differ from 1-40"
+    assert set(hp) == want - {str(KEY_PIN)}, (f"header pads {sorted(set(hp) ^ (want - {str(KEY_PIN)}), key=int)} "
+                                              f"differ from 1-40 less the key pin {KEY_PIN}")
+    for n, (x, y) in sp.items():
+        ex, ey = pin_xy(int(n))
+        assert abs(x - ex) < 1e-3 and abs(y - ey) < 1e-3, f"socket pad {n} at {(x, y)}, want {(ex, ey)}"
+    for n, (x, y) in hp.items():
+        assert abs(x - sp[n][0]) < 1e-3 and abs(y - sp[n][1]) < 1e-3, f"header pad {n} at {(x, y)}, socket {sp[n]}"
+    cx, cy = HEADER_XC, (ROW_INNER + ROW_EDGE) / 2
+    for n, (x, y) in hp.items():                  # turned 180 degrees about the header's centre
+        tx, ty = 2 * cx - x, 2 * cy - y
+        m = 41 - int(n)
+        assert abs(tx - sp[str(m)][0]) < 1e-3 and abs(ty - sp[str(m)][1]) < 1e-3, f"turned, pad {n} misses {m}"
+    assert str(KEY_NEVER_WITH) in hp and 41 - KEY_NEVER_WITH == KEY_PIN, \
+        f"turned, header pad {KEY_NEVER_WITH} must meet the plugged contact {KEY_PIN}"
     return h, s
 
 
@@ -235,6 +347,13 @@ def build(bb, size=STANDARD, title="", ref_text="", in1_tracks=False):
     bb.text(pcbnew.F_SilkS, "1", *page([(x1 - 1.9, y1)])[0], 0.8)
     x40, y40 = pin_xy(40)
     bb.text(pcbnew.F_SilkS, "40", *page([(x40 + 2.2, y40)])[0], 0.8)
+    # the key (D2 of 2026-11-27): an X where pin 39 would be, and "KEY" above it, inside the header-tail keep-out
+    # (no part sits there on any coupon); the footprint's own X marks the same place on the bottom silk
+    kx, ky = pin_xy(KEY_PIN)
+    for (ax, ay), (bx_, by_) in (((-1, -1), (1, 1)), ((-1, 1), (1, -1))):
+        bb.polyline(pcbnew.F_SilkS, page([(kx + ax * KEY_MARK, ky + ay * KEY_MARK),
+                                          (kx + bx_ * KEY_MARK, ky + by_ * KEY_MARK)]), 0.15)
+    bb.text(pcbnew.F_SilkS, "KEY", *page([(kx, ky + 1.75)])[0], 0.8)
     bb.text(pcbnew.F_SilkS, "SLOT EDGE", *page([(HEADER_XC, 8.4)])[0], 0.8)
     if title:
         bb.text(pcbnew.F_SilkS, title, *page([(size[0] / 2, size[1] - 6.0)])[0], 1.0)

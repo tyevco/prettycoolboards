@@ -94,9 +94,27 @@ def test_present_n_on_a_resistor_is_not_a_strap(tmp_path):
     assert rep.result("present_n") == "FAIL"
 
 
-def test_rsv_connected(tmp_path):
+def test_key_pin_connected(tmp_path):
+    """Pin 39 is the slot key (D2 of 2026-11-27): a net on it fails."""
     rep = run(tmp_path, F.move_pin(F.good_spec(), "J1", 39, "GND"))
-    assert rep.result("rsv") == "FAIL"
+    assert rep.result("key") == "FAIL" and "pin 39 (KEY) is on GND" in detail(rep, "key")
+
+
+def test_key_rule_on_the_netlist(tmp_path):
+    """The keyed fixture passes; the stock 40-pin header (pin 39 present, unconnected) and a header without pin 2
+    (keyed at 2 and 39, so it fits either way round) fail. With the rule switched off, the unkeyed fixture fails
+    nothing: the key rule is what catches it."""
+    assert run(tmp_path).result("key") == "PASS"
+    rep = run(tmp_path, F.unkeyed(F.good_spec()))
+    assert rep.result("key") == "FAIL" and "symbol has a pin 39" in detail(rep, "key")
+    rep = run(tmp_path, F.drop_header_pin(F.good_spec(), 2))
+    assert rep.result("key") == "FAIL" and "no pin 2" in detail(rep, "key")
+
+
+def test_key_rule_is_what_catches_an_unkeyed_header(tmp_path, monkeypatch):
+    assert run(tmp_path, F.unkeyed(F.good_spec())).failed
+    monkeypatch.setattr(R, "_check_key", lambda c, r: None)
+    assert not run(tmp_path, F.unkeyed(F.good_spec())).failed
 
 
 def test_gnd_pin_open(tmp_path):
@@ -400,6 +418,32 @@ def test_no_ground_plane(tmp_path, geometry):
 
 
 @needs_pcbnew
+def test_key_rule_on_the_board(tmp_path, geometry):
+    """The keyed fixture's J1 has 39 pads and none at 39; the stock footprint (pad 39 present) fails key.pcb, and so
+    does a header without pad 2. With the board rule switched off, the stock footprint's board fails nothing."""
+    rep = run(tmp_path, geometry=geometry, with_board=True)
+    assert rep.result("key.pcb") == "PASS" and "39 pads" in detail(rep, "key.pcb")
+    assert rep.result("header.position") == "PASS" and "all 39 pads" in detail(rep, "header.position")
+    spec = F.unkeyed(F.good_spec())
+    rep = run(tmp_path, spec, geometry=geometry, with_board=True)
+    assert rep.result("key.pcb") == "FAIL" and "has a pad 39" in detail(rep, "key.pcb")
+    rep = run(tmp_path, F.drop_header_pin(F.good_spec(), 2), geometry=geometry, with_board=True)
+    assert rep.result("key.pcb") == "FAIL" and "no pad 2" in detail(rep, "key.pcb")
+
+
+@needs_pcbnew
+def test_key_pcb_rule_is_what_catches_pad_39(tmp_path, geometry, monkeypatch):
+    netp = F.write_net(str(tmp_path / "k.net"), F.good_spec())          # a keyed netlist, an unkeyed board
+    pcbp = F.write_board(str(tmp_path / "u.kicad_pcb"), F.unkeyed(F.good_spec()))
+    c = R.Coupon("fixture", M.read_netlist(netp), M.read_board(pcbp, geometry), F.good_desc(), None, geometry)
+    assert R.check(c).result("key.pcb") == "FAIL"
+    monkeypatch.setattr(R, "_check_key_pcb", lambda r, hf, g: None)
+    c = R.Coupon("fixture", M.read_netlist(netp), M.read_board(pcbp, geometry), F.good_desc(), None, geometry)
+    rep = R.check(c)
+    assert rep.result("key.pcb") is None and rep.result("key") == "PASS"
+
+
+@needs_pcbnew
 def test_cli_exit_codes(tmp_path, geometry):
     spec = F.good_spec()
     F.write_net(str(tmp_path / "c.net"), spec)
@@ -430,10 +474,21 @@ def test_generated_coupons(board):
     c = R.load_coupon(board)
     rep = R.check(c)
     print(rep.table())
-    if rep.failed and c.desc is not None and c.desc.get("placeholder"):
+    if rep.failed and F.predates_the_key(board):
+        pytest.xfail(f"{board} was generated before D2 of 2026-11-27 (J1 still has pin 39; the key rules FAIL it, "
+                     "as they should): rebuild it with build.py and layout.py")
+    if rep.failed and F.excused(board) and c.desc is not None and c.desc.get("placeholder"):
         pytest.xfail(f"{board}'s descriptor is still a placeholder: write descriptors/{board}.json from the "
                      "captured design (the rules CLI reports this as FAIL, as it should)")
     assert not rep.failed, rep.table(quiet=True)
+
+
+def test_a1_coupons_are_generated():
+    """D1 of 2026-11-27: the A1 coupons are released first, so their generated netlist and board must be there for
+    test_generated_coupons to check (a coupon that is not generated is otherwise silently left out of it)."""
+    for board in F.A1_COUPONS:
+        assert board in R.COUPON_BOARDS
+        assert all(os.path.exists(p) for p in M.board_files(board)), f"{board} is not generated"
 
 
 def test_rules_agree_with_sheets_coupon_common():
@@ -452,13 +507,28 @@ def test_mirror_pin():
     assert [R.mirror_pin(n) for n in (1, 2, 7, 8, 32, 39, 40)] == [40, 39, 34, 33, 9, 2, 1]
 
 
-def test_reversed_coupon_reads_present(tmp_path):
-    """Under SPEC §4.2's pinout a coupon turned 180 degrees reads as present (pin 32 meets its pin 9, GND)."""
+def test_turned_coupon_cannot_mate(tmp_path):
+    """With the key (D2 of 2026-11-27) a coupon turned 180 degrees does not go in: its pin 2 meets the socket's
+    plugged hole 39. What it would do with the plug missing (it reads as present: pin 32 meets its pin 9, GND) is
+    reported as INFO. Without a pin 2 the key does not stop it, and that reads as present again (WARN)."""
     rep = run(tmp_path)
+    assert rep.result("reversal") == "PASS" and "cannot go in" in detail(rep, "reversal")
+    assert rep.result("reversal_if_unplugged") == "INFO" and "pin 9, on GND" in detail(rep, "reversal_if_unplugged")
+    rep = run(tmp_path, F.drop_header_pin(F.good_spec(), 2))
     assert rep.result("reversal") == "WARN" and "pin 9, on GND" in detail(rep, "reversal")
-    # with pin 9 open on the coupon (a pinout where 9 is RSV), the turned coupon reads absent
-    rep = run(tmp_path, F.move_pin(F.good_spec(), "J1", 9, None))
-    assert rep.result("reversal") == "PASS"
+    # with no pin 2 and pin 9 open the turned coupon reads absent
+    rep = run(tmp_path, F.move_pin(F.drop_header_pin(F.good_spec(), 2), "J1", 9, None))
+    assert rep.result("reversal") == "PASS" and "open pin 9" in detail(rep, "reversal")
+
+
+def test_key_blocks_three_offset_misinsertions():
+    """The plug in hole 39 meets a coupon pin under the half turn and three of the six offsets; the other three
+    leave hole 39 facing an absent pin or nothing, so they are checked for PRESENT_N as before."""
+    pins = set(range(1, 41)) - {39}
+    blocked = [k for k, f in R.MISINSERTIONS.items() if R.keyed_against(pins, f)]
+    assert blocked == ["one column toward pin 40", "one row over, even row in the odd row",
+                       "turned 180 degrees and one column off (a)"]
+    assert R.keyed_against(pins, R.mirror_pin) and not R.keyed_against(pins - {2}, R.mirror_pin)
 
 
 def _ladder_spec(r_ohm="1k"):
@@ -631,6 +701,7 @@ def test_cload_counts_the_motherboard_capacitor(tmp_path):
 def test_other_misinsertions(tmp_path):
     rep = run(tmp_path)
     assert rep.result("misinsertion") == "INFO"                              # only the 180-degree case reads present
+    assert "blocked by the key's plug in hole 39" in detail(rep, "misinsertion")
     spec = F.move_pin(F.good_spec(), "J1", 34, "GND")                        # G1 on GND: one column off reads present
     rep = run(tmp_path, spec)
     assert rep.result("misinsertion") == "WARN" and "one column toward pin 1" in detail(rep, "misinsertion")
@@ -717,3 +788,123 @@ def test_push_pull_on_irq_n_or_miso_warns(tmp_path):
     assert run(tmp_path, spec).result("miso.drive") == "WARN"
     spec["comps"]["U12"]["pins"] = [("1", "Y", "tri_state")]
     assert run(tmp_path, spec).result("miso.drive") == "PASS"
+
+
+# ------------------------------------------------------------------- D3: the slot's direct lines through 100 ohm
+def _with_g0(load_ohm=None, cap=None, out_pin=False):
+    """The good fixture with G0 used: an input pin of U12 on it, optionally a resistor to GND, a capacitor to GND, or
+    an output-type pin."""
+    spec = F.move_pin(F.good_spec(), "J1", 33, "G0")
+    F.add_comp(spec, "U12", "U10", "LOGIC", {"1": "G0"}, lib="x", part="LOGIC",
+               pins=[("1", "A", "output" if out_pin else "input")])
+    if load_ohm is not None:
+        F.add_comp(spec, "R40", "R", load_ohm, {"1": "G0", "2": "GND"})
+    if cap is not None:
+        F.add_comp(spec, "C40", "C", cap, {"1": "G0", "2": "GND"})
+    d = F.good_desc()
+    d["uses"].append("G0")
+    d["glines"] = {"G0": {"role": "enable", "arg": 0, "flags": []}}
+    return spec, d
+
+
+def test_slot_lines_through_the_series_resistor(tmp_path):
+    """SPEC §4.3 / nets.SLOT_SERIES: a 1 k pull-down on G0 draws 2.9 mA through the 100 ohm and the MCU's ~50 ohm
+    (PASS, with the level at the coupon); 220 ohm draws 8.9 mA, beyond the 8 mA of DS13543 Table 88 (FAIL)."""
+    spec, d = _with_g0("1k")
+    rep = run(tmp_path, spec, desc=d)
+    assert rep.result("slotlines.dc") == "PASS", rep.table()
+    assert "G0: R40, 1 k to 0.0 V: 2.870 / 0.000 V at the coupon, 2.87 mA (287.0 mV across the 100 ohm)" in \
+        detail(rep, "slotlines.dc")
+    spec, d = _with_g0("220")
+    rep = run(tmp_path, spec, desc=d)
+    assert rep.result("slotlines.dc") == "FAIL" and "8.92 mA" in detail(rep, "slotlines.dc")
+    assert run(tmp_path).result("slotlines.dc") is None                    # the good fixture drives no G or CS line
+
+
+def test_slot_line_capacitor_and_contention(tmp_path):
+    spec, d = _with_g0("100k", cap="1n")
+    rep = run(tmp_path, spec, desc=d)
+    assert rep.result("slotlines.edges") == "WARN" and "add 1000 pF" in detail(rep, "slotlines.edges")
+    spec, d = _with_g0("100k")
+    assert run(tmp_path, spec, desc=d).result("slotlines.edges") == "PASS"
+    spec, d = _with_g0(out_pin=True)
+    rep = run(tmp_path, spec, desc=d)
+    assert rep.result("slotlines.contention") == "WARN" and "22 mA" in detail(rep, "slotlines.contention")
+
+
+def test_slot_line_without_a_pull_floats_while_the_descriptor_is_read(tmp_path):
+    """The bring-up firmware keeps the direct lines high-impedance until the descriptor is read and checked
+    (bringup/src/slot.c, risks.md EL-2): a used G-line with no pull on the coupon floats then (WARN); with a 100 k
+    pull-down it is held (PASS); a coupon that uses no MCU-driven line gets no row."""
+    spec, d = _with_g0()
+    rep = run(tmp_path, spec, desc=d)
+    assert rep.result("slotlines.idle") == "WARN" and "G0: no resistor" in detail(rep, "slotlines.idle")
+    spec, d = _with_g0("100k")
+    rep = run(tmp_path, spec, desc=d)
+    assert rep.result("slotlines.idle") == "PASS" and "G0 (100 k to 0.0 V)" in detail(rep, "slotlines.idle")
+    assert run(tmp_path).result("slotlines.idle") is None
+
+
+def test_irq_n_is_driven_by_the_coupon(tmp_path):
+    """IRQ_N's pull-up sits on the coupon side of the 100 ohm: no DC drop at the MCU pin (INFO)."""
+    rep = run(tmp_path)
+    assert rep.result("slotlines.irq_n") == "INFO" and "does not flow through the resistor" in \
+        detail(rep, "slotlines.irq_n")
+
+
+def test_series_lines_follow_the_contract():
+    """rules.py models a series resistor on exactly nets.SLOT_SERIES's lines, and none on a lane, whose 47 ohm +
+    1 nF (LANE_R_OHM, LANE_C_PF) D3 leaves alone (SPEC §4.3)."""
+    import nets
+    assert set(R.SERIES_LINES) == {s_ for n in nets.SLOTS for s_ in nets.SLOT_SERIES[n]}
+    assert all(not s_.startswith("AN") for n in nets.SLOTS for s_ in nets.SLOT_SERIES[n])
+    assert nets.SLOT_PATH["AN0"].startswith(f"{R.LANE_R_OHM} ohm series + 1 nF") and R.LANE_C_PF == 1000
+    assert {nets.SLOT_SERIES[n][s_][1] for n in nets.SLOTS for s_ in nets.SLOT_SERIES[n]} == {100}
+
+
+# ------------------------------------------------------------------- D7: a diode from INJ into a lane
+def test_diode_from_inj_is_open_while_the_lane_idles(tmp_path):
+    """The test coupon's INJ path (D7): a diode from INJ and a resistor into a ladder tap leave the idle lane's
+    R_src and ratio computable (the diode is off while INJ idles low or open); a diode from +3V3 into the lane is
+    not treated that way (it may conduct)."""
+    spec = _ladder_spec("1k")
+    F.move_pin(spec, "J1", 19, "INJ")
+    F.add_comp(spec, "D40", "D", "1N4148W", {"2": "INJ", "1": "/INJ_AN0"}, part="D", pins=F.R_PINS)
+    F.add_comp(spec, "R40", "R", "1k", {"1": "/INJ_AN0", "2": "AN0"})
+    c = R.Coupon("f", M.read_netlist(F.write_net(str(tmp_path / "c.net"), spec)), None, None)
+    c.header_ref = "J1"
+    rth, ratio, why = R.lane_network(c, "AN0")
+    assert abs(rth - 800.0) < 1e-6 and abs(ratio - 0.2) < 1e-9 and "D40 from INJ taken as open" in why
+    spec = _ladder_spec("1k")
+    F.add_comp(spec, "D40", "D", "1N4148W", {"2": "+3V3", "1": "/X"}, part="D", pins=F.R_PINS)
+    F.add_comp(spec, "R40", "R", "1k", {"1": "/X", "2": "AN0"})
+    c = R.Coupon("f", M.read_netlist(F.write_net(str(tmp_path / "c.net"), spec)), None, None)
+    c.header_ref = "J1"
+    assert R.lane_network(c, "AN0")[0] is None
+
+
+# ------------------------------------------------------------------- D2 in the descriptor: no bit for pin 39
+def test_uses_has_no_bit_for_the_key_pin():
+    import nets
+    pin_of = {sig: p for p, sig, _d, _n in nets.SLOT_PINS}
+    groups = {g: ([p for p, sig, _d, _n in nets.SLOT_PINS if sig == g]) for g in D.USES}
+    assert all(groups[g] for g in D.USES) and not any(nets.SLOT_KEY_PIN in ps for ps in groups.values())
+    assert set(D.USES) == {"+3V3", "+5V"} | set(nets.SLOT_SIGNALS) - {"PRESENT_N"}
+    assert pin_of["KEY"] == nets.SLOT_KEY_PIN and "KEY" not in D.USES and "RSV" not in D.USES
+    d = F.good_desc()
+    d["uses"].append("KEY")
+    with pytest.raises(D.DescriptorError):
+        D.encode(d)
+
+
+def test_image_with_a_uses_bit_beyond_the_pins_is_refused():
+    import struct
+    img = bytearray(D.encode(F.good_desc()))
+    off = D.LAYOUT.offset("uses")
+    v = struct.unpack_from("<I", img, off)[0] | (1 << len(D.USES))
+    struct.pack_into("<I", img, off, v)
+    struct.pack_into("<I", img, D.CRC_OFFSET, D.crc32(bytes(img[:D.CRC_OFFSET])))
+    with pytest.raises(D.DescriptorError) as e:
+        D.decode(bytes(img))
+    assert e.value.kind == "reserved" and "pin 39" in str(e.value)
+    assert "KEY" not in D.decode(bytes(img), strict=False)["uses"]

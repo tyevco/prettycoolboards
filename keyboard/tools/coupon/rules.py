@@ -86,11 +86,29 @@ SIGNAL_PINS = {sig: pin for pin, (sig, kind) in PIN_KIND.items() if kind in ("si
 RAIL_PINS = {"+5V": [p for p, (s, _k) in PIN_KIND.items() if s == "+5V"],
              "+3V3": [p for p, (s, _k) in PIN_KIND.items() if s == "+3V3"]}
 GND_PINS = [p for p, (_s, k) in PIN_KIND.items() if k == "gnd"]
+# The slot key (the owner's decision D2 of 2026-11-27; SPEC §4.2, §4.9; nets.SLOT_KEY_PIN): no pin 39 on any coupon
+# (no pad, no net; the header's pin pulled before soldering) and socket hole 39 plugged. Turned 180 degrees, coupon
+# pin 2 meets the plug, so pin 2 must stay a real pin (nets.SLOT_KEY_NEVER_WITH).
+KEY_PIN = nets.SLOT_KEY_PIN
+KEY_NEVER_WITH = nets.SLOT_KEY_NEVER_WITH
+
+# The slot's direct lines (the owner's decision D3 of 2026-11-27; SPEC §4.3; nets.SLOT_SERIES): 100 ohm in series at
+# each socket on CS0_N, CS1_N, IRQ_N, G0-G3 and S5's G4/G5, then straight to an MCU pin. The lanes keep their 47 ohm +
+# 1 nF (LANE_R_OHM, LANE_C_PF: D3 puts no resistor on a lane; tests check nets.SLOT_SERIES against that).
+SERIES_LINES = sorted({sig for n in nets.SLOTS for sig in nets.SLOT_SERIES[n]}, key=lambda s: SIGNAL_PINS[s])
+MCU_VDD = 3.3                  # V: the MCU's VDD (+3V3_MCU), which its slot pins drive to
+MCU_R_DRV = 50.0               # ohm: DS13543 Rev 2 Table 88, V_OH >= VDD - 0.4 V and V_OL <= 0.4 V at |I_IO| = 8 mA,
+                               # so at most 50 ohm while within 8 mA (an estimate of the output driver)
+MCU_I_SPEC_MA = 8.0            # mA: the |I_IO| at which Table 88 specifies those levels ("up to +-8 mA", §5.3.15)
+IDLE_LOW_INPUTS = ("INJ",)     # slot inputs that idle low or open: INJ through JP_INJn, open by default (SPEC §4.7)
+SLOT_LINE_C_PF = 40            # pF: SPEC §4.3's worst case behind the 100 ohm (socket, header, about 60 mm of coupon
+                               # track, logic inputs): the figure its timing check (tau = 4 ns) is done for
 
 
 def coupon_net(signal):
-    """The coupon-side net name of a slot signal (keyboard/hardware/design/sheets/coupon_common.py)."""
-    return "GND" if signal in ("GND", "PRESENT_N") else (None if signal == "RSV" else signal)
+    """The coupon-side net name of a slot signal (keyboard/hardware/design/sheets/coupon_common.py): None for the
+    key pin (nets.NO_NET_SIGNALS: 'KEY', formerly 'RSV')."""
+    return "GND" if signal in ("GND", "PRESENT_N") else (None if signal in nets.NO_NET_SIGNALS else signal)
 
 
 # ---------------------------------------------------------------------------------------------------- findings
@@ -180,8 +198,8 @@ class Coupon:
     # -- helpers on the netlist
     def header_in_net(self):
         n = self.net
-        cands = [c for c in n.comps.values()
-                 if len(c.pins) == 40 or len({p for (r, p) in n.pin_net if r == c.ref}) == 40]
+        cands = [c for c in n.comps.values()             # 40 pins, or fewer with the key (D2: no pin 39)
+                 if len(c.pins) in (38, 39, 40) or len({p for (r, p) in n.pin_net if r == c.ref}) in (38, 39, 40)]
         cands = [c for c in cands if c.prefix in ("J", "P", "CN")] or cands
         if len(cands) == 1:
             return cands[0].ref
@@ -191,6 +209,13 @@ class Coupon:
 
     def hpin_net(self, pin):
         return self.net.net_of(self.header_ref, pin)
+
+    def header_pin_numbers(self):
+        """The pin numbers the header's symbol has in the netlist (its pin table and its nodes), as ints."""
+        h = self.net.comps.get(self.header_ref)
+        nums = set(h.pins) if h else set()
+        nums |= {p for (r, p) in self.net.pin_net if r == self.header_ref}
+        return {int(p) for p in nums if str(p).isdigit()}
 
     def kind_of(self, ref):
         return self.net.comps[ref].prefix if ref in self.net.comps else ""
@@ -477,7 +502,7 @@ def check_netlist(c, r):
     n = c.net
     c.header_ref = c.header_in_net()
     if c.header_ref is None:
-        r.fail("pins.net", "no 40-pin slot header in the netlist")
+        r.fail("pins.net", "no 2 x 20 slot header (39 or 40 pins) in the netlist")
         return
     h = c.header_ref
     # every header pin against nets.SLOT_PINS (SPEC §4.2), coupon-side names (sheets/coupon_common.py)
@@ -511,11 +536,7 @@ def check_netlist(c, r):
     else:
         others = [m for m in n.members("GND") if m[0] != h]
         r.ok("present_n", f"pin 32 strapped to GND ({len(others)} other GND connections)")
-    p39 = n.net_of(h, 39)
-    if p39 is not None:
-        r.fail("rsv", f"pin 39 (RSV) is on {p39}: reserved, not connected (SPEC §4.2)")
-    else:
-        r.ok("rsv", "pin 39 not connected")
+    _check_key(c, r)
     for rail, pins in RAIL_PINS.items():
         got = {n.net_of(h, p) for p in pins}
         if len(got) > 1:
@@ -536,6 +557,7 @@ def check_netlist(c, r):
     else:
         r.ok("shorts", "no two slot signals share a net, and none is tied to GND or a rail")
     _check_reversal(c, r)
+    _check_slot_lines(c, r)
     stubs = [sig for sig, pin in SIGNAL_PINS.items()
              if sig != "PRESENT_N" and n.net_of(h, pin) and c.is_stub(n.net_of(h, pin))]
     if stubs:
@@ -685,9 +707,40 @@ def check_netlist(c, r):
                  (f"; not fitted: {', '.join(dnp)}" if dnp else ""))
 
 
+def _check_key(c, r):
+    """The slot key (the owner's decision D2 of 2026-11-27; SPEC §4.2, §4.9): pin 39 absent from the coupon's header
+    and unconnected, pin 2 present. The netlist shows the header's symbol; check_board() checks its footprint."""
+    n, h = c.net, c.header_ref
+    pins = c.header_pin_numbers()
+    probs = []
+    got = n.net_of(h, KEY_PIN)
+    if got is not None:
+        probs.append(f"pin {KEY_PIN} (KEY) is on {got}: the key pin carries no net")
+    elif KEY_PIN in pins:
+        probs.append(f"{h}'s symbol has a pin {KEY_PIN}: a coupon header with pin {KEY_PIN} hits the socket's plugged "
+                     f"hole {KEY_PIN} and does not go in; draw it with sheets/coupon_common.py's keyed symbol (no pin "
+                     f"{KEY_PIN}) and pull the header's pin {KEY_PIN}")
+    if KEY_NEVER_WITH not in pins:
+        probs.append(f"{h} has no pin {KEY_NEVER_WITH}: keyed at {KEY_NEVER_WITH} and {KEY_PIN} together, a coupon "
+                     "fits either way round (they swap under a half turn, nets.SLOT_KEY_NEVER_WITH)")
+    if probs:
+        r.fail("key", "; ".join(probs) + " (SPEC §4.2, §4.9; D2 of 2026-11-27)")
+    else:
+        r.ok("key", f"pin {KEY_PIN} absent from {h} and unconnected (the key, D2 of 2026-11-27); pin {KEY_NEVER_WITH} "
+                    f"present, so turned 180 degrees it meets the socket's plugged hole {KEY_PIN}")
+
+
+def keyed_against(pins, f):
+    """True when the socket's plugged hole 39 meets a pin the coupon has under the mapping f (slot pin -> coupon
+    pin): the coupon cannot go in that way. `pins`: the coupon's header pin numbers."""
+    cp = f(KEY_PIN)
+    return cp is not None and cp in pins
+
+
 def mirror_pin(n):
-    """The coupon pin that motherboard pin n meets when the coupon is plugged in turned 180 degrees: the 2 x 20
-    header has no key, and a half turn about its centre maps column k to 19 - k and swaps the rows (pin n <-> 41 - n)."""
+    """The coupon pin that motherboard pin n meets when the coupon is plugged in turned 180 degrees: a half turn about
+    the header's centre maps column k to 19 - k and swaps the rows (pin n <-> 41 - n). With the key (D2 of 2026-11-27)
+    the turned coupon's pin 2 meets the socket's plugged hole 39, so it does not go in."""
     return 41 - n
 
 
@@ -698,8 +751,9 @@ def _col_shift(k):
     return f
 
 
-# Other ways an unkeyed 2 x 20 header goes into a 2 x 20 socket (slot pin n -> the coupon pin it meets, None: none).
-# Odd pins are one row, even pins the other, pin 2k-1 and 2k in column k (SPEC §4.2).
+# Other ways a 2 x 20 header can go into a 2 x 20 socket (slot pin n -> the coupon pin it meets, None: none). Odd pins
+# are one row, even pins the other, pin 2k-1 and 2k in column k (SPEC §4.2). With the key, a way is blocked when the
+# plugged hole 39 meets a pin the coupon has (keyed_against).
 MISINSERTIONS = {
     "one column toward pin 1": _col_shift(+1),         # slot pin n meets coupon pin n + 2; coupon pins 1-2 hang out
     "one column toward pin 40": _col_shift(-1),
@@ -710,38 +764,229 @@ MISINSERTIONS = {
 }
 
 
-def _check_reversal(c, r):
-    """What a coupon plugged in turned 180 degrees does (SPEC §4.1: the 2.54 mm header is not keyed), and the other
-    misinsertions of an unkeyed header: the firmware powers +3V3_Sn only when PRESENT_N reads low, so a misinsertion
-    matters when the slot's pin 32 meets a coupon pin on GND."""
+def _reads_present(c, f):
+    """(present, what): does the slot's PRESENT_N (pin 32) meet a coupon pin on GND under the mapping f?"""
     n, h = c.net, c.header_ref
-    present, absent = [], []
+    cp = f(32)
+    net = n.net_of(h, cp) if cp else None
+    what = f"pin 32 meets {'its pin %d (%s, %s)' % (cp, PIN_KIND[cp][0], net or 'open') if cp else 'nothing'}"
+    return net == "GND", what
+
+
+def _check_reversal(c, r):
+    """What a coupon plugged in wrongly does. The firmware powers +3V3_Sn only when PRESENT_N reads low, so a way in
+    matters when the slot's pin 32 meets a coupon pin on GND. With the key (D2 of 2026-11-27: socket hole 39 plugged)
+    a way in is blocked when the plug meets a pin the coupon has: the half turn (its pin 2) and three of the six
+    offsets. The rest are checked for PRESENT_N; and the half turn is also analysed as if the plug were missing (a
+    hand step at assembly, SPEC §4.2), which the firmware answers by reading the descriptor before it drives a line
+    (risks.md EL-2)."""
+    n, h = c.net, c.header_ref
+    pins = c.header_pin_numbers()
+    present, absent, blocked = [], [], []
     for name, f in MISINSERTIONS.items():
-        cp = f(32)
-        net = n.net_of(h, cp) if cp else None
-        what = f"pin 32 meets {'its pin %d (%s, %s)' % (cp, PIN_KIND[cp][0], net or 'open') if cp else 'nothing'}"
-        (present if net == "GND" else absent).append(f"{name}: {what}")
+        if keyed_against(pins, f):
+            blocked.append(f"{name} (its pin {f(KEY_PIN)} meets the plug)")
+            continue
+        yes, what = _reads_present(c, f)
+        (present if yes else absent).append(f"{name}: {what}")
+    tail = ("" if not blocked else "; blocked by the key's plug in hole 39: " + "; ".join(blocked))
     if present:
         r.warn("misinsertion", "reads as present (PRESENT_N on a coupon GND, so the firmware would power +3V3_Sn): "
-                               + "; ".join(present))
+                               + "; ".join(present) + tail)
     else:
-        r.info("misinsertion", "reads absent in every other misinsertion checked (" + "; ".join(absent) + "): the "
-                               "firmware powers nothing. Only electrical: whether the post or the socket body stops "
-                               "these insertions is not checked")
+        r.info("misinsertion", "reads absent in every other misinsertion the key does not block ("
+                               + ("; ".join(absent) or "none") + ")" + tail + ": the firmware powers nothing. Only "
+                               "electrical: whether the post or the socket body stops these insertions is not "
+                               "checked")
     m = mirror_pin(32)
     got = n.net_of(h, m)
+    meets = [f"pin {p} ({PIN_KIND[p][0]}) meets the coupon's pin {mirror_pin(p)} "
+             f"({n.net_of(h, mirror_pin(p)) or 'open'})" for p in RAIL_PINS["+3V3"]]
+    own = [f"its +3V3 (pin {p}) meets the slot's {PIN_KIND[mirror_pin(p)][0]}" for p in RAIL_PINS["+3V3"]]
+    core = (f"the slot's PRESENT_N (pin 32) meets its pin {m}, on {got}, so it reads as present. Powering +3V3_Sn to "
+            "read the descriptor, the slot's " + "; ".join(meets) + "; " + "; ".join(own) + ": MCU pins rated 20 mA "
+            "(DS13543 Rev 2 Table 31) behind a switch that limits at 256-335 mA (SPEC §3.1), and the slot's 100 ohm "
+            "(D3). The bring-up firmware reads the descriptor before it drives a slot line (risks.md EL-2)")
+    if keyed_against(pins, mirror_pin):
+        r.ok("reversal", f"turned 180 degrees the coupon cannot go in: its pin {mirror_pin(KEY_PIN)} meets the "
+                         f"socket's plugged hole {KEY_PIN} (the key, D2 of 2026-11-27; SPEC §4.2)")
+        if got is not None:
+            r.info("reversal_if_unplugged", f"turned 180 degrees with the socket's hole {KEY_PIN} left unplugged (a hand "
+                                         "step), " + core)
+        return
     if got is None:
         r.ok("reversal", f"turned 180 degrees, the slot's PRESENT_N (pin 32) meets the coupon's open pin {m}: the "
                          "firmware sees no coupon and powers nothing")
         return
-    meets = [f"pin {p} ({PIN_KIND[p][0]}) meets the coupon's pin {mirror_pin(p)} "
-             f"({n.net_of(h, mirror_pin(p)) or 'open'})" for p in RAIL_PINS["+3V3"]]
-    own = [f"its +3V3 (pin {p}) meets the slot's {PIN_KIND[mirror_pin(p)][0]}" for p in RAIL_PINS["+3V3"]]
-    r.warn("reversal", f"turned 180 degrees this coupon still reads as present: the slot's PRESENT_N (pin 32) meets "
-                       f"its pin {m}, on {got}. Powering +3V3_Sn to read the descriptor, the slot's "
-                       + "; ".join(meets) + "; " + "; ".join(own) + ": MCU pins rated 20 mA (DS13543 Rev 2 Table 31) "
-                       "behind a switch that limits at 256-335 mA (SPEC §3.1). Remedies are SPEC's to choose (a "
-                       f"pinout where pin {m} is RSV, or slot lines kept high-impedance until the descriptor is valid)")
+    r.warn("reversal", f"the key does not stop this coupon turned 180 degrees (it has no pin {KEY_NEVER_WITH}): "
+                       + core)
+
+
+def _fmt_ohm(v):
+    return f"{v / 1e3:g} k" if v >= 1e3 else f"{v:g} ohm"
+
+
+def line_load(c, net):
+    """The DC load the coupon puts on a slot line: (R_th ohm, V_th V, why) of its fitted resistors seen from the
+    line, with every other part's pin taken as high-impedance (logic inputs) and capacitors open. GND is 0 V, a
+    '+3V3' net 3.3 V, a '+5V' net 5.0 V. (inf, None, why) when no resistor reaches a known potential; (None, None,
+    why) when one reaches a rail of unknown potential."""
+    n, h = c.net, c.header_ref
+    pot = {}
+    for x in n.nets:
+        b = M.net_base(x)
+        if x == "GND":
+            pot[x] = 0.0
+        elif b == "+3V3":
+            pot[x] = MCU_VDD
+        elif b == "+5V":
+            pot[x] = 5.0
+        elif x in c.rails():
+            pot[x] = None
+    nodes, frontier, res = {net}, [net], {}
+    while frontier:
+        x = frontier.pop()
+        for ref, _pin in n.members(x):
+            comp = n.comps.get(ref)
+            if ref == h or ref in res or not n.fitted(ref) or c.kind_of(ref) != "R" or comp is None \
+                    or len(comp.pins) != 2:
+                continue
+            ohm = _parse_ohm(comp.value)
+            ends = [n.net_of(ref, p_) for p_ in comp.pins]
+            if ohm is None or None in ends:
+                return None, None, f"{ref} ({comp.value}) not read"
+            res[ref] = (ends[0], ends[1], max(ohm, 1e-3))
+            for e in ends:
+                if e in pot:
+                    if pot[e] is None:
+                        return None, None, f"{ref} to {e}, a rail of unknown potential"
+                elif e not in nodes:
+                    nodes.add(e)
+                    frontier.append(e)
+    if not any(e in pot for a_, b_, _o in res.values() for e in (a_, b_)):
+        return math.inf, None, "no resistor to a rail or GND" if not res else "resistors reach no rail or GND"
+    idx = {x: i for i, x in enumerate(sorted(nodes))}
+    k = len(idx)
+    g = [[0.0] * (k + 2) for _ in range(k)]            # G | 1 A into the line | the fixed potentials' currents
+    for a_, b_, ohm in res.values():
+        for p_, q in ((a_, b_), (b_, a_)):
+            if p_ in idx:
+                g[idx[p_]][idx[p_]] += 1 / ohm
+                if q in idx:
+                    g[idx[p_]][idx[q]] -= 1 / ohm
+                else:
+                    g[idx[p_]][k + 1] += pot[q] / ohm
+    g[idx[net]][k] = 1.0
+    for col in range(k):
+        piv = max(range(col, k), key=lambda i: abs(g[i][col]))
+        if abs(g[piv][col]) < 1e-15:
+            return math.inf, None, "resistors reach no rail or GND from the line"
+        g[col], g[piv] = g[piv], g[col]
+        for i in range(k):
+            if i != col and g[i][col]:
+                f = g[i][col] / g[col][col]
+                g[i] = [x_ - f * y_ for x_, y_ in zip(g[i], g[col])]
+    i = idx[net]
+    return g[i][k] / g[i][i], g[i][k + 1] / g[i][i], f"{', '.join(sorted(res))}"
+
+
+def _check_slot_lines(c, r):
+    """The slot's direct lines through the motherboard's 100 ohm (D3 of 2026-11-27; SPEC §4.3; nets.SLOT_SERIES),
+    against what the coupon puts on them. SPEC §4.3's timing check assumes about 40 pF and logic inputs behind the
+    resistor; this checks the coupon's side of that: the DC load the MCU drives through the MCU's driver and the
+    100 ohm (levels at the coupon, the pin current), capacitors added to the line (the edge they make), and a coupon
+    output on a line the MCU drives (contention). Arithmetic with the nominal resistors; estimates."""
+    n, k = c.net, c.canon
+    slots = (k["slots"] or list(nets.SLOTS)) if k else list(nets.SLOTS)
+    dc, edges, contention, notes = [], [], [], []
+    held, floating = [], []
+    for sig in SERIES_LINES:
+        net = c.hpin_net(SIGNAL_PINS[sig])
+        if net is None or not c.fitted_members(net):
+            continue
+        series = sorted({nets.SLOT_SERIES[s_][sig][1] for s_ in slots if sig in nets.SLOT_SERIES[s_]})
+        where = [s_ for s_ in slots if sig in nets.SLOT_SERIES[s_]]
+        if not series:
+            continue                                   # S1-S4's G4/G5 come from U_EXP3, with no series resistor
+        rs = series[-1]
+        on = sig if set(where) == set(slots) else f"{sig} (in {', '.join('S%d' % s_ for s_ in where)})"
+        role = None
+        if k and sig in D.GLINES:
+            role = k["glines"][sig]["role"]
+        if sig == "IRQ_N" or role == "input":
+            # driven by the coupon into an MCU input: its pull-up and driver sit on the coupon side of the 100 ohm,
+            # which carries only the pin's leakage (DS13543 Table 87, under 1 uA: under 0.1 mV)
+            notes.append(f"{sig}: driven by the coupon into the MCU through {rs:g} ohm; its pull-up current does not "
+                         "flow through the resistor, so the MCU pin sees the coupon's own low level (plus under "
+                         "0.1 mV); the falling edge into the motherboard's ~20 pF is about 2 ns (SPEC §4.3)")
+            continue
+        rth, vth, why = line_load(c, net)
+        if rth is None:
+            dc.append((None, f"{on}: DC load not computed ({why})"))
+        elif math.isinf(rth):
+            dc.append((0.0, f"{on}: no resistive load"))
+            floating.append(on)
+        else:
+            held.append(f"{on} ({_fmt_ohm(rth)} to {vth:.1f} V)")
+            i_hi = (MCU_VDD - vth) / (rth + rs + MCU_R_DRV)
+            i_lo = (0.0 - vth) / (rth + rs + MCU_R_DRV)
+            v_hi = MCU_VDD - i_hi * (rs + MCU_R_DRV)
+            v_lo = -i_lo * (rs + MCU_R_DRV)
+            i_max = max(abs(i_hi), abs(i_lo))
+            dc.append((i_max, f"{on}: {why}, {_fmt_ohm(rth)} to {vth:.1f} V: {round(v_hi, 3) + 0.0:.3f} / "
+                              f"{round(v_lo, 3) + 0.0:.3f} V at the coupon, {i_max * 1e3:.2f} mA "
+                              f"({i_max * rs * 1e3:.1f} mV across the {rs:g} ohm)"))
+        grounds = c.ac_grounds()
+        caps = [(x_.ref, parse_cap(x_.value) or 0.0) for x_, ends in c.two_pin("C")
+                if net in ends and (ends[1] if ends[0] == net else ends[0]) in grounds]
+        if caps:
+            cpf = sum(v for _r, v in caps) * 1e12
+            tau = (rs + MCU_R_DRV) * (cpf + SLOT_LINE_C_PF) * 1e-12
+            edges.append(f"{on}: {', '.join(a_ for a_, _v in caps)} add {cpf:.0f} pF to SPEC §4.3's {SLOT_LINE_C_PF} "
+                         f"pF: tau = {tau * 1e9:.1f} ns through {rs:g} + {MCU_R_DRV:g} ohm, a 10-90 % edge of "
+                         f"{2.2 * tau * 1e9:.0f} ns (SPEC §4.3 checked 9 ns)")
+        drv = [f"{ref}.{p_} ({n.pin_type.get((ref, p_), '')})" for ref, p_ in c.fitted_members(net)
+               if n.pin_type.get((ref, p_), "") in ("output", "power_out", "open_collector", "open_emitter",
+                                                    "tri_state")]
+        if drv:
+            contention.append(f"{on}: {', '.join(drv)} by its symbol's pin type, on a line the MCU drives; a stiff "
+                              f"coupon driver against the MCU through {rs:g} ohm draws up to "
+                              f"{MCU_VDD / (rs + MCU_R_DRV) * 1e3:.0f} mA (DS13543 Table 31: 20 mA per pin)")
+    head = (f"driven through the socket's {nets.SLOT_SERIES_OHMS:g} ohm (D3) and the MCU's driver, taken as "
+            f"{MCU_R_DRV:g} ohm (DS13543 Table 88 at 8 mA), from 0 / {MCU_VDD:g} V, in slots "
+            f"{', '.join('S%d' % s_ for s_ in slots)} (estimates; high / low level at the coupon): ")
+    if dc:
+        over = [t for i_, t in dc if i_ is not None and i_ > MCU_I_SPEC_MA * 1e-3]
+        unknown = [t for i_, t in dc if i_ is None]
+        if over:
+            r.fail("slotlines.dc", head + "; ".join(over) + f": above the {MCU_I_SPEC_MA:g} mA at which DS13543 "
+                                                            "Table 88 specifies the MCU's output levels")
+        elif unknown:
+            r.warn("slotlines.dc", head + "; ".join(t for _i, t in dc))
+        else:
+            r.ok("slotlines.dc", head + "; ".join(t for _i, t in dc))
+    if edges:
+        r.warn("slotlines.edges", "; ".join(edges) + ": SPEC §4.3's '100 ohm limits no slot function' assumes no "
+                                                     "capacitor on these lines; check the edge against the line's use")
+    elif dc:
+        r.ok("slotlines.edges", f"no capacitor on the MCU-driven slot lines: SPEC §4.3's {SLOT_LINE_C_PF} pF behind "
+                                f"100 ohm (tau 4 ns, a 9 ns edge) holds as far as the netlist shows")
+    if contention:
+        r.warn("slotlines.contention", "; ".join(contention) + " (a symbol's pin type can be wrong either way)")
+    # The bring-up firmware leaves these lines high-impedance from +3V3_Sn on until it has read and checked the
+    # descriptor (bringup/src/slot.c, risks.md EL-2), so only the coupon holds them then. SPEC §4.9 has no rule for
+    # it: reported, not failed.
+    idle = ("the bring-up firmware leaves the slot's MCU-driven lines high-impedance from +3V3_Sn on until it has "
+            "read and checked the descriptor (the settling time plus the read; bringup/src/slot.c, risks.md EL-2)")
+    if floating:
+        r.warn("slotlines.idle", f"{', '.join(floating)}: no resistor to a rail or GND on the coupon, so these inputs "
+                                 f"float while {idle}; a pull (as the A1 coupons' 100 k) holds them, unless the part "
+                                 "has its own (not in the netlist)")
+    elif held:
+        r.ok("slotlines.idle", f"every MCU-driven slot line the coupon uses has a pull on the coupon, which holds it "
+                               f"while {idle}: {'; '.join(held)}")
+    if notes:
+        r.info("slotlines.irq_n", "; ".join(notes))
 
 
 def lane_network(c, net, active_as_ground=False):
@@ -753,21 +998,31 @@ def lane_network(c, net, active_as_ground=False):
     source: a sensor, a buffer, a mux), the netlist cannot give its output impedance: then R_th is None, unless
     active_as_ground, which treats every net such a part touches as AC ground. That makes R_th a LOWER BOUND of the
     real source impedance (grounding a node can only lower a resistive network's resistance, and any output
-    impedance in the source only adds to it), and ratio None."""
+    impedance in the source only adds to it), and ratio None.
+
+    A two-pin diode with one end on a slot input that idles low or open (IDLE_LOW_INPUTS: INJ, the latency rig's
+    stimulus, open by default at JP_INJn, SPEC §4.7) does not conduct while the lane idles, so it counts as open:
+    the test coupon's D11 from INJ into the AN0 tap (D7 of 2026-11-27). R_th and ratio are then the idle lane's;
+    with INJ driven high the diode conducts and both move (the descriptor declares the idle values)."""
     n, h = c.net, c.header_ref
     rails = c.ac_grounds()
     fixed = {x: (0.0 if x == "GND" else 1.0 if M.net_base(x) == "+3V3" else None) for x in rails}
     nodes, frontier, res = {net}, [net], {}
-    active = []
+    active, idle_open = [], set()
+    idle_nets = {c.hpin_net(SIGNAL_PINS[s]) for s in IDLE_LOW_INPUTS} - {None}
     while frontier:
         x = frontier.pop()
         for ref, _pin in n.members(x):
-            if ref == h or ref in res or not n.fitted(ref):
+            if ref == h or ref in res or ref in idle_open or not n.fitted(ref):
                 continue
             kind = c.kind_of(ref)
             if kind in ("C", "TP", "FID", "H", "#FLG", "#PWR"):
                 continue
             comp = n.comps.get(ref)
+            if (kind == "D" and comp is not None and len(comp.pins) == 2
+                    and {n.net_of(ref, p_) for p_ in comp.pins} & idle_nets):
+                idle_open.add(ref)                     # a diode from INJ: reverse-biased or open while INJ idles
+                continue
             if kind != "R" or comp is None or len(comp.pins) != 2:
                 if not active_as_ground:
                     return None, None, f"{ref} drives it"
@@ -818,6 +1073,9 @@ def lane_network(c, net, active_as_ground=False):
     why = f"{len(res)} resistor{'s' if len(res) != 1 else ''}"
     if active:
         why += f", {', '.join(sorted(set(active)))} taken as 0 ohm"
+    if idle_open:
+        why += (f"; {', '.join(sorted(idle_open))} from {'/'.join(IDLE_LOW_INPUTS)} taken as open (the idle lane: "
+                "the rig's stimulus low or its jumper open)")
     return rth, ratio, why
 
 
@@ -930,8 +1188,8 @@ def check_board(c, r):
         if hdrs:
             r.warn("header.library", f"{hdrs[0].ref} is {hdrs[0].fpid!r}, not {g.header_fpid!r}")
     if not hdrs:
-        others = [f"{f.ref} {f.fpid}" for f in b.footprints.values() if len(f.pads) == 40]
-        r.fail("header.footprint", f"no {g.header_fpid}" + (f" (40-pad footprints: {others})" if others else ""))
+        others = [f"{f.ref} {f.fpid}" for f in b.footprints.values() if len(f.pads) in (39, 40)]
+        r.fail("header.footprint", f"no {g.header_fpid}" + (f" (39- or 40-pad footprints: {others})" if others else ""))
         return
     if len(hdrs) > 1:
         r.fail("header.footprint", f"{len(hdrs)} slot headers: {[f.ref for f in hdrs]}")
@@ -942,6 +1200,7 @@ def check_board(c, r):
                               "sits on the bottom, pins down into the motherboard socket (SPEC §9)")
     else:
         r.ok("header.side", f"{hf.ref} on the bottom")
+    _check_key_pcb(r, hf, g)
     errs = []
     for p in hf.pads:
         try:
@@ -958,7 +1217,7 @@ def check_board(c, r):
         r.fail("header.position", f"pad {worst[1]} at {worst[2]}, slot position {worst[3]}: {why} "
                                   f"(+-{PIN_TOL} mm; pin_xy() of {g.source})")
     else:
-        r.ok("header.position", f"all 40 pads on their slot positions (worst {worst[0] * 1000:.1f} um), "
+        r.ok("header.position", f"all {len(errs)} pads on their slot positions (worst {worst[0] * 1000:.1f} um), "
                                 f"so the coupon mates with the socket placed by {g.source}")
     # pad nets: against SLOT_PINS and against the netlist (parity)
     pnets = {p.number: (None if M.is_unconnected_name(p.net) else p.net) for p in hf.pads}
@@ -974,7 +1233,7 @@ def check_board(c, r):
     if probs:
         r.fail("pins.pcb", "; ".join(probs))
     else:
-        r.ok("pins.pcb", "every header pad carries its slot net (PRESENT_N on GND, RSV open)")
+        r.ok("pins.pcb", f"every header pad carries its slot net (PRESENT_N on GND, no pad or net at {KEY_PIN})")
     if c.net is not None and c.header_ref:
         diff = [f"pad {num}: board {pnets.get(num)}, netlist {c.net.net_of(c.header_ref, num)}"
                 for num in sorted(pnets, key=lambda s: int(s) if s.isdigit() else 0)
@@ -1041,6 +1300,23 @@ def check_board(c, r):
         r.warn("routed", f"pcbnew counts {b.unrouted} unrouted connections (DRC reports them in full)")
     elif b.unrouted == 0:
         r.ok("routed", "no unrouted connection")
+
+
+def _check_key_pcb(r, hf, g):
+    """The key on the board (D2 of 2026-11-27): the header footprint has no pad 39 (no hole for the pulled pin) and
+    a real pad 2."""
+    numbers = {p.number for p in hf.pads}
+    kprobs = []
+    if str(KEY_PIN) in numbers:
+        kprobs.append(f"{hf.ref} ({hf.fpid}) has a pad {KEY_PIN}: a header pin there hits the socket's plugged hole "
+                      f"{KEY_PIN}; use boards/coupon_common.py's keyed footprint ({g.header_fpid}, no pad {KEY_PIN})")
+    if str(KEY_NEVER_WITH) not in numbers:
+        kprobs.append(f"{hf.ref} has no pad {KEY_NEVER_WITH}: keyed at {KEY_NEVER_WITH} and {KEY_PIN}, a coupon fits "
+                      "either way round")
+    if kprobs:
+        r.fail("key.pcb", "; ".join(kprobs) + " (SPEC §4.2, §4.9)")
+    else:
+        r.ok("key.pcb", f"{hf.ref} has {len(hf.pads)} pads, none at {KEY_PIN} (the key), and pad {KEY_NEVER_WITH}")
 
 
 # ---- the netlist against the descriptor ------------------------------------------------------------------------

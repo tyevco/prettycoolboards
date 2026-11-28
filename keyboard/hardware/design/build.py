@@ -21,6 +21,7 @@ import os
 import re
 import subprocess
 import sys
+import types
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 HW = os.path.dirname(HERE)                                  # keyboard/hardware
@@ -82,18 +83,38 @@ def load_modules(names):
     return [importlib.import_module(f"sheets.{n}") for n in names]
 
 
+def library_modules(mods):
+    """The modules whose library parts go into the board's "keyboard" library: the board's sheet modules, then every
+    shared module one of them imports that sets LIBRARY_SHARED = True (sheets/coupon_common.py: the keyed slot header
+    of the owner's decision D2 of 2026-11-27, so every coupon gets it without listing it). Added 2026-11-27; a board
+    that imports no such module builds exactly as before."""
+    out = list(mods)
+    for m in mods:
+        for v in vars(m).values():
+            if isinstance(v, types.ModuleType) and getattr(v, "LIBRARY_SHARED", False) and v not in out:
+                out.append(v)
+    return out
+
+
 def build_libraries(mods, out):
+    """Each library module's SYMBOLS (box symbols, symgen), its optional symbols() (ready symbol S-expressions,
+    e.g. a stock symbol with a pin removed) and its optional footprints(fpgen, lib_dir)."""
     libdir = os.path.join(out, "lib")
     os.makedirs(libdir, exist_ok=True)
     sym_path = os.path.join(libdir, LIB + ".kicad_sym")
     fp_dir = os.path.join(libdir, LIB + ".pretty")
     syms, seen = [], set()
-    for m in mods:
+    for m in library_modules(mods):
         for spec in getattr(m, "SYMBOLS", []):
             if spec["name"] in seen:
                 continue
             seen.add(spec["name"])
             syms.append(symgen.box_symbol(**spec))
+        for sym in (m.symbols() if hasattr(m, "symbols") else []):
+            if str(sym[1]) in seen:
+                continue
+            seen.add(str(sym[1]))
+            syms.append(sym)
         if hasattr(m, "footprints"):
             m.footprints(fpgen, fp_dir)
     symgen.write_library(sym_path, syms, generator="prettycool_keyboard_symgen")

@@ -1,5 +1,5 @@
 {
-  "_comment": "Descriptor of the rev A test coupon (SPEC §10 step 7). Values from its captured design, keyboard/hardware/design/sheets/test_coupon.py (2026-11-27). Currents are design estimates, not measurements. The board is designed and laid out, not built.",
+  "_comment": "Descriptor of the rev A test coupon (SPEC §10 step 7). Values from its captured design, keyboard/hardware/design/sheets/test_coupon.py (2026-11-27; the INJ-to-AN0 path of the owner's decision D7 and the pin 39 key of D2 added the same day). Currents and the INJ lift are design estimates, not measurements. The board is designed and laid out, not built.",
   "board": "test-coupon",
   "source": "keyboard/hardware/design/sheets/test_coupon.py",
   "placeholder": false,
@@ -11,6 +11,7 @@
     "bulk_uf: C1 10 uF + C3, C10, C11 100 nF on +3V3; C2 22 uF on +5V",
     "spi.max_khz 10000 is a conservative guess through the bus switch and the 2.54 mm header; the SN74LV165A's own limit was not read, and the master's hold time on MISO is to be checked at bring-up (sheets/test_coupon.py); SPI mode 3, as the sheet prefers",
     "lanes: a 5 x 499 ohm 0.1 % ladder, R_src = k (5 - k) / 5 x 499 = 399 / 599 / 599 / 399 ohm (sheets/test_coupon.py DESCRIPTOR_FACTS; rules.py recomputes it from the netlist)",
+    "AN0 also carries the latency rig's stimulus (D7 of 2026-11-27): D11 (1N4148W) and R40 (1 k) from INJ into the AN0 tap. With INJ low or open D11 is reverse-biased and every lane reads its ratio and R_src above (leakage under 10 uV). With INJ high (3.3 V) AN0 rises by about 0.55 V (0.43-0.58 V over tolerances, estimate), AN1, AN2, AN3 by 3/4, 1/2, 1/4 of that, and AN0's R_src falls to about 289 ohm: the reference ratios and the ext block hold with INJ low only. r_src_ohm is the idle, larger value. Drive INJ only while the slot is powered: with the slot off it back-feeds the coupon's +3V3 to about 0.85-0.88 V (estimate)",
     "ext.tolerance: worst case of five equal 0.1 % resistors (arithmetic: |delta ratio| = 0.00032, 0.00048, 0.00048, 0.00032)"
   ],
   "type": "test",
@@ -32,7 +33,7 @@
     "+5V": {"typ_ma": 0, "max_ma": 190, "bulk_uf": 22.0, "startup_ms": 0}
   },
   "lanes": {
-    "AN0": {"kind": "reference", "unit": "ratio", "flags": ["ratiometric", "adc4_ok"], "sites": 1, "r_src_ohm": 399, "cload_max_pf": 0, "offset": 0.0, "gain": 1.0, "note": "ladder tap 1 of 5: 0.2 x +3V3"},
+    "AN0": {"kind": "reference", "unit": "ratio", "flags": ["ratiometric", "adc4_ok"], "sites": 1, "r_src_ohm": 399, "cload_max_pf": 0, "offset": 0.0, "gain": 1.0, "note": "ladder tap 1 of 5: 0.2 x +3V3 with INJ low; INJ high lifts it about 0.55 V (D11 + R40, the rig's lane path)"},
     "AN1": {"kind": "reference", "unit": "ratio", "flags": ["ratiometric", "adc4_ok"], "sites": 1, "r_src_ohm": 599, "cload_max_pf": 0, "offset": 0.0, "gain": 1.0, "note": "0.4 x +3V3"},
     "AN2": {"kind": "reference", "unit": "ratio", "flags": ["ratiometric", "adc4_ok"], "sites": 1, "r_src_ohm": 599, "cload_max_pf": 0, "offset": 0.0, "gain": 1.0, "note": "0.6 x +3V3"},
     "AN3": {"kind": "reference", "unit": "ratio", "flags": ["ratiometric", "adc4_ok"], "sites": 1, "r_src_ohm": 399, "cload_max_pf": 0, "offset": 0.0, "gain": 1.0, "note": "0.8 x +3V3"}

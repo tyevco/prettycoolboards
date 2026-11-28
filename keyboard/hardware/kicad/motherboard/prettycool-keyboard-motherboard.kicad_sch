@@ -1,0 +1,500 @@
+(kicad_sch
+	(version 20260306)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(uuid "8f90aa17-293d-57ef-9e9c-d487e7a89866")
+	(paper "A3")
+	(title_block
+		(title "PrettyCool Keyboard rev A testbed motherboard")
+		(date "2026-11-27")
+		(rev "A")
+		(company "PrettyCool Boards")
+	)
+	(lib_symbols)
+	(sheet
+		(at 25.4 40.64)
+		(size 90 22.86)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "9fe62a1d-22c6-54b9-8c92-944baa53d667")
+		(property "Sheetname" "USB-C input, ESD, Type-C detect"
+			(at 25.4 39.9284 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 2.54 2.54)
+					(bold yes)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "usb.kicad_sch"
+			(at 25.4 64.0846 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866"
+					(page "2")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 145.88 40.64)
+		(size 90 22.86)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "3a0af7db-b83a-5147-95eb-53b14e1ee035")
+		(property "Sheetname" "Power: input breaker, VSYS, +3V3, +3V3_SLOT, +3V3A, monitors"
+			(at 145.88 39.9284 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 2.54 2.54)
+					(bold yes)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "power.kicad_sch"
+			(at 145.88 64.0846 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866"
+					(page "3")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 266.36 40.64)
+		(size 90 22.86)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "7e6b3e5a-9a29-582a-837c-783777a8bfb6")
+		(property "Sheetname" "MCU: STM32U5A5VJT6, supplies, HSE, BOOT0, NRST"
+			(at 266.36 39.9284 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 2.54 2.54)
+					(bold yes)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "mcu.kicad_sch"
+			(at 266.36 64.0846 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866"
+					(page "4")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 25.4 86.36)
+		(size 90 22.86)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "a841488c-1e75-5922-b55e-3ba95baeff5e")
+		(property "Sheetname" "I/O expanders, slot I2C mux, bus pull-ups"
+			(at 25.4 85.6484 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 2.54 2.54)
+					(bold yes)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "io.kicad_sch"
+			(at 25.4 109.8046 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866"
+					(page "5")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 145.88 86.36)
+		(size 90 22.86)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "ccefaff1-c05a-545f-984f-b6920b461a3d")
+		(property "Sheetname" "Slot S1: socket, rails, monitors, bus switch, lanes"
+			(at 145.88 85.6484 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 2.54 2.54)
+					(bold yes)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "slot1.kicad_sch"
+			(at 145.88 109.8046 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866"
+					(page "6")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 266.36 86.36)
+		(size 90 22.86)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "f2a30a92-e24e-5bf9-a3b4-e352b0ee13d9")
+		(property "Sheetname" "Slot S2: socket, rails, monitors, bus switch, lanes"
+			(at 266.36 85.6484 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 2.54 2.54)
+					(bold yes)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "slot2.kicad_sch"
+			(at 266.36 109.8046 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866"
+					(page "7")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 25.4 132.08)
+		(size 90 22.86)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "f6e00492-7a90-5a27-8163-dc4c879e494a")
+		(property "Sheetname" "Slot S3: socket, rails, monitors, bus switch, lanes"
+			(at 25.4 131.3684 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 2.54 2.54)
+					(bold yes)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "slot3.kicad_sch"
+			(at 25.4 155.5246 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866"
+					(page "8")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 145.88 132.08)
+		(size 90 22.86)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "b43630bf-d4bd-53f9-b80d-cfbe0434603b")
+		(property "Sheetname" "Slot S4: socket, rails, monitors, bus switch, lanes"
+			(at 145.88 131.3684 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 2.54 2.54)
+					(bold yes)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "slot4.kicad_sch"
+			(at 145.88 155.5246 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866"
+					(page "9")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 266.36 132.08)
+		(size 90 22.86)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "fdde5c59-8c65-5942-bb2f-0376868da015")
+		(property "Sheetname" "Slot S5: socket, rails, monitors, bus switch, lanes"
+			(at 266.36 131.3684 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 2.54 2.54)
+					(bold yes)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "slot5.kicad_sch"
+			(at 266.36 155.5246 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866"
+					(page "10")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 25.4 177.8)
+		(size 90 22.86)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "8b7eb3ae-e068-5679-af0e-da89db501f1e")
+		(property "Sheetname" "Headers: SWD, latency rig, KVM; mounting"
+			(at 25.4 177.0884 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 2.54 2.54)
+					(bold yes)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "headers.kicad_sch"
+			(at 25.4 201.2446 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "prettycool-keyboard-motherboard"
+				(path "/8f90aa17-293d-57ef-9e9c-d487e7a89866"
+					(page "11")
+				)
+			)
+		)
+	)
+	(text "PrettyCool Keyboard rev A testbed motherboard, rev A: generated by keyboard/hardware/design/build.py from sheets/mb_usb.py, sheets/mb_power.py, sheets/mb_mcu.py, sheets/mb_io.py, sheets/mb_slots.py, sheets/mb_headers.py. Do not hand-edit.\nArchitecture of record: keyboard/hardware/design/SPEC.md and nets.py.\nStatus: captured (schematic generated and gated); not built, not measured."
+		(exclude_from_sim no)
+		(at 25.4 228.52 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left top)
+		)
+		(uuid "6b50313b-364b-5d7f-93e4-632884900430")
+	)
+	(sheet_instances
+		(path "/"
+			(page "1")
+		)
+	)
+)

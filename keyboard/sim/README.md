@@ -1,6 +1,6 @@
 # keyboard/sim: SPICE benches for the margins SPEC computes by hand
 
-**Status (2026-11-27): simulations of datasheet-based models. Nothing here is built or measured.** Each bench
+**Status (2026-11-28): simulations of datasheet-based models. Nothing here is built or measured.** Each bench
 checks the arithmetic and the assumptions behind a margin that [SPEC](../hardware/design/SPEC.md) relies on. A
 passing test means "the margin holds for these models and these datasheet values", not "the board works". The
 models are behavioural and written from datasheets (sources at the end). The one vendor model that could be used,
@@ -22,6 +22,7 @@ given the time constant that DS13543's own Table 98 implies.
 | `bench_lane.py` | Bench 1: the lane front end and the ADC sample-and-hold. Also `keys_table` (SPEC §6.3's arithmetic) and `min_sampling_cycles` (which sampling-time step a declared R_src needs). |
 | `bench_slot.py` | Bench 2: a TPS2553 enabling a coupon, the VDDA disturbance, and the S5 breaker with motor profiles. Also `bulk_limit` (a start-up rule for compiler v0). |
 | `bench_input.py` | Bench 3: start-up through U2, and the 2.8 A ceiling through a USB cable. |
+| `bench_vdda.py` | Bench 4: the +3V3A branch (VDDA and VREF+ behind FB1) with the LDO's output impedance, and the damping options of the owner's decision D4 (2026-11-27). AC (transfer and impedance) and transient (the ADCs' own current, a scan's steps, another slot's load step). |
 | `vendor.py` | Fetches TI's TPS2553 PSpice model (SLVM425B) into a local cache, checks its SHA-256, and patches it for ngspice. Not committed: see below. |
 | `run_all.py` | Runs every bench, writes `plots/*.png`, and prints the tables below. |
 | `tests/` | pytest: the margins (one test per SPEC claim), the tooling against closed-form answers, and the vendor cross-check. |
@@ -44,8 +45,22 @@ KBDSIM_NETLIST=/tmp/proposed.net KBDSIM_NETS=/tmp/nets.py KBDSIM_SPEC=/tmp/SPEC.
   PYTHONDONTWRITEBYTECODE=1 $PY -m pytest keyboard/sim/tests -q -p no:cacheprovider
 ```
 
-Result on 2026-11-27 (`ngspice-42`): 62 passed and 16 xfailed with the vendor model fetched; without it, 61 passed,
-1 skipped and 16 xfailed.
+Result on 2026-11-28 (`ngspice-42`), against the motherboard netlist recaptured on 2026-11-27 with the owner's
+decisions of that evening (D2 key, D3 series resistors, D4 PGTH divider, damping leg and Kelvin sense): without the
+vendor model, 73 passed, 1 skipped and 15 xfailed (`-m nospice`: 20 passed, 1 xfailed). Before the recapture it was
+68 passed, 1 skipped and 18 xfailed. The three tests that waited for the recapture now run as ordinary tests and
+pass: `test_damping_leg_is_captured` (0.47 Ω + 10 µF from +3V3A through VDDA_DAMP), `test_pgth_divider_follows_the_contract`
+(100 k / 44.2 k) and `test_ceiling_compliant_cable_keeps_vsys_pg`, whose strict xfail applied only while the capture
+had 39 k. Their expected-failure branches apply only to a netlist with none of D3's socket-side nets
+(`design.predates_decisions_2026_11_27()`, for what-if runs against an older one with `KBDSIM_NETLIST`): a recaptured
+netlist whose PGTH divider is back at 39 k, or whose damping leg is missing, marked DNP or of another value, fails.
+The fifteen strict xfails left are the gaps listed under each bench; the recapture closed none of them.
+`test_no_bench_line_hides_a_series_resistor` (2026-11-28) reads the netlist: no bench models a G-line or a chip
+select, so D3's 100 Ω enter no simulation, and the lane bench's 47 Ω must be the whole path from each socket's lane
+pin to its ADC pin. A resistor added in series with a lane, or a D3 resistor missing, of another value, marked DNP
+or joined by another part on its socket-side net, fails it. The netlist reader skips parts marked DNP (they are not
+on the assembled board), and `test_motherboard_netlist_is_there` fails when the netlist the benches read is missing,
+so the capture tests cannot all turn into skips. The review of 2026-11-28 below has the faults.
 
 **How the tests encode SPEC.** Each test asserts a margin that SPEC relies on, using today's contract and capture
 values. Some margins do not hold. Those tests are marked `xfail(strict=True)`, and the reason names the gap. The
@@ -200,6 +215,37 @@ the 0.3 Ω case the VSYS level while U2 cycles is set by the load model (a const
 
 ![The 2.8 A ceiling](plots/input_ceiling.png)
 
+### 4. The +3V3A branch (SPEC §3.1, §3.7; risks.md EL-5; owner decision D4)
+
+**Circuit.** VSYS feeds the LDL1117 (the `ldo` model, its output impedance fitted to Figure 27), +3V3_SLOT carries
+the captured 5.2 µF (C41 4.7 µF and five 100 nF), FB1 (BLM18PG221SN1D: 0.10 Ω DC resistance, max, Murata; its
+inductance bracketed 0.1–2 µH) feeds +3V3A, and +3V3A carries the captured 2.2 µF (2 × (100 nF + 1 µF) at VDDA and
+VREF+) and a 2 mA static load. Four variants: as captured; with the contract's damping leg (`nets.VDDA_DAMPING`,
+0.47 Ω + 10 µF from +3V3A to GND); 1 Ω or 2.2 Ω in place of FB1 with 10 µF more on +3V3A.
+
+**Stimuli.** AC: H(f) = V(+3V3A) / V(+3V3_SLOT) and the impedance at +3V3A, 1 kHz to 10 MHz. Transient: (a) the
+ADCs' current at the start of an 80 µs scan window, 2.66 mA (DS13543 Table 97: ADC12 IDDA 980 µA + IDDV 160 µA, typ
+at 2.5 Msps and 14 bits, twice; Table 100: ADC4 360 + 18 µA), a bound for the slower working point; (b) the same
+current in eight conversion pulses per frame, at SPEC §6.3's 7.3 µs and 3.3 µs steps; (c) a 10.4 mA step on
++3V3_SLOT (four TMAG5253 at 2.6 mA switched on). Every disturbance is quoted at mid-scale: a change dV of VREF+ moves
+the code of a ratiometric input at mid-scale by 2^13 × dV / 3.3 V (LSB).
+
+**Brackets.** FB1 0.1, 0.3, 0.5, 1 and 2 µH; the LDO's fitted inductance × 0.5, 1 and 2; the +3V3A capacitors at
+2.2 and 1.3 µF (DC bias); the leg's capacitor at 100 % and 47 % (DC bias). None of the DC-bias figures was read for
+a particular part.
+
+**The bars** (proposals, SPEC §3.7): peaking at most 3 dB with the leg at its nominal values over the whole bracket,
+and at most 6 dB with its capacitor at 47 %; |Z| at +3V3A at most 1 Ω; the VREF+ swing inside a scan window from the
+ADCs' own current at most 3 LSB at mid-scale.
+
+**Can catch:** a filter that resonates in the scan's band, or that turns the ADCs' own current into a reference
+error, given these models.
+
+**Cannot catch:** the bead's real L(f, I_DC) and loss, the LDO's real control loop (only its fitted output
+impedance), layout inductance, the ADC's real current waveform (Table 97's averages), the sensors' supply rejection.
+
+![The +3V3A branch](plots/vdda_damping.png)
+
 ## Results (ngspice-42, 2026-11-27)
 
 Every figure is a simulation of the models above, not a measurement. Bold verdicts are gaps or new findings.
@@ -251,11 +297,17 @@ Every figure is a simulation of the models above, not a measurement. Bold verdic
 | Input | +3V3 ramp (10 % to 3.0 V), I_dVdt min | within 25 ms (U_CC VDD) | 7.9 ms; inrush 68 mA | agrees |
 | Input | +3V3 ramp (10 % to 3.0 V), I_dVdt typ | within 25 ms (U_CC VDD) | 2.9 ms; inrush 104 mA | agrees |
 | Input | +3V3 ramp (10 % to 3.0 V), I_dVdt max | within 25 ms (U_CC VDD) | 1.7 ms; inrush 146 mA | agrees |
-| Input | 2.8 A ceiling, 4.75 V source, 0.100 Ω cable | board runs at the ceiling | VBUS 4.44 V, VSYS 4.26 V; UVLO margin +404 mV, U_CC +639 mV | holds |
-| Input | 2.8 A ceiling, 4.75 V source, 0.250 Ω cable | board runs at the ceiling | VBUS 4.05 V, VSYS 3.87 V; UVLO margin +14 mV, U_CC +249 mV | **VSYS_PG may fall; UVLO margin only 14 mV** |
+| Input | 2.8 A ceiling, 4.75 V source, 0.100 Ω cable | board runs at the ceiling | VBUS 4.44 V, VSYS 4.26 V; UVLO margin +403 mV, U_CC +639 mV | holds |
+| Input | 2.8 A ceiling, 4.75 V source, 0.250 Ω cable | board runs at the ceiling | VBUS 4.05 V, VSYS 3.87 V; UVLO margin +14 mV, U_CC +249 mV | **UVLO margin only 14 mV** |
 | Input | 2.8 A ceiling, 4.75 V source, 0.300 Ω cable | board runs at the ceiling | VBUS 3.98 V, VSYS cycling (load-model artifact); UVLO margin -52 mV, U_CC +183 mV | **U2 UVLO: turns off and chatters** |
 | Input | 2.8 A ceiling, 5.00 V source, 0.250 Ω cable | board runs at the ceiling | VBUS 4.30 V, VSYS 4.12 V; UVLO margin +264 mV, U_CC +499 mV | holds |
 | Input | Largest cable at 2.8 A from 4.75 V before U2's UVLO (max threshold, 1 % divider) | not stated | 255 mΩ round trip (276 mΩ with exact resistors) | a compliant 3 A cable is 250 mΩ |
+| VDDA | +3V3_SLOT to +3V3A peaking, as captured (FB1 0.1 / 0.5 / 2 µH) | risks.md EL-5: resonance at 76-196 kHz | +6.4 dB at 316 kHz / +13.2 dB at 151 kHz / +19.1 dB at 76 kHz | **resonates in the scan's band** |
+| VDDA | The same with the leg (0.47 Ω + 10 µF); whole bracket; capacitor at 47 % | D4: damp it | +0.6 dB / +0.4 dB / +2.7 dB; worst +2.7 dB; +5.9 dB | holds (≤ 3 dB) |
+| VDDA | VREF+ swing inside a scan window from the ADCs' 2.66 mA, as captured, FB1 2 µH | – | 9.7 LSB at mid-scale | **exceeds 3 LSB** |
+| VDDA | VREF+ swing inside a scan window from the ADCs' 2.66 mA, with the leg, FB1 2 µH | – | 2.4 LSB at mid-scale | holds (≤ 3 LSB) |
+| VDDA | VREF+ swing inside a scan window from the ADCs' 2.66 mA, 1 Ω in place of FB1 | – | 5.6 LSB at mid-scale | **exceeds 3 LSB** |
+| VDDA | VREF+ swing inside a scan window from the ADCs' 2.66 mA, 2.2 Ω in place of FB1 | – | 12.7 LSB at mid-scale | **exceeds 3 LSB** |
 
 **SPEC §6.3's keys-per-slot table, recomputed.** `bench_lane.keys_table` reproduces each of SPEC's four key-count
 rows exactly, as SPEC.md prints them (`test_keys_table_reproduces_spec`). The rows below substitute the simulated
@@ -315,7 +367,8 @@ These are recommendations for the owners of SPEC, `nets.py` and the capture. Thi
      hundred µs into a short, so this bound is pessimistic.
 
    Recommendation: the firmware does not switch slot rails during a measurement run, and discards the conversions
-   of the frame in which it does.
+   of the frame in which it does. The owner's damping leg (D4, bench 4) does not change this: it acts on the
+   resonance, not on a rail that switches on.
 7. **The haptics slot's supply (§3.6, §11 #15).** SPEC's 4.3–4.5 V at the coupon excludes the cable:
    * with a compliant 3 A cable at its limit and the board at its 2.8 A ceiling, the coupon sees about 3.7 V;
    * with 1 A detents alone, from 4.75 V through 0.25 Ω, it sees about 4.34 V.
@@ -340,6 +393,13 @@ These are recommendations for the owners of SPEC, `nets.py` and the capture. Thi
    * have the firmware scale the budget by the bus voltage it reads.
 
    Also say in SPEC that the board assumes a cable within Type-C's IR-drop limit.
+
+   **Owner's decision D4 (2026-11-27):** U2's PGTH divider becomes 100 k / 44.2 k (`nets.INPUT_PGTH_DIVIDER`), so
+   VSYS_PG falls at 3.51–3.64 V (3.46–3.69 V with 1 % resistors); the UVLO divider stays. With that divider in a
+   copy of the netlist, `test_ceiling_compliant_cable_keeps_vsys_pg` passes (its marker applies only while the
+   capture still has 39 k); the 14 mV UVLO margin is unchanged. SPEC §3.6 now states the load line. **Captured**
+   (2026-11-27, R36 = 44.2 k): the suite runs against it, the compliant-cable row above no longer says VSYS_PG may
+   fall, and the UVLO margin is still 14 mV (the UVLO divider was not part of D4).
 10. **A short on S5 with the board near its ceiling (§3.5, §3.6; new).** After a fast trip the TPS25947 "tries to
     turn the HFET back on after a short de-glitch interval (30 µs) in a current limited manner" and, on a
     persistent fault, "stays in current limit ... and eventually enter[s] thermal shutdown" (SLVSFC9C §7.3.5.4;
@@ -353,6 +413,16 @@ These are recommendations for the owners of SPEC, `nets.py` and the capture. Thi
     under U2's minimum less U5's maximum (about 0.45 A), or bring-up step 5 shorts S5 with the other slots
     loaded and records which breaker opens.
 
+11. **The +3V3A branch (§3.1, §3.7; risks.md EL-5; new, bench 4).** As captured, FB1 and the 2.2 µF peak by
+    6.4–19.1 dB at 76–316 kHz (FB1 0.1–2 µH), up to 21 dB with the capacitors derated, and the ADCs' own current
+    swings VREF+ by up to 9.7 LSB at mid-scale inside a scan window. **The owner's decision D4 (2026-11-27)** was to
+    damp it, with the option chosen from this model: a 0.47 Ω + 10 µF leg on +3V3A keeps the peaking within 2.7 dB
+    over the bracket (5.9 dB with its capacitor at 47 %), |Z| within 0.62 Ω, and the ADC swing within 2.4 LSB, and
+    leaves the DC impedance at FB1's 0.1 Ω. A resistor in place of FB1 removes the peaking but puts 1–2.2 Ω at DC,
+    which turns the same ADC current into a 5.6–12.7 LSB swing. Chosen: the leg (`nets.VDDA_DAMPING`; SPEC §3.7).
+    `tests/test_vdda.py` fails if it is removed from the contract or, once the motherboard is recaptured, from the
+    netlist.
+
 What holds, by these models:
 
 * SPEC's lane arithmetic under its own assumption, the 680 pF alternative, 20-cycle sampling in every bracket, and
@@ -360,7 +430,8 @@ What holds, by these models:
 * every enable with bulk only, or with a resistive load at the rule;
 * U5's blanking window (1.13–3.19 ms) and its fast trip;
 * the start-up: +3V3 in 1.7–7.9 ms, against 25 ms, with an inrush of 68–146 mA, far below I_LIM;
-* the 2.8 A ceiling with a short cable or a 5 V source.
+* the 2.8 A ceiling with a short cable or a 5 V source;
+* the +3V3A branch with the contract's damping leg (bench 4).
 
 ## Assumptions without a document
 
@@ -418,9 +489,13 @@ Read on 2026-11-27. SHA-256 prefixes are of the copies read.
 * TI TUSB320LAI SLLSEQ8D (62f7b3f6): VBUS_THR 2.95 / 3.3 / 3.8 V.
 * TI DRV8316 SLVSF16B (39f1977b, from ti.com): §7.3 VVM 4.5 V min; VUVLO falling 4.1 / 4.2 / 4.3 V.
 * ST LDL1117 DocID030319 Rev 3 (387b4375): dropout, ISC, Figure 27 (captioned VOUT = 5 V, but its conditions read
-  VIN = 3.5 V, 10 mA to 1.2 A, COUT 4.7 µF).
+  VIN = 3.5 V, 10 mA to 1.2 A, COUT 4.7 µF); Figures 20–21 (stability plan: COUT 1 or 3.3 µF to 22 µF nominal),
+  read for bench 4 on 2026-11-27. ST publishes no SPICE model of it that was found (st.com unreachable that day).
+* ST DS13543 Rev 2, Table 97 (ADC12 IDDA_s and IDDV_s at 2.5 Msps, 14 bits: 980 and 160 µA typ) and Table 100
+  (ADC4 IDDA and IDDV at 2.5 Msps: 360 and 18 µA typ), for bench 4.
 * Diodes AP2112 DS39724 Rev. 2-2 (ef8d376f): AP2112-3.3 dropout and short-current limit.
-* Murata BLM18PG221SN1D (349daf9c): DC resistance 0.10 Ω max.
+* Murata BLM18PG221SN1D (349daf9c): DC resistance 0.10 Ω max; 220 Ω ±25 % at 100 MHz; no low-frequency
+  inductance (bench 4 brackets it).
 * USB 2.0 Specification (usb.org `usb_20_20250603.zip`, 5fe9c53c), §7.2.2: "The voltage supplied by
   high-powered hub ports is 4.75 V to 5.25 V"; VBUSD and VGNDD 125 mV.
 * USB Type-C Cable and Connector Specification Release 2.0, August 2019 (usb.org, 87d15160), §4.4.1: "The
@@ -466,3 +541,28 @@ above from a clean state, looked at every plot, and injected faults into copies 
 
 The mirrored-tree driver used for these is not part of the tool; `KBDSIM_NETLIST`, `KBDSIM_NETS` and `KBDSIM_SPEC`
 do the same job from the command line.
+
+## Review (2026-11-28)
+
+A review of the tools' sync to the owner's decisions of 2026-11-27 injected faults into copies of the recaptured
+motherboard netlist (`KBDSIM_NETLIST`, `-m nospice`) and found four that passed. What each fault did, before and
+after the fixes (an unchanged round trip of the netlist passes both times):
+
+| Fault in the netlist copy | Before | After |
+|---|---|---|
+| D3 resistor R631 (S2 CS0_N) removed | `test_no_bench_line_hides_a_series_resistor` fails | the same |
+| D3 resistor R938 (S5 G4) 100 Ω → 1 k | `test_no_bench_line_hides_a_series_resistor` fails | the same |
+| R631 marked DNP (not on the assembled board) | **0 fail** | `test_no_bench_line_hides_a_series_resistor` fails |
+| A 100 pF capacitor added on S2_CS0_N_J (D3: plain resistors) | **0 fail** | `test_no_bench_line_hides_a_series_resistor` fails |
+| Damping-leg resistor R103 removed, or 0.47 → 0 Ω | `test_damping_leg_is_captured` fails | the same |
+| Damping-leg capacitor C118 marked DNP | **0 fail** | `test_damping_leg_is_captured` fails |
+| U2's PGTH bottom resistor R36 44.2 k → 39 k (D4 reverted) | **0 fail**: both PGTH tests reported expected failures | `test_pgth_divider_follows_the_contract` fails (and, with ngspice, `test_ceiling_compliant_cable_keeps_vsys_pg`) |
+| R36 removed | `test_design_values_come_from_the_capture` fails | that one and `test_pgth_divider_follows_the_contract` |
+| No netlist at all (`KBDSIM_NETLIST` naming no file) | **0 fail**: 4 skips, 3 expected failures | `test_motherboard_netlist_is_there` fails |
+
+The fixes: `design.Netlist` reads KiCad 10's `dnp` property and `two_pin()` returns fitted parts only (no bench value
+changes: `run_all.py`'s tables are identical, since the only DNP parts are the two 5.1 k Rd footprints on USB_CC1/2);
+the D3 test checks that nothing but the resistor (and a test point) sits on each socket-side net and that the MCU
+side reaches the MCU pin `nets.SLOT_MCU` names; the D4 tests excuse a mismatch only for a netlist that predates the
+decisions. `keyboard/hardware/design/check_contract.py` (the hardware workflow's gate, not this tool) catches the
+removed and changed parts and the extra capacitor, but not the two DNP faults (it does not read DNP).

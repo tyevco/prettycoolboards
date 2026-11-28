@@ -16,8 +16,9 @@ function repoLinks(md: any) {
       const [path, hash] = href.split('#')
       const isPage = path === '' || /\.(md|html)$/i.test(path)
       if (isPage && /(^|\/)README\.md$/i.test(path)) {
-        // a README is its folder's index page on the site (see rewrites), so link to the folder
-        token.attrSet('href', path.replace(/README\.md$/i, '') + (hash ? '#' + hash : ''))
+        // a README is its folder's index page on the site (see rewrites), so link to the folder; a README in the
+        // page's own folder is './' (an empty path would point back at the page itself)
+        token.attrSet('href', (path.replace(/README\.md$/i, '') || './') + (hash ? '#' + hash : ''))
       } else if (!isPage) {
         const target = posix.normalize(posix.join(posix.dirname(env.relativePath ?? ''), path))
         const kind = path.endsWith('/') ? 'tree' : 'blob'

@@ -253,6 +253,24 @@ static void check_rules(int64_t now)
 		if (sim.coupon[s - 1] == SIM_NONE && ((en3 && !was_on[h->rail3]) || (en5 && !was_on[h->rail5]))) {
 			violation("S%d:rail_on_no_coupon%s", s, "");
 		}
+		/* A turned coupon (the key plug missing): it reads present but has no readable descriptor, so the
+		 * firmware must never drive its lines (SPEC §4.6, risks.md EL-2). U_EXP3's G4/G5 on S1-S4 are always
+		 * low by design (they meet the turned coupon's GND, pin 4, and its unpowered +5V, pin 3). */
+		if (sim.coupon[s - 1] == SIM_TURNED) {
+			for (int i = 0; i < 2; i++) {
+				if (exp_level_spec(&h->cs[i]) < 0 && sim_mcu_out(&h->cs[i]) >= 0) {
+					violation("S%d:%s_driven_into_turned_coupon", s, i ? "CS1_N" : "CS0_N");
+				}
+			}
+			for (int g = 0; g < 6; g++) {
+				if (exp_level_spec(&h->g[g]) < 0 && sim_mcu_out(&h->g[g]) >= 0) {
+					violation("S%d:%s_driven_into_turned_coupon", s, gname[g]);
+				}
+			}
+			if (bus) {
+				violation("S%d:bus_closed_on_turned_coupon%s", s, "");
+			}
+		}
 		if (en3) {
 			continue;
 		}
@@ -362,6 +380,8 @@ void sim_update(void)
 
 		if (sim_test_coupon_powered(s)) {
 			level = !sim_gline(s, 5); /* Q14 pulls IRQ_N low while G5 is high; INJ's jumper is open */
+		} else if (sim.coupon[s - 1] == SIM_TURNED) {
+			level = 0;                /* the slot's pin 31 on the turned coupon's pin 10, GND */
 		} else if (sim.coupon[s - 1] != SIM_NONE && sim.on[tb_rail_3v3(s)]) {
 			level = 1;
 		}
@@ -381,7 +401,7 @@ void sim_set_coupon(int slot, enum sim_coupon_kind kind)
 
 	sim.coupon[slot - 1] = kind;
 	memset(sim.eeprom[slot - 1], 0xFF, sizeof(sim.eeprom[slot - 1]));
-	if (kind == SIM_TEST) {
+	if (kind == SIM_TEST || kind == SIM_TURNED) {  /* turned: a written descriptor, but on a bus it cannot reach */
 		tb_desc_test_coupon(&d, (uint32_t)slot);
 		(void)tb_desc_encode(&d, sim.eeprom[slot - 1], sizeof(sim.eeprom[slot - 1]));
 	} else if (kind == SIM_HALL) {

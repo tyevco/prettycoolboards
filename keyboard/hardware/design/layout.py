@@ -315,7 +315,9 @@ def place_rest(bb, comps, fixed, placer, mod):
     left = [r for r in fps if r in comps and r not in done]
     for ref in sorted(left, key=lambda r: (re.sub(r"\d+", "", r), refnum(r))):
         fp = fps[ref]
-        anchors = [fps[r] for r in done if r in fps and fps[r].GetPadCount() >= 3]
+        # sorted: `done` is a set, and its order (string hashing, per process) decided ties between anchors, so two
+        # runs placed differently (motherboard, 2026-11-28: 19 parts moved between identical runs)
+        anchors = [fps[r] for r in sorted(done) if r in fps and fps[r].GetPadCount() >= 3]
         a = placer.anchor_for(fp, anchors)
         if a is None:
             warn.append(f"{ref}: no anchor shares a net; placed near the board centre")
@@ -467,7 +469,12 @@ def dsn_drop_net(dsn, net="GND"):
     layers = re.findall(r"\(layer (\S+)\s*\(type", s)
     keep = []
     for m in list(re.finditer(r"\(wire \(path (\S+) ([0-9.]+) ([^)]*)\)\s*\(net %s\)[^\n]*" % re.escape(net), s))[::-1]:
-        keep.append(f'    (keepout "" (path {m.group(1)} {m.group(2)} {m.group(3)}))')
+        # one keep-out per segment: Freerouting 2.1.0 honours a two-point path keep-out with its width and the
+        # clearance, but let a track overlap a longer one (MOSI over coupon-haptics' +5V riser, 2026-11-27)
+        xy = m.group(3).split()
+        pts = [(xy[k], xy[k + 1]) for k in range(0, len(xy) - 1, 2)]
+        for a, c in zip(pts, pts[1:]) if len(pts) > 1 else [(pts[0], pts[0])]:
+            keep.append(f'    (keepout "" (path {m.group(1)} {m.group(2)} {a[0]} {a[1]} {c[0]} {c[1]}))')
         s = s[:m.start()] + s[m.end():]
     for m in list(re.finditer(r'\(via "([^"]+)"\s+([-0-9.]+) ([-0-9.]+)\s*\(net %s\)[^\n]*' % re.escape(net), s))[::-1]:
         dia = re.search(r"Via\[[0-9]+-[0-9]+\]_([0-9.]+):", m.group(1))
@@ -751,14 +758,27 @@ def route_board(board, mod, out, minutes, attempts, resume=False):
     if mod.LAYERS == 4 and not resume:
         b = pcbnew.LoadBoard(out)
         v, d = cfg(mod, "GND_VIA", (0.6, 0.3))
-        done, left = pcbgen.fanout_vias(b, "GND", via=v, drill=d)
+        # FANOUT_SKIP (board module, "REF.PAD"): GND pads the module has already tied to the plane itself (the
+        # fan-out only finds a via within 1 mm of a pad, so it put new vias, with their tracks, among a QFN's pins:
+        # coupon-haptics, 2026-11-27). The plane fix-up after routing still gives any of them that stays apart a via.
+        skip = set(cfg(mod, "FANOUT_SKIP", ()))
+        pads = None
+        if skip:
+            gnd = b.GetNetInfo().GetNetItem("GND").GetNetCode()
+            pads = [p for fp in b.GetFootprints() for p in fp.Pads() if p.GetNetCode() == gnd
+                    and p.GetDrillSize().x == 0 and (p.IsOnLayer(pcbnew.F_Cu) or p.IsOnLayer(pcbnew.B_Cu))
+                    and f"{fp.GetReference()}.{p.GetNumber()}" not in skip]
+        done, left = pcbgen.fanout_vias(b, "GND", pads=pads, via=v, drill=d)
         pcbnew.SaveBoard(out, b)
         pcbgen.refill(out)
         print(f"[{board}] GND fan-out: {done} pads, {len(left)} without room:",
               [(p.GetParentFootprint().GetReference(), p.GetNumber()) for p in left])
     left = None
     for attempt in range(attempts):
-        route(out, mod, minutes * (attempt + 1), drop_nets=drop)
+        # OPTIMIZER_PASSES (board module, default 20): Freerouting's optimizer passes. With them, Freerouting 2.1.0
+        # reported every connection routed yet left whole chains of wires out of its session file (coupon-haptics,
+        # 2026-11-27: 4-30 connections open after the import, 0 in two runs with the optimizer off).
+        route(out, mod, minutes * (attempt + 1), optimizer_passes=cfg(mod, "OPTIMIZER_PASSES", 20), drop_nets=drop)
         _, counts = drc(out)
         left = counts.get("[unconnected_items]", 0)
         print(f"[{board}] route attempt {attempt + 1}: {left} unconnected")
@@ -809,6 +829,15 @@ def main():
         if routing:
             route_board(board, mod, out, a.minutes, a.attempts, resume=a.resume)
     counts, _ = report(board, out)
+    # post_check (board module, optional): a board-specific check of the saved board after DRC, returning a list of
+    # errors; any error fails the run like a DRC error (the motherboard's Kelvin sense check, D4 of 2026-11-27)
+    if hasattr(mod, "post_check") and not a.place_only:
+        errs = mod.post_check(out)
+        for e in errs:
+            print(f"[{board}] POST-CHECK: {e}")
+        print(f"[{board}] post-check: {'FAIL, ' + str(len(errs)) + ' error(s)' if errs else 'pass'}")
+        if errs:
+            return 1
     return 1 if counts else 0
 
 

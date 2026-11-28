@@ -1,0 +1,55 @@
+{
+ "entries": [
+  {
+   "correction": {
+    "dx": 0.0,
+    "dy": 0.0,
+    "mirror": false,
+    "rot": 90.0
+   },
+   "ee": {
+    "key": "",
+    "title": ""
+   },
+   "fit": {
+    "alternatives": [],
+    "matched": 0,
+    "method": "manual",
+    "rms": 0.0,
+    "score": 0
+   },
+   "fitted": "2026-11-27",
+   "kicad": {
+    "fpid": "Package_SON:Texas_X2SON-4-1EP_1.1x1.4mm_P0.5mm_EP0.8x0.6mm",
+    "pad_hash": "sha1:d00446a4af83c6d6"
+   },
+   "reasons": [
+    "typed in by hardware (coupon-hall capture)"
+   ],
+   "status": "manual",
+   "tool": "jlcplace 0.2.1",
+   "verdict": "yellow",
+   "verifications": [
+    {
+     "board": "prettycool-keyboard-coupon-hall.kicad_pcb",
+     "by": "hardware (coupon-hall capture)",
+     "correction": {
+      "dx": 0.0,
+      "dy": 0.0,
+      "mirror": false,
+      "rot": 90.0
+     },
+     "date": "2026-11-27",
+     "layer": "top",
+     "note": "No EasyEDA record for C22452022 (EasyEDA: 404 Component not found, 2026-11-27), so jlcplace cannot simulate it. Correction rot 90, dx 0, dy 0 = the jlcplace fit (5 of 5 pads by number, rms 0.067 mm) of the EasyEDA footprint X2SON-4_L1.4-W1.1-P0.50-TR-EP of C22401868 (TMAG5253BA3IQDMRR), the same TI DMR0004A X2SON-4 package (SBASAI5E sec. 12; pin 1 VCC top-left in Figure 5-1, KiCad footprint pad 1 at rot 0 likewise). JLC's own footprint for C22452022 is unknown: check pin 1 of U20-U25 in JLC's placement preview.",
+     "ok": true,
+     "presses": null,
+     "ref": "U20",
+     "rotation": 0.0,
+     "source": "manual"
+    }
+   ]
+  }
+ ],
+ "lcsc": "C22452022"
+}

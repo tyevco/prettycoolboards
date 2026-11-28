@@ -35,7 +35,9 @@ static int ee_transfer(const struct emul *target, struct i2c_msg *msgs, int num_
 	ARG_UNUSED(target);
 	ARG_UNUSED(addr);
 	sim_update();
-	if (slot == 0 || sim.coupon[slot - 1] == SIM_NONE || !sim.on[tb_rail_3v3(slot)]) {
+	/* SIM_TURNED: the slot's SCL meets the turned coupon's GND, so nothing on the channel answers (sim.h) */
+	if (slot == 0 || sim.coupon[slot - 1] == SIM_NONE || sim.coupon[slot - 1] == SIM_TURNED ||
+	    !sim.on[tb_rail_3v3(slot)]) {
 		return -EIO;
 	}
 	for (int i = 0; i < num_msgs; i++) {

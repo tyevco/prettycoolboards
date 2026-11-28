@@ -40,7 +40,7 @@ static int done(const struct shell *sh, const char *cmd, int rc)
 
 static int cmd_coupon(const struct shell *sh, size_t argc, char **argv)
 {
-	static const char *const kinds[] = {"none", "test", "blank", "hall"};
+	static const char *const kinds[] = {"none", "test", "blank", "hall", "turned"}; /* enum sim_coupon_kind */
 	int slot = atoi(argv[1]);
 
 	ARG_UNUSED(argc);
@@ -161,7 +161,8 @@ static int cmd_state(const struct shell *sh, size_t argc, char **argv)
 
 SHELL_STATIC_SUBCMD_SET_CREATE(
 	sub_sim,
-	SHELL_CMD_ARG(coupon, NULL, "<n> none|test|blank|hall", cmd_coupon, 3, 0),
+	SHELL_CMD_ARG(coupon, NULL, "<n> none|test|blank|hall|turned (turned: the key plug missing)", cmd_coupon, 3,
+		      0),
 	SHELL_CMD_ARG(source, NULL, "none|default|1.5A|3.0A|accessory|absent (U_CC; raises its INT)", cmd_source, 2,
 		      0),
 	SHELL_CMD_ARG(usb, NULL, "reset|configured|deconfigured|suspend|resume|disconnected", cmd_usb, 2, 0),

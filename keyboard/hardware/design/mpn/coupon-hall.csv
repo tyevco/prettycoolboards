@@ -1,0 +1,19 @@
+# LCSC code -> manufacturer part for the Hall-effect coupon's vendor-neutral BOM (release.py). One row per LCSC code on
+# the board. Manufacturer and MPN as JLC's parts API lists them on 2026-11-27. DigiKey / Mouser numbers were not looked
+# up: fill them in when ordering from a US distributor. No stock or prices here: check them when ordering.
+LCSC,Manufacturer,MPN,DigiKey,Mouser,Note
+C25503140,HanElectricity,2541WV-2x20P,,,"male 2 x 20 pin header, 2.54 mm, 6.0 mm mating, 2.54 mm plastic, 3.0 mm tail, gold; PULL PIN 39 BEFORE SOLDERING: the slot key (D2 of 2026-11-27), the footprint has no hole at 39, so J1 is hand-fitted; any 2 x 20 2.54 mm header with a 6 mm mating length mates with the motherboard's 8.5 mm socket; mounted on the BOTTOM side"
+C7562,STMicroelectronics,M24C02-WMN6TP,,,"2 kbit I2C EEPROM, SO8N; the descriptor at 0x50 (E2-E0 to GND)"
+C22452022,Texas Instruments,TMAG5253BA4IQDMRR,,,"linear Hall sensor with EN, +-160 mT, 7.5 mV/mT, X2SON-4 DMR; keep the BA4 range on all six (the references must match the keys); BA3 (+-80 mT, C22401868) fits the same footprint for a weaker magnet or a larger gap"
+C494728,Texas Instruments,TMUX1208PWR,,,"8:1 analog mux, 1.08-5.5 V, 5 Ohm at 5 V (9 Ohm typ, 15 max at 3.3 V: SCDS389C §7.6), active-high EN, fail-safe logic, TSSOP-16; the pinout is TMUX1208-specific (pin 3 N.C.)"
+C2652971,Texas Instruments,SN74HC259PWR,,,"8-bit addressable latch, TSSOP-16; any 74HC259 in TSSOP-16 (e.g. Nexperia 74HC259PW)"
+C130011,Texas Instruments,OPA2365AIDR,,,"dual zero-crossover RRIO op-amp, 50 MHz, SOIC-8; keep a zero-crossover part (a classic RRIO input has its offset step in the key travel range)"
+C77131,Murata Electronics,NCP15XH103F03RC,,,"NTC thermistor 10 kOhm 1 %, B25/50 3380 K, 0402"
+C95204,YAGEO,RT0603BRD0710KL,,,"10 kOhm 0.1 % 25 ppm/K 0603 thin film (thermistor dividers); keep 0.1 % and <= 25 ppm/K"
+C1525,Samsung Electro-Mechanics,CL05B104KO5NNNC,,,"100 nF 16 V X7R 0402"
+C52923,Samsung Electro-Mechanics,CL05A105KA5NQNC,,,"1 uF 25 V X5R 0402 (thermistor taps)"
+C19702,Samsung Electro-Mechanics,CL10A106KP8NNNC,,,"10 uF 10 V X5R 0603 (on +3V3)"
+C25741,UNI-ROYAL(Uniroyal Elec),0402WGF1003TCE,,,"100 kOhm 1 % 0402 (G-line pull-downs, WC); substitute any 100 k 1 % 0402 thick film"
+C26083,UNI-ROYAL(Uniroyal Elec),0402WGF1004TCE,,,"1 MOhm 1 % 0402 (K1 output pull-down, R20); substitute any 1 M 1 % 0402 thick film"
+C25092,UNI-ROYAL(Uniroyal Elec),0402WGF220JTCE,,,"22 Ohm 0402 (lane buffer outputs); substitute any 22 Ohm 0402"
+C17168,UNI-ROYAL(Uniroyal Elec),0402WGF0000TCE,,,"0 Ohm 0402: R26, DO NOT PLACE (fit by hand for the unbuffered-lane experiment)"

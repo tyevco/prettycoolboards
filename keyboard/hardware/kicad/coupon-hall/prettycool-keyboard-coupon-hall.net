@@ -1,0 +1,6396 @@
+(export
+	(version "E")
+	(design
+		(source "/home/user/prettycoolboards/keyboard/hardware/kicad/coupon-hall/prettycool-keyboard-coupon-hall.kicad_sch")
+		(date "2026-11-28T04:04:38")
+		(tool "Eeschema 10.0.8-10.0.8~ubuntu24.04.1")
+		(sheet
+			(number "1")
+			(name "/")
+			(tstamps "/")
+			(title_block
+				(title "PrettyCool Keyboard rev A Hall-effect coupon")
+				(company "PrettyCool Boards")
+				(rev "A")
+				(date "2026-11-28")
+				(source "prettycool-keyboard-coupon-hall.kicad_sch")
+				(comment
+					(number "1")
+					(value "")
+				)
+				(comment
+					(number "2")
+					(value "")
+				)
+				(comment
+					(number "3")
+					(value "")
+				)
+				(comment
+					(number "4")
+					(value "")
+				)
+				(comment
+					(number "5")
+					(value "")
+				)
+				(comment
+					(number "6")
+					(value "")
+				)
+				(comment
+					(number "7")
+					(value "")
+				)
+				(comment
+					(number "8")
+					(value "")
+				)
+				(comment
+					(number "9")
+					(value "")
+				)
+			)
+		)
+		(sheet
+			(number "2")
+			(name "/Slot header, descriptor EEPROM, mounting/")
+			(tstamps "/dd4d5149-be51-54b5-993a-758e65418097/")
+			(title_block
+				(title "Slot header, descriptor EEPROM, mounting")
+				(company "PrettyCool Boards")
+				(rev "A")
+				(date "2026-11-28")
+				(source "slot.kicad_sch")
+				(comment
+					(number "1")
+					(value "")
+				)
+				(comment
+					(number "2")
+					(value "")
+				)
+				(comment
+					(number "3")
+					(value "")
+				)
+				(comment
+					(number "4")
+					(value "")
+				)
+				(comment
+					(number "5")
+					(value "")
+				)
+				(comment
+					(number "6")
+					(value "")
+				)
+				(comment
+					(number "7")
+					(value "")
+				)
+				(comment
+					(number "8")
+					(value "")
+				)
+				(comment
+					(number "9")
+					(value "")
+				)
+			)
+		)
+		(sheet
+			(number "3")
+			(name "/Hall sensors: four keys, two references/")
+			(tstamps "/ed8cf34d-d55d-56d7-b999-12311132f7a1/")
+			(title_block
+				(title "Hall sensors: four keys, two references")
+				(company "PrettyCool Boards")
+				(rev "A")
+				(date "2026-11-28")
+				(source "sensors.kicad_sch")
+				(comment
+					(number "1")
+					(value "")
+				)
+				(comment
+					(number "2")
+					(value "")
+				)
+				(comment
+					(number "3")
+					(value "")
+				)
+				(comment
+					(number "4")
+					(value "")
+				)
+				(comment
+					(number "5")
+					(value "")
+				)
+				(comment
+					(number "6")
+					(value "")
+				)
+				(comment
+					(number "7")
+					(value "")
+				)
+				(comment
+					(number "8")
+					(value "")
+				)
+				(comment
+					(number "9")
+					(value "")
+				)
+			)
+		)
+		(sheet
+			(number "4")
+			(name "/Mux, enable latch, lane buffers, thermistors/")
+			(tstamps "/ca079efd-5383-5d91-88f2-b4f4e2ad851c/")
+			(title_block
+				(title "Mux, enable latch, lane buffers, thermistors")
+				(company "PrettyCool Boards")
+				(rev "A")
+				(date "2026-11-28")
+				(source "frontend.kicad_sch")
+				(comment
+					(number "1")
+					(value "")
+				)
+				(comment
+					(number "2")
+					(value "")
+				)
+				(comment
+					(number "3")
+					(value "")
+				)
+				(comment
+					(number "4")
+					(value "")
+				)
+				(comment
+					(number "5")
+					(value "")
+				)
+				(comment
+					(number "6")
+					(value "")
+				)
+				(comment
+					(number "7")
+					(value "")
+				)
+				(comment
+					(number "8")
+					(value "")
+				)
+				(comment
+					(number "9")
+					(value "")
+				)
+			)
+		)
+	)
+	(components
+		(comp
+			(ref "C1")
+			(value "10u")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(description "Unpolarized capacitor")
+			(fields
+				(field
+					(name "MPN") "CL10A106KP8NNNC")
+				(field
+					(name "Manufacturer") "Samsung Electro-Mechanics")
+				(field
+					(name "LCSC") "C19702")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "MPN")
+				(value "CL10A106KP8NNNC")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Samsung Electro-Mechanics")
+			)
+			(property
+				(name "LCSC")
+				(value "C19702")
+			)
+			(property
+				(name "Sheetname")
+				(value "Slot header, descriptor EEPROM, mounting")
+			)
+			(property
+				(name "Sheetfile")
+				(value "slot.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/Slot header, descriptor EEPROM, mounting/")
+				(tstamps "/dd4d5149-be51-54b5-993a-758e65418097/")
+			)
+			(tstamps "6485b9a1-d600-5499-a8c0-39c45d41d45b")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C3")
+			(value "100n")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(description "Unpolarized capacitor")
+			(fields
+				(field
+					(name "MPN") "CL05B104KO5NNNC")
+				(field
+					(name "Manufacturer") "Samsung Electro-Mechanics")
+				(field
+					(name "LCSC") "C1525")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "MPN")
+				(value "CL05B104KO5NNNC")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Samsung Electro-Mechanics")
+			)
+			(property
+				(name "LCSC")
+				(value "C1525")
+			)
+			(property
+				(name "Sheetname")
+				(value "Slot header, descriptor EEPROM, mounting")
+			)
+			(property
+				(name "Sheetfile")
+				(value "slot.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/Slot header, descriptor EEPROM, mounting/")
+				(tstamps "/dd4d5149-be51-54b5-993a-758e65418097/")
+			)
+			(tstamps "74c88a10-ed53-5367-9137-a5e7fc6c0111")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "FID1")
+			(value "Fiducial")
+			(footprint "Fiducial:Fiducial_1mm_Mask2mm")
+			(description "Fiducial Marker")
+			(fields
+				(field
+					(name "Footprint") "Fiducial:Fiducial_1mm_Mask2mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Fiducial Marker")
+			)
+			(libsource
+				(lib "Mechanical")
+				(part "Fiducial")
+				(description "Fiducial Marker")
+			)
+			(property
+				(name "Sheetname")
+				(value "Slot header, descriptor EEPROM, mounting")
+			)
+			(property
+				(name "Sheetfile")
+				(value "slot.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "ki_keywords")
+				(value "fiducial marker")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Fiducial*")
+			)
+			(sheetpath
+				(names "/Slot header, descriptor EEPROM, mounting/")
+				(tstamps "/dd4d5149-be51-54b5-993a-758e65418097/")
+			)
+			(tstamps "222bc396-5c06-582d-af3b-1b07fcaced71")
+			(units
+				(unit
+					(name "A")
+					(pins)
+				)
+			)
+		)
+		(comp
+			(ref "FID2")
+			(value "Fiducial")
+			(footprint "Fiducial:Fiducial_1mm_Mask2mm")
+			(description "Fiducial Marker")
+			(fields
+				(field
+					(name "Footprint") "Fiducial:Fiducial_1mm_Mask2mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Fiducial Marker")
+			)
+			(libsource
+				(lib "Mechanical")
+				(part "Fiducial")
+				(description "Fiducial Marker")
+			)
+			(property
+				(name "Sheetname")
+				(value "Slot header, descriptor EEPROM, mounting")
+			)
+			(property
+				(name "Sheetfile")
+				(value "slot.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "ki_keywords")
+				(value "fiducial marker")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Fiducial*")
+			)
+			(sheetpath
+				(names "/Slot header, descriptor EEPROM, mounting/")
+				(tstamps "/dd4d5149-be51-54b5-993a-758e65418097/")
+			)
+			(tstamps "094dabeb-af4b-52a6-a4c9-8266fa606b2e")
+			(units
+				(unit
+					(name "A")
+					(pins)
+				)
+			)
+		)
+		(comp
+			(ref "FID3")
+			(value "Fiducial")
+			(footprint "Fiducial:Fiducial_1mm_Mask2mm")
+			(description "Fiducial Marker")
+			(fields
+				(field
+					(name "Footprint") "Fiducial:Fiducial_1mm_Mask2mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Fiducial Marker")
+			)
+			(libsource
+				(lib "Mechanical")
+				(part "Fiducial")
+				(description "Fiducial Marker")
+			)
+			(property
+				(name "Sheetname")
+				(value "Slot header, descriptor EEPROM, mounting")
+			)
+			(property
+				(name "Sheetfile")
+				(value "slot.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "ki_keywords")
+				(value "fiducial marker")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Fiducial*")
+			)
+			(sheetpath
+				(names "/Slot header, descriptor EEPROM, mounting/")
+				(tstamps "/dd4d5149-be51-54b5-993a-758e65418097/")
+			)
+			(tstamps "87090521-085b-5e6b-ab9d-5b087cae778f")
+			(units
+				(unit
+					(name "A")
+					(pins)
+				)
+			)
+		)
+		(comp
+			(ref "H1")
+			(value "M3")
+			(footprint "MountingHole:MountingHole_3.2mm_M3")
+			(description "Mounting Hole without connection")
+			(fields
+				(field
+					(name "Footprint") "MountingHole:MountingHole_3.2mm_M3")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Mounting Hole without connection")
+			)
+			(libsource
+				(lib "Mechanical")
+				(part "MountingHole")
+				(description "Mounting Hole without connection")
+			)
+			(property
+				(name "Sheetname")
+				(value "Slot header, descriptor EEPROM, mounting")
+			)
+			(property
+				(name "Sheetfile")
+				(value "slot.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "ki_keywords")
+				(value "mounting hole")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "MountingHole*")
+			)
+			(sheetpath
+				(names "/Slot header, descriptor EEPROM, mounting/")
+				(tstamps "/dd4d5149-be51-54b5-993a-758e65418097/")
+			)
+			(tstamps "89762eb9-8b18-5354-a35f-b3beb338d9f9")
+			(units
+				(unit
+					(name "A")
+					(pins)
+				)
+			)
+		)
+		(comp
+			(ref "J1")
+			(value "SLOT")
+			(footprint "keyboard:PinHeader_2x20_P2.54mm_Vertical")
+			(datasheet "https://www.lcsc.com/datasheet/lcsc_datasheet_2407041454_HanElectricity-2541WV-2x20P_C25503140.pdf")
+			(description "Pin header, male, 2 x 20, 2.54 mm, vertical, through hole, 6.0 mm mating, 2.54 mm plastic, 3.0 mm tail; mounted on the coupon's bottom side; pin 39 pulled before soldering (the slot key)")
+			(fields
+				(field
+					(name "MPN") "2541WV-2x20P")
+				(field
+					(name "Manufacturer") "HanElectricity")
+				(field
+					(name "LCSC") "C25503140")
+				(field
+					(name "Fit") "pull the header's pin 39 out first (the slot key, SPEC §4.2), then solder it on the bottom side from the top")
+				(field
+					(name "Footprint") "keyboard:PinHeader_2x20_P2.54mm_Vertical")
+				(field
+					(name "Datasheet") "https://www.lcsc.com/datasheet/lcsc_datasheet_2407041454_HanElectricity-2541WV-2x20P_C25503140.pdf")
+				(field
+					(name "Description") "Pin header, male, 2 x 20, 2.54 mm, vertical, through hole, 6.0 mm mating, 2.54 mm plastic, 3.0 mm tail; mounted on the coupon's bottom side; pin 39 pulled before soldering (the slot key)")
+			)
+			(libsource
+				(lib "keyboard")
+				(part "Conn_02x20_Odd_Even_NoPin39")
+				(description "Generic connector, double row, 02x20, odd/even pin numbering, pin 39 removed: the rev A slot key (owner's decision D2 of 2026-11-27, SPEC §4.2). Derived from KiCad 10.0.8 Connector_Generic:Conn_02x20_Odd_Even")
+			)
+			(property
+				(name "MPN")
+				(value "2541WV-2x20P")
+			)
+			(property
+				(name "Manufacturer")
+				(value "HanElectricity")
+			)
+			(property
+				(name "LCSC")
+				(value "C25503140")
+			)
+			(property
+				(name "Fit")
+				(value "pull the header's pin 39 out first (the slot key, SPEC §4.2), then solder it on the bottom side from the top")
+			)
+			(property
+				(name "Sheetname")
+				(value "Slot header, descriptor EEPROM, mounting")
+			)
+			(property
+				(name "Sheetfile")
+				(value "slot.kicad_sch")
+			)
+			(property
+				(name "dnp")
+			)
+			(property
+				(name "ki_keywords")
+				(value "connector")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "keyboard:PinHeader_2x20_P2.54mm_Vertical")
+			)
+			(sheetpath
+				(names "/Slot header, descriptor EEPROM, mounting/")
+				(tstamps "/dd4d5149-be51-54b5-993a-758e65418097/")
+			)
+			(tstamps "37372e26-0cfa-54fc-8de5-1562c3590699")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "7")
+						)
+						(pin
+							(num "9")
+						)
+						(pin
+							(num "11")
+						)
+						(pin
+							(num "13")
+						)
+						(pin
+							(num "15")
+						)
+						(pin
+							(num "17")
+						)
+						(pin
+							(num "19")
+						)
+						(pin
+							(num "21")
+						)
+						(pin
+							(num "23")
+						)
+						(pin
+							(num "25")
+						)
+						(pin
+							(num "27")
+						)
+						(pin
+							(num "29")
+						)
+						(pin
+							(num "31")
+						)
+						(pin
+							(num "33")
+						)
+						(pin
+							(num "35")
+						)
+						(pin
+							(num "37")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "8")
+						)
+						(pin
+							(num "10")
+						)
+						(pin
+							(num "12")
+						)
+						(pin
+							(num "14")
+						)
+						(pin
+							(num "16")
+						)
+						(pin
+							(num "18")
+						)
+						(pin
+							(num "20")
+						)
+						(pin
+							(num "22")
+						)
+						(pin
+							(num "24")
+						)
+						(pin
+							(num "26")
+						)
+						(pin
+							(num "28")
+						)
+						(pin
+							(num "30")
+						)
+						(pin
+							(num "32")
+						)
+						(pin
+							(num "34")
+						)
+						(pin
+							(num "36")
+						)
+						(pin
+							(num "38")
+						)
+						(pin
+							(num "40")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "JP1")
+			(value "WP")
+			(footprint "Jumper:SolderJumper-2_P1.3mm_Open_RoundedPad1.0x1.5mm")
+			(description "Solder jumper, open: bridge to write-protect the descriptor EEPROM")
+			(fields
+				(field
+					(name "Footprint") "Jumper:SolderJumper-2_P1.3mm_Open_RoundedPad1.0x1.5mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Solder jumper, open: bridge to write-protect the descriptor EEPROM")
+			)
+			(libsource
+				(lib "Jumper")
+				(part "SolderJumper_2_Open")
+				(description "Solder Jumper, 2-pole, open")
+			)
+			(property
+				(name "Sheetname")
+				(value "Slot header, descriptor EEPROM, mounting")
+			)
+			(property
+				(name "Sheetfile")
+				(value "slot.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "ki_keywords")
+				(value "solder jumper SPST")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "SolderJumper*Open*")
+			)
+			(sheetpath
+				(names "/Slot header, descriptor EEPROM, mounting/")
+				(tstamps "/dd4d5149-be51-54b5-993a-758e65418097/")
+			)
+			(tstamps "bc4b1009-c329-5628-b9d5-65822e4dde10")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R1")
+			(value "100k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(description "Resistor")
+			(fields
+				(field
+					(name "MPN") "0402WGF1003TCE")
+				(field
+					(name "Manufacturer") "UNI-ROYAL")
+				(field
+					(name "LCSC") "C25741")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0402WGF1003TCE")
+			)
+			(property
+				(name "Manufacturer")
+				(value "UNI-ROYAL")
+			)
+			(property
+				(name "LCSC")
+				(value "C25741")
+			)
+			(property
+				(name "Sheetname")
+				(value "Slot header, descriptor EEPROM, mounting")
+			)
+			(property
+				(name "Sheetfile")
+				(value "slot.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/Slot header, descriptor EEPROM, mounting/")
+				(tstamps "/dd4d5149-be51-54b5-993a-758e65418097/")
+			)
+			(tstamps "40dc93e8-e2ff-53b0-8432-d230b3a8a29d")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "TP1")
+			(value "+3V3")
+			(footprint "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm")
+			(description "test point")
+			(fields
+				(field
+					(name "Footprint") "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "test point")
+			)
+			(libsource
+				(lib "Connector")
+				(part "TestPoint")
+				(description "test point")
+			)
+			(property
+				(name "Sheetname")
+				(value "Slot header, descriptor EEPROM, mounting")
+			)
+			(property
+				(name "Sheetfile")
+				(value "slot.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "ki_keywords")
+				(value "test point tp")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Pin* Test*")
+			)
+			(sheetpath
+				(names "/Slot header, descriptor EEPROM, mounting/")
+				(tstamps "/dd4d5149-be51-54b5-993a-758e65418097/")
+			)
+			(tstamps "1882bb23-845d-5eba-a33e-20c0f5ac5199")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "TP2")
+			(value "GND")
+			(footprint "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm")
+			(description "test point")
+			(fields
+				(field
+					(name "Footprint") "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "test point")
+			)
+			(libsource
+				(lib "Connector")
+				(part "TestPoint")
+				(description "test point")
+			)
+			(property
+				(name "Sheetname")
+				(value "Slot header, descriptor EEPROM, mounting")
+			)
+			(property
+				(name "Sheetfile")
+				(value "slot.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "ki_keywords")
+				(value "test point tp")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Pin* Test*")
+			)
+			(sheetpath
+				(names "/Slot header, descriptor EEPROM, mounting/")
+				(tstamps "/dd4d5149-be51-54b5-993a-758e65418097/")
+			)
+			(tstamps "d4514579-463c-54fa-95b1-c81d1eefbab9")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "TP3")
+			(value "GND")
+			(footprint "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm")
+			(description "test point")
+			(fields
+				(field
+					(name "Footprint") "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "test point")
+			)
+			(libsource
+				(lib "Connector")
+				(part "TestPoint")
+				(description "test point")
+			)
+			(property
+				(name "Sheetname")
+				(value "Slot header, descriptor EEPROM, mounting")
+			)
+			(property
+				(name "Sheetfile")
+				(value "slot.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "ki_keywords")
+				(value "test point tp")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Pin* Test*")
+			)
+			(sheetpath
+				(names "/Slot header, descriptor EEPROM, mounting/")
+				(tstamps "/dd4d5149-be51-54b5-993a-758e65418097/")
+			)
+			(tstamps "6814422a-4ba3-5250-8a60-5aa7e621c147")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U1")
+			(value "M24C02-WMN6TP")
+			(footprint "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm")
+			(datasheet "https://www.lcsc.com/datasheet/lcsc_datasheet_1809061818_STMicroelectronics-M24C02-WMN6TP_C7562.pdf")
+			(description "2Kb (256x8) I2C Serial EEPROM, 2.5-5.5V, SOIC-8")
+			(fields
+				(field
+					(name "MPN") "M24C02-WMN6TP")
+				(field
+					(name "Manufacturer") "STMicroelectronics")
+				(field
+					(name "LCSC") "C7562")
+				(field
+					(name "Footprint") "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm")
+				(field
+					(name "Datasheet") "https://www.lcsc.com/datasheet/lcsc_datasheet_1809061818_STMicroelectronics-M24C02-WMN6TP_C7562.pdf")
+				(field
+					(name "Description") "2Kb (256x8) I2C Serial EEPROM, 2.5-5.5V, SOIC-8")
+			)
+			(libsource
+				(lib "Memory_EEPROM")
+				(part "M24C02-WMN")
+				(description "2Kb (256x8) I2C Serial EEPROM, 2.5-5.5V, SOIC-8")
+			)
+			(property
+				(name "MPN")
+				(value "M24C02-WMN6TP")
+			)
+			(property
+				(name "Manufacturer")
+				(value "STMicroelectronics")
+			)
+			(property
+				(name "LCSC")
+				(value "C7562")
+			)
+			(property
+				(name "Sheetname")
+				(value "Slot header, descriptor EEPROM, mounting")
+			)
+			(property
+				(name "Sheetfile")
+				(value "slot.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "Nonvolatile Non-Volatile Memory ROM ST")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "SOIC*3.9x4.9mm*P1.27mm*")
+			)
+			(sheetpath
+				(names "/Slot header, descriptor EEPROM, mounting/")
+				(tstamps "/dd4d5149-be51-54b5-993a-758e65418097/")
+			)
+			(tstamps "e4a6fcaf-0880-53e3-9053-abe63556f5cf")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "8")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "7")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C20")
+			(value "100n")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(description "Unpolarized capacitor")
+			(fields
+				(field
+					(name "MPN") "CL05B104KO5NNNC")
+				(field
+					(name "Manufacturer") "Samsung Electro-Mechanics")
+				(field
+					(name "LCSC") "C1525")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "MPN")
+				(value "CL05B104KO5NNNC")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Samsung Electro-Mechanics")
+			)
+			(property
+				(name "LCSC")
+				(value "C1525")
+			)
+			(property
+				(name "Sheetname")
+				(value "Hall sensors: four keys, two references")
+			)
+			(property
+				(name "Sheetfile")
+				(value "sensors.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/Hall sensors: four keys, two references/")
+				(tstamps "/ed8cf34d-d55d-56d7-b999-12311132f7a1/")
+			)
+			(tstamps "5dea2863-d6b8-53f6-aaf8-8cd692a25ffb")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C21")
+			(value "100n")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(description "Unpolarized capacitor")
+			(fields
+				(field
+					(name "MPN") "CL05B104KO5NNNC")
+				(field
+					(name "Manufacturer") "Samsung Electro-Mechanics")
+				(field
+					(name "LCSC") "C1525")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "MPN")
+				(value "CL05B104KO5NNNC")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Samsung Electro-Mechanics")
+			)
+			(property
+				(name "LCSC")
+				(value "C1525")
+			)
+			(property
+				(name "Sheetname")
+				(value "Hall sensors: four keys, two references")
+			)
+			(property
+				(name "Sheetfile")
+				(value "sensors.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/Hall sensors: four keys, two references/")
+				(tstamps "/ed8cf34d-d55d-56d7-b999-12311132f7a1/")
+			)
+			(tstamps "3d5ebc50-74e2-5c5a-9814-11712ee73202")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C22")
+			(value "100n")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(description "Unpolarized capacitor")
+			(fields
+				(field
+					(name "MPN") "CL05B104KO5NNNC")
+				(field
+					(name "Manufacturer") "Samsung Electro-Mechanics")
+				(field
+					(name "LCSC") "C1525")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "MPN")
+				(value "CL05B104KO5NNNC")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Samsung Electro-Mechanics")
+			)
+			(property
+				(name "LCSC")
+				(value "C1525")
+			)
+			(property
+				(name "Sheetname")
+				(value "Hall sensors: four keys, two references")
+			)
+			(property
+				(name "Sheetfile")
+				(value "sensors.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/Hall sensors: four keys, two references/")
+				(tstamps "/ed8cf34d-d55d-56d7-b999-12311132f7a1/")
+			)
+			(tstamps "32d21584-31fc-5b77-a239-a947e5f9436a")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C23")
+			(value "100n")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(description "Unpolarized capacitor")
+			(fields
+				(field
+					(name "MPN") "CL05B104KO5NNNC")
+				(field
+					(name "Manufacturer") "Samsung Electro-Mechanics")
+				(field
+					(name "LCSC") "C1525")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "MPN")
+				(value "CL05B104KO5NNNC")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Samsung Electro-Mechanics")
+			)
+			(property
+				(name "LCSC")
+				(value "C1525")
+			)
+			(property
+				(name "Sheetname")
+				(value "Hall sensors: four keys, two references")
+			)
+			(property
+				(name "Sheetfile")
+				(value "sensors.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/Hall sensors: four keys, two references/")
+				(tstamps "/ed8cf34d-d55d-56d7-b999-12311132f7a1/")
+			)
+			(tstamps "a0983000-0a30-5a34-862d-4dea399abf82")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C24")
+			(value "100n")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(description "Unpolarized capacitor")
+			(fields
+				(field
+					(name "MPN") "CL05B104KO5NNNC")
+				(field
+					(name "Manufacturer") "Samsung Electro-Mechanics")
+				(field
+					(name "LCSC") "C1525")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "MPN")
+				(value "CL05B104KO5NNNC")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Samsung Electro-Mechanics")
+			)
+			(property
+				(name "LCSC")
+				(value "C1525")
+			)
+			(property
+				(name "Sheetname")
+				(value "Hall sensors: four keys, two references")
+			)
+			(property
+				(name "Sheetfile")
+				(value "sensors.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/Hall sensors: four keys, two references/")
+				(tstamps "/ed8cf34d-d55d-56d7-b999-12311132f7a1/")
+			)
+			(tstamps "e9caf540-cd5c-5458-b3e7-ab3b660d6449")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C25")
+			(value "100n")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(description "Unpolarized capacitor")
+			(fields
+				(field
+					(name "MPN") "CL05B104KO5NNNC")
+				(field
+					(name "Manufacturer") "Samsung Electro-Mechanics")
+				(field
+					(name "LCSC") "C1525")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "MPN")
+				(value "CL05B104KO5NNNC")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Samsung Electro-Mechanics")
+			)
+			(property
+				(name "LCSC")
+				(value "C1525")
+			)
+			(property
+				(name "Sheetname")
+				(value "Hall sensors: four keys, two references")
+			)
+			(property
+				(name "Sheetfile")
+				(value "sensors.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/Hall sensors: four keys, two references/")
+				(tstamps "/ed8cf34d-d55d-56d7-b999-12311132f7a1/")
+			)
+			(tstamps "4973b82e-9577-5a88-9436-9d243e3f0e12")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R20")
+			(value "1M")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(description "Resistor")
+			(fields
+				(field
+					(name "MPN") "0402WGF1004TCE")
+				(field
+					(name "Manufacturer") "UNI-ROYAL")
+				(field
+					(name "LCSC") "C26083")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0402WGF1004TCE")
+			)
+			(property
+				(name "Manufacturer")
+				(value "UNI-ROYAL")
+			)
+			(property
+				(name "LCSC")
+				(value "C26083")
+			)
+			(property
+				(name "Sheetname")
+				(value "Hall sensors: four keys, two references")
+			)
+			(property
+				(name "Sheetfile")
+				(value "sensors.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/Hall sensors: four keys, two references/")
+				(tstamps "/ed8cf34d-d55d-56d7-b999-12311132f7a1/")
+			)
+			(tstamps "3245465a-7147-5306-a555-4c3d4c26ef74")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U20")
+			(value "TMAG5253BA4")
+			(footprint "Package_SON:Texas_X2SON-4-1EP_1.1x1.4mm_P0.5mm_EP0.8x0.6mm")
+			(datasheet "https://www.ti.com/lit/ds/symlink/tmag5253.pdf")
+			(description "Low-power linear Hall-effect sensor with enable pin, 1.65-3.6 V, ratiometric analog output, high-impedance output in shutdown, X2SON-4 DMR 1.1 x 1.4 mm (thermal pad: no connect)")
+			(fields
+				(field
+					(name "MPN") "TMAG5253BA4IQDMRR")
+				(field
+					(name "Manufacturer") "Texas Instruments")
+				(field
+					(name "LCSC") "C22452022")
+				(field
+					(name "Footprint") "Package_SON:Texas_X2SON-4-1EP_1.1x1.4mm_P0.5mm_EP0.8x0.6mm")
+				(field
+					(name "Datasheet") "https://www.ti.com/lit/ds/symlink/tmag5253.pdf")
+				(field
+					(name "Description") "Low-power linear Hall-effect sensor with enable pin, 1.65-3.6 V, ratiometric analog output, high-impedance output in shutdown, X2SON-4 DMR 1.1 x 1.4 mm (thermal pad: no connect)")
+			)
+			(libsource
+				(lib "keyboard")
+				(part "TMAG5253_DMR")
+				(description "Low-power linear Hall-effect sensor with enable pin, 1.65-3.6 V, ratiometric analog output, high-impedance output in shutdown, X2SON-4 DMR 1.1 x 1.4 mm (thermal pad: no connect)")
+			)
+			(property
+				(name "MPN")
+				(value "TMAG5253BA4IQDMRR")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Texas Instruments")
+			)
+			(property
+				(name "LCSC")
+				(value "C22452022")
+			)
+			(property
+				(name "Sheetname")
+				(value "Hall sensors: four keys, two references")
+			)
+			(property
+				(name "Sheetfile")
+				(value "sensors.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "hall linear magnetic sensor analog enable TI")
+			)
+			(sheetpath
+				(names "/Hall sensors: four keys, two references/")
+				(tstamps "/ed8cf34d-d55d-56d7-b999-12311132f7a1/")
+			)
+			(tstamps "17e844a1-801a-5ba5-b249-f7a001d16df4")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "5")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U21")
+			(value "TMAG5253BA4")
+			(footprint "Package_SON:Texas_X2SON-4-1EP_1.1x1.4mm_P0.5mm_EP0.8x0.6mm")
+			(datasheet "https://www.ti.com/lit/ds/symlink/tmag5253.pdf")
+			(description "Low-power linear Hall-effect sensor with enable pin, 1.65-3.6 V, ratiometric analog output, high-impedance output in shutdown, X2SON-4 DMR 1.1 x 1.4 mm (thermal pad: no connect)")
+			(fields
+				(field
+					(name "MPN") "TMAG5253BA4IQDMRR")
+				(field
+					(name "Manufacturer") "Texas Instruments")
+				(field
+					(name "LCSC") "C22452022")
+				(field
+					(name "Footprint") "Package_SON:Texas_X2SON-4-1EP_1.1x1.4mm_P0.5mm_EP0.8x0.6mm")
+				(field
+					(name "Datasheet") "https://www.ti.com/lit/ds/symlink/tmag5253.pdf")
+				(field
+					(name "Description") "Low-power linear Hall-effect sensor with enable pin, 1.65-3.6 V, ratiometric analog output, high-impedance output in shutdown, X2SON-4 DMR 1.1 x 1.4 mm (thermal pad: no connect)")
+			)
+			(libsource
+				(lib "keyboard")
+				(part "TMAG5253_DMR")
+				(description "Low-power linear Hall-effect sensor with enable pin, 1.65-3.6 V, ratiometric analog output, high-impedance output in shutdown, X2SON-4 DMR 1.1 x 1.4 mm (thermal pad: no connect)")
+			)
+			(property
+				(name "MPN")
+				(value "TMAG5253BA4IQDMRR")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Texas Instruments")
+			)
+			(property
+				(name "LCSC")
+				(value "C22452022")
+			)
+			(property
+				(name "Sheetname")
+				(value "Hall sensors: four keys, two references")
+			)
+			(property
+				(name "Sheetfile")
+				(value "sensors.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "hall linear magnetic sensor analog enable TI")
+			)
+			(sheetpath
+				(names "/Hall sensors: four keys, two references/")
+				(tstamps "/ed8cf34d-d55d-56d7-b999-12311132f7a1/")
+			)
+			(tstamps "f0a3545c-b71d-5042-8ca8-587c81c8f302")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "5")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U22")
+			(value "TMAG5253BA4")
+			(footprint "Package_SON:Texas_X2SON-4-1EP_1.1x1.4mm_P0.5mm_EP0.8x0.6mm")
+			(datasheet "https://www.ti.com/lit/ds/symlink/tmag5253.pdf")
+			(description "Low-power linear Hall-effect sensor with enable pin, 1.65-3.6 V, ratiometric analog output, high-impedance output in shutdown, X2SON-4 DMR 1.1 x 1.4 mm (thermal pad: no connect)")
+			(fields
+				(field
+					(name "MPN") "TMAG5253BA4IQDMRR")
+				(field
+					(name "Manufacturer") "Texas Instruments")
+				(field
+					(name "LCSC") "C22452022")
+				(field
+					(name "Footprint") "Package_SON:Texas_X2SON-4-1EP_1.1x1.4mm_P0.5mm_EP0.8x0.6mm")
+				(field
+					(name "Datasheet") "https://www.ti.com/lit/ds/symlink/tmag5253.pdf")
+				(field
+					(name "Description") "Low-power linear Hall-effect sensor with enable pin, 1.65-3.6 V, ratiometric analog output, high-impedance output in shutdown, X2SON-4 DMR 1.1 x 1.4 mm (thermal pad: no connect)")
+			)
+			(libsource
+				(lib "keyboard")
+				(part "TMAG5253_DMR")
+				(description "Low-power linear Hall-effect sensor with enable pin, 1.65-3.6 V, ratiometric analog output, high-impedance output in shutdown, X2SON-4 DMR 1.1 x 1.4 mm (thermal pad: no connect)")
+			)
+			(property
+				(name "MPN")
+				(value "TMAG5253BA4IQDMRR")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Texas Instruments")
+			)
+			(property
+				(name "LCSC")
+				(value "C22452022")
+			)
+			(property
+				(name "Sheetname")
+				(value "Hall sensors: four keys, two references")
+			)
+			(property
+				(name "Sheetfile")
+				(value "sensors.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "hall linear magnetic sensor analog enable TI")
+			)
+			(sheetpath
+				(names "/Hall sensors: four keys, two references/")
+				(tstamps "/ed8cf34d-d55d-56d7-b999-12311132f7a1/")
+			)
+			(tstamps "849f088b-dd28-512e-a9fa-aa205a3c316a")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "5")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U23")
+			(value "TMAG5253BA4")
+			(footprint "Package_SON:Texas_X2SON-4-1EP_1.1x1.4mm_P0.5mm_EP0.8x0.6mm")
+			(datasheet "https://www.ti.com/lit/ds/symlink/tmag5253.pdf")
+			(description "Low-power linear Hall-effect sensor with enable pin, 1.65-3.6 V, ratiometric analog output, high-impedance output in shutdown, X2SON-4 DMR 1.1 x 1.4 mm (thermal pad: no connect)")
+			(fields
+				(field
+					(name "MPN") "TMAG5253BA4IQDMRR")
+				(field
+					(name "Manufacturer") "Texas Instruments")
+				(field
+					(name "LCSC") "C22452022")
+				(field
+					(name "Footprint") "Package_SON:Texas_X2SON-4-1EP_1.1x1.4mm_P0.5mm_EP0.8x0.6mm")
+				(field
+					(name "Datasheet") "https://www.ti.com/lit/ds/symlink/tmag5253.pdf")
+				(field
+					(name "Description") "Low-power linear Hall-effect sensor with enable pin, 1.65-3.6 V, ratiometric analog output, high-impedance output in shutdown, X2SON-4 DMR 1.1 x 1.4 mm (thermal pad: no connect)")
+			)
+			(libsource
+				(lib "keyboard")
+				(part "TMAG5253_DMR")
+				(description "Low-power linear Hall-effect sensor with enable pin, 1.65-3.6 V, ratiometric analog output, high-impedance output in shutdown, X2SON-4 DMR 1.1 x 1.4 mm (thermal pad: no connect)")
+			)
+			(property
+				(name "MPN")
+				(value "TMAG5253BA4IQDMRR")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Texas Instruments")
+			)
+			(property
+				(name "LCSC")
+				(value "C22452022")
+			)
+			(property
+				(name "Sheetname")
+				(value "Hall sensors: four keys, two references")
+			)
+			(property
+				(name "Sheetfile")
+				(value "sensors.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "hall linear magnetic sensor analog enable TI")
+			)
+			(sheetpath
+				(names "/Hall sensors: four keys, two references/")
+				(tstamps "/ed8cf34d-d55d-56d7-b999-12311132f7a1/")
+			)
+			(tstamps "ce607246-2490-543b-a570-c87e22187c41")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "5")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U24")
+			(value "TMAG5253BA4")
+			(footprint "Package_SON:Texas_X2SON-4-1EP_1.1x1.4mm_P0.5mm_EP0.8x0.6mm")
+			(datasheet "https://www.ti.com/lit/ds/symlink/tmag5253.pdf")
+			(description "Low-power linear Hall-effect sensor with enable pin, 1.65-3.6 V, ratiometric analog output, high-impedance output in shutdown, X2SON-4 DMR 1.1 x 1.4 mm (thermal pad: no connect)")
+			(fields
+				(field
+					(name "MPN") "TMAG5253BA4IQDMRR")
+				(field
+					(name "Manufacturer") "Texas Instruments")
+				(field
+					(name "LCSC") "C22452022")
+				(field
+					(name "Footprint") "Package_SON:Texas_X2SON-4-1EP_1.1x1.4mm_P0.5mm_EP0.8x0.6mm")
+				(field
+					(name "Datasheet") "https://www.ti.com/lit/ds/symlink/tmag5253.pdf")
+				(field
+					(name "Description") "Low-power linear Hall-effect sensor with enable pin, 1.65-3.6 V, ratiometric analog output, high-impedance output in shutdown, X2SON-4 DMR 1.1 x 1.4 mm (thermal pad: no connect)")
+			)
+			(libsource
+				(lib "keyboard")
+				(part "TMAG5253_DMR")
+				(description "Low-power linear Hall-effect sensor with enable pin, 1.65-3.6 V, ratiometric analog output, high-impedance output in shutdown, X2SON-4 DMR 1.1 x 1.4 mm (thermal pad: no connect)")
+			)
+			(property
+				(name "MPN")
+				(value "TMAG5253BA4IQDMRR")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Texas Instruments")
+			)
+			(property
+				(name "LCSC")
+				(value "C22452022")
+			)
+			(property
+				(name "Sheetname")
+				(value "Hall sensors: four keys, two references")
+			)
+			(property
+				(name "Sheetfile")
+				(value "sensors.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "hall linear magnetic sensor analog enable TI")
+			)
+			(sheetpath
+				(names "/Hall sensors: four keys, two references/")
+				(tstamps "/ed8cf34d-d55d-56d7-b999-12311132f7a1/")
+			)
+			(tstamps "9a54c632-a2a6-5d30-98d3-079d8c85a5c6")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "5")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U25")
+			(value "TMAG5253BA4")
+			(footprint "Package_SON:Texas_X2SON-4-1EP_1.1x1.4mm_P0.5mm_EP0.8x0.6mm")
+			(datasheet "https://www.ti.com/lit/ds/symlink/tmag5253.pdf")
+			(description "Low-power linear Hall-effect sensor with enable pin, 1.65-3.6 V, ratiometric analog output, high-impedance output in shutdown, X2SON-4 DMR 1.1 x 1.4 mm (thermal pad: no connect)")
+			(fields
+				(field
+					(name "MPN") "TMAG5253BA4IQDMRR")
+				(field
+					(name "Manufacturer") "Texas Instruments")
+				(field
+					(name "LCSC") "C22452022")
+				(field
+					(name "Footprint") "Package_SON:Texas_X2SON-4-1EP_1.1x1.4mm_P0.5mm_EP0.8x0.6mm")
+				(field
+					(name "Datasheet") "https://www.ti.com/lit/ds/symlink/tmag5253.pdf")
+				(field
+					(name "Description") "Low-power linear Hall-effect sensor with enable pin, 1.65-3.6 V, ratiometric analog output, high-impedance output in shutdown, X2SON-4 DMR 1.1 x 1.4 mm (thermal pad: no connect)")
+			)
+			(libsource
+				(lib "keyboard")
+				(part "TMAG5253_DMR")
+				(description "Low-power linear Hall-effect sensor with enable pin, 1.65-3.6 V, ratiometric analog output, high-impedance output in shutdown, X2SON-4 DMR 1.1 x 1.4 mm (thermal pad: no connect)")
+			)
+			(property
+				(name "MPN")
+				(value "TMAG5253BA4IQDMRR")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Texas Instruments")
+			)
+			(property
+				(name "LCSC")
+				(value "C22452022")
+			)
+			(property
+				(name "Sheetname")
+				(value "Hall sensors: four keys, two references")
+			)
+			(property
+				(name "Sheetfile")
+				(value "sensors.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "hall linear magnetic sensor analog enable TI")
+			)
+			(sheetpath
+				(names "/Hall sensors: four keys, two references/")
+				(tstamps "/ed8cf34d-d55d-56d7-b999-12311132f7a1/")
+			)
+			(tstamps "44e1c5a9-ca6e-5e01-9867-2dc5320a1811")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "5")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C10")
+			(value "100n")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(description "Unpolarized capacitor")
+			(fields
+				(field
+					(name "MPN") "CL05B104KO5NNNC")
+				(field
+					(name "Manufacturer") "Samsung Electro-Mechanics")
+				(field
+					(name "LCSC") "C1525")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "MPN")
+				(value "CL05B104KO5NNNC")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Samsung Electro-Mechanics")
+			)
+			(property
+				(name "LCSC")
+				(value "C1525")
+			)
+			(property
+				(name "Sheetname")
+				(value "Mux, enable latch, lane buffers, thermistors")
+			)
+			(property
+				(name "Sheetfile")
+				(value "frontend.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/Mux, enable latch, lane buffers, thermistors/")
+				(tstamps "/ca079efd-5383-5d91-88f2-b4f4e2ad851c/")
+			)
+			(tstamps "b696cb57-05fc-57e3-8e12-46e2edf9d3b2")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C11")
+			(value "100n")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(description "Unpolarized capacitor")
+			(fields
+				(field
+					(name "MPN") "CL05B104KO5NNNC")
+				(field
+					(name "Manufacturer") "Samsung Electro-Mechanics")
+				(field
+					(name "LCSC") "C1525")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "MPN")
+				(value "CL05B104KO5NNNC")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Samsung Electro-Mechanics")
+			)
+			(property
+				(name "LCSC")
+				(value "C1525")
+			)
+			(property
+				(name "Sheetname")
+				(value "Mux, enable latch, lane buffers, thermistors")
+			)
+			(property
+				(name "Sheetfile")
+				(value "frontend.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/Mux, enable latch, lane buffers, thermistors/")
+				(tstamps "/ca079efd-5383-5d91-88f2-b4f4e2ad851c/")
+			)
+			(tstamps "63e0ac59-e029-5346-8e5d-12e271875917")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C12")
+			(value "100n")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(description "Unpolarized capacitor")
+			(fields
+				(field
+					(name "MPN") "CL05B104KO5NNNC")
+				(field
+					(name "Manufacturer") "Samsung Electro-Mechanics")
+				(field
+					(name "LCSC") "C1525")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "MPN")
+				(value "CL05B104KO5NNNC")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Samsung Electro-Mechanics")
+			)
+			(property
+				(name "LCSC")
+				(value "C1525")
+			)
+			(property
+				(name "Sheetname")
+				(value "Mux, enable latch, lane buffers, thermistors")
+			)
+			(property
+				(name "Sheetfile")
+				(value "frontend.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/Mux, enable latch, lane buffers, thermistors/")
+				(tstamps "/ca079efd-5383-5d91-88f2-b4f4e2ad851c/")
+			)
+			(tstamps "a24b1799-e42a-503d-bbdc-e61e3ea88f98")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C16")
+			(value "1u")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(description "Unpolarized capacitor")
+			(fields
+				(field
+					(name "MPN") "CL05A105KA5NQNC")
+				(field
+					(name "Manufacturer") "Samsung Electro-Mechanics")
+				(field
+					(name "LCSC") "C52923")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "MPN")
+				(value "CL05A105KA5NQNC")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Samsung Electro-Mechanics")
+			)
+			(property
+				(name "LCSC")
+				(value "C52923")
+			)
+			(property
+				(name "Sheetname")
+				(value "Mux, enable latch, lane buffers, thermistors")
+			)
+			(property
+				(name "Sheetfile")
+				(value "frontend.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/Mux, enable latch, lane buffers, thermistors/")
+				(tstamps "/ca079efd-5383-5d91-88f2-b4f4e2ad851c/")
+			)
+			(tstamps "e8bf3370-fd71-5339-9482-746eb3f6cf2e")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C17")
+			(value "1u")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(description "Unpolarized capacitor")
+			(fields
+				(field
+					(name "MPN") "CL05A105KA5NQNC")
+				(field
+					(name "Manufacturer") "Samsung Electro-Mechanics")
+				(field
+					(name "LCSC") "C52923")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "MPN")
+				(value "CL05A105KA5NQNC")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Samsung Electro-Mechanics")
+			)
+			(property
+				(name "LCSC")
+				(value "C52923")
+			)
+			(property
+				(name "Sheetname")
+				(value "Mux, enable latch, lane buffers, thermistors")
+			)
+			(property
+				(name "Sheetfile")
+				(value "frontend.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/Mux, enable latch, lane buffers, thermistors/")
+				(tstamps "/ca079efd-5383-5d91-88f2-b4f4e2ad851c/")
+			)
+			(tstamps "423e3122-9c0f-588e-8662-063cc883f066")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "H10")
+			(value "M2")
+			(footprint "MountingHole:MountingHole_2.2mm_M2")
+			(description "Mounting Hole without connection")
+			(fields
+				(field
+					(name "Footprint") "MountingHole:MountingHole_2.2mm_M2")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Mounting Hole without connection")
+			)
+			(libsource
+				(lib "Mechanical")
+				(part "MountingHole")
+				(description "Mounting Hole without connection")
+			)
+			(property
+				(name "Sheetname")
+				(value "Mux, enable latch, lane buffers, thermistors")
+			)
+			(property
+				(name "Sheetfile")
+				(value "frontend.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "ki_keywords")
+				(value "mounting hole")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "MountingHole*")
+			)
+			(sheetpath
+				(names "/Mux, enable latch, lane buffers, thermistors/")
+				(tstamps "/ca079efd-5383-5d91-88f2-b4f4e2ad851c/")
+			)
+			(tstamps "aafe3de6-adeb-5fb9-8e08-848d493df9d2")
+			(units
+				(unit
+					(name "A")
+					(pins)
+				)
+			)
+		)
+		(comp
+			(ref "H11")
+			(value "M2")
+			(footprint "MountingHole:MountingHole_2.2mm_M2")
+			(description "Mounting Hole without connection")
+			(fields
+				(field
+					(name "Footprint") "MountingHole:MountingHole_2.2mm_M2")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Mounting Hole without connection")
+			)
+			(libsource
+				(lib "Mechanical")
+				(part "MountingHole")
+				(description "Mounting Hole without connection")
+			)
+			(property
+				(name "Sheetname")
+				(value "Mux, enable latch, lane buffers, thermistors")
+			)
+			(property
+				(name "Sheetfile")
+				(value "frontend.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "ki_keywords")
+				(value "mounting hole")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "MountingHole*")
+			)
+			(sheetpath
+				(names "/Mux, enable latch, lane buffers, thermistors/")
+				(tstamps "/ca079efd-5383-5d91-88f2-b4f4e2ad851c/")
+			)
+			(tstamps "6aa278b9-883a-510c-b320-269a4ecbc0d5")
+			(units
+				(unit
+					(name "A")
+					(pins)
+				)
+			)
+		)
+		(comp
+			(ref "H12")
+			(value "M2")
+			(footprint "MountingHole:MountingHole_2.2mm_M2")
+			(description "Mounting Hole without connection")
+			(fields
+				(field
+					(name "Footprint") "MountingHole:MountingHole_2.2mm_M2")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Mounting Hole without connection")
+			)
+			(libsource
+				(lib "Mechanical")
+				(part "MountingHole")
+				(description "Mounting Hole without connection")
+			)
+			(property
+				(name "Sheetname")
+				(value "Mux, enable latch, lane buffers, thermistors")
+			)
+			(property
+				(name "Sheetfile")
+				(value "frontend.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "ki_keywords")
+				(value "mounting hole")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "MountingHole*")
+			)
+			(sheetpath
+				(names "/Mux, enable latch, lane buffers, thermistors/")
+				(tstamps "/ca079efd-5383-5d91-88f2-b4f4e2ad851c/")
+			)
+			(tstamps "4b4ac5ac-99a5-5415-b1c2-d6f041e561ae")
+			(units
+				(unit
+					(name "A")
+					(pins)
+				)
+			)
+		)
+		(comp
+			(ref "H13")
+			(value "M2")
+			(footprint "MountingHole:MountingHole_2.2mm_M2")
+			(description "Mounting Hole without connection")
+			(fields
+				(field
+					(name "Footprint") "MountingHole:MountingHole_2.2mm_M2")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Mounting Hole without connection")
+			)
+			(libsource
+				(lib "Mechanical")
+				(part "MountingHole")
+				(description "Mounting Hole without connection")
+			)
+			(property
+				(name "Sheetname")
+				(value "Mux, enable latch, lane buffers, thermistors")
+			)
+			(property
+				(name "Sheetfile")
+				(value "frontend.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "ki_keywords")
+				(value "mounting hole")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "MountingHole*")
+			)
+			(sheetpath
+				(names "/Mux, enable latch, lane buffers, thermistors/")
+				(tstamps "/ca079efd-5383-5d91-88f2-b4f4e2ad851c/")
+			)
+			(tstamps "d7b7c44b-74d6-50dc-959a-171b66179787")
+			(units
+				(unit
+					(name "A")
+					(pins)
+				)
+			)
+		)
+		(comp
+			(ref "H14")
+			(value "M2")
+			(footprint "MountingHole:MountingHole_2.2mm_M2")
+			(description "Mounting Hole without connection")
+			(fields
+				(field
+					(name "Footprint") "MountingHole:MountingHole_2.2mm_M2")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Mounting Hole without connection")
+			)
+			(libsource
+				(lib "Mechanical")
+				(part "MountingHole")
+				(description "Mounting Hole without connection")
+			)
+			(property
+				(name "Sheetname")
+				(value "Mux, enable latch, lane buffers, thermistors")
+			)
+			(property
+				(name "Sheetfile")
+				(value "frontend.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "ki_keywords")
+				(value "mounting hole")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "MountingHole*")
+			)
+			(sheetpath
+				(names "/Mux, enable latch, lane buffers, thermistors/")
+				(tstamps "/ca079efd-5383-5d91-88f2-b4f4e2ad851c/")
+			)
+			(tstamps "c5d1b8ce-9ed4-5654-b61f-c57110d48dd0")
+			(units
+				(unit
+					(name "A")
+					(pins)
+				)
+			)
+		)
+		(comp
+			(ref "R10")
+			(value "100k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(description "Resistor")
+			(fields
+				(field
+					(name "MPN") "0402WGF1003TCE")
+				(field
+					(name "Manufacturer") "UNI-ROYAL")
+				(field
+					(name "LCSC") "C25741")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0402WGF1003TCE")
+			)
+			(property
+				(name "Manufacturer")
+				(value "UNI-ROYAL")
+			)
+			(property
+				(name "LCSC")
+				(value "C25741")
+			)
+			(property
+				(name "Sheetname")
+				(value "Mux, enable latch, lane buffers, thermistors")
+			)
+			(property
+				(name "Sheetfile")
+				(value "frontend.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/Mux, enable latch, lane buffers, thermistors/")
+				(tstamps "/ca079efd-5383-5d91-88f2-b4f4e2ad851c/")
+			)
+			(tstamps "5f6c8e34-6150-5021-92ac-08e63f5725e5")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R11")
+			(value "100k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(description "Resistor")
+			(fields
+				(field
+					(name "MPN") "0402WGF1003TCE")
+				(field
+					(name "Manufacturer") "UNI-ROYAL")
+				(field
+					(name "LCSC") "C25741")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0402WGF1003TCE")
+			)
+			(property
+				(name "Manufacturer")
+				(value "UNI-ROYAL")
+			)
+			(property
+				(name "LCSC")
+				(value "C25741")
+			)
+			(property
+				(name "Sheetname")
+				(value "Mux, enable latch, lane buffers, thermistors")
+			)
+			(property
+				(name "Sheetfile")
+				(value "frontend.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/Mux, enable latch, lane buffers, thermistors/")
+				(tstamps "/ca079efd-5383-5d91-88f2-b4f4e2ad851c/")
+			)
+			(tstamps "0ddf79d3-3454-5755-b832-d41029207ded")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R12")
+			(value "100k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(description "Resistor")
+			(fields
+				(field
+					(name "MPN") "0402WGF1003TCE")
+				(field
+					(name "Manufacturer") "UNI-ROYAL")
+				(field
+					(name "LCSC") "C25741")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0402WGF1003TCE")
+			)
+			(property
+				(name "Manufacturer")
+				(value "UNI-ROYAL")
+			)
+			(property
+				(name "LCSC")
+				(value "C25741")
+			)
+			(property
+				(name "Sheetname")
+				(value "Mux, enable latch, lane buffers, thermistors")
+			)
+			(property
+				(name "Sheetfile")
+				(value "frontend.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/Mux, enable latch, lane buffers, thermistors/")
+				(tstamps "/ca079efd-5383-5d91-88f2-b4f4e2ad851c/")
+			)
+			(tstamps "4f18a192-351c-5f7b-9057-195eb7d43949")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R13")
+			(value "100k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(description "Resistor")
+			(fields
+				(field
+					(name "MPN") "0402WGF1003TCE")
+				(field
+					(name "Manufacturer") "UNI-ROYAL")
+				(field
+					(name "LCSC") "C25741")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0402WGF1003TCE")
+			)
+			(property
+				(name "Manufacturer")
+				(value "UNI-ROYAL")
+			)
+			(property
+				(name "LCSC")
+				(value "C25741")
+			)
+			(property
+				(name "Sheetname")
+				(value "Mux, enable latch, lane buffers, thermistors")
+			)
+			(property
+				(name "Sheetfile")
+				(value "frontend.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/Mux, enable latch, lane buffers, thermistors/")
+				(tstamps "/ca079efd-5383-5d91-88f2-b4f4e2ad851c/")
+			)
+			(tstamps "6bb403ef-784d-5db7-9f96-bd2c9c354a5e")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R14")
+			(value "100k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(description "Resistor")
+			(fields
+				(field
+					(name "MPN") "0402WGF1003TCE")
+				(field
+					(name "Manufacturer") "UNI-ROYAL")
+				(field
+					(name "LCSC") "C25741")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0402WGF1003TCE")
+			)
+			(property
+				(name "Manufacturer")
+				(value "UNI-ROYAL")
+			)
+			(property
+				(name "LCSC")
+				(value "C25741")
+			)
+			(property
+				(name "Sheetname")
+				(value "Mux, enable latch, lane buffers, thermistors")
+			)
+			(property
+				(name "Sheetfile")
+				(value "frontend.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/Mux, enable latch, lane buffers, thermistors/")
+				(tstamps "/ca079efd-5383-5d91-88f2-b4f4e2ad851c/")
+			)
+			(tstamps "ab389548-17ce-5317-9890-6e2ccd6eede5")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R15")
+			(value "100k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(description "Resistor")
+			(fields
+				(field
+					(name "MPN") "0402WGF1003TCE")
+				(field
+					(name "Manufacturer") "UNI-ROYAL")
+				(field
+					(name "LCSC") "C25741")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0402WGF1003TCE")
+			)
+			(property
+				(name "Manufacturer")
+				(value "UNI-ROYAL")
+			)
+			(property
+				(name "LCSC")
+				(value "C25741")
+			)
+			(property
+				(name "Sheetname")
+				(value "Mux, enable latch, lane buffers, thermistors")
+			)
+			(property
+				(name "Sheetfile")
+				(value "frontend.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/Mux, enable latch, lane buffers, thermistors/")
+				(tstamps "/ca079efd-5383-5d91-88f2-b4f4e2ad851c/")
+			)
+			(tstamps "b3cfea5a-255a-5c3f-8592-78ed1caf1893")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R16")
+			(value "10k")
+			(footprint "Resistor_SMD:R_0603_1608Metric")
+			(description "Thin-film resistor, 10 kOhm, 0.1 %, 25 ppm/K, 0603 (thermistor divider)")
+			(fields
+				(field
+					(name "MPN") "RT0603BRD0710KL")
+				(field
+					(name "Manufacturer") "YAGEO")
+				(field
+					(name "LCSC") "C95204")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Thin-film resistor, 10 kOhm, 0.1 %, 25 ppm/K, 0603 (thermistor divider)")
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "RT0603BRD0710KL")
+			)
+			(property
+				(name "Manufacturer")
+				(value "YAGEO")
+			)
+			(property
+				(name "LCSC")
+				(value "C95204")
+			)
+			(property
+				(name "Sheetname")
+				(value "Mux, enable latch, lane buffers, thermistors")
+			)
+			(property
+				(name "Sheetfile")
+				(value "frontend.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/Mux, enable latch, lane buffers, thermistors/")
+				(tstamps "/ca079efd-5383-5d91-88f2-b4f4e2ad851c/")
+			)
+			(tstamps "1634b331-9496-520e-afa5-fcc5bf899ddc")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R17")
+			(value "10k")
+			(footprint "Resistor_SMD:R_0603_1608Metric")
+			(description "Thin-film resistor, 10 kOhm, 0.1 %, 25 ppm/K, 0603 (thermistor divider)")
+			(fields
+				(field
+					(name "MPN") "RT0603BRD0710KL")
+				(field
+					(name "Manufacturer") "YAGEO")
+				(field
+					(name "LCSC") "C95204")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Thin-film resistor, 10 kOhm, 0.1 %, 25 ppm/K, 0603 (thermistor divider)")
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "RT0603BRD0710KL")
+			)
+			(property
+				(name "Manufacturer")
+				(value "YAGEO")
+			)
+			(property
+				(name "LCSC")
+				(value "C95204")
+			)
+			(property
+				(name "Sheetname")
+				(value "Mux, enable latch, lane buffers, thermistors")
+			)
+			(property
+				(name "Sheetfile")
+				(value "frontend.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/Mux, enable latch, lane buffers, thermistors/")
+				(tstamps "/ca079efd-5383-5d91-88f2-b4f4e2ad851c/")
+			)
+			(tstamps "c0b4cfd6-577c-5696-b9fd-fd797f4361f7")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R18")
+			(value "22")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(description "Resistor")
+			(fields
+				(field
+					(name "MPN") "0402WGF220JTCE")
+				(field
+					(name "Manufacturer") "UNI-ROYAL")
+				(field
+					(name "LCSC") "C25092")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0402WGF220JTCE")
+			)
+			(property
+				(name "Manufacturer")
+				(value "UNI-ROYAL")
+			)
+			(property
+				(name "LCSC")
+				(value "C25092")
+			)
+			(property
+				(name "Sheetname")
+				(value "Mux, enable latch, lane buffers, thermistors")
+			)
+			(property
+				(name "Sheetfile")
+				(value "frontend.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/Mux, enable latch, lane buffers, thermistors/")
+				(tstamps "/ca079efd-5383-5d91-88f2-b4f4e2ad851c/")
+			)
+			(tstamps "2337b2c3-b101-52e6-bcc0-0ecdf3f8036c")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R19")
+			(value "22")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(description "Resistor")
+			(fields
+				(field
+					(name "MPN") "0402WGF220JTCE")
+				(field
+					(name "Manufacturer") "UNI-ROYAL")
+				(field
+					(name "LCSC") "C25092")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0402WGF220JTCE")
+			)
+			(property
+				(name "Manufacturer")
+				(value "UNI-ROYAL")
+			)
+			(property
+				(name "LCSC")
+				(value "C25092")
+			)
+			(property
+				(name "Sheetname")
+				(value "Mux, enable latch, lane buffers, thermistors")
+			)
+			(property
+				(name "Sheetfile")
+				(value "frontend.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/Mux, enable latch, lane buffers, thermistors/")
+				(tstamps "/ca079efd-5383-5d91-88f2-b4f4e2ad851c/")
+			)
+			(tstamps "3f8ae457-d115-53f5-9d83-731d651b52ca")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R26")
+			(value "0R")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(description "Resistor")
+			(fields
+				(field
+					(name "MPN") "0402WGF0000TCE")
+				(field
+					(name "Manufacturer") "UNI-ROYAL")
+				(field
+					(name "LCSC") "C17168")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0402WGF0000TCE")
+			)
+			(property
+				(name "Manufacturer")
+				(value "UNI-ROYAL")
+			)
+			(property
+				(name "LCSC")
+				(value "C17168")
+			)
+			(property
+				(name "Sheetname")
+				(value "Mux, enable latch, lane buffers, thermistors")
+			)
+			(property
+				(name "Sheetfile")
+				(value "frontend.kicad_sch")
+			)
+			(property
+				(name "dnp")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/Mux, enable latch, lane buffers, thermistors/")
+				(tstamps "/ca079efd-5383-5d91-88f2-b4f4e2ad851c/")
+			)
+			(tstamps "ed03dd1e-1802-588f-8e57-a9d4f154b3cb")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "TH10")
+			(value "10k B3380")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(datasheet "https://www.lcsc.com/datasheet/lcsc_datasheet_2304140030_Murata-Electronics-NCP15XH103F03RC_C77131.pdf")
+			(description "NTC thermistor 10 kOhm 1 %, B25/50 3380 K, 0402, beside K1's sensor")
+			(fields
+				(field
+					(name "MPN") "NCP15XH103F03RC")
+				(field
+					(name "Manufacturer") "Murata Electronics")
+				(field
+					(name "LCSC") "C77131")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet") "https://www.lcsc.com/datasheet/lcsc_datasheet_2304140030_Murata-Electronics-NCP15XH103F03RC_C77131.pdf")
+				(field
+					(name "Description") "NTC thermistor 10 kOhm 1 %, B25/50 3380 K, 0402, beside K1's sensor")
+			)
+			(libsource
+				(lib "Device")
+				(part "Thermistor_NTC")
+				(description "Temperature dependent resistor, negative temperature coefficient")
+			)
+			(property
+				(name "MPN")
+				(value "NCP15XH103F03RC")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Murata Electronics")
+			)
+			(property
+				(name "LCSC")
+				(value "C77131")
+			)
+			(property
+				(name "Sheetname")
+				(value "Mux, enable latch, lane buffers, thermistors")
+			)
+			(property
+				(name "Sheetfile")
+				(value "frontend.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "thermistor NTC resistor sensor RTD")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_* RV_*")
+			)
+			(sheetpath
+				(names "/Mux, enable latch, lane buffers, thermistors/")
+				(tstamps "/ca079efd-5383-5d91-88f2-b4f4e2ad851c/")
+			)
+			(tstamps "977cdca3-bb98-5025-9f46-071858a4258d")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "TH11")
+			(value "10k B3380")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(datasheet "https://www.lcsc.com/datasheet/lcsc_datasheet_2304140030_Murata-Electronics-NCP15XH103F03RC_C77131.pdf")
+			(description "NTC thermistor 10 kOhm 1 %, B25/50 3380 K, 0402, beside REF1's sensor")
+			(fields
+				(field
+					(name "MPN") "NCP15XH103F03RC")
+				(field
+					(name "Manufacturer") "Murata Electronics")
+				(field
+					(name "LCSC") "C77131")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet") "https://www.lcsc.com/datasheet/lcsc_datasheet_2304140030_Murata-Electronics-NCP15XH103F03RC_C77131.pdf")
+				(field
+					(name "Description") "NTC thermistor 10 kOhm 1 %, B25/50 3380 K, 0402, beside REF1's sensor")
+			)
+			(libsource
+				(lib "Device")
+				(part "Thermistor_NTC")
+				(description "Temperature dependent resistor, negative temperature coefficient")
+			)
+			(property
+				(name "MPN")
+				(value "NCP15XH103F03RC")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Murata Electronics")
+			)
+			(property
+				(name "LCSC")
+				(value "C77131")
+			)
+			(property
+				(name "Sheetname")
+				(value "Mux, enable latch, lane buffers, thermistors")
+			)
+			(property
+				(name "Sheetfile")
+				(value "frontend.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "thermistor NTC resistor sensor RTD")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_* RV_*")
+			)
+			(sheetpath
+				(names "/Mux, enable latch, lane buffers, thermistors/")
+				(tstamps "/ca079efd-5383-5d91-88f2-b4f4e2ad851c/")
+			)
+			(tstamps "a22558c7-408f-5d25-8c37-17e06f3d0941")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "TP10")
+			(value "AN0")
+			(footprint "TestPoint:TestPoint_Pad_D1.0mm")
+			(description "test point")
+			(fields
+				(field
+					(name "Footprint") "TestPoint:TestPoint_Pad_D1.0mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "test point")
+			)
+			(libsource
+				(lib "Connector")
+				(part "TestPoint")
+				(description "test point")
+			)
+			(property
+				(name "Sheetname")
+				(value "Mux, enable latch, lane buffers, thermistors")
+			)
+			(property
+				(name "Sheetfile")
+				(value "frontend.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "ki_keywords")
+				(value "test point tp")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Pin* Test*")
+			)
+			(sheetpath
+				(names "/Mux, enable latch, lane buffers, thermistors/")
+				(tstamps "/ca079efd-5383-5d91-88f2-b4f4e2ad851c/")
+			)
+			(tstamps "49e71857-cfca-5f81-9dd8-a843c621c034")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "TP11")
+			(value "AN1")
+			(footprint "TestPoint:TestPoint_Pad_D1.0mm")
+			(description "test point")
+			(fields
+				(field
+					(name "Footprint") "TestPoint:TestPoint_Pad_D1.0mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "test point")
+			)
+			(libsource
+				(lib "Connector")
+				(part "TestPoint")
+				(description "test point")
+			)
+			(property
+				(name "Sheetname")
+				(value "Mux, enable latch, lane buffers, thermistors")
+			)
+			(property
+				(name "Sheetfile")
+				(value "frontend.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "ki_keywords")
+				(value "test point tp")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Pin* Test*")
+			)
+			(sheetpath
+				(names "/Mux, enable latch, lane buffers, thermistors/")
+				(tstamps "/ca079efd-5383-5d91-88f2-b4f4e2ad851c/")
+			)
+			(tstamps "40c04946-61de-575c-ad7c-f88b239c22be")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "TP12")
+			(value "MUX_D")
+			(footprint "TestPoint:TestPoint_Pad_D1.0mm")
+			(description "test point")
+			(fields
+				(field
+					(name "Footprint") "TestPoint:TestPoint_Pad_D1.0mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "test point")
+			)
+			(libsource
+				(lib "Connector")
+				(part "TestPoint")
+				(description "test point")
+			)
+			(property
+				(name "Sheetname")
+				(value "Mux, enable latch, lane buffers, thermistors")
+			)
+			(property
+				(name "Sheetfile")
+				(value "frontend.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "ki_keywords")
+				(value "test point tp")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Pin* Test*")
+			)
+			(sheetpath
+				(names "/Mux, enable latch, lane buffers, thermistors/")
+				(tstamps "/ca079efd-5383-5d91-88f2-b4f4e2ad851c/")
+			)
+			(tstamps "20705b50-e37d-506f-aa00-6b1c3d97137a")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "TP13")
+			(value "HALL_K1")
+			(footprint "TestPoint:TestPoint_Pad_D1.0mm")
+			(description "test point")
+			(fields
+				(field
+					(name "Footprint") "TestPoint:TestPoint_Pad_D1.0mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "test point")
+			)
+			(libsource
+				(lib "Connector")
+				(part "TestPoint")
+				(description "test point")
+			)
+			(property
+				(name "Sheetname")
+				(value "Mux, enable latch, lane buffers, thermistors")
+			)
+			(property
+				(name "Sheetfile")
+				(value "frontend.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "ki_keywords")
+				(value "test point tp")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Pin* Test*")
+			)
+			(sheetpath
+				(names "/Mux, enable latch, lane buffers, thermistors/")
+				(tstamps "/ca079efd-5383-5d91-88f2-b4f4e2ad851c/")
+			)
+			(tstamps "1e1996c7-bd37-5868-b303-70fc9cd2cb07")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "TP14")
+			(value "G3")
+			(footprint "TestPoint:TestPoint_Pad_D1.0mm")
+			(description "test point")
+			(fields
+				(field
+					(name "Footprint") "TestPoint:TestPoint_Pad_D1.0mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "test point")
+			)
+			(libsource
+				(lib "Connector")
+				(part "TestPoint")
+				(description "test point")
+			)
+			(property
+				(name "Sheetname")
+				(value "Mux, enable latch, lane buffers, thermistors")
+			)
+			(property
+				(name "Sheetfile")
+				(value "frontend.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
+			)
+			(property
+				(name "ki_keywords")
+				(value "test point tp")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Pin* Test*")
+			)
+			(sheetpath
+				(names "/Mux, enable latch, lane buffers, thermistors/")
+				(tstamps "/ca079efd-5383-5d91-88f2-b4f4e2ad851c/")
+			)
+			(tstamps "ee8cdf48-af0a-54e6-99a1-d29466d0d360")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U10")
+			(value "TMUX1208PWR")
+			(footprint "Package_SO:TSSOP-16_4.4x5mm_P0.65mm")
+			(datasheet "https://www.ti.com/lit/ds/symlink/tmux1208.pdf")
+			(description "8:1 analog multiplexer, 1.08-5.5 V, 5 Ohm at 5 V (9 Ohm typ, 15 max at 3.3 V), fail-safe logic, active-high EN, TSSOP-16")
+			(fields
+				(field
+					(name "MPN") "TMUX1208PWR")
+				(field
+					(name "Manufacturer") "Texas Instruments")
+				(field
+					(name "LCSC") "C494728")
+				(field
+					(name "Footprint") "Package_SO:TSSOP-16_4.4x5mm_P0.65mm")
+				(field
+					(name "Datasheet") "https://www.ti.com/lit/ds/symlink/tmux1208.pdf")
+				(field
+					(name "Description") "8:1 analog multiplexer, 1.08-5.5 V, 5 Ohm at 5 V (9 Ohm typ, 15 max at 3.3 V), fail-safe logic, active-high EN, TSSOP-16")
+			)
+			(libsource
+				(lib "keyboard")
+				(part "TMUX1208PW")
+				(description "8:1 analog multiplexer, 1.08-5.5 V, 5 Ohm at 5 V (9 Ohm typ, 15 max at 3.3 V), fail-safe logic, active-high EN, TSSOP-16")
+			)
+			(property
+				(name "MPN")
+				(value "TMUX1208PWR")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Texas Instruments")
+			)
+			(property
+				(name "LCSC")
+				(value "C494728")
+			)
+			(property
+				(name "Sheetname")
+				(value "Mux, enable latch, lane buffers, thermistors")
+			)
+			(property
+				(name "Sheetfile")
+				(value "frontend.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "analog multiplexer mux 8:1 TI")
+			)
+			(sheetpath
+				(names "/Mux, enable latch, lane buffers, thermistors/")
+				(tstamps "/ca079efd-5383-5d91-88f2-b4f4e2ad851c/")
+			)
+			(tstamps "ad0deb08-5b02-54ec-90b7-9b8ec8389754")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "7")
+						)
+						(pin
+							(num "12")
+						)
+						(pin
+							(num "11")
+						)
+						(pin
+							(num "10")
+						)
+						(pin
+							(num "9")
+						)
+						(pin
+							(num "14")
+						)
+						(pin
+							(num "13")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "8")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "16")
+						)
+						(pin
+							(num "15")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U11")
+			(value "SN74HC259PWR")
+			(footprint "Package_SO:TSSOP-16_4.4x5mm_P0.65mm")
+			(datasheet "https://www.ti.com/lit/ds/symlink/sn74hc259.pdf")
+			(description "8-bit addressable latch, 2-6 V, TSSOP-16")
+			(fields
+				(field
+					(name "MPN") "SN74HC259PWR")
+				(field
+					(name "Manufacturer") "Texas Instruments")
+				(field
+					(name "LCSC") "C2652971")
+				(field
+					(name "Footprint") "Package_SO:TSSOP-16_4.4x5mm_P0.65mm")
+				(field
+					(name "Datasheet") "https://www.ti.com/lit/ds/symlink/sn74hc259.pdf")
+				(field
+					(name "Description") "8-bit addressable latch, 2-6 V, TSSOP-16")
+			)
+			(libsource
+				(lib "74xx")
+				(part "74LS259")
+				(description "8-bit addressable latch")
+			)
+			(property
+				(name "MPN")
+				(value "SN74HC259PWR")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Texas Instruments")
+			)
+			(property
+				(name "LCSC")
+				(value "C2652971")
+			)
+			(property
+				(name "Sheetname")
+				(value "Mux, enable latch, lane buffers, thermistors")
+			)
+			(property
+				(name "Sheetfile")
+				(value "frontend.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "TTL REG DFF")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "DIP?16*")
+			)
+			(sheetpath
+				(names "/Mux, enable latch, lane buffers, thermistors/")
+				(tstamps "/ca079efd-5383-5d91-88f2-b4f4e2ad851c/")
+			)
+			(tstamps "72500762-9ed5-5d78-89b9-88a6fcae7f23")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "13")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "14")
+						)
+						(pin
+							(num "15")
+						)
+						(pin
+							(num "16")
+						)
+						(pin
+							(num "8")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "7")
+						)
+						(pin
+							(num "9")
+						)
+						(pin
+							(num "10")
+						)
+						(pin
+							(num "11")
+						)
+						(pin
+							(num "12")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U12")
+			(value "OPA2365AIDR")
+			(footprint "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm")
+			(datasheet "https://www.ti.com/lit/ds/symlink/opa365.pdf")
+			(description "Dual operational amplifier")
+			(fields
+				(field
+					(name "MPN") "OPA2365AIDR")
+				(field
+					(name "Manufacturer") "Texas Instruments")
+				(field
+					(name "LCSC") "C130011")
+				(field
+					(name "Footprint") "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm")
+				(field
+					(name "Datasheet") "https://www.ti.com/lit/ds/symlink/opa365.pdf")
+				(field
+					(name "Description") "Dual operational amplifier")
+			)
+			(libsource
+				(lib "Amplifier_Operational")
+				(part "Opamp_Dual")
+				(description "Dual operational amplifier")
+			)
+			(property
+				(name "MPN")
+				(value "OPA2365AIDR")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Texas Instruments")
+			)
+			(property
+				(name "LCSC")
+				(value "C130011")
+			)
+			(property
+				(name "Sheetname")
+				(value "Mux, enable latch, lane buffers, thermistors")
+			)
+			(property
+				(name "Sheetfile")
+				(value "frontend.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "dual opamp")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "SOIC*3.9x4.9mm*P1.27mm* DIP*W7.62mm* MSOP*3x3mm*P0.65mm* SSOP*2.95x2.8mm*P0.65mm* TSSOP*3x3mm*P0.65mm* VSSOP*P0.5mm* TO?99*")
+			)
+			(sheetpath
+				(names "/Mux, enable latch, lane buffers, thermistors/")
+				(tstamps "/ca079efd-5383-5d91-88f2-b4f4e2ad851c/")
+			)
+			(tstamps "7c3d4992-9806-56e5-b5e6-911d8a5de4df" "70aa302f-1e65-5f4b-ad61-a7b8db7f9a7b"
+				"57bdddea-7633-5b41-834e-df37d30a5d39"
+			)
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "1")
+						)
+					)
+				)
+				(unit
+					(name "B")
+					(pins
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "7")
+						)
+					)
+				)
+				(unit
+					(name "C")
+					(pins
+						(pin
+							(num "8")
+						)
+						(pin
+							(num "4")
+						)
+					)
+				)
+			)
+		)
+	)
+	(groups)
+	(variants)
+	(libparts
+		(libpart
+			(lib "74xx")
+			(part "74LS259")
+			(description "8-bit addressable latch")
+			(docs "http://www.ti.com/lit/gpn/sn74LS259")
+			(footprints
+				(fp "DIP?16*")
+			)
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "74LS259")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet") "http://www.ti.com/lit/gpn/sn74LS259")
+				(field
+					(name "Description") "8-bit addressable latch")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "A0")
+					(type "input")
+				)
+				(pin
+					(num "2")
+					(name "A1")
+					(type "input")
+				)
+				(pin
+					(num "3")
+					(name "A2")
+					(type "input")
+				)
+				(pin
+					(num "4")
+					(name "Q0")
+					(type "output")
+				)
+				(pin
+					(num "5")
+					(name "Q1")
+					(type "output")
+				)
+				(pin
+					(num "6")
+					(name "Q2")
+					(type "output")
+				)
+				(pin
+					(num "7")
+					(name "Q3")
+					(type "output")
+				)
+				(pin
+					(num "8")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "9")
+					(name "Q4")
+					(type "output")
+				)
+				(pin
+					(num "10")
+					(name "Q5")
+					(type "output")
+				)
+				(pin
+					(num "11")
+					(name "Q6")
+					(type "output")
+				)
+				(pin
+					(num "12")
+					(name "Q7")
+					(type "output")
+				)
+				(pin
+					(num "13")
+					(name "D")
+					(type "input")
+				)
+				(pin
+					(num "14")
+					(name "E")
+					(type "input")
+				)
+				(pin
+					(num "15")
+					(name "Clr")
+					(type "input")
+				)
+				(pin
+					(num "16")
+					(name "VCC")
+					(type "power_in")
+				)
+			)
+		)
+		(libpart
+			(lib "Amplifier_Operational")
+			(part "Opamp_Dual")
+			(description "Dual operational amplifier")
+			(footprints
+				(fp "SOIC*3.9x4.9mm*P1.27mm*")
+				(fp "DIP*W7.62mm*")
+				(fp "MSOP*3x3mm*P0.65mm*")
+				(fp "SSOP*2.95x2.8mm*P0.65mm*")
+				(fp "TSSOP*3x3mm*P0.65mm*")
+				(fp "VSSOP*P0.5mm*")
+				(fp "TO?99*")
+			)
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "Opamp_Dual")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Dual operational amplifier")
+				(field
+					(name "Sim.Library") "${KICAD10_SYMBOL_DIR}/Simulation_SPICE.sp")
+				(field
+					(name "Sim.Name") "kicad_builtin_opamp_dual")
+				(field
+					(name "Sim.Device") "SUBCKT")
+				(field
+					(name "Sim.Pins") "1=out1 2=in1- 3=in1+ 4=vee 5=in2+ 6=in2- 7=out2 8=vcc")
+				(field
+					(name "KLC_S3.1") "Units A+B are centered, UnitC has a offset so it fits nicely on A or B.")
+				(field
+					(name "KLC_S4.1") "Pin1 and Pin7 are the output, adding a name would look ugly and does not add a benefit.")
+				(field
+					(name "KLC_S6.2") "This is a generic symbol and thus has no datasheet.")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "")
+					(type "output")
+				)
+				(pin
+					(num "2")
+					(name "-")
+					(type "input")
+				)
+				(pin
+					(num "3")
+					(name "+")
+					(type "input")
+				)
+				(pin
+					(num "4")
+					(name "V-")
+					(type "power_in")
+				)
+				(pin
+					(num "5")
+					(name "+")
+					(type "input")
+				)
+				(pin
+					(num "6")
+					(name "-")
+					(type "input")
+				)
+				(pin
+					(num "7")
+					(name "")
+					(type "output")
+				)
+				(pin
+					(num "8")
+					(name "V+")
+					(type "power_in")
+				)
+			)
+		)
+		(libpart
+			(lib "Connector")
+			(part "TestPoint")
+			(description "test point")
+			(footprints
+				(fp "Pin*")
+				(fp "Test*")
+			)
+			(fields
+				(field
+					(name "Reference") "TP")
+				(field
+					(name "Value") "TestPoint")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "test point")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "1")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Device")
+			(part "C")
+			(description "Unpolarized capacitor")
+			(footprints
+				(fp "C_*")
+			)
+			(fields
+				(field
+					(name "Reference") "C")
+				(field
+					(name "Value") "C")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Device")
+			(part "R")
+			(description "Resistor")
+			(footprints
+				(fp "R_*")
+			)
+			(fields
+				(field
+					(name "Reference") "R")
+				(field
+					(name "Value") "R")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Device")
+			(part "Thermistor_NTC")
+			(description "Temperature dependent resistor, negative temperature coefficient")
+			(footprints
+				(fp "R_*")
+				(fp "RV_*")
+			)
+			(fields
+				(field
+					(name "Reference") "TH")
+				(field
+					(name "Value") "Thermistor_NTC")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Temperature dependent resistor, negative temperature coefficient")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Jumper")
+			(part "SolderJumper_2_Open")
+			(description "Solder Jumper, 2-pole, open")
+			(footprints
+				(fp "SolderJumper*Open*")
+			)
+			(fields
+				(field
+					(name "Reference") "JP")
+				(field
+					(name "Value") "SolderJumper_2_Open")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Solder Jumper, 2-pole, open")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "A")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "B")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Mechanical")
+			(part "Fiducial")
+			(description "Fiducial Marker")
+			(footprints
+				(fp "Fiducial*")
+			)
+			(fields
+				(field
+					(name "Reference") "FID")
+				(field
+					(name "Value") "Fiducial")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Fiducial Marker")
+			)
+		)
+		(libpart
+			(lib "Mechanical")
+			(part "MountingHole")
+			(description "Mounting Hole without connection")
+			(footprints
+				(fp "MountingHole*")
+			)
+			(fields
+				(field
+					(name "Reference") "H")
+				(field
+					(name "Value") "MountingHole")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Mounting Hole without connection")
+			)
+		)
+		(libpart
+			(lib "Memory_EEPROM")
+			(part "M24C02-WMN")
+			(description "2Kb (256x8) I2C Serial EEPROM, 2.5-5.5V, SOIC-8")
+			(docs "http://www.st.com/content/ccc/resource/technical/document/datasheet/b0/d8/50/40/5a/85/49/6f/DM00071904.pdf/files/DM00071904.pdf/jcr:content/translations/en.DM00071904.pdf")
+			(footprints
+				(fp "SOIC*3.9x4.9mm*P1.27mm*")
+			)
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "M24C02-WMN")
+				(field
+					(name "Footprint") "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm")
+				(field
+					(name "Datasheet") "http://www.st.com/content/ccc/resource/technical/document/datasheet/b0/d8/50/40/5a/85/49/6f/DM00071904.pdf/files/DM00071904.pdf/jcr:content/translations/en.DM00071904.pdf")
+				(field
+					(name "Description") "2Kb (256x8) I2C Serial EEPROM, 2.5-5.5V, SOIC-8")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "E0")
+					(type "input")
+				)
+				(pin
+					(num "2")
+					(name "E1")
+					(type "input")
+				)
+				(pin
+					(num "3")
+					(name "E2")
+					(type "input")
+				)
+				(pin
+					(num "4")
+					(name "VSS")
+					(type "power_in")
+				)
+				(pin
+					(num "5")
+					(name "SDA")
+					(type "bidirectional")
+				)
+				(pin
+					(num "6")
+					(name "SCL")
+					(type "input")
+				)
+				(pin
+					(num "7")
+					(name "~{WC}")
+					(type "input")
+				)
+				(pin
+					(num "8")
+					(name "VCC")
+					(type "power_in")
+				)
+			)
+		)
+		(libpart
+			(lib "keyboard")
+			(part "Conn_02x20_Odd_Even_NoPin39")
+			(description "Generic connector, double row, 02x20, odd/even pin numbering, pin 39 removed: the rev A slot key (owner's decision D2 of 2026-11-27, SPEC §4.2). Derived from KiCad 10.0.8 Connector_Generic:Conn_02x20_Odd_Even")
+			(footprints
+				(fp "keyboard:PinHeader_2x20_P2.54mm_Vertical")
+			)
+			(fields
+				(field
+					(name "Reference") "J")
+				(field
+					(name "Value") "Conn_02x20_Odd_Even")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Generic connector, double row, 02x20, odd/even pin numbering, pin 39 removed: the rev A slot key (owner's decision D2 of 2026-11-27, SPEC §4.2). Derived from KiCad 10.0.8 Connector_Generic:Conn_02x20_Odd_Even")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "Pin_1")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "Pin_2")
+					(type "passive")
+				)
+				(pin
+					(num "3")
+					(name "Pin_3")
+					(type "passive")
+				)
+				(pin
+					(num "4")
+					(name "Pin_4")
+					(type "passive")
+				)
+				(pin
+					(num "5")
+					(name "Pin_5")
+					(type "passive")
+				)
+				(pin
+					(num "6")
+					(name "Pin_6")
+					(type "passive")
+				)
+				(pin
+					(num "7")
+					(name "Pin_7")
+					(type "passive")
+				)
+				(pin
+					(num "8")
+					(name "Pin_8")
+					(type "passive")
+				)
+				(pin
+					(num "9")
+					(name "Pin_9")
+					(type "passive")
+				)
+				(pin
+					(num "10")
+					(name "Pin_10")
+					(type "passive")
+				)
+				(pin
+					(num "11")
+					(name "Pin_11")
+					(type "passive")
+				)
+				(pin
+					(num "12")
+					(name "Pin_12")
+					(type "passive")
+				)
+				(pin
+					(num "13")
+					(name "Pin_13")
+					(type "passive")
+				)
+				(pin
+					(num "14")
+					(name "Pin_14")
+					(type "passive")
+				)
+				(pin
+					(num "15")
+					(name "Pin_15")
+					(type "passive")
+				)
+				(pin
+					(num "16")
+					(name "Pin_16")
+					(type "passive")
+				)
+				(pin
+					(num "17")
+					(name "Pin_17")
+					(type "passive")
+				)
+				(pin
+					(num "18")
+					(name "Pin_18")
+					(type "passive")
+				)
+				(pin
+					(num "19")
+					(name "Pin_19")
+					(type "passive")
+				)
+				(pin
+					(num "20")
+					(name "Pin_20")
+					(type "passive")
+				)
+				(pin
+					(num "21")
+					(name "Pin_21")
+					(type "passive")
+				)
+				(pin
+					(num "22")
+					(name "Pin_22")
+					(type "passive")
+				)
+				(pin
+					(num "23")
+					(name "Pin_23")
+					(type "passive")
+				)
+				(pin
+					(num "24")
+					(name "Pin_24")
+					(type "passive")
+				)
+				(pin
+					(num "25")
+					(name "Pin_25")
+					(type "passive")
+				)
+				(pin
+					(num "26")
+					(name "Pin_26")
+					(type "passive")
+				)
+				(pin
+					(num "27")
+					(name "Pin_27")
+					(type "passive")
+				)
+				(pin
+					(num "28")
+					(name "Pin_28")
+					(type "passive")
+				)
+				(pin
+					(num "29")
+					(name "Pin_29")
+					(type "passive")
+				)
+				(pin
+					(num "30")
+					(name "Pin_30")
+					(type "passive")
+				)
+				(pin
+					(num "31")
+					(name "Pin_31")
+					(type "passive")
+				)
+				(pin
+					(num "32")
+					(name "Pin_32")
+					(type "passive")
+				)
+				(pin
+					(num "33")
+					(name "Pin_33")
+					(type "passive")
+				)
+				(pin
+					(num "34")
+					(name "Pin_34")
+					(type "passive")
+				)
+				(pin
+					(num "35")
+					(name "Pin_35")
+					(type "passive")
+				)
+				(pin
+					(num "36")
+					(name "Pin_36")
+					(type "passive")
+				)
+				(pin
+					(num "37")
+					(name "Pin_37")
+					(type "passive")
+				)
+				(pin
+					(num "38")
+					(name "Pin_38")
+					(type "passive")
+				)
+				(pin
+					(num "40")
+					(name "Pin_40")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "keyboard")
+			(part "TMAG5253_DMR")
+			(description "Low-power linear Hall-effect sensor with enable pin, 1.65-3.6 V, ratiometric analog output, high-impedance output in shutdown, X2SON-4 DMR 1.1 x 1.4 mm (thermal pad: no connect)")
+			(docs "https://www.ti.com/lit/ds/symlink/tmag5253.pdf")
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "TMAG5253_DMR")
+				(field
+					(name "Footprint") "Package_SON:Texas_X2SON-4-1EP_1.1x1.4mm_P0.5mm_EP0.8x0.6mm")
+				(field
+					(name "Datasheet") "https://www.ti.com/lit/ds/symlink/tmag5253.pdf")
+				(field
+					(name "Description") "Low-power linear Hall-effect sensor with enable pin, 1.65-3.6 V, ratiometric analog output, high-impedance output in shutdown, X2SON-4 DMR 1.1 x 1.4 mm (thermal pad: no connect)")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "VCC")
+					(type "power_in")
+				)
+				(pin
+					(num "2")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "3")
+					(name "EN")
+					(type "input")
+				)
+				(pin
+					(num "4")
+					(name "OUT")
+					(type "tri_state")
+				)
+				(pin
+					(num "5")
+					(name "EP")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "keyboard")
+			(part "TMUX1208PW")
+			(description "8:1 analog multiplexer, 1.08-5.5 V, 5 Ohm at 5 V (9 Ohm typ, 15 max at 3.3 V), fail-safe logic, active-high EN, TSSOP-16")
+			(docs "https://www.ti.com/lit/ds/symlink/tmux1208.pdf")
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "TMUX1208PW")
+				(field
+					(name "Footprint") "Package_SO:TSSOP-16_4.4x5mm_P0.65mm")
+				(field
+					(name "Datasheet") "https://www.ti.com/lit/ds/symlink/tmux1208.pdf")
+				(field
+					(name "Description") "8:1 analog multiplexer, 1.08-5.5 V, 5 Ohm at 5 V (9 Ohm typ, 15 max at 3.3 V), fail-safe logic, active-high EN, TSSOP-16")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "A0")
+					(type "input")
+				)
+				(pin
+					(num "2")
+					(name "EN")
+					(type "input")
+				)
+				(pin
+					(num "3")
+					(name "NC")
+					(type "passive")
+				)
+				(pin
+					(num "4")
+					(name "S1")
+					(type "bidirectional")
+				)
+				(pin
+					(num "5")
+					(name "S2")
+					(type "bidirectional")
+				)
+				(pin
+					(num "6")
+					(name "S3")
+					(type "bidirectional")
+				)
+				(pin
+					(num "7")
+					(name "S4")
+					(type "bidirectional")
+				)
+				(pin
+					(num "8")
+					(name "D")
+					(type "bidirectional")
+				)
+				(pin
+					(num "9")
+					(name "S8")
+					(type "bidirectional")
+				)
+				(pin
+					(num "10")
+					(name "S7")
+					(type "bidirectional")
+				)
+				(pin
+					(num "11")
+					(name "S6")
+					(type "bidirectional")
+				)
+				(pin
+					(num "12")
+					(name "S5")
+					(type "bidirectional")
+				)
+				(pin
+					(num "13")
+					(name "VDD")
+					(type "power_in")
+				)
+				(pin
+					(num "14")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "15")
+					(name "A2")
+					(type "input")
+				)
+				(pin
+					(num "16")
+					(name "A1")
+					(type "input")
+				)
+			)
+		)
+	)
+	(libraries
+		(library
+			(logical "74xx")
+			(uri "${KICAD10_SYMBOL_DIR}/74xx.kicad_sym")
+		)
+		(library
+			(logical "Amplifier_Operational")
+			(uri "${KICAD10_SYMBOL_DIR}/Amplifier_Operational.kicad_sym")
+		)
+		(library
+			(logical "Connector")
+			(uri "${KICAD10_SYMBOL_DIR}/Connector.kicad_sym")
+		)
+		(library
+			(logical "Device")
+			(uri "${KICAD10_SYMBOL_DIR}/Device.kicad_sym")
+		)
+		(library
+			(logical "Jumper")
+			(uri "${KICAD10_SYMBOL_DIR}/Jumper.kicad_sym")
+		)
+		(library
+			(logical "Mechanical")
+			(uri "${KICAD10_SYMBOL_DIR}/Mechanical.kicad_sym")
+		)
+		(library
+			(logical "Memory_EEPROM")
+			(uri "${KICAD10_SYMBOL_DIR}/Memory_EEPROM.kicad_sym")
+		)
+		(library
+			(logical "keyboard")
+			(uri "${KIPRJMOD}/lib/keyboard.kicad_sym")
+		)
+	)
+	(nets
+		(net
+			(code "1")
+			(name "+3V3")
+			(class "Rail3V3")
+			(node
+				(ref "C1")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C10")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C11")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C12")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C20")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C21")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C22")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C23")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C24")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C25")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C3")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "J1")
+				(pin "7")
+				(pinfunction "Pin_7_7")
+				(pintype "passive")
+			)
+			(node
+				(ref "J1")
+				(pin "8")
+				(pinfunction "Pin_8_8")
+				(pintype "passive")
+			)
+			(node
+				(ref "JP1")
+				(pin "2")
+				(pinfunction "B_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R16")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R17")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "TP1")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "8")
+				(pinfunction "VCC_8")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U10")
+				(pin "13")
+				(pinfunction "VDD_13")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U11")
+				(pin "16")
+				(pinfunction "VCC_16")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U12")
+				(pin "8")
+				(pinfunction "V+_8")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U20")
+				(pin "1")
+				(pinfunction "VCC_1")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U21")
+				(pin "1")
+				(pinfunction "VCC_1")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U22")
+				(pin "1")
+				(pinfunction "VCC_1")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U23")
+				(pin "1")
+				(pinfunction "VCC_1")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U24")
+				(pin "1")
+				(pinfunction "VCC_1")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U25")
+				(pin "1")
+				(pinfunction "VCC_1")
+				(pintype "power_in")
+			)
+		)
+		(net
+			(code "2")
+			(name "/Mux, enable latch, lane buffers, thermistors/BUF0")
+			(class "Default")
+			(node
+				(ref "R18")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U12")
+				(pin "1")
+				(pintype "output")
+			)
+			(node
+				(ref "U12")
+				(pin "2")
+				(pinfunction "-_2")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "3")
+			(name "/Mux, enable latch, lane buffers, thermistors/BUF1")
+			(class "Default")
+			(node
+				(ref "R19")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U12")
+				(pin "6")
+				(pinfunction "-_6")
+				(pintype "input")
+			)
+			(node
+				(ref "U12")
+				(pin "7")
+				(pintype "output")
+			)
+		)
+		(net
+			(code "4")
+			(name "/Mux, enable latch, lane buffers, thermistors/MUX_D")
+			(class "Default")
+			(node
+				(ref "R26")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "TP12")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U10")
+				(pin "8")
+				(pinfunction "D_8")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U12")
+				(pin "3")
+				(pinfunction "+_3")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "5")
+			(name "/Mux, enable latch, lane buffers, thermistors/TEMP1")
+			(class "Default")
+			(node
+				(ref "C16")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R16")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "TH10")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U10")
+				(pin "10")
+				(pinfunction "S7_10")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "6")
+			(name "/Mux, enable latch, lane buffers, thermistors/TEMP2")
+			(class "Default")
+			(node
+				(ref "C17")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R17")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "TH11")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U10")
+				(pin "9")
+				(pinfunction "S8_9")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "7")
+			(name "/Slot header, descriptor EEPROM, mounting/EE_WC")
+			(class "Default")
+			(node
+				(ref "JP1")
+				(pin "1")
+				(pinfunction "A_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R1")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "7")
+				(pinfunction "~{WC}_7")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "8")
+			(name "AN0")
+			(class "Default")
+			(node
+				(ref "J1")
+				(pin "11")
+				(pinfunction "Pin_11_11")
+				(pintype "passive")
+			)
+			(node
+				(ref "R18")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "TP10")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "9")
+			(name "AN1")
+			(class "Default")
+			(node
+				(ref "J1")
+				(pin "13")
+				(pinfunction "Pin_13_13")
+				(pintype "passive")
+			)
+			(node
+				(ref "R19")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "TP11")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "10")
+			(name "AN2")
+			(class "Default")
+			(node
+				(ref "J1")
+				(pin "15")
+				(pinfunction "Pin_15_15")
+				(pintype "passive")
+			)
+			(node
+				(ref "R26")
+				(pin "2")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "11")
+			(name "EN_K1")
+			(class "Default")
+			(node
+				(ref "U11")
+				(pin "4")
+				(pinfunction "Q0_4")
+				(pintype "output")
+			)
+			(node
+				(ref "U20")
+				(pin "3")
+				(pinfunction "EN_3")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "12")
+			(name "EN_K2")
+			(class "Default")
+			(node
+				(ref "U11")
+				(pin "5")
+				(pinfunction "Q1_5")
+				(pintype "output")
+			)
+			(node
+				(ref "U21")
+				(pin "3")
+				(pinfunction "EN_3")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "13")
+			(name "EN_K3")
+			(class "Default")
+			(node
+				(ref "U11")
+				(pin "6")
+				(pinfunction "Q2_6")
+				(pintype "output")
+			)
+			(node
+				(ref "U22")
+				(pin "3")
+				(pinfunction "EN_3")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "14")
+			(name "EN_K4")
+			(class "Default")
+			(node
+				(ref "U11")
+				(pin "7")
+				(pinfunction "Q3_7")
+				(pintype "output")
+			)
+			(node
+				(ref "U23")
+				(pin "3")
+				(pinfunction "EN_3")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "15")
+			(name "EN_REF1")
+			(class "Default")
+			(node
+				(ref "U11")
+				(pin "9")
+				(pinfunction "Q4_9")
+				(pintype "output")
+			)
+			(node
+				(ref "U24")
+				(pin "3")
+				(pinfunction "EN_3")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "16")
+			(name "EN_REF2")
+			(class "Default")
+			(node
+				(ref "U11")
+				(pin "10")
+				(pinfunction "Q5_10")
+				(pintype "output")
+			)
+			(node
+				(ref "U25")
+				(pin "3")
+				(pinfunction "EN_3")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "17")
+			(name "G0")
+			(class "Default")
+			(node
+				(ref "J1")
+				(pin "33")
+				(pinfunction "Pin_33_33")
+				(pintype "passive")
+			)
+			(node
+				(ref "R10")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U10")
+				(pin "1")
+				(pinfunction "A0_1")
+				(pintype "input")
+			)
+			(node
+				(ref "U11")
+				(pin "1")
+				(pinfunction "A0_1")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "18")
+			(name "G1")
+			(class "Default")
+			(node
+				(ref "J1")
+				(pin "34")
+				(pinfunction "Pin_34_34")
+				(pintype "passive")
+			)
+			(node
+				(ref "R11")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U10")
+				(pin "16")
+				(pinfunction "A1_16")
+				(pintype "input")
+			)
+			(node
+				(ref "U11")
+				(pin "2")
+				(pinfunction "A1_2")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "19")
+			(name "G2")
+			(class "Default")
+			(node
+				(ref "J1")
+				(pin "35")
+				(pinfunction "Pin_35_35")
+				(pintype "passive")
+			)
+			(node
+				(ref "R12")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U10")
+				(pin "15")
+				(pinfunction "A2_15")
+				(pintype "input")
+			)
+			(node
+				(ref "U11")
+				(pin "3")
+				(pinfunction "A2_3")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "20")
+			(name "G3")
+			(class "Default")
+			(node
+				(ref "J1")
+				(pin "36")
+				(pinfunction "Pin_36_36")
+				(pintype "passive")
+			)
+			(node
+				(ref "R13")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "TP14")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U10")
+				(pin "2")
+				(pinfunction "EN_2")
+				(pintype "input")
+			)
+			(node
+				(ref "U11")
+				(pin "13")
+				(pinfunction "D_13")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "21")
+			(name "G4")
+			(class "Default")
+			(node
+				(ref "J1")
+				(pin "37")
+				(pinfunction "Pin_37_37")
+				(pintype "passive")
+			)
+			(node
+				(ref "R14")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U11")
+				(pin "14")
+				(pinfunction "E_14")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "22")
+			(name "G5")
+			(class "Default")
+			(node
+				(ref "J1")
+				(pin "38")
+				(pinfunction "Pin_38_38")
+				(pintype "passive")
+			)
+			(node
+				(ref "R15")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U11")
+				(pin "15")
+				(pinfunction "Clr_15")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "23")
+			(name "GND")
+			(class "Default")
+			(node
+				(ref "C1")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C10")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C11")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C12")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C16")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C17")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C20")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C21")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C22")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C23")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C24")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C25")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C3")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "J1")
+				(pin "10")
+				(pinfunction "Pin_10_10")
+				(pintype "passive")
+			)
+			(node
+				(ref "J1")
+				(pin "12")
+				(pinfunction "Pin_12_12")
+				(pintype "passive")
+			)
+			(node
+				(ref "J1")
+				(pin "14")
+				(pinfunction "Pin_14_14")
+				(pintype "passive")
+			)
+			(node
+				(ref "J1")
+				(pin "16")
+				(pinfunction "Pin_16_16")
+				(pintype "passive")
+			)
+			(node
+				(ref "J1")
+				(pin "18")
+				(pinfunction "Pin_18_18")
+				(pintype "passive")
+			)
+			(node
+				(ref "J1")
+				(pin "21")
+				(pinfunction "Pin_21_21")
+				(pintype "passive")
+			)
+			(node
+				(ref "J1")
+				(pin "22")
+				(pinfunction "Pin_22_22")
+				(pintype "passive")
+			)
+			(node
+				(ref "J1")
+				(pin "26")
+				(pinfunction "Pin_26_26")
+				(pintype "passive")
+			)
+			(node
+				(ref "J1")
+				(pin "32")
+				(pinfunction "Pin_32_32")
+				(pintype "passive")
+			)
+			(node
+				(ref "J1")
+				(pin "4")
+				(pinfunction "Pin_4_4")
+				(pintype "passive")
+			)
+			(node
+				(ref "J1")
+				(pin "40")
+				(pinfunction "Pin_40_40")
+				(pintype "passive")
+			)
+			(node
+				(ref "J1")
+				(pin "5")
+				(pinfunction "Pin_5_5")
+				(pintype "passive")
+			)
+			(node
+				(ref "J1")
+				(pin "6")
+				(pinfunction "Pin_6_6")
+				(pintype "passive")
+			)
+			(node
+				(ref "J1")
+				(pin "9")
+				(pinfunction "Pin_9_9")
+				(pintype "passive")
+			)
+			(node
+				(ref "R1")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R10")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R11")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R12")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R13")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R14")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R15")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R20")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "TH10")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "TH11")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "TP2")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "TP3")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "1")
+				(pinfunction "E0_1")
+				(pintype "input")
+			)
+			(node
+				(ref "U1")
+				(pin "2")
+				(pinfunction "E1_2")
+				(pintype "input")
+			)
+			(node
+				(ref "U1")
+				(pin "3")
+				(pinfunction "E2_3")
+				(pintype "input")
+			)
+			(node
+				(ref "U1")
+				(pin "4")
+				(pinfunction "VSS_4")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U10")
+				(pin "14")
+				(pinfunction "GND_14")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U11")
+				(pin "8")
+				(pinfunction "GND_8")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U12")
+				(pin "4")
+				(pinfunction "V-_4")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U20")
+				(pin "2")
+				(pinfunction "GND_2")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U21")
+				(pin "2")
+				(pinfunction "GND_2")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U22")
+				(pin "2")
+				(pinfunction "GND_2")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U23")
+				(pin "2")
+				(pinfunction "GND_2")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U24")
+				(pin "2")
+				(pinfunction "GND_2")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U25")
+				(pin "2")
+				(pinfunction "GND_2")
+				(pintype "power_in")
+			)
+		)
+		(net
+			(code "24")
+			(name "HALL_K1")
+			(class "Default")
+			(node
+				(ref "R20")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "TP13")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U10")
+				(pin "4")
+				(pinfunction "S1_4")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U12")
+				(pin "5")
+				(pinfunction "+_5")
+				(pintype "input")
+			)
+			(node
+				(ref "U20")
+				(pin "4")
+				(pinfunction "OUT_4")
+				(pintype "tri_state")
+			)
+		)
+		(net
+			(code "25")
+			(name "HALL_K2")
+			(class "Default")
+			(node
+				(ref "U10")
+				(pin "5")
+				(pinfunction "S2_5")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U21")
+				(pin "4")
+				(pinfunction "OUT_4")
+				(pintype "tri_state")
+			)
+		)
+		(net
+			(code "26")
+			(name "HALL_K3")
+			(class "Default")
+			(node
+				(ref "U10")
+				(pin "6")
+				(pinfunction "S3_6")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U22")
+				(pin "4")
+				(pinfunction "OUT_4")
+				(pintype "tri_state")
+			)
+		)
+		(net
+			(code "27")
+			(name "HALL_K4")
+			(class "Default")
+			(node
+				(ref "U10")
+				(pin "7")
+				(pinfunction "S4_7")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U23")
+				(pin "4")
+				(pinfunction "OUT_4")
+				(pintype "tri_state")
+			)
+		)
+		(net
+			(code "28")
+			(name "HALL_REF1")
+			(class "Default")
+			(node
+				(ref "U10")
+				(pin "12")
+				(pinfunction "S5_12")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U24")
+				(pin "4")
+				(pinfunction "OUT_4")
+				(pintype "tri_state")
+			)
+		)
+		(net
+			(code "29")
+			(name "HALL_REF2")
+			(class "Default")
+			(node
+				(ref "U10")
+				(pin "11")
+				(pinfunction "S6_11")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U25")
+				(pin "4")
+				(pinfunction "OUT_4")
+				(pintype "tri_state")
+			)
+		)
+		(net
+			(code "30")
+			(name "SCL")
+			(class "Default")
+			(node
+				(ref "J1")
+				(pin "29")
+				(pinfunction "Pin_29_29")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "6")
+				(pinfunction "SCL_6")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "31")
+			(name "SDA")
+			(class "Default")
+			(node
+				(ref "J1")
+				(pin "30")
+				(pinfunction "Pin_30_30")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "5")
+				(pinfunction "SDA_5")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "32")
+			(name "unconnected-(J1-Pin_1-Pad1)")
+			(class "Default")
+			(node
+				(ref "J1")
+				(pin "1")
+				(pinfunction "Pin_1_1")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "33")
+			(name "unconnected-(J1-Pin_2-Pad2)")
+			(class "Default")
+			(node
+				(ref "J1")
+				(pin "2")
+				(pinfunction "Pin_2_2")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "34")
+			(name "unconnected-(J1-Pin_3-Pad3)")
+			(class "Default")
+			(node
+				(ref "J1")
+				(pin "3")
+				(pinfunction "Pin_3_3")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "35")
+			(name "unconnected-(J1-Pin_17-Pad17)")
+			(class "Default")
+			(node
+				(ref "J1")
+				(pin "17")
+				(pinfunction "Pin_17_17")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "36")
+			(name "unconnected-(J1-Pin_19-Pad19)")
+			(class "Default")
+			(node
+				(ref "J1")
+				(pin "19")
+				(pinfunction "Pin_19_19")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "37")
+			(name "unconnected-(J1-Pin_20-Pad20)")
+			(class "Default")
+			(node
+				(ref "J1")
+				(pin "20")
+				(pinfunction "Pin_20_20")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "38")
+			(name "unconnected-(J1-Pin_23-Pad23)")
+			(class "Default")
+			(node
+				(ref "J1")
+				(pin "23")
+				(pinfunction "Pin_23_23")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "39")
+			(name "unconnected-(J1-Pin_24-Pad24)")
+			(class "Default")
+			(node
+				(ref "J1")
+				(pin "24")
+				(pinfunction "Pin_24_24")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "40")
+			(name "unconnected-(J1-Pin_25-Pad25)")
+			(class "Default")
+			(node
+				(ref "J1")
+				(pin "25")
+				(pinfunction "Pin_25_25")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "41")
+			(name "unconnected-(J1-Pin_27-Pad27)")
+			(class "Default")
+			(node
+				(ref "J1")
+				(pin "27")
+				(pinfunction "Pin_27_27")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "42")
+			(name "unconnected-(J1-Pin_28-Pad28)")
+			(class "Default")
+			(node
+				(ref "J1")
+				(pin "28")
+				(pinfunction "Pin_28_28")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "43")
+			(name "unconnected-(J1-Pin_31-Pad31)")
+			(class "Default")
+			(node
+				(ref "J1")
+				(pin "31")
+				(pinfunction "Pin_31_31")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "44")
+			(name "unconnected-(U10-NC-Pad3)")
+			(class "Default")
+			(node
+				(ref "U10")
+				(pin "3")
+				(pinfunction "NC_3")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "45")
+			(name "unconnected-(U11-Q6-Pad11)")
+			(class "Default")
+			(node
+				(ref "U11")
+				(pin "11")
+				(pinfunction "Q6_11")
+				(pintype "output+no_connect")
+			)
+		)
+		(net
+			(code "46")
+			(name "unconnected-(U11-Q7-Pad12)")
+			(class "Default")
+			(node
+				(ref "U11")
+				(pin "12")
+				(pinfunction "Q7_12")
+				(pintype "output+no_connect")
+			)
+		)
+		(net
+			(code "47")
+			(name "unconnected-(U20-EP-Pad5)")
+			(class "Default")
+			(node
+				(ref "U20")
+				(pin "5")
+				(pinfunction "EP_5")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "48")
+			(name "unconnected-(U21-EP-Pad5)")
+			(class "Default")
+			(node
+				(ref "U21")
+				(pin "5")
+				(pinfunction "EP_5")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "49")
+			(name "unconnected-(U22-EP-Pad5)")
+			(class "Default")
+			(node
+				(ref "U22")
+				(pin "5")
+				(pinfunction "EP_5")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "50")
+			(name "unconnected-(U23-EP-Pad5)")
+			(class "Default")
+			(node
+				(ref "U23")
+				(pin "5")
+				(pinfunction "EP_5")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "51")
+			(name "unconnected-(U24-EP-Pad5)")
+			(class "Default")
+			(node
+				(ref "U24")
+				(pin "5")
+				(pinfunction "EP_5")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "52")
+			(name "unconnected-(U25-EP-Pad5)")
+			(class "Default")
+			(node
+				(ref "U25")
+				(pin "5")
+				(pinfunction "EP_5")
+				(pintype "passive+no_connect")
+			)
+		)
+	)
+)

@@ -2,7 +2,7 @@
 	(version "E")
 	(design
 		(source "/home/user/prettycoolboards/keyboard/hardware/kicad/test-coupon/prettycool-keyboard-test-coupon.kicad_sch")
-		(date "2026-11-27T03:59:22")
+		(date "2026-11-28T00:30:48")
 		(tool "Eeschema 10.0.8-10.0.8~ubuntu24.04.1")
 		(sheet
 			(number "1")
@@ -12,7 +12,7 @@
 				(title "PrettyCool Keyboard rev A test coupon (calibration and loopback)")
 				(company "PrettyCool Boards")
 				(rev "A")
-				(date "2026-11-27")
+				(date "2026-11-28")
 				(source "prettycool-keyboard-test-coupon.kicad_sch")
 				(comment
 					(number "1")
@@ -60,7 +60,7 @@
 				(title "Slot header, descriptor EEPROM, mounting")
 				(company "PrettyCool Boards")
 				(rev "A")
-				(date "2026-11-27")
+				(date "2026-11-28")
 				(source "slot.kicad_sch")
 				(comment
 					(number "1")
@@ -108,7 +108,7 @@
 				(title "Calibration and current-limit loads")
 				(company "PrettyCool Boards")
 				(rev "A")
-				(date "2026-11-27")
+				(date "2026-11-28")
 				(source "loads.kicad_sch")
 				(comment
 					(number "1")
@@ -156,7 +156,7 @@
 				(title "SPI, G-line, SYNC and INJ loopback; IRQ_N; status LED")
 				(company "PrettyCool Boards")
 				(rev "A")
-				(date "2026-11-27")
+				(date "2026-11-28")
 				(source "loopback.kicad_sch")
 				(comment
 					(number "1")
@@ -204,7 +204,7 @@
 				(title "Ratiometric lane references and test pads")
 				(company "PrettyCool Boards")
 				(rev "A")
-				(date "2026-11-27")
+				(date "2026-11-28")
 				(source "lanes.kicad_sch")
 				(comment
 					(number "1")
@@ -665,9 +665,9 @@
 		(comp
 			(ref "J1")
 			(value "SLOT")
-			(footprint "Connector_PinHeader_2.54mm:PinHeader_2x20_P2.54mm_Vertical")
+			(footprint "keyboard:PinHeader_2x20_P2.54mm_Vertical")
 			(datasheet "https://www.lcsc.com/datasheet/lcsc_datasheet_2407041454_HanElectricity-2541WV-2x20P_C25503140.pdf")
-			(description "Pin header, male, 2 x 20, 2.54 mm, vertical, through hole, 6.0 mm mating, 2.54 mm plastic, 3.0 mm tail; mounted on the coupon's bottom side")
+			(description "Pin header, male, 2 x 20, 2.54 mm, vertical, through hole, 6.0 mm mating, 2.54 mm plastic, 3.0 mm tail; mounted on the coupon's bottom side; pin 39 pulled before soldering (the slot key)")
 			(fields
 				(field
 					(name "MPN") "2541WV-2x20P")
@@ -676,16 +676,18 @@
 				(field
 					(name "LCSC") "C25503140")
 				(field
-					(name "Footprint") "Connector_PinHeader_2.54mm:PinHeader_2x20_P2.54mm_Vertical")
+					(name "Fit") "pull the header's pin 39 out first (the slot key, SPEC §4.2), then solder it on the bottom side from the top")
+				(field
+					(name "Footprint") "keyboard:PinHeader_2x20_P2.54mm_Vertical")
 				(field
 					(name "Datasheet") "https://www.lcsc.com/datasheet/lcsc_datasheet_2407041454_HanElectricity-2541WV-2x20P_C25503140.pdf")
 				(field
-					(name "Description") "Pin header, male, 2 x 20, 2.54 mm, vertical, through hole, 6.0 mm mating, 2.54 mm plastic, 3.0 mm tail; mounted on the coupon's bottom side")
+					(name "Description") "Pin header, male, 2 x 20, 2.54 mm, vertical, through hole, 6.0 mm mating, 2.54 mm plastic, 3.0 mm tail; mounted on the coupon's bottom side; pin 39 pulled before soldering (the slot key)")
 			)
 			(libsource
-				(lib "Connector_Generic")
-				(part "Conn_02x20_Odd_Even")
-				(description "Generic connector, double row, 02x20, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)")
+				(lib "keyboard")
+				(part "Conn_02x20_Odd_Even_NoPin39")
+				(description "Generic connector, double row, 02x20, odd/even pin numbering, pin 39 removed: the rev A slot key (owner's decision D2 of 2026-11-27, SPEC §4.2). Derived from KiCad 10.0.8 Connector_Generic:Conn_02x20_Odd_Even")
 			)
 			(property
 				(name "MPN")
@@ -700,6 +702,10 @@
 				(value "C25503140")
 			)
 			(property
+				(name "Fit")
+				(value "pull the header's pin 39 out first (the slot key, SPEC §4.2), then solder it on the bottom side from the top")
+			)
+			(property
 				(name "Sheetname")
 				(value "Slot header, descriptor EEPROM, mounting")
 			)
@@ -708,12 +714,15 @@
 				(value "slot.kicad_sch")
 			)
 			(property
+				(name "dnp")
+			)
+			(property
 				(name "ki_keywords")
 				(value "connector")
 			)
 			(property
 				(name "ki_fp_filters")
-				(value "Connector*:*_2x??_*")
+				(value "keyboard:PinHeader_2x20_P2.54mm_Vertical")
 			)
 			(sheetpath
 				(names "/Slot header, descriptor EEPROM, mounting/")
@@ -780,9 +789,6 @@
 						)
 						(pin
 							(num "37")
-						)
-						(pin
-							(num "39")
 						)
 						(pin
 							(num "2")
@@ -4020,6 +4026,78 @@
 			)
 		)
 		(comp
+			(ref "D11")
+			(value "1N4148W")
+			(footprint "Diode_SMD:D_SOD-123")
+			(datasheet "https://www.lcsc.com/datasheet/lcsc_datasheet_1811061725_ST-Semtech-1N4148W_C81598.pdf")
+			(description "Switching diode, 75 V, 150 mA, SOD-123 (INJ into the AN0 lane)")
+			(fields
+				(field
+					(name "MPN") "1N4148W")
+				(field
+					(name "Manufacturer") "ST(Semtech)")
+				(field
+					(name "LCSC") "C81598")
+				(field
+					(name "Footprint") "Diode_SMD:D_SOD-123")
+				(field
+					(name "Datasheet") "https://www.lcsc.com/datasheet/lcsc_datasheet_1811061725_ST-Semtech-1N4148W_C81598.pdf")
+				(field
+					(name "Description") "Switching diode, 75 V, 150 mA, SOD-123 (INJ into the AN0 lane)")
+			)
+			(libsource
+				(lib "Diode")
+				(part "1N4148W")
+				(description "75V 0.15A Fast Switching Diode, SOD-123")
+			)
+			(property
+				(name "MPN")
+				(value "1N4148W")
+			)
+			(property
+				(name "Manufacturer")
+				(value "ST(Semtech)")
+			)
+			(property
+				(name "LCSC")
+				(value "C81598")
+			)
+			(property
+				(name "Sheetname")
+				(value "Ratiometric lane references and test pads")
+			)
+			(property
+				(name "Sheetfile")
+				(value "lanes.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "diode")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "D*SOD?123*")
+			)
+			(sheetpath
+				(names "/Ratiometric lane references and test pads/")
+				(tstamps "/e59cd554-27b6-565e-bffc-a0758c6b6b85/")
+			)
+			(tstamps "dc6cd5ef-fb5b-58d9-99c6-484a8fe21605")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
 			(ref "R30")
 			(value "499")
 			(footprint "Resistor_SMD:R_0603_1608Metric")
@@ -4365,6 +4443,78 @@
 				(tstamps "/e59cd554-27b6-565e-bffc-a0758c6b6b85/")
 			)
 			(tstamps "09c9704d-dead-51bb-91ca-073c948f70e1")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R40")
+			(value "1k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(description "Resistor")
+			(fields
+				(field
+					(name "MPN") "0402WGF1001TCE")
+				(field
+					(name "Manufacturer") "UNI-ROYAL")
+				(field
+					(name "LCSC") "C11702")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0402WGF1001TCE")
+			)
+			(property
+				(name "Manufacturer")
+				(value "UNI-ROYAL")
+			)
+			(property
+				(name "LCSC")
+				(value "C11702")
+			)
+			(property
+				(name "Sheetname")
+				(value "Ratiometric lane references and test pads")
+			)
+			(property
+				(name "Sheetfile")
+				(value "lanes.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/Ratiometric lane references and test pads/")
+				(tstamps "/e59cd554-27b6-565e-bffc-a0758c6b6b85/")
+			)
+			(tstamps "6ce980c8-191f-5641-9da9-85d4a1e8b7ca")
 			(units
 				(unit
 					(name "A")
@@ -5221,11 +5371,333 @@
 			)
 		)
 		(libpart
-			(lib "Connector_Generic")
-			(part "Conn_02x20_Odd_Even")
-			(description "Generic connector, double row, 02x20, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)")
+			(lib "Device")
+			(part "C")
+			(description "Unpolarized capacitor")
 			(footprints
-				(fp "Connector*:*_2x??_*")
+				(fp "C_*")
+			)
+			(fields
+				(field
+					(name "Reference") "C")
+				(field
+					(name "Value") "C")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Device")
+			(part "LED_Small")
+			(description "Light emitting diode, small symbol")
+			(footprints
+				(fp "LED*")
+				(fp "LED_SMD:*")
+				(fp "LED_THT:*")
+			)
+			(fields
+				(field
+					(name "Reference") "D")
+				(field
+					(name "Value") "LED_Small")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Light emitting diode, small symbol")
+				(field
+					(name "Sim.Pins") "1=K 2=A")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "K")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "A")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Device")
+			(part "R")
+			(description "Resistor")
+			(footprints
+				(fp "R_*")
+			)
+			(fields
+				(field
+					(name "Reference") "R")
+				(field
+					(name "Value") "R")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Diode")
+			(part "1N4148W")
+			(description "75V 0.15A Fast Switching Diode, SOD-123")
+			(docs "https://www.vishay.com/docs/85748/1n4148w.pdf")
+			(footprints
+				(fp "D*SOD?123*")
+			)
+			(fields
+				(field
+					(name "Reference") "D")
+				(field
+					(name "Value") "1N4148W")
+				(field
+					(name "Footprint") "Diode_SMD:D_SOD-123")
+				(field
+					(name "Datasheet") "https://www.vishay.com/docs/85748/1n4148w.pdf")
+				(field
+					(name "Description") "75V 0.15A Fast Switching Diode, SOD-123")
+				(field
+					(name "Sim.Device") "D")
+				(field
+					(name "Sim.Pins") "1=K 2=A")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "K")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "A")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Jumper")
+			(part "SolderJumper_2_Open")
+			(description "Solder Jumper, 2-pole, open")
+			(footprints
+				(fp "SolderJumper*Open*")
+			)
+			(fields
+				(field
+					(name "Reference") "JP")
+				(field
+					(name "Value") "SolderJumper_2_Open")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Solder Jumper, 2-pole, open")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "A")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "B")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Mechanical")
+			(part "Fiducial")
+			(description "Fiducial Marker")
+			(footprints
+				(fp "Fiducial*")
+			)
+			(fields
+				(field
+					(name "Reference") "FID")
+				(field
+					(name "Value") "Fiducial")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Fiducial Marker")
+			)
+		)
+		(libpart
+			(lib "Mechanical")
+			(part "MountingHole")
+			(description "Mounting Hole without connection")
+			(footprints
+				(fp "MountingHole*")
+			)
+			(fields
+				(field
+					(name "Reference") "H")
+				(field
+					(name "Value") "MountingHole")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Mounting Hole without connection")
+			)
+		)
+		(libpart
+			(lib "Memory_EEPROM")
+			(part "M24C02-WMN")
+			(description "2Kb (256x8) I2C Serial EEPROM, 2.5-5.5V, SOIC-8")
+			(docs "http://www.st.com/content/ccc/resource/technical/document/datasheet/b0/d8/50/40/5a/85/49/6f/DM00071904.pdf/files/DM00071904.pdf/jcr:content/translations/en.DM00071904.pdf")
+			(footprints
+				(fp "SOIC*3.9x4.9mm*P1.27mm*")
+			)
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "M24C02-WMN")
+				(field
+					(name "Footprint") "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm")
+				(field
+					(name "Datasheet") "http://www.st.com/content/ccc/resource/technical/document/datasheet/b0/d8/50/40/5a/85/49/6f/DM00071904.pdf/files/DM00071904.pdf/jcr:content/translations/en.DM00071904.pdf")
+				(field
+					(name "Description") "2Kb (256x8) I2C Serial EEPROM, 2.5-5.5V, SOIC-8")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "E0")
+					(type "input")
+				)
+				(pin
+					(num "2")
+					(name "E1")
+					(type "input")
+				)
+				(pin
+					(num "3")
+					(name "E2")
+					(type "input")
+				)
+				(pin
+					(num "4")
+					(name "VSS")
+					(type "power_in")
+				)
+				(pin
+					(num "5")
+					(name "SDA")
+					(type "bidirectional")
+				)
+				(pin
+					(num "6")
+					(name "SCL")
+					(type "input")
+				)
+				(pin
+					(num "7")
+					(name "~{WC}")
+					(type "input")
+				)
+				(pin
+					(num "8")
+					(name "VCC")
+					(type "power_in")
+				)
+			)
+		)
+		(libpart
+			(lib "Transistor_FET")
+			(part "AO3400A")
+			(description "30V Vds, 5.7A Id, N-Channel MOSFET, SOT-23")
+			(docs "http://www.aosmd.com/pdfs/datasheet/AO3400A.pdf")
+			(footprints
+				(fp "SOT?23*")
+			)
+			(fields
+				(field
+					(name "Reference") "Q")
+				(field
+					(name "Value") "AO3400A")
+				(field
+					(name "Footprint") "Package_TO_SOT_SMD:SOT-23")
+				(field
+					(name "Datasheet") "http://www.aosmd.com/pdfs/datasheet/AO3400A.pdf")
+				(field
+					(name "Description") "30V Vds, 5.7A Id, N-Channel MOSFET, SOT-23")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "G")
+					(type "input")
+				)
+				(pin
+					(num "2")
+					(name "S")
+					(type "passive")
+				)
+				(pin
+					(num "3")
+					(name "D")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "keyboard")
+			(part "Conn_02x20_Odd_Even_NoPin39")
+			(description "Generic connector, double row, 02x20, odd/even pin numbering, pin 39 removed: the rev A slot key (owner's decision D2 of 2026-11-27, SPEC §4.2). Derived from KiCad 10.0.8 Connector_Generic:Conn_02x20_Odd_Even")
+			(footprints
+				(fp "keyboard:PinHeader_2x20_P2.54mm_Vertical")
 			)
 			(fields
 				(field
@@ -5239,7 +5711,7 @@
 					(name "Datasheet")
 				)
 				(field
-					(name "Description") "Generic connector, double row, 02x20, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)")
+					(name "Description") "Generic connector, double row, 02x20, odd/even pin numbering, pin 39 removed: the rev A slot key (owner's decision D2 of 2026-11-27, SPEC §4.2). Derived from KiCad 10.0.8 Connector_Generic:Conn_02x20_Odd_Even")
 			)
 			(pins
 				(pin
@@ -5433,298 +5905,8 @@
 					(type "passive")
 				)
 				(pin
-					(num "39")
-					(name "Pin_39")
-					(type "passive")
-				)
-				(pin
 					(num "40")
 					(name "Pin_40")
-					(type "passive")
-				)
-			)
-		)
-		(libpart
-			(lib "Device")
-			(part "C")
-			(description "Unpolarized capacitor")
-			(footprints
-				(fp "C_*")
-			)
-			(fields
-				(field
-					(name "Reference") "C")
-				(field
-					(name "Value") "C")
-				(field
-					(name "Footprint")
-				)
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description") "Unpolarized capacitor")
-			)
-			(pins
-				(pin
-					(num "1")
-					(name "")
-					(type "passive")
-				)
-				(pin
-					(num "2")
-					(name "")
-					(type "passive")
-				)
-			)
-		)
-		(libpart
-			(lib "Device")
-			(part "LED_Small")
-			(description "Light emitting diode, small symbol")
-			(footprints
-				(fp "LED*")
-				(fp "LED_SMD:*")
-				(fp "LED_THT:*")
-			)
-			(fields
-				(field
-					(name "Reference") "D")
-				(field
-					(name "Value") "LED_Small")
-				(field
-					(name "Footprint")
-				)
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description") "Light emitting diode, small symbol")
-				(field
-					(name "Sim.Pins") "1=K 2=A")
-			)
-			(pins
-				(pin
-					(num "1")
-					(name "K")
-					(type "passive")
-				)
-				(pin
-					(num "2")
-					(name "A")
-					(type "passive")
-				)
-			)
-		)
-		(libpart
-			(lib "Device")
-			(part "R")
-			(description "Resistor")
-			(footprints
-				(fp "R_*")
-			)
-			(fields
-				(field
-					(name "Reference") "R")
-				(field
-					(name "Value") "R")
-				(field
-					(name "Footprint")
-				)
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description") "Resistor")
-			)
-			(pins
-				(pin
-					(num "1")
-					(name "")
-					(type "passive")
-				)
-				(pin
-					(num "2")
-					(name "")
-					(type "passive")
-				)
-			)
-		)
-		(libpart
-			(lib "Jumper")
-			(part "SolderJumper_2_Open")
-			(description "Solder Jumper, 2-pole, open")
-			(footprints
-				(fp "SolderJumper*Open*")
-			)
-			(fields
-				(field
-					(name "Reference") "JP")
-				(field
-					(name "Value") "SolderJumper_2_Open")
-				(field
-					(name "Footprint")
-				)
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description") "Solder Jumper, 2-pole, open")
-			)
-			(pins
-				(pin
-					(num "1")
-					(name "A")
-					(type "passive")
-				)
-				(pin
-					(num "2")
-					(name "B")
-					(type "passive")
-				)
-			)
-		)
-		(libpart
-			(lib "Mechanical")
-			(part "Fiducial")
-			(description "Fiducial Marker")
-			(footprints
-				(fp "Fiducial*")
-			)
-			(fields
-				(field
-					(name "Reference") "FID")
-				(field
-					(name "Value") "Fiducial")
-				(field
-					(name "Footprint")
-				)
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description") "Fiducial Marker")
-			)
-		)
-		(libpart
-			(lib "Mechanical")
-			(part "MountingHole")
-			(description "Mounting Hole without connection")
-			(footprints
-				(fp "MountingHole*")
-			)
-			(fields
-				(field
-					(name "Reference") "H")
-				(field
-					(name "Value") "MountingHole")
-				(field
-					(name "Footprint")
-				)
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description") "Mounting Hole without connection")
-			)
-		)
-		(libpart
-			(lib "Memory_EEPROM")
-			(part "M24C02-WMN")
-			(description "2Kb (256x8) I2C Serial EEPROM, 2.5-5.5V, SOIC-8")
-			(docs "http://www.st.com/content/ccc/resource/technical/document/datasheet/b0/d8/50/40/5a/85/49/6f/DM00071904.pdf/files/DM00071904.pdf/jcr:content/translations/en.DM00071904.pdf")
-			(footprints
-				(fp "SOIC*3.9x4.9mm*P1.27mm*")
-			)
-			(fields
-				(field
-					(name "Reference") "U")
-				(field
-					(name "Value") "M24C02-WMN")
-				(field
-					(name "Footprint") "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm")
-				(field
-					(name "Datasheet") "http://www.st.com/content/ccc/resource/technical/document/datasheet/b0/d8/50/40/5a/85/49/6f/DM00071904.pdf/files/DM00071904.pdf/jcr:content/translations/en.DM00071904.pdf")
-				(field
-					(name "Description") "2Kb (256x8) I2C Serial EEPROM, 2.5-5.5V, SOIC-8")
-			)
-			(pins
-				(pin
-					(num "1")
-					(name "E0")
-					(type "input")
-				)
-				(pin
-					(num "2")
-					(name "E1")
-					(type "input")
-				)
-				(pin
-					(num "3")
-					(name "E2")
-					(type "input")
-				)
-				(pin
-					(num "4")
-					(name "VSS")
-					(type "power_in")
-				)
-				(pin
-					(num "5")
-					(name "SDA")
-					(type "bidirectional")
-				)
-				(pin
-					(num "6")
-					(name "SCL")
-					(type "input")
-				)
-				(pin
-					(num "7")
-					(name "~{WC}")
-					(type "input")
-				)
-				(pin
-					(num "8")
-					(name "VCC")
-					(type "power_in")
-				)
-			)
-		)
-		(libpart
-			(lib "Transistor_FET")
-			(part "AO3400A")
-			(description "30V Vds, 5.7A Id, N-Channel MOSFET, SOT-23")
-			(docs "http://www.aosmd.com/pdfs/datasheet/AO3400A.pdf")
-			(footprints
-				(fp "SOT?23*")
-			)
-			(fields
-				(field
-					(name "Reference") "Q")
-				(field
-					(name "Value") "AO3400A")
-				(field
-					(name "Footprint") "Package_TO_SOT_SMD:SOT-23")
-				(field
-					(name "Datasheet") "http://www.aosmd.com/pdfs/datasheet/AO3400A.pdf")
-				(field
-					(name "Description") "30V Vds, 5.7A Id, N-Channel MOSFET, SOT-23")
-			)
-			(pins
-				(pin
-					(num "1")
-					(name "G")
-					(type "input")
-				)
-				(pin
-					(num "2")
-					(name "S")
-					(type "passive")
-				)
-				(pin
-					(num "3")
-					(name "D")
 					(type "passive")
 				)
 			)
@@ -5744,12 +5926,12 @@
 			(uri "${KICAD10_SYMBOL_DIR}/Connector.kicad_sym")
 		)
 		(library
-			(logical "Connector_Generic")
-			(uri "${KICAD10_SYMBOL_DIR}/Connector_Generic.kicad_sym")
-		)
-		(library
 			(logical "Device")
 			(uri "${KICAD10_SYMBOL_DIR}/Device.kicad_sym")
+		)
+		(library
+			(logical "Diode")
+			(uri "${KICAD10_SYMBOL_DIR}/Diode.kicad_sym")
 		)
 		(library
 			(logical "Jumper")
@@ -5766,6 +5948,10 @@
 		(library
 			(logical "Transistor_FET")
 			(uri "${KICAD10_SYMBOL_DIR}/Transistor_FET.kicad_sym")
+		)
+		(library
+			(logical "keyboard")
+			(uri "${KIPRJMOD}/lib/keyboard.kicad_sym")
 		)
 	)
 	(nets
@@ -5879,7 +6065,7 @@
 		(net
 			(code "2")
 			(name "+5V")
-			(class "Default")
+			(class "Rail5V")
 			(node
 				(ref "C2")
 				(pin "1")
@@ -6046,7 +6232,7 @@
 		(net
 			(code "10")
 			(name "/Calibration and current-limit loads/LOAD3_D")
-			(class "Default")
+			(class "Load")
 			(node
 				(ref "Q13")
 				(pin "3")
@@ -6071,6 +6257,22 @@
 		)
 		(net
 			(code "11")
+			(name "/Ratiometric lane references and test pads/INJ_AN0")
+			(class "Default")
+			(node
+				(ref "D11")
+				(pin "1")
+				(pinfunction "K_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R40")
+				(pin "1")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "12")
 			(name "/SPI, G-line, SYNC and INJ loopback; IRQ_N; status LED/LED_A")
 			(class "Default")
 			(node
@@ -6086,7 +6288,7 @@
 			)
 		)
 		(net
-			(code "12")
+			(code "13")
 			(name "/SPI, G-line, SYNC and INJ loopback; IRQ_N; status LED/LED_K")
 			(class "Default")
 			(node
@@ -6103,7 +6305,7 @@
 			)
 		)
 		(net
-			(code "13")
+			(code "14")
 			(name "/SPI, G-line, SYNC and INJ loopback; IRQ_N; status LED/SR_QH")
 			(class "Default")
 			(node
@@ -6119,7 +6321,7 @@
 			)
 		)
 		(net
-			(code "14")
+			(code "15")
 			(name "/Slot header, descriptor EEPROM, mounting/EE_WC")
 			(class "Default")
 			(node
@@ -6141,7 +6343,7 @@
 			)
 		)
 		(net
-			(code "15")
+			(code "16")
 			(name "AN0")
 			(class "Default")
 			(node
@@ -6161,6 +6363,11 @@
 				(pintype "passive")
 			)
 			(node
+				(ref "R40")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
 				(ref "TP10")
 				(pin "1")
 				(pinfunction "1_1")
@@ -6168,7 +6375,7 @@
 			)
 		)
 		(net
-			(code "16")
+			(code "17")
 			(name "AN1")
 			(class "Default")
 			(node
@@ -6195,7 +6402,7 @@
 			)
 		)
 		(net
-			(code "17")
+			(code "18")
 			(name "AN2")
 			(class "Default")
 			(node
@@ -6222,7 +6429,7 @@
 			)
 		)
 		(net
-			(code "18")
+			(code "19")
 			(name "AN3")
 			(class "Default")
 			(node
@@ -6249,7 +6456,7 @@
 			)
 		)
 		(net
-			(code "19")
+			(code "20")
 			(name "CS0_N")
 			(class "Default")
 			(node
@@ -6282,7 +6489,7 @@
 			)
 		)
 		(net
-			(code "20")
+			(code "21")
 			(name "CS1_N")
 			(class "Default")
 			(node
@@ -6310,7 +6517,7 @@
 			)
 		)
 		(net
-			(code "21")
+			(code "22")
 			(name "G0")
 			(class "Default")
 			(node
@@ -6338,7 +6545,7 @@
 			)
 		)
 		(net
-			(code "22")
+			(code "23")
 			(name "G1")
 			(class "Default")
 			(node
@@ -6366,7 +6573,7 @@
 			)
 		)
 		(net
-			(code "23")
+			(code "24")
 			(name "G2")
 			(class "Default")
 			(node
@@ -6394,7 +6601,7 @@
 			)
 		)
 		(net
-			(code "24")
+			(code "25")
 			(name "G3")
 			(class "Default")
 			(node
@@ -6422,7 +6629,7 @@
 			)
 		)
 		(net
-			(code "25")
+			(code "26")
 			(name "G4")
 			(class "Default")
 			(node
@@ -6450,7 +6657,7 @@
 			)
 		)
 		(net
-			(code "26")
+			(code "27")
 			(name "G5")
 			(class "Default")
 			(node
@@ -6478,7 +6685,7 @@
 			)
 		)
 		(net
-			(code "27")
+			(code "28")
 			(name "GND")
 			(class "Default")
 			(node
@@ -6742,9 +6949,15 @@
 			)
 		)
 		(net
-			(code "28")
+			(code "29")
 			(name "INJ")
 			(class "Default")
+			(node
+				(ref "D11")
+				(pin "2")
+				(pinfunction "A_2")
+				(pintype "passive")
+			)
 			(node
 				(ref "J1")
 				(pin "19")
@@ -6776,7 +6989,7 @@
 			)
 		)
 		(net
-			(code "29")
+			(code "30")
 			(name "IRQ_N")
 			(class "Default")
 			(node
@@ -6810,7 +7023,7 @@
 			)
 		)
 		(net
-			(code "30")
+			(code "31")
 			(name "MISO")
 			(class "Default")
 			(node
@@ -6832,7 +7045,7 @@
 			)
 		)
 		(net
-			(code "31")
+			(code "32")
 			(name "MOSI")
 			(class "Default")
 			(node
@@ -6860,7 +7073,7 @@
 			)
 		)
 		(net
-			(code "32")
+			(code "33")
 			(name "SCK")
 			(class "Default")
 			(node
@@ -6888,7 +7101,7 @@
 			)
 		)
 		(net
-			(code "33")
+			(code "34")
 			(name "SCL")
 			(class "Default")
 			(node
@@ -6905,7 +7118,7 @@
 			)
 		)
 		(net
-			(code "34")
+			(code "35")
 			(name "SDA")
 			(class "Default")
 			(node
@@ -6922,7 +7135,7 @@
 			)
 		)
 		(net
-			(code "35")
+			(code "36")
 			(name "SYNC")
 			(class "Default")
 			(node
@@ -6947,17 +7160,6 @@
 				(pin "11")
 				(pinfunction "D0_11")
 				(pintype "input")
-			)
-		)
-		(net
-			(code "36")
-			(name "unconnected-(J1-Pin_39-Pad39)")
-			(class "Default")
-			(node
-				(ref "J1")
-				(pin "39")
-				(pinfunction "Pin_39_39")
-				(pintype "passive+no_connect")
 			)
 		)
 		(net

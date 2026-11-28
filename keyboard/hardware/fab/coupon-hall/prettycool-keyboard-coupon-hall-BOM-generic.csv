@@ -1,0 +1,15 @@
+Designator,Qty,Value,Footprint,Side,Manufacturer,MPN,DigiKey,Mouser,LCSC,Note
+C1,1,10u,C_0603_1608Metric,top,Samsung Electro-Mechanics,CL10A106KP8NNNC,,,C19702,10 uF 10 V X5R 0603 (on +3V3)
+"C3,C10,C11,C12,C20,C21,C22,C23,C24,C25",10,100n,C_0402_1005Metric,top,Samsung Electro-Mechanics,CL05B104KO5NNNC,,,C1525,100 nF 16 V X7R 0402
+"C16,C17",2,1u,C_0402_1005Metric,top,Samsung Electro-Mechanics,CL05A105KA5NQNC,,,C52923,1 uF 25 V X5R 0402 (thermistor taps)
+"R1,R10,R11,R12,R13,R14,R15",7,100k,R_0402_1005Metric,top,UNI-ROYAL(Uniroyal Elec),0402WGF1003TCE,,,C25741,"100 kOhm 1 % 0402 (G-line pull-downs, WC); substitute any 100 k 1 % 0402 thick film"
+"R16,R17",2,10k,R_0603_1608Metric,top,YAGEO,RT0603BRD0710KL,,,C95204,10 kOhm 0.1 % 25 ppm/K 0603 thin film (thermistor dividers); keep 0.1 % and <= 25 ppm/K
+"R18,R19",2,22,R_0402_1005Metric,top,UNI-ROYAL(Uniroyal Elec),0402WGF220JTCE,,,C25092,22 Ohm 0402 (lane buffer outputs); substitute any 22 Ohm 0402
+R20,1,1M,R_0402_1005Metric,top,UNI-ROYAL(Uniroyal Elec),0402WGF1004TCE,,,C26083,"1 MOhm 1 % 0402 (K1 output pull-down, R20); substitute any 1 M 1 % 0402 thick film"
+"TH10,TH11",2,10k B3380,R_0402_1005Metric,top,Murata Electronics,NCP15XH103F03RC,,,C77131,"NTC thermistor 10 kOhm 1 %, B25/50 3380 K, 0402"
+U1,1,M24C02-WMN6TP,SOIC-8_3.9x4.9mm_P1.27mm,top,STMicroelectronics,M24C02-WMN6TP,,,C7562,"2 kbit I2C EEPROM, SO8N; the descriptor at 0x50 (E2-E0 to GND)"
+U10,1,TMUX1208PWR,TSSOP-16_4.4x5mm_P0.65mm,top,Texas Instruments,TMUX1208PWR,,,C494728,"8:1 analog mux, 1.08-5.5 V, 5 Ohm at 5 V (9 Ohm typ, 15 max at 3.3 V: SCDS389C §7.6), active-high EN, fail-safe logic, TSSOP-16; the pinout is TMUX1208-specific (pin 3 N.C.)"
+U11,1,SN74HC259PWR,TSSOP-16_4.4x5mm_P0.65mm,top,Texas Instruments,SN74HC259PWR,,,C2652971,"8-bit addressable latch, TSSOP-16; any 74HC259 in TSSOP-16 (e.g. Nexperia 74HC259PW)"
+U12,1,OPA2365AIDR,SOIC-8_3.9x4.9mm_P1.27mm,top,Texas Instruments,OPA2365AIDR,,,C130011,"dual zero-crossover RRIO op-amp, 50 MHz, SOIC-8; keep a zero-crossover part (a classic RRIO input has its offset step in the key travel range)"
+"U20,U21,U22,U23,U24,U25",6,TMAG5253BA4,Texas_X2SON-4-1EP_1.1x1.4mm_P0.5mm_EP0.8x0.6mm,top,Texas Instruments,TMAG5253BA4IQDMRR,,,C22452022,"linear Hall sensor with EN, +-160 mT, 7.5 mV/mT, X2SON-4 DMR; keep the BA4 range on all six (the references must match the keys); BA3 (+-80 mT, C22401868) fits the same footprint for a weaker magnet or a larger gap"
+J1,1,SLOT,PinHeader_2x20_P2.54mm_Vertical,bottom,HanElectricity,2541WV-2x20P,,,C25503140,"NOT IN THE JLC BOM/CPL (DNP for the assembler), fitted by hand after assembly: pull the header's pin 39 out first (the slot key, SPEC §4.2), then solder it on the bottom side from the top; male 2 x 20 pin header, 2.54 mm, 6.0 mm mating, 2.54 mm plastic, 3.0 mm tail, gold; PULL PIN 39 BEFORE SOLDERING: the slot key (D2 of 2026-11-27), the footprint has no hole at 39, so J1 is hand-fitted; any 2 x 20 2.54 mm header with a 6 mm mating length mates with the motherboard's 8.5 mm socket; mounted on the BOTTOM side"

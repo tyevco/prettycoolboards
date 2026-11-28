@@ -1,7 +1,8 @@
 # boards: the Zephyr board `kbd_testbed_a`
 
-> **Status (2026-11-27): generated and compiled; the board does not exist.** The rev A testbed motherboard is
-> designed on paper ([SPEC](../../hardware/design/SPEC.md)); no PCB has been made. Everything here builds with
+> **Status (2026-11-28): generated and compiled; the board does not exist.** The rev A testbed motherboard's
+> schematic is captured and gated against `nets.py` ([SPEC](../../hardware/design/SPEC.md)); no PCB has been made
+> or measured. Everything here builds with
 > Zephyr v4.5.0 and Ubuntu's arm-none-eabi GCC 13.2.1 (`gnuarmemb`, not the Zephyr SDK 1.0.1 that v4.5.0
 > expects). Nothing has run on the hardware: not the clocks, the pin map, the runners or the OpenOCD config.
 
@@ -72,6 +73,14 @@ over `nets.py` and `gen_board.py`. The firmware reports it (`@tb boot ... map=<h
 contract it was built from. Constants that SPEC gives and `nets.py` has no field for are at the top of
 `gen_board.py`, each with its section: the clock tree, the ADC prescaler and acquisition times, the slot LDO's
 300 mA, the 45 mA base load estimate, the KVM rail's trip window, the U_CC decide time.
+
+**The owner's decisions of 2026-11-27 change no generated line but the hash** (regenerated 2026-11-28 from the
+decided `nets.py`; `--check --diff` showed only the hash line in each of the 11 files; the dts header's status
+sentence was then updated in `gen_board.py` by hand, which moves the hash once more). The slot key (D2)
+is pin 39, which no MCU pin served (it was RSV, unconnected). The 37 series resistors (D3) sit between the socket
+and the MCU-side nets, whose names (`S<n>_<signal>`) and pins are unchanged: `MCU_PINS`, the devicetree and
+`check_dts.py`'s 1075 and 762 checks stay as they were. The Kelvin sense nets, the PGTH divider and the +3V3A
+damping leg (D4) touch no MCU pin either. Any later edit of `nets.py`, a comment included, changes the hash again.
 
 ## What the devicetree says
 

@@ -1,0 +1,65 @@
+# LCSC code -> manufacturer part for the motherboard's vendor-neutral BOM (release.py). One row per LCSC code on the
+# board, plus the owner's pin-compatible MCU alternates (decision D6 of 2026-11-27), which are not on the BOM and say
+# so in their Note. Manufacturer and MPN as JLC's parts API lists them on 2026-11-27 (for the BOOMELE box headers JLC
+# appends a description to the model; the MPN here is the model alone). DigiKey / Mouser numbers were not looked up:
+# fill them in when ordering from a US distributor. No stock or prices here: check them when ordering.
+LCSC,Manufacturer,MPN,DigiKey,Mouser,Note
+C22455480,STMicroelectronics,STM32U5A5VJT6,,,"STM32U5A5VJT6, LQFP-100 14 x 14 mm, no SMPS; the owner's MCU (U1). SPEC §1 condition 1: the owner buys the MCUs from ST's store before ordering (D6 of 2026-11-27); JLC had 13"
+C18213037,STMicroelectronics,STM32U599VJT6,,,"ALTERNATE for U1, not on the BOM (owner's decision D6 of 2026-11-27, nets.MCU_ALTERNATES): pin-compatible LQFP-100, no SMPS; firmware changes only the SoC. Not the -Q (SMPS) part"
+C7938448,STMicroelectronics,STM32U595VJT6,,,"ALTERNATE for U1, not on the BOM (owner's decision D6 of 2026-11-27, nets.MCU_ALTERNATES): pin-compatible LQFP-100, no SMPS. Not the -Q (SMPS) part"
+C2864845,Texas Instruments,TPS259474LRPWR,,,"TPS259474LRPWR circuit breaker (latch-off), VQFN-HR-10 2 x 2 mm (RPW): U2 input 3.33 A, U5 S5 5 V 2.27 A"
+C55266,Texas Instruments,TPS2553DBVR,,,"TPS2553DBVR current-limited switch, active-high EN, SOT-23-6 (not the -1 latch-off): slot rails and +5V_KVM"
+C49851,Texas Instruments,INA226AIDGSR,,,"INA226AIDGSR current/power monitor, VSSOP-10; 13 per board at 0x40-0x42, 0x44-0x4D"
+C130026,Texas Instruments,TCA9548APWR,,,"TCA9548APWR 8-channel I2C mux, TSSOP-24, at 0x70"
+C130204,Texas Instruments,TCA9535PWR,,,"TCA9535PWR 16-bit I2C expander, TSSOP-24, at 0x20-0x22 (UMW TCA9535PWR C22396388 is a second source, SPEC §2.1)"
+C406866,Texas Instruments,SN74CBTLV3125PWR,,,"SN74CBTLV3125PWR quad FET bus switch with Ioff, TSSOP-14 (thin stock, SPEC §11 #19)"
+C51118,Diodes Incorporated,AP2112K-3.3TRG1,,,"AP2112K-3.3TRG1 600 mA LDO, SOT-23-5: the always-on +3V3"
+C435835,STMicroelectronics,LDL1117S33R,,,"LDL1117S33R 1.2 A LDO, SOT-223: +3V3_SLOT"
+C13738,YXC Crystal Oscillators,X322516MLB4SI,,,"16 MHz crystal, 9 pF load, +/-10 ppm, 3225 4-pad: the HSE (16 MHz is in the HS PHY's CLKSEL list)"
+C165948,Korean Hroparts Elec,TYPE-C-31-M-12,,,"USB Type-C receptacle, USB 2.0 16-pin, SMD (the caliper's part)"
+C132554,Texas Instruments,TUSB320LAIRWBR,,,"TUSB320LAIRWBR Type-C detect, X2QFN-12 1.6 x 1.6 mm, I2C 0x67 (TUSB320LIRWBR C2836598 is a drop-in second source, SPEC §3.8)"
+C138714,Texas Instruments,TPD4E05U06DQAR,,,"TPD4E05U06DQAR 4-channel ESD, USON-10 (DQA): D+, D-, CC1, CC2"
+C151296,Littelfuse,SMF5.0A,,,"SMF5.0A 200 W TVS, SOD-123FL, on VBUS"
+C80165,Murata Electronics,BLM18PG221SN1D,,,"ferrite bead 220 Ohm at 100 MHz, 0603: +3V3_SLOT to +3V3A"
+C5124634,BOOMELE(Boom Precision Elec),2.54-2*20P,,,"female 2 x 20 socket, 2.54 mm, 8.5 mm, through hole, 2.5 A per contact: the five slots; any 2 x 20 2.54 mm 8.5 mm socket mates with the coupons' headers"
+C5307809,Samtec,FTSH-107-01-L-DV-K,,,"Samtec FTSH-107-01-L-DV-K, 2 x 7 1.27 mm SMD header, keyed: J_SWD (STDC14 for STLINK-V3)"
+C5665,BOOMELE(Boom Precision Elec),2.54-2*5P,,,"shrouded box header, 2 x 5, 2.54 mm, vertical, through hole, keyed (owner's decision D5 of 2026-11-27): J_RIG; any 2 x 5 2.54 mm IDC box header with 1.0 mm holes fits"
+C9136,BOOMELE(Boom Precision Elec),2.54-2*6P,,,"shrouded box header, 2 x 6, 2.54 mm, vertical, through hole, keyed (D5 of 2026-11-27): J_KVM; any 2 x 6 2.54 mm IDC box header with 1.0 mm holes fits"
+C32713268,hanxia,HX PZ2.54-1x2P ZZ,,,"1 x 2 pin header, 2.54 mm, through hole: the meter jumpers JP_3V3_S1-S5; each needs a 2.54 mm jumper shunt (e.g. BOOMELE C100114), fitted by hand"
+C720477,XUNPU,TS-1088-AR02016,,,"tactile switch SPST-NO, SMD 3.9 x 2.9 mm: RESET and BOOT0"
+C2286,Hubei KENTO Elec,KT-0603R,,,red LED 0603; any red 0603 LED fits
+C154638,RALEC,LR1206-21R020F4,,,"20 mOhm 1 % 1 W 1206 alloy current-sense resistor, 50 ppm/K: the VSYS and +5V_S5 shunts; keep 20 mOhm, 1 %, <= 100 ppm/K"
+C270842,UNI-ROYAL(Uniroyal Elec),HP05W3F100LT5E,,,"0.1 Ohm 1 % 1/3 W 0805, 100 ppm/K: the +5V_S1-S4 shunts; keep 1 % and <= 100 ppm/K"
+C7434086,UNI-ROYAL(Uniroyal Elec),HP05W3F240LT5E,,,"0.24 Ohm 1 % 1/3 W 0805, 100 ppm/K: the +3V3_Sn shunts; keep 1 % and <= 100 ppm/K"
+C414986,UNI-ROYAL(Uniroyal Elec),HP03W5F500LT5E,,,"0.5 Ohm 1 % 1/5 W 0603, 100 ppm/K: the +3V3_MCU shunt"
+C2759448,UNI-ROYAL(Uniroyal Elec),HP03W5F100KT5E,,,"1 Ohm 1 % 1/5 W 0603, 100 ppm/K: the +3V3_USB shunt"
+C26989,UNI-ROYAL(Uniroyal Elec),0402WGF9092TCE,,,90.9 kOhm 1 % 0402: TPS2553 R_ILIM for the 3.3 V slot rails (256 / 292 / 335 mA); keep 90.9 k 1 %
+C26980,UNI-ROYAL(Uniroyal Elec),0402WGF4532TCE,,,45.3 kOhm 1 % 0402: TPS2553 R_ILIM for the 5 V rails (519 / 577 / 644 mA); keep 45.3 k 1 %
+C226852,YAGEO,AC0402FR-071K47L,,,1.47 kOhm 1 % 0402: U5 R_ILM (2.27 A typ); keep 1.47 k 1 %
+C45993,UNI-ROYAL(Uniroyal Elec),0402WGF3833TCE,,,383 kOhm 1 % 0402: U2 OVLO divider (5.8 V with 100 k)
+C25783,UNI-ROYAL(Uniroyal Elec),0402WGF3902TCE,,,"39 kOhm 1 % 0402: U2's UVLO divider and U5's PGTH divider (4.28 V with 100 k)"
+C25895,UNI-ROYAL(Uniroyal Elec),0402WGF4422TCE,,,"44.2 kOhm 1 % 0402: U2's PGTH divider bottom, R36 (owner's decision D4 of 2026-11-27: VSYS_PG falls at 3.51-3.64 V with 100 k); keep 44.2 k 1 %"
+C23411,UNI-ROYAL(Uniroyal Elec),0603WAF470LT5E,,,"0.47 Ohm 1 % 0603: the +3V3A damping leg's resistor, R103 (owner's decision D4 of 2026-11-27, SPEC §3.7); any 0.47 Ohm 0603 fits"
+C409935,PANASONIC,ERJ2RKF8873X,,,"887 kOhm 1 % 0402, 100 V: U_CC VBUS_DET (TI: 855-920 k)"
+C25764,UNI-ROYAL(Uniroyal Elec),0402WGF2003TCE,,,200 kOhm 1 % 0402: U_CC INT_N pull-up
+C25105,UNI-ROYAL(Uniroyal Elec),0402WGF330JTCE,,,33 Ohm 1 % 0402: J_RIG output series resistors
+C25118,UNI-ROYAL(Uniroyal Elec),0402WGF470JTCE,,,47 Ohm 1 % 0402: lane series resistors
+C25076,UNI-ROYAL(Uniroyal Elec),0402WGF1000TCE,,,"100 Ohm 1 % 0402: the 37 slot series resistors at the sockets (owner's decision D3 of 2026-11-27, SPEC §4.3)"
+C11702,UNI-ROYAL(Uniroyal Elec),0402WGF1001TCE,,,"1 kOhm 1 % 0402: U2 R_ILM (3.33 A typ), LED and RIG_VREF resistors"
+C25879,UNI-ROYAL(Uniroyal Elec),0402WGF2201TCE,,,2.2 kOhm 1 % 0402: I2C1 and I2C4 pull-ups
+C25900,UNI-ROYAL(Uniroyal Elec),0402WGF4701TCE,,,"4.7 kOhm 1 % 0402: slot I2C pull-ups, U_CC ADDR"
+C25744,UNI-ROYAL(Uniroyal Elec),0402WGF1002TCE,,,10 kOhm 1 % 0402
+C25741,UNI-ROYAL(Uniroyal Elec),0402WGF1003TCE,,,100 kOhm 1 % 0402
+C26083,UNI-ROYAL(Uniroyal Elec),0402WGF1004TCE,,,1 MOhm 1 % 0402: USB-C shield
+C25905,UNI-ROYAL(Uniroyal Elec),0402WGF5101TCE,,,"5.1 kOhm 1 % 0402: the two Rd footprints on CC1/CC2, NOT FITTED (DNP) while U_CC is fitted"
+C53547,FH (Guangdong Fenghua Advanced Tech),0402CG102J500NT,,,1 nF 50 V C0G 0402: the lane capacitors; keep C0G
+C1545,FH (Guangdong Fenghua Advanced Tech),0402CG100J500NT,,,10 pF 50 V C0G 0402: HSE load capacitors; keep C0G
+C1531,FH (Guangdong Fenghua Advanced Tech),0402B222K500NT,,,2.2 nF 50 V X7R 0402: TPS25947 dVdt and ITIMER
+C9192,FH (Guangdong Fenghua Advanced Tech),1206B472K102NT,,,4.7 nF 1 kV X7R 1206: USB-C shield
+C1525,Samsung Electro-Mechanics,CL05B104KO5NNNC,,,100 nF 16 V X7R 0402
+C52923,Samsung Electro-Mechanics,CL05A105KA5NQNC,,,1 uF 25 V X5R 0402
+C19666,Samsung Electro-Mechanics,CL10A475KO8NNNC,,,"4.7 uF 16 V X5R 0603: VCAP (ESR < 20 mOhm at 3 MHz, >= 10 V) and the LDL1117 output"
+C19702,Samsung Electro-Mechanics,CL10A106KP8NNNC,,,10 uF 10 V X5R 0603 (on 3.3 V rails)
+C1779,Samsung Electro-Mechanics,CL21A475KAQNNNE,,,4.7 uF 25 V X5R 0805: VBUS ahead of U2 (USB 2.0: <= 10 uF)
+C15850,Samsung Electro-Mechanics,CL21A106KAYNNNE,,,"10 uF 25 V X5R 0805: 5 V rails, and the +3V3A damping leg's capacitor C118 (D4 of 2026-11-27; keep >= 25 V and 0805 or larger, for the DC bias)"
+C45783,Samsung Electro-Mechanics,CL21A226MAQNNNE,,,22 uF 25 V X5R 0805: VSYS bulk

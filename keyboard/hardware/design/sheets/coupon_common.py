@@ -9,17 +9,30 @@
 
 The coupon side of the slot (nets as the coupon sees them):
 
-* **J1, the male 2 x 20 header, 2.54 mm** (owner's decision D2), pin for pin `nets.SLOT_PINS`. On the coupon the nets
-  are slot-local: `+5V`, `+3V3`, `GND` and the signal names (`AN0` ... `G5`); PRESENT_N (pin 32) is **strapped to
-  GND** (a strap, not a resistor: SPEC §4.6) and RSV (pin 39) is not connected. A signal the coupon does not use is
-  passed in `unused` and its pin left unconnected (no-connect flag), so it never becomes a one-pin net.
-  Part (a candidate, SPEC §2.1): HanElectricity 2541WV-2x20P (LCSC C25503140; 1516 in stock at JLC, $0.138 on
-  2026-11-27): 2 x 20, 2.54 mm pitch and row spacing, 0.64 mm square brass pins, gold, 6.00 mm mating length,
+* **J1, the male 2 x 20 header, 2.54 mm** (owner's decision D2 of 2026-11-26), pin for pin `nets.SLOT_PINS`. On the
+  coupon the nets are slot-local: `+5V`, `+3V3`, `GND` and the signal names (`AN0` ... `G5`); PRESENT_N (pin 32) is
+  **strapped to GND** (a strap, not a resistor: SPEC §4.6). A signal the coupon does not use is passed in `unused`
+  and its pin left unconnected (no-connect flag), so it never becomes a one-pin net.
+* **Pin 39 is the slot key** (the owner's decision D2 of 2026-11-27, SPEC §4.2, `nets.SLOT_KEY_PIN`; it was RSV):
+  absent on every coupon. J1 is drawn with `keyboard:Conn_02x20_Odd_Even_NoPin39`, KiCad's
+  `Connector_Generic:Conn_02x20_Odd_Even` with pin 39 removed (and "KEY" written where it was), on
+  `keyboard:PinHeader_2x20_P2.54mm_Vertical`, KiCad's `PinHeader_2x20_P2.54mm_Vertical` with pad 39 removed and a
+  key mark on its silk (boards/coupon_common.keyed_header()). KiCad 10.0.8 has neither, so `footprints()` and
+  `symbols()` below derive them from the stock parts; build.py adds them to every board whose sheet module imports
+  this one (`LIBRARY_SHARED`). The header's pin 39 is **pulled out before J1 is soldered**: JLC listed no 2 x 20
+  header sold without it on 2026-11-27 (SPEC §4.2), and a stock header has no hole to go into at 39 (SPEC §11 #31),
+  so **J1 is DNP for the assembler** and fitted by hand (its "Fit" field; release.py lists it in the vendor-neutral
+  BOM as a part to buy). `header_dnp=False` puts it back in the JLC BOM and CPL.
+  The footprint keeps the stock name (in the board's own "keyboard" library) so that
+  keyboard/tools/coupon/rules.py, which matches the header by footprint name, finds it. `header_pins()` still maps
+  "39" to None (no net), as it did for RSV.
+  Part (a candidate, SPEC §2.1): HanElectricity 2541WV-2x20P (LCSC C25503140; 506 in stock at JLC, $0.138 on
+  2026-11-28): 2 x 20, 2.54 mm pitch and row spacing, 0.64 mm square brass pins, gold, 6.00 mm mating length,
   2.54 mm plastic, 3.0 mm tail, Ø1.0 mm PCB holes (its drawing 2541WV-2xXXP, rev A 2015-05-03), so KiCad's
-  `PinHeader_2x20_P2.54mm_Vertical` (Ø1.0 drill, 1.7 mm pad) is its land. **It is mounted on the coupon's bottom
-  side**, body down, pins down into the motherboard socket (SPEC §9: coupon underside 11 mm above the motherboard =
-  8.5 mm socket + the header's 2.54 mm plastic). The motherboard's socket and the mating check are in
-  boards/coupon_common.py.
+  `PinHeader_2x20_P2.54mm_Vertical` (Ø1.0 drill, 1.7 mm pad) is its land, less pad 39. **It is mounted on the
+  coupon's bottom side**, body down, pins down into the motherboard socket (SPEC §9: coupon underside 11 mm above
+  the motherboard = 8.5 mm socket + the header's 2.54 mm plastic). The motherboard's socket and the mating check are
+  in boards/coupon_common.py.
 * **U1, the descriptor EEPROM**, 2 kbit at 0x50 on the slot's own I2C channel (SPEC §4.5, §4.6): ST M24C02-WMN6TP
   (LCSC C7562, 216,993 in stock at JLC, $0.125 on 2026-11-27; the SPEC's candidate). SO8N pinout from ST's datasheet
   (DocID024020 Rev 2, Figure 2): 1 E0, 2 E1, 3 E2, 4 VSS, 5 SDA, 6 SCL, 7 WC, 8 VCC; KiCad's
@@ -44,20 +57,39 @@ Reference designators 1-9 (J1, U1, C1-C3, R1, JP1, TP1-TP4, H1, FID1-FID3, #FLG0
 a coupon's own parts start at 10.
 """
 
+import copy
+
 import nets
 from sheets.parts import TP_WIRE, cap, fiducials, mounting_hole, power_flags, res, testpoints
 
 POWER_NETS = ["GND", "+3V3", "+5V"]
-# every slot signal the coupon can use, by its slot-local name (PRESENT_N is a GND strap, RSV not connected)
+# every slot signal the coupon can use, by its slot-local name (PRESENT_N is a GND strap; pin 39 is the key, no pin)
 SIGNALS = [s for s in nets.SLOT_SIGNALS if s != "PRESENT_N"]
 INTERSHEET = list(SIGNALS)
 
-HEADER = {"ref": "J1", "symbol": "Connector_Generic:Conn_02x20_Odd_Even",
-          "footprint": "Connector_PinHeader_2.54mm:PinHeader_2x20_P2.54mm_Vertical",
+# The slot key (owner's decision D2 of 2026-11-27): no pin 39 on any coupon. build.py adds this module's symbols()
+# and footprints() to the "keyboard" library of every board whose sheet module imports it.
+LIBRARY_SHARED = True
+KEY_PIN = nets.SLOT_KEY_PIN
+HEADER_SYMBOL_STOCK = "Connector_Generic:Conn_02x20_Odd_Even"
+HEADER_SYMBOL_NAME = f"Conn_02x20_Odd_Even_NoPin{KEY_PIN}"
+HEADER_FOOTPRINT_STOCK = "Connector_PinHeader_2.54mm:PinHeader_2x20_P2.54mm_Vertical"
+
+# J1 is fitted by hand (D2 of 2026-11-27, SPEC §11 #31): JLC cannot fit a stock 2 x 20 header into a footprint with
+# no hole at 39 (jlcplace finds EasyEDA's pad 39 off copper: red), so J1 is DNP for the assembler, and release.py
+# lists it in the vendor-neutral BOM as a part to buy and fit by hand (the "Fit" field). This is the key's
+# consequence, not a decision on risk register recommendation 11 (SPEC §11 #26: coupon BOM/CPL without J1 for
+# Economic PCBA), which the owner left open. slot_sheet(header_dnp=False) puts J1 back in the JLC BOM and CPL, for
+# when a header sold without pin 39 is found or JLC agrees to pull the pin.
+HEADER_FIT = ("pull the header's pin 39 out first (the slot key, SPEC §4.2), then solder it on the bottom side from "
+              "the top")
+HEADER = {"ref": "J1", "symbol": f"keyboard:{HEADER_SYMBOL_NAME}",
+          "footprint": "keyboard:PinHeader_2x20_P2.54mm_Vertical",     # = boards/coupon_common.HEADER_FP
           "fields": {"MPN": "2541WV-2x20P", "Manufacturer": "HanElectricity", "LCSC": "C25503140"},
           "datasheet": "https://www.lcsc.com/datasheet/lcsc_datasheet_2407041454_HanElectricity-2541WV-2x20P_C25503140.pdf",
           "description": "Pin header, male, 2 x 20, 2.54 mm, vertical, through hole, 6.0 mm mating, 2.54 mm plastic, "
-                         "3.0 mm tail; mounted on the coupon's bottom side"}
+                         "3.0 mm tail; mounted on the coupon's bottom side; pin 39 pulled before soldering (the slot "
+                         "key)"}
 EEPROM = {"ref": "U1", "symbol": "Memory_EEPROM:M24C02-WMN", "footprint": "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm",
           "fields": {"MPN": "M24C02-WMN6TP", "Manufacturer": "STMicroelectronics", "LCSC": "C7562"},
           "datasheet": "https://www.lcsc.com/datasheet/lcsc_datasheet_1809061818_STMicroelectronics-M24C02-WMN6TP_C7562.pdf"}
@@ -67,16 +99,18 @@ REFS = {"header": "J1", "eeprom": "U1", "hole": "H1", "fiducials": ("FID1", "FID
 
 
 def coupon_net(signal):
-    """The coupon-side net of a slot-local signal: '+5V', '+3V3', 'GND', None (RSV) or the signal's own name."""
+    """The coupon-side net of a slot-local signal: '+5V', '+3V3', 'GND', None (the key pin, nets.NO_NET_SIGNALS:
+    'KEY', formerly 'RSV') or the signal's own name."""
     if signal in ("GND", "PRESENT_N"):           # PRESENT_N: tied to GND on every coupon (SPEC §4.6)
         return "GND"
-    if signal == "RSV":
+    if signal in nets.NO_NET_SIGNALS:            # pin 39, the key (D2 of 2026-11-27): no pin, no pad, no net
         return None
     return signal
 
 
 def header_pins(unused=(), rails=("+3V3", "+5V")):
-    """J1 pin number -> coupon net (None = not connected), from nets.SLOT_PINS."""
+    """J1 pin number -> coupon net (None = not connected), from nets.SLOT_PINS. Pin 39 (the key) maps to None, as
+    RSV did; the keyed symbol has no pin 39, so slot_sheet() leaves it out of the symbol's pin map."""
     bad = set(unused) - set(SIGNALS)
     if bad:
         raise ValueError(f"unused: {sorted(bad)} are not slot signals (PRESENT_N is always strapped to GND)")
@@ -89,19 +123,85 @@ def header_pins(unused=(), rails=("+3V3", "+5V")):
     return out
 
 
+def symbols():
+    """Library symbols this module adds (build.py): the keyed header symbol, KiCad 10.0.8's
+    Connector_Generic:Conn_02x20_Odd_Even with pin 39 and its pin stub removed and "KEY" written in the body where it
+    was. Every other pin, the graphics and the fields are the stock symbol's."""
+    import sexpr
+    import symlib
+    lib, name = HEADER_SYMBOL_STOCK.split(":")
+    sym = copy.deepcopy(symlib._flatten(lib, name))
+    sym[1] = sexpr.Q(HEADER_SYMBOL_NAME)
+    key = str(KEY_PIN)
+    for item in sym:
+        if isinstance(item, list) and item and item[0] == "property" and str(item[1]) == "Description":
+            item[2] = sexpr.Q(f"Generic connector, double row, 02x20, odd/even pin numbering, pin {key} removed: the "
+                              "rev A slot key (owner's decision D2 of 2026-11-27, SPEC §4.2). Derived from KiCad "
+                              f"10.0.8 {HEADER_SYMBOL_STOCK}")
+        if isinstance(item, list) and item and item[0] == "property" and str(item[1]) == "ki_fp_filters":
+            item[2] = sexpr.Q(HEADER["footprint"])     # the stock filter (Connector*:*_2x??_*) misses "keyboard:"
+        if isinstance(item, list) and item and item[0] == "symbol":
+            item[1] = sexpr.Q(HEADER_SYMBOL_NAME + str(item[1])[len(name):])
+            pin = next((x for x in item if isinstance(x, list) and x and x[0] == "pin"
+                        and str(sexpr.find(x, "number")[1]) == key), None)
+            if pin is None:
+                continue
+            px, py = float(sexpr.find(pin, "at")[1]), float(sexpr.find(pin, "at")[2])
+            item.remove(pin)
+            for x in list(item):                    # the pin's stub, a short rectangle at the body edge on its row
+                if isinstance(x, list) and x and x[0] == "rectangle":
+                    (_s, x0, y0), (_e, x1, y1) = sexpr.find(x, "start"), sexpr.find(x, "end")
+                    if abs((float(y0) + float(y1)) / 2 - py) < 0.2 and min(float(x0), float(x1)) <= px + 3.9 \
+                            and abs(float(x1) - float(x0)) < 2.0:
+                        item.remove(x)
+            item.append(["text", sexpr.Q("KEY"), ["at", 1.27, py, 0],
+                         ["effects", ["font", ["size", 1.0, 1.0]]]])
+    return [sym]
+
+
+def footprints(fpgen, lib_dir):
+    """Library footprints this module adds (build.py): the keyed header land, boards/coupon_common.keyed_header()
+    (KiCad's PinHeader_2x20_P2.54mm_Vertical without pad 39, with a key mark), under the stock name."""
+    import os
+    import re
+    import uuid
+
+    from boards import coupon_common as bcc
+    pcbnew = fpgen.pcbnew
+    fp = bcc.keyed_header()
+    io = pcbnew.PCB_IO_MGR.FindPlugin(pcbnew.PCB_IO_MGR.KICAD_SEXP)
+    os.makedirs(lib_dir, exist_ok=True)
+    io.FootprintSave(lib_dir, fp)
+    # the copy of the stock footprint gets fresh UUIDs on every run: make them a function of the item's place in the
+    # file, so that the generated library (and every board placed from it) is the same on every build
+    path = os.path.join(lib_dir, fp.GetFPID().GetLibItemName().wx_str() + ".kicad_mod")
+    with open(path, encoding="utf-8") as f:
+        text = f.read()
+    count = iter(range(1 << 20))
+    text = re.sub(r'\(uuid "[0-9a-fA-F-]+"\)', lambda m: '(uuid "%s")' % uuid.uuid5(
+        uuid.NAMESPACE_URL, f"prettycool-keyboard/lib/keyboard/{os.path.basename(path)}/{next(count)}"), text)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(text)
+
+
 def slot_sheet(d, unused=(), rails=("+3V3", "+5V"), wp="jumper", bulk_3v3="10u", bulk_5v="22u/25V",
-               wire_pads=True, hole=True):
-    """Draw the slot sheet every coupon carries. Returns the J1 pin map."""
+               wire_pads=True, hole=True, header_dnp=True):
+    """Draw the slot sheet every coupon carries. Returns the J1 pin map. J1 is DNP for the assembler and carries the
+    "Fit" field (hand-fitted after its pin 39 is pulled, HEADER_FIT) unless header_dnp=False."""
     d.sheet("slot", "slot.kicad_sch", "Slot header, descriptor EEPROM, mounting")
     pins = header_pins(unused, rails)
 
     d.group("J1: slot header, male 2 x 20, 2.54 mm (on the BOTTOM side)",
             "Pinout = keyboard/hardware/design/nets.py SLOT_PINS (SPEC §4.2), seen from the coupon: odd pins one row,\n"
-            "even pins the other; a GND opposite every lane. PRESENT_N (32) is strapped to GND, RSV (39) is open.\n"
-            "Mounted on the bottom, pins down into the motherboard's 8.5 mm socket (SPEC §9). Not hot-plugged.",
+            "even pins the other; a GND opposite every lane. PRESENT_N (32) is strapped to GND.\n"
+            "Pin 39 is the slot KEY (owner's decision D2, 2026-11-27): no pin, no pad, no net; pull the header's\n"
+            "pin 39 before soldering: J1 is DNP for the assembler and fitted by hand (SPEC §11 #31). Mounted on the\n"
+            "bottom, pins down into the motherboard's 8.5 mm socket (SPEC §9). Not hot-plugged.",
             anchor="J1")
-    d.add(HEADER["ref"], HEADER["symbol"], "SLOT", HEADER["footprint"], pins=pins, datasheet=HEADER["datasheet"],
-          description=HEADER["description"], fields=dict(HEADER["fields"]))
+    sym_pins = {p: n for p, n in pins.items() if p != str(KEY_PIN)}      # the keyed symbol has no pin 39
+    fields = dict(HEADER["fields"], **({"Fit": HEADER_FIT} if header_dnp else {}))
+    d.add(HEADER["ref"], HEADER["symbol"], "SLOT", HEADER["footprint"], pins=sym_pins, dnp=header_dnp,
+          datasheet=HEADER["datasheet"], description=HEADER["description"], fields=fields)
     if "+3V3" in rails and bulk_3v3:
         cap(d, "C1", bulk_3v3, "+3V3", "GND", near="J1.7")
     if "+5V" in rails and bulk_5v:
